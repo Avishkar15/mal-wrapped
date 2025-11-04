@@ -35,7 +35,17 @@ export default function MALWrapped() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    // Add initialization logic here
   }, []);
 
-  return null;
+  return React.createElement(
+    'div',
+    { className: 'min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 flex items-center justify-center' },
+    React.createElement(
+      'div',
+      { className: 'text-white text-center p-8' },
+      React.createElement('h1', { className: 'text-4xl font-bold mb-4' }, 'MAL Wrapped'),
+      React.createElement('p', { className: 'text-lg' }, 'Component placeholder - implementation in progress')
+    )
+  );
 }
