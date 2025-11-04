@@ -35,3 +35,7 @@ export default function MALWrapped() {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+  }, []);
+
+  return null;
+}
