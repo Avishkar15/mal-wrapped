@@ -417,6 +417,34 @@ export default function MALWrapped() {
     return origin + normalizedPath;
   }
 
+  async function handleDownloadPNG() {
+    if (!slideRef.current || typeof window === 'undefined') return;
+    
+    setIsCapturing(true);
+    try {
+      // Dynamically import html2canvas
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const canvas = await html2canvas(slideRef.current, {
+        backgroundColor: '#101010',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+      });
+      
+      const link = document.createElement('a');
+      link.download = `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('Error generating PNG:', err);
+      alert('Failed to download image. Please try again.');
+    } finally {
+      setIsCapturing(false);
+    }
+  }
+
   async function handleBegin() {
     if (typeof window === 'undefined') {
       setError('This feature requires a browser environment');
