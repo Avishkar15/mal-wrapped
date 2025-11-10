@@ -1710,7 +1710,7 @@ export default function MALWrapped() {
       {/* Background floating elements - outside the card on grid bg */}
       {stats && isAuthenticated && slides.length > 0 && (
         <div className="absolute inset-0 pointer-events-none opacity-10 overflow-hidden" style={{ zIndex: 0 }}>
-          {[...Array(6)].map((_, idx) => {
+          {Array.from({ length: 6 }).map((_, idx) => {
             const positions = [
               { top: '10%', left: '5%', rotate: -12 },
               { top: '50%', right: '5%', rotate: 15 },
@@ -1735,7 +1735,7 @@ export default function MALWrapped() {
                 {shapes[idx % shapes.length]}
               </div>
             );
-          })()}
+          })}
         </div>
       )}
       <div ref={slideRef} className={`w-full max-w-5xl h-full bg-[#101010] border-2 border-white/10 rounded-xl shadow-2xl shadow-black/50 flex flex-col justify-center relative ${isCapturing ? 'capturing overflow-visible' : 'overflow-hidden'}`} style={{ zIndex: 10 }}>
