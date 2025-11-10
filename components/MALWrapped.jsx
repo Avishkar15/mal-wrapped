@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, Star, TrendingUp, Clock, Tv, BookOpen, Users, Award } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 
 function generateCodeVerifier(length = 128) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
@@ -10,7 +10,31 @@ function generateCodeVerifier(length = 128) {
   return result;
 }
 
-const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID || 'your_client_id';
+function sha256(plain) {
+  if (typeof window === 'undefined') {
+    return Promise.reject(new Error('sha256 requires browser environment'));
+  }
+  const encoder = new TextEncoder();
+  const data = encoder.encode(plain);
+  return window.crypto.subtle.digest('SHA-256', data);
+}
+
+function base64urlencode(a) {
+  let str = '';
+  const bytes = new Uint8Array(a);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    str += String.fromCharCode(bytes[i]);
+  }
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function pkceChallenge(verifier) {
+  const hashed = await sha256(verifier);
+  return base64urlencode(hashed);
+}
+
+const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
 const AUTH_URL = 'https://myanimelist.net/v1/oauth2/authorize';
 
 export default function MALWrapped() {
@@ -24,21 +48,20 @@ export default function MALWrapped() {
   const [error, setError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState(null);
+  const slideRef = useRef(null);
 
   const slides = stats ? [
     { id: 'welcome' },
-    { id: 'year_summary' },
-    { id: 'top_genre' },
-    { id: 'top_shows' },
-    { id: 'watch_time' },
-    { id: 'top_studio' },
+    { id: 'anime_log' },
+    { id: 'total_watch_time' },
+    { id: 'top_genres' },
+    { id: 'favorite_anime' },
+    { id: 'top_studios' },
+    { id: 'seasonal_highlight' },
     { id: 'hidden_gems' },
-    { id: 'seasonal' },
-    { id: 'community' },
-    { id: 'manga_summary' },
-    { id: 'top_manga' },
-    { id: 'manga_genres' },
-    { id: 'manga_authors' },
+    { id: 'manga_log' },
+    { id: 'favorite_manga' },
+    { id: 'top_authors' },
     { id: 'finale' },
   ] : [];
 
@@ -75,15 +98,16 @@ export default function MALWrapped() {
     setLoadingProgress('Connecting to MAL...');
     
     try {
+      const redirectUri = window.location.origin + window.location.pathname;
       const response = await fetch('/api/auth/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, code_verifier: verifier }),
+        body: JSON.stringify({ code, code_verifier: verifier, redirect_uri: redirectUri }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Authentication failed');
+        throw new Error(errorData.error_description || errorData.error || 'Authentication failed');
       }
 
       const data = await response.json();
@@ -144,16 +168,31 @@ export default function MALWrapped() {
         const data = await response.json();
         
         if (!data.data || data.data.length === 0) break;
+        
+        // Log first item structure for debugging
+        if (allAnime.length === 0 && data.data.length > 0) {
+          console.log('Sample anime item structure:', JSON.stringify(data.data[0], null, 2));
+        }
+        
         allAnime = [...allAnime, ...data.data];
         
         if (!data.paging?.next) break;
         offset += limit;
+        setLoadingProgress(`Loaded ${allAnime.length} anime...`);
       }
 
+      console.log(`Total anime loaded: ${allAnime.length}`);
       setAnimeList(allAnime);
-      calculateStats(allAnime, []);
+      // Calculate stats with current anime, manga will be added later
+      if (mangaList.length > 0) {
+        calculateStats(allAnime, mangaList);
+      } else {
+        // Set initial stats with just anime
+        calculateStats(allAnime, []);
+      }
     } catch (err) {
       console.error('Error fetching anime list:', err);
+      setError('Failed to load anime list. Please try again.');
     }
   }
 
@@ -180,7 +219,8 @@ export default function MALWrapped() {
       }
 
       setMangaList(allManga);
-      calculateStats(animeList, allManga);
+      // Recalculate stats with both anime and manga
+      calculateStats(animeList.length > 0 ? animeList : [], allManga);
     } catch (err) {
       console.error('Error fetching manga list:', err);
     }
@@ -189,16 +229,34 @@ export default function MALWrapped() {
   function calculateStats(anime, manga) {
     const currentYear = 2025;
     
-    // Filter anime from current year
+    console.log('Calculating stats for:', {
+      animeCount: anime.length,
+      mangaCount: manga.length,
+      sampleAnime: anime.length > 0 ? anime[0] : null
+    });
+    
+    // Filter anime from current year (completed in 2025)
     const thisYearAnime = anime.filter(item => {
-      const startDate = item.node?.start_date;
-      return startDate && new Date(startDate).getFullYear() === currentYear;
+      const finishDate = item.list_status?.finish_date;
+      if (!finishDate) return false;
+      try {
+        return new Date(finishDate).getFullYear() === currentYear;
+      } catch (e) {
+        return false;
+      }
     });
 
     // Get completed anime with ratings
-    const completedAnime = anime.filter(item => 
-      item.list_status?.status === 'completed' && item.list_status?.score > 0
-    );
+    const completedAnime = anime.filter(item => {
+      const status = item.list_status?.status;
+      const score = item.list_status?.score;
+      return status === 'completed' && score && score > 0;
+    });
+    
+    console.log('Filtered anime:', {
+      thisYearCount: thisYearAnime.length,
+      completedCount: completedAnime.length
+    });
 
     // Calculate genres
     const genreCounts = {};
@@ -231,11 +289,17 @@ export default function MALWrapped() {
 
     // Hidden gems (high rating, low popularity)
     const hiddenGems = completedAnime
-      .filter(item => 
-        item.list_status.score >= 8 && 
-        item.node?.num_list_users < 100000
-      )
-      .sort((a, b) => b.list_status.score - a.list_status.score)
+      .filter(item => {
+        const score = item.list_status.score;
+        const popularity = item.node?.num_list_users || 0;
+        return score >= 8 && popularity < 100000;
+      })
+      .sort((a, b) => {
+        if (b.list_status.score !== a.list_status.score) {
+          return b.list_status.score - a.list_status.score;
+        }
+        return (a.node?.num_list_users || 0) - (b.node?.num_list_users || 0);
+      })
       .slice(0, 5);
 
     // Watch time calculation
@@ -244,8 +308,53 @@ export default function MALWrapped() {
     );
     const avgEpisodeLength = 24; // minutes
     const totalMinutes = totalEpisodes * avgEpisodeLength;
-    const days = Math.floor(totalMinutes / (60 * 24));
-    const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+    const totalHours = Math.floor(totalMinutes / 60);
+
+    // Seasonal highlight - find most active season
+    const seasonalCounts = {};
+    thisYearAnime.forEach(item => {
+      const finishDate = item.list_status?.finish_date;
+      if (finishDate) {
+        const date = new Date(finishDate);
+        const month = date.getMonth();
+        let season = 'Winter';
+        if (month >= 2 && month <= 4) season = 'Spring';
+        else if (month >= 5 && month <= 7) season = 'Summer';
+        else if (month >= 8 && month <= 10) season = 'Fall';
+        const key = `${season} ${date.getFullYear()}`;
+        seasonalCounts[key] = (seasonalCounts[key] || 0) + 1;
+      }
+    });
+    const topSeasonal = Object.entries(seasonalCounts)
+      .sort((a, b) => b[1] - a[1])[0];
+
+    // Get seasonal highlight anime
+    let seasonalAnime = null;
+    if (topSeasonal) {
+      const [seasonYear, count] = topSeasonal;
+      const [season] = seasonYear.split(' ');
+      const seasonAnime = thisYearAnime
+        .filter(item => {
+          const finishDate = item.list_status?.finish_date;
+          if (!finishDate) return false;
+          const date = new Date(finishDate);
+          const month = date.getMonth();
+          let itemSeason = 'Winter';
+          if (month >= 2 && month <= 4) itemSeason = 'Spring';
+          else if (month >= 5 && month <= 7) itemSeason = 'Summer';
+          else if (month >= 8 && month <= 10) itemSeason = 'Fall';
+          return itemSeason === season;
+        })
+        .sort((a, b) => (b.node?.mean || 0) - (a.node?.mean || 0))[0];
+      
+      if (seasonAnime) {
+        seasonalAnime = {
+          ...seasonAnime,
+          season: seasonYear,
+          count: count
+        };
+      }
+    }
 
     // Manga stats
     const completedManga = manga.filter(item => 
@@ -260,8 +369,10 @@ export default function MALWrapped() {
     const authorCounts = {};
     manga.forEach(item => {
       item.node?.authors?.forEach(author => {
-        const name = author.node?.first_name + ' ' + author.node?.last_name;
-        authorCounts[name] = (authorCounts[name] || 0) + 1;
+        const name = `${author.node?.first_name || ''} ${author.node?.last_name || ''}`.trim();
+        if (name) {
+          authorCounts[name] = (authorCounts[name] || 0) + 1;
+        }
       });
     });
 
@@ -269,35 +380,77 @@ export default function MALWrapped() {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    // Manga genres
-    const mangaGenreCounts = {};
-    manga.forEach(item => {
-      item.node?.genres?.forEach(genre => {
-        mangaGenreCounts[genre.name] = (mangaGenreCounts[genre.name] || 0) + 1;
-      });
-    });
-
-    const topMangaGenres = Object.entries(mangaGenreCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-    setStats({
-      thisYearAnime,
+    const statsData = {
+      thisYearAnime: thisYearAnime.length > 0 ? thisYearAnime : [],
       totalAnime: anime.length,
       totalManga: manga.length,
-      topGenres,
-      topStudios,
-      topRated,
-      hiddenGems,
-      watchTime: { days, hours, totalMinutes },
+      topGenres: topGenres.length > 0 ? topGenres : [],
+      topStudios: topStudios.length > 0 ? topStudios : [],
+      topRated: topRated.length > 0 ? topRated : [],
+      hiddenGems: hiddenGems.length > 0 ? hiddenGems : [],
+      watchTime: totalHours,
       completedCount: completedAnime.length,
-      topManga,
-      topAuthors,
-      topMangaGenres,
+      topManga: topManga.length > 0 ? topManga : [],
+      topAuthors: topAuthors.length > 0 ? topAuthors : [],
+      seasonalAnime: seasonalAnime || null,
+    };
+    
+    console.log('Calculated stats:', {
+      totalAnime: statsData.totalAnime,
+      topRatedCount: statsData.topRated.length,
+      topGenresCount: statsData.topGenres.length,
+      topStudiosCount: statsData.topStudios.length,
+      hiddenGemsCount: statsData.hiddenGems.length,
+      sampleAnime: statsData.topRated.length > 0 ? statsData.topRated[0] : null
     });
+    
+    setStats(statsData);
+  }
+
+  async function handleDownloadPNG() {
+    if (!slideRef.current || typeof window === 'undefined') return;
+    
+    try {
+      // Dynamically import html2canvas
+      const html2canvas = (await import('html2canvas')).default;
+      
+      const canvas = await html2canvas(slideRef.current, {
+        backgroundColor: '#000000',
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+      });
+      
+      const link = document.createElement('a');
+      link.download = `mal-wrapped-${slides[currentSlide].id}-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('Error generating PNG:', err);
+      alert('Failed to download image. Please try again.');
+    }
+  }
+
+  function getRedirectUri() {
+    if (typeof window === 'undefined') return '';
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+    return origin + normalizedPath;
   }
 
   async function handleBegin() {
+    if (typeof window === 'undefined') {
+      setError('This feature requires a browser environment');
+      return;
+    }
+
+    if (!CLIENT_ID || CLIENT_ID === '<your_client_id_here>') {
+      setError('CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID in Vercel.');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -305,15 +458,20 @@ export default function MALWrapped() {
       const verifier = generateCodeVerifier();
       localStorage.setItem('pkce_verifier', verifier);
 
+      const challenge = await pkceChallenge(verifier);
+      const redirectUri = getRedirectUri();
+
       const params = new URLSearchParams({
         response_type: 'code',
         client_id: CLIENT_ID,
-        code_challenge: verifier,
+        redirect_uri: redirectUri,
+        code_challenge: challenge,
+        code_challenge_method: 'S256',
       });
 
       window.location.href = `${AUTH_URL}?${params.toString()}`;
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to initiate OAuth');
       setIsLoading(false);
     }
   }
@@ -321,238 +479,542 @@ export default function MALWrapped() {
   function SlideContent({ slide }) {
     if (!slide || !stats) return null;
 
-    const colors = ['#FF1493', '#00CED1', '#FFD700', '#FF6347', '#9370DB', '#00FA9A'];
-    
     switch (slide.id) {
       case 'welcome':
         return (
-          <div className="slide-card bg-gradient-pink">
-            <Sparkles className="float-icon" size={48} />
-            <h2 className="text-6xl font-black mb-6 text-shadow">Hi, {username}!</h2>
-            <p className="text-2xl font-medium">Your 2025 Anime Year in Review</p>
-            <div className="pulse-circle" style={{top: '10%', left: '80%'}}></div>
-          </div>
-        );
-
-      case 'year_summary':
-        return (
-          <div className="slide-card bg-gradient-cyan">
-            <Tv className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-4">You Watched</h2>
-            <div className="stat-box">
-              <div className="text-7xl font-black text-yellow-300">{stats.thisYearAnime.length}</div>
-              <div className="text-2xl mt-2">series in 2025</div>
-            </div>
-            <div className="decorative-shape" style={{background: '#FF1493'}}></div>
-          </div>
-        );
-
-      case 'top_genre':
-        return (
-          <div className="slide-card bg-gradient-purple">
-            <TrendingUp className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-6">Your Top Genres</h2>
-            <div className="genre-list">
-              {stats.topGenres.map(([genre, count], idx) => (
-                <div key={genre} className="genre-card" style={{
-                  background: colors[idx],
-                  animationDelay: `${idx * 0.1}s`
-                }}>
-                  <div className="text-2xl font-bold">{genre}</div>
-                  <div className="text-lg opacity-90">{count} shows</div>
-                </div>
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
               ))}
             </div>
-            <div className="pulse-circle" style={{top: '20%', right: '10%'}}></div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content welcome-slide">
+              <h1 className="main-title">MYANIMELIST WRAPPED</h1>
+              <div className="year-display">2025</div>
+              <p className="subtitle">A look back at your year, <span className="highlight">a.</span></p>
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
+            </div>
           </div>
         );
 
-      case 'top_shows':
+      case 'anime_log':
         return (
-          <div className="slide-card bg-gradient-orange">
-            <Star className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-6">Your Favorite Shows</h2>
-            <div className="show-list">
-              {stats.topRated.slice(0, 5).map((item, idx) => (
-                <div key={item.node.id} className="show-item" style={{animationDelay: `${idx * 0.1}s`}}>
-                  <div className="show-rank">{idx + 1}</div>
-                  <div className="show-info">
-                    <div className="show-title">{item.node.title}</div>
-                    <div className="show-score">⭐ {item.list_status.score}/10</div>
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
+              ))}
+            </div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">2025 ANIME LOG</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">A LOOK AT THE SERIES YOU COMPLETED THIS YEAR.</p>
+              <div className="stat-number">{stats.thisYearAnime.length}</div>
+              <div className="stat-label">ANIME SERIES WATCHED</div>
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
+            </div>
+          </div>
+        );
+
+      case 'total_watch_time':
+        return (
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
+              ))}
+            </div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">TOTAL WATCH TIME</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">HOW MUCH TIME YOU SPENT IN OTHER WORLDS.</p>
+              <div className="stat-number">{stats.watchTime}</div>
+              <div className="stat-label">HOURS OF ANIME WATCHED</div>
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
+            </div>
+          </div>
+        );
+
+      case 'top_genres':
+        return (
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
+              ))}
+            </div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">YOUR TOP GENRES</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">THE GENRES YOU EXPLORED THE MOST.</p>
+              {stats.topGenres && stats.topGenres.length > 0 ? (
+                <div className="ranked-list">
+                  {stats.topGenres.map(([genre, count], idx) => (
+                    <div key={genre} className={`ranked-item ${idx === 0 ? 'highlighted' : ''}`}>
+                      <span className="rank-number">#{idx + 1}</span>
+                      <span className="rank-name">{genre}</span>
+                      <span className="rank-count">{count} entries</span>
+                      {idx === 0 && <span className="star-icon">★</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-data">No genre data available</div>
+              )}
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
+            </div>
+          </div>
+        );
+
+      case 'favorite_anime':
+        const topAnime = stats.topRated.slice(0, 5);
+        return (
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
+              ))}
+            </div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">YOUR FAVORITE ANIME</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">THE SERIES YOU RATED THE HIGHEST.</p>
+              {topAnime && topAnime.length > 0 ? (
+                <>
+                  <div className="featured-card">
+                    <div className="featured-image">
+                      {topAnime[0]?.node?.main_picture?.large && (
+                        <img src={topAnime[0].node.main_picture.large} alt={topAnime[0].node.title || 'Anime'} />
+                      )}
+                      {!topAnime[0]?.node?.main_picture?.large && (
+                        <div style={{ width: '100%', height: '100%', background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
+                          No Image
+                        </div>
+                      )}
+                    </div>
+                    <div className="featured-content">
+                      <div className="featured-tag">#1 FAVORITE</div>
+                      <div className="featured-title">{topAnime[0].node?.title || 'Unknown'}</div>
+                      {topAnime[0].node?.studios?.[0] && (
+                        <div className="featured-studio">{topAnime[0].node.studios[0].name}</div>
+                      )}
+                      <div className="featured-rating">
+                        <span className="star">★</span> {topAnime[0].list_status?.score || 'N/A'}/10
+                      </div>
+                      {topAnime[0].node?.genres && topAnime[0].node.genres.length > 0 && (
+                        <div className="featured-genres">
+                          {topAnime[0].node.genres.slice(0, 2).map(genre => (
+                            <span key={genre.name} className="genre-tag">{genre.name.toUpperCase()}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="rank-badge">1</div>
+                  </div>
+                  {topAnime.length > 1 && (
+                    <div className="anime-grid">
+                      {topAnime.slice(1, 5).map((item, idx) => (
+                        <div key={item.node?.id || idx} className="anime-card">
+                          {item.node?.main_picture?.medium ? (
+                            <img src={item.node.main_picture.medium} alt={item.node.title || 'Anime'} />
+                          ) : (
+                            <div style={{ width: '100%', aspectRatio: '2/3', background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '0.75rem' }}>
+                              No Image
+                            </div>
+                          )}
+                          <div className="anime-title">{item.node?.title || 'Unknown'}</div>
+                          <div className="anime-rating">
+                            <span className="star">★</span> {item.list_status?.score || 'N/A'}
+                          </div>
+                          <div className="rank-badge-small">{idx + 2}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="no-data">No rated anime found. Rate some anime to see your favorites here!</div>
+              )}
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
+            </div>
+          </div>
+        );
+
+      case 'top_studios':
+        return (
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
+              ))}
+            </div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">TOP ANIMATION STUDIOS</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">THE STUDIOS THAT BROUGHT YOUR FAVORITES TO LIFE.</p>
+              {stats.topStudios && stats.topStudios.length > 0 ? (
+                <div className="ranked-list">
+                  {stats.topStudios.map(([studio, count], idx) => (
+                    <div key={studio} className={`ranked-item ${idx === 0 ? 'highlighted' : ''}`}>
+                      <span className="rank-number">#{idx + 1}</span>
+                      <span className="rank-name">{studio}</span>
+                      <span className="rank-count">{count} entries</span>
+                      {idx === 0 && <span className="star-icon">★</span>}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-data">No studio data available</div>
+              )}
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
+            </div>
+          </div>
+        );
+
+      case 'seasonal_highlight':
+        return (
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
+              ))}
+            </div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">SEASONAL HIGHLIGHT</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">THE TOP-RATED SHOW FROM A SINGLE SEASON.</p>
+              {stats.seasonalAnime ? (
+                <div className="seasonal-featured">
+                  <div className="seasonal-image">
+                    {stats.seasonalAnime.node.main_picture?.large && (
+                      <img src={stats.seasonalAnime.node.main_picture.large} alt={stats.seasonalAnime.node.title} />
+                    )}
+                  </div>
+                  <div className="seasonal-content">
+                    <div className="seasonal-title">{stats.seasonalAnime.node.title}</div>
+                    {stats.seasonalAnime.node.studios?.[0] && (
+                      <div className="seasonal-studio">{stats.seasonalAnime.node.studios[0].name}</div>
+                    )}
+                    <div className="seasonal-season">{stats.seasonalAnime.season}</div>
+                    <div className="seasonal-rating">
+                      <span className="star">★</span> {stats.seasonalAnime.node.mean?.toFixed(1) || 'N/A'} / 10
+                    </div>
                   </div>
                 </div>
-              ))}
+              ) : (
+                <div className="no-data">No seasonal data available</div>
+              )}
             </div>
-          </div>
-        );
-
-      case 'watch_time':
-        return (
-          <div className="slide-card bg-gradient-teal">
-            <Clock className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-4">Time Spent</h2>
-            <div className="stat-box">
-              <div className="text-7xl font-black text-pink-300">{stats.watchTime.days}</div>
-              <div className="text-2xl">days</div>
-              <div className="text-4xl font-bold text-yellow-300 mt-4">{stats.watchTime.hours}</div>
-              <div className="text-xl">hours</div>
-            </div>
-            <p className="text-xl mt-6 opacity-90">in anime worlds!</p>
-            <div className="decorative-shape" style={{background: '#FFD700', right: '10%'}}></div>
-          </div>
-        );
-
-      case 'top_studio':
-        return (
-          <div className="slide-card bg-gradient-blue">
-            <Award className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-6">Favorite Studios</h2>
-            <div className="studio-list">
-              {stats.topStudios.map(([studio, count], idx) => (
-                <div key={studio} className="studio-card" style={{
-                  background: colors[idx % colors.length],
-                  animationDelay: `${idx * 0.1}s`
-                }}>
-                  <div className="text-xl font-bold">{studio}</div>
-                  <div className="text-sm opacity-90">{count} shows</div>
-                </div>
-              ))}
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
             </div>
           </div>
         );
 
       case 'hidden_gems':
         return (
-          <div className="slide-card bg-gradient-violet">
-            <Sparkles className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-6">Hidden Gems</h2>
-            <p className="text-xl mb-6">Underrated shows you loved</p>
-            <div className="gem-list">
-              {stats.hiddenGems.slice(0, 3).map((item, idx) => (
-                <div key={item.node.id} className="gem-card" style={{animationDelay: `${idx * 0.15}s`}}>
-                  <div className="gem-title">{item.node.title}</div>
-                  <div className="gem-score">⭐ {item.list_status.score}/10</div>
-                  <div className="gem-popularity">{item.node.num_list_users.toLocaleString()} users</div>
-                </div>
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
               ))}
             </div>
-          </div>
-        );
-
-      case 'seasonal':
-        return (
-          <div className="slide-card bg-gradient-pink">
-            <TrendingUp className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-4">Seasonal Highlight</h2>
-            <div className="stat-box">
-              <div className="text-2xl text-cyan-300 mb-2">Winter 2025</div>
-              <div className="text-5xl font-black">{stats.thisYearAnime.length}</div>
-              <div className="text-xl mt-2">new shows watched</div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">HIDDEN GEMS</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">POPULARITY-WISE, THESE WERE DEEP CUTS.</p>
+              {stats.hiddenGems.length > 0 ? (
+                <div className="gems-grid">
+                  {stats.hiddenGems.slice(0, 3).map((item) => (
+                    <div key={item.node.id} className="gem-card">
+                      {item.node.main_picture?.large && (
+                        <img src={item.node.main_picture.large} alt={item.node.title} />
+                      )}
+                      <div className="gem-title">{item.node.title}</div>
+                      <div className="gem-rating">
+                        <span className="star">★</span> {item.list_status.score}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-data">No hidden gems found</div>
+              )}
             </div>
-            <div className="pulse-circle" style={{bottom: '20%', left: '15%'}}></div>
-          </div>
-        );
-
-      case 'community':
-        return (
-          <div className="slide-card bg-gradient-green">
-            <Users className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-6">Community Stats</h2>
-            <div className="stat-grid">
-              <div className="stat-item">
-                <div className="text-5xl font-black text-yellow-300">{stats.completedCount}</div>
-                <div className="text-lg">Completed</div>
-              </div>
-              <div className="stat-item">
-                <div className="text-5xl font-black text-pink-300">{stats.totalAnime}</div>
-                <div className="text-lg">Total Anime</div>
-              </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
             </div>
-            <p className="text-xl mt-6">Keep going, otaku! 🎌</p>
           </div>
         );
 
-      case 'manga_summary':
+      case 'manga_log':
         return (
-          <div className="slide-card bg-gradient-orange">
-            <BookOpen className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-4">Your Manga Journey</h2>
-            <div className="stat-box">
-              <div className="text-7xl font-black text-cyan-300">{stats.totalManga}</div>
-              <div className="text-2xl mt-2">manga titles</div>
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
+              ))}
             </div>
-            <p className="text-xl mt-6 opacity-90">You're a true reader! 📚</p>
-            <div className="decorative-shape" style={{background: '#FF6347'}}></div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">2025 MANGA LOG</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">YOU DIDN'T JUST WATCH, YOU READ.</p>
+              <div className="stat-number">{stats.totalManga}</div>
+              <div className="stat-label">MANGA READ</div>
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
+            </div>
           </div>
         );
 
-      case 'top_manga':
+      case 'favorite_manga':
         return (
-          <div className="slide-card bg-gradient-purple">
-            <Star className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-6">Top Manga</h2>
-            <div className="show-list">
-              {stats.topManga.slice(0, 5).map((item, idx) => (
-                <div key={item.node.id} className="show-item" style={{animationDelay: `${idx * 0.1}s`}}>
-                  <div className="show-rank">{idx + 1}</div>
-                  <div className="show-info">
-                    <div className="show-title">{item.node.title}</div>
-                    <div className="show-score">⭐ {item.list_status.score}/10</div>
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
+              ))}
+            </div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">YOUR FAVORITE MANGA</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">THE MANGA YOU RATED THE HIGHEST.</p>
+              {stats.topManga && stats.topManga.length > 0 ? (
+                <>
+                  <div className="featured-card">
+                    <div className="featured-image">
+                      {stats.topManga[0]?.node?.main_picture?.large && (
+                        <img src={stats.topManga[0].node.main_picture.large} alt={stats.topManga[0].node.title || 'Manga'} />
+                      )}
+                      {!stats.topManga[0]?.node?.main_picture?.large && (
+                        <div style={{ width: '100%', height: '100%', background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
+                          No Image
+                        </div>
+                      )}
+                    </div>
+                    <div className="featured-content">
+                      <div className="featured-tag">#1 FAVORITE</div>
+                      <div className="featured-title">{stats.topManga[0].node?.title || 'Unknown'}</div>
+                      {stats.topManga[0].node?.authors?.[0] && (
+                        <div className="featured-studio">
+                          {stats.topManga[0].node.authors[0].node?.first_name} {stats.topManga[0].node.authors[0].node?.last_name}
+                        </div>
+                      )}
+                      <div className="featured-rating">
+                        <span className="star">★</span> {stats.topManga[0].list_status?.score || 'N/A'}/10
+                      </div>
+                      {stats.topManga[0].node?.genres && stats.topManga[0].node.genres.length > 0 && (
+                        <div className="featured-genres">
+                          {stats.topManga[0].node.genres.slice(0, 2).map(genre => (
+                            <span key={genre.name} className="genre-tag">{genre.name.toUpperCase()}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="rank-badge">1</div>
                   </div>
-                </div>
-              ))}
+                  {stats.topManga.length > 1 && (
+                    <div className="anime-grid">
+                      {stats.topManga.slice(1, 5).map((item, idx) => (
+                        <div key={item.node?.id || idx} className="anime-card">
+                          {item.node?.main_picture?.medium ? (
+                            <img src={item.node.main_picture.medium} alt={item.node.title || 'Manga'} />
+                          ) : (
+                            <div style={{ width: '100%', aspectRatio: '2/3', background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666', fontSize: '0.75rem' }}>
+                              No Image
+                            </div>
+                          )}
+                          <div className="anime-title">{item.node?.title || 'Unknown'}</div>
+                          <div className="anime-rating">
+                            <span className="star">★</span> {item.list_status?.score || 'N/A'}
+                          </div>
+                          <div className="rank-badge-small">{idx + 2}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="no-data">No rated manga found. Rate some manga to see your favorites here!</div>
+              )}
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
             </div>
           </div>
         );
 
-      case 'manga_genres':
+      case 'top_authors':
         return (
-          <div className="slide-card bg-gradient-teal">
-            <TrendingUp className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-6">Manga Genres</h2>
-            <div className="genre-list">
-              {stats.topMangaGenres.map(([genre, count], idx) => (
-                <div key={genre} className="genre-card" style={{
-                  background: colors[idx],
-                  animationDelay: `${idx * 0.1}s`
-                }}>
-                  <div className="text-2xl font-bold">{genre}</div>
-                  <div className="text-lg opacity-90">{count} titles</div>
-                </div>
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
               ))}
             </div>
-          </div>
-        );
-
-      case 'manga_authors':
-        return (
-          <div className="slide-card bg-gradient-cyan">
-            <Award className="float-icon" size={48} />
-            <h2 className="text-5xl font-black mb-6">Favorite Authors</h2>
-            <div className="studio-list">
-              {stats.topAuthors.map(([author, count], idx) => (
-                <div key={author} className="studio-card" style={{
-                  background: colors[idx % colors.length],
-                  animationDelay: `${idx * 0.1}s`
-                }}>
-                  <div className="text-xl font-bold">{author}</div>
-                  <div className="text-sm opacity-90">{count} works</div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content">
+              <h2 className="section-title">TOP MANGA AUTHORS</h2>
+              <div className="title-underline"></div>
+              <p className="section-subtitle">THE AUTHORS WHOSE WORK YOU READ MOST.</p>
+              {stats.topAuthors && stats.topAuthors.length > 0 ? (
+                <div className="ranked-list">
+                  {stats.topAuthors.map(([author, count], idx) => (
+                    <div key={author} className={`ranked-item ${idx === 0 ? 'highlighted' : ''}`}>
+                      <span className="rank-number">#{idx + 1}</span>
+                      <span className="rank-name">{author}</span>
+                      <span className="rank-count">{count} entries</span>
+                      {idx === 0 && <span className="star-icon">★</span>}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="no-data">No author data available</div>
+              )}
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} disabled={currentSlide === slides.length - 1}>
+                <ChevronRight size={24} />
+              </button>
             </div>
           </div>
         );
 
       case 'finale':
         return (
-          <div className="slide-card bg-gradient-rainbow">
-            <Sparkles className="float-icon" size={60} />
-            <h2 className="text-6xl font-black mb-6 text-shadow">Thank You!</h2>
-            <p className="text-3xl font-bold mb-4">MAL Wrapped 2025</p>
-            <p className="text-xl opacity-90">Let's make 2026 even more epic! 🎉</p>
-            <div className="pulse-circle" style={{top: '15%', right: '15%'}}></div>
-            <div className="pulse-circle" style={{bottom: '15%', left: '15%'}}></div>
-            <div className="decorative-shape"></div>
+          <div ref={slideRef} className="slide-container">
+            <div className="progress-bar">
+              {slides.map((_, idx) => (
+                <div key={idx} className={`progress-dash ${idx === currentSlide ? 'active' : ''}`} />
+              ))}
+            </div>
+            <button className="download-btn" onClick={handleDownloadPNG}>
+              <Download size={20} />
+            </button>
+            <div className="slide-content finale-slide">
+              <h1 className="main-title">THANK YOU</h1>
+              <div className="year-display">2025</div>
+              <p className="subtitle">Thanks for using MAL Wrapped!</p>
+              <p className="finale-text">Share your results and let's make 2026 even more anime-packed!</p>
+            </div>
+            <div className="slide-nav">
+              <button className="nav-arrow" onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0}>
+                <ChevronLeft size={24} />
+              </button>
+              <span className="slide-counter">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</span>
+              <button className="nav-arrow" onClick={() => setCurrentSlide(0)}>
+                RESTART
+              </button>
+            </div>
           </div>
         );
 
@@ -563,471 +1025,767 @@ export default function MALWrapped() {
 
   return (
     <>
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
         }
-        
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 0.6; }
-          50% { transform: scale(1.2); opacity: 0.3; }
-        }
-        
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(50px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         body {
-          background: #0a0a0a;
-          color: white;
+          background: #000000;
+          color: #ffffff;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
           overflow-x: hidden;
         }
-        
-        .slide-card {
+
+        .slide-container {
           width: 100%;
-          min-height: 600px;
-          padding: 3rem;
-          border-radius: 32px;
+          min-height: 100vh;
+          background: #000000;
           position: relative;
-          overflow: hidden;
           display: flex;
           flex-direction: column;
+          padding: 2rem;
+        }
+
+        .progress-bar {
+          display: flex;
+          gap: 0.5rem;
+          padding: 1.5rem 0 1rem 0;
+          position: absolute;
+          top: 0;
+          left: 2rem;
+          z-index: 10;
+        }
+
+        .progress-dash {
+          width: 40px;
+          height: 3px;
+          background: #666666;
+          transition: all 0.3s ease;
+        }
+
+        .progress-dash.active {
+          background: #00FF00;
+          box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .download-btn {
+          position: absolute;
+          top: 1.5rem;
+          right: 2rem;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.1);
+          border: none;
+          color: #ffffff;
+          cursor: pointer;
+          display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-          animation: slideIn 0.5s ease-out;
+          transition: all 0.3s ease;
+          z-index: 10;
         }
-        
-        .bg-gradient-pink {
-          background: linear-gradient(135deg, #FF1493 0%, #FF6B9D 100%);
-        }
-        
-        .bg-gradient-cyan {
-          background: linear-gradient(135deg, #00CED1 0%, #20B2AA 100%);
-        }
-        
-        .bg-gradient-purple {
-          background: linear-gradient(135deg, #9370DB 0%, #8A2BE2 100%);
-        }
-        
-        .bg-gradient-orange {
-          background: linear-gradient(135deg, #FF6347 0%, #FF8C00 100%);
-        }
-        
-        .bg-gradient-teal {
-          background: linear-gradient(135deg, #008080 0%, #20B2AA 100%);
-        }
-        
-        .bg-gradient-blue {
-          background: linear-gradient(135deg, #4169E1 0%, #1E90FF 100%);
-        }
-        
-        .bg-gradient-violet {
-          background: linear-gradient(135deg, #8B00FF 0%, #9370DB 100%);
-        }
-        
-        .bg-gradient-green {
-          background: linear-gradient(135deg, #00FA9A 0%, #3CB371 100%);
-        }
-        
-        .bg-gradient-rainbow {
-          background: linear-gradient(135deg, #FF1493 0%, #00CED1 25%, #FFD700 50%, #9370DB 75%, #FF6347 100%);
-        }
-        
-        .float-icon {
-          position: absolute;
-          top: 2rem;
-          right: 2rem;
-          animation: float 3s ease-in-out infinite;
-          opacity: 0.8;
-        }
-        
-        .pulse-circle {
-          position: absolute;
-          width: 150px;
-          height: 150px;
-          border-radius: 50%;
+
+        .download-btn:hover {
           background: rgba(255, 255, 255, 0.2);
-          animation: pulse 2s ease-in-out infinite;
+          transform: scale(1.1);
         }
-        
-        .decorative-shape {
-          position: absolute;
-          width: 100px;
-          height: 100px;
-          border-radius: 20px;
-          background: rgba(255, 255, 255, 0.15);
-          transform: rotate(45deg);
-          bottom: 10%;
-          right: 5%;
-        }
-        
-        .text-shadow {
-          text-shadow: 4px 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        
-        .stat-box {
-          background: rgba(0, 0, 0, 0.2);
-          padding: 2rem 3rem;
-          border-radius: 24px;
-          backdrop-filter: blur(10px);
-          border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .genre-list, .studio-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          width: 100%;
-          max-width: 500px;
-        }
-        
-        .genre-card, .studio-card {
-          padding: 1.5rem 2rem;
-          border-radius: 20px;
-          text-align: center;
-          font-weight: bold;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-          animation: slideInRight 0.5s ease-out;
-          transition: transform 0.2s;
-        }
-        
-        .genre-card:hover, .studio-card:hover {
-          transform: translateX(10px) scale(1.05);
-        }
-        
-        .show-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          width: 100%;
-          max-width: 600px;
-        }
-        
-        .show-item {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-          padding: 1.5rem;
-          background: rgba(0, 0, 0, 0.3);
-          border-radius: 16px;
-          backdrop-filter: blur(10px);
-          border: 2px solid rgba(255, 255, 255, 0.1);
-          animation: slideIn 0.5s ease-out;
-          transition: transform 0.2s;
-        }
-        
-        .show-item:hover {
-          transform: translateX(10px);
-        }
-        
-        .show-rank {
-          font-size: 2rem;
-          font-weight: 900;
-          min-width: 50px;
-          text-align: center;
-          color: #FFD700;
-        }
-        
-        .show-info {
+
+        .slide-content {
           flex: 1;
-          text-align: left;
-        }
-        
-        .show-title {
-          font-size: 1.25rem;
-          font-weight: bold;
-          margin-bottom: 0.5rem;
-        }
-        
-        .show-score {
-          font-size: 1rem;
-          opacity: 0.9;
-        }
-        
-        .gem-list {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
-          width: 100%;
-          max-width: 500px;
+          justify-content: center;
+          align-items: center;
+          padding: 4rem 2rem;
+          animation: fadeIn 0.6s ease-in;
         }
-        
-        .gem-card {
-          padding: 1.5rem;
-          background: rgba(0, 0, 0, 0.3);
-          border-radius: 16px;
-          backdrop-filter: blur(10px);
-          border: 2px solid rgba(255, 255, 255, 0.1);
-          animation: slideIn 0.5s ease-out;
+
+        .welcome-slide {
           text-align: center;
         }
-        
-        .gem-title {
-          font-size: 1.25rem;
-          font-weight: bold;
-          margin-bottom: 0.5rem;
+
+        .main-title {
+          font-family: 'Inter', sans-serif;
+          font-size: 3rem;
+          font-weight: 700;
+          color: #ffffff;
+          letter-spacing: 0.1em;
+          margin-bottom: 2rem;
+          text-transform: uppercase;
+          animation: slideUp 0.8s ease-out;
         }
-        
-        .gem-score {
-          font-size: 1rem;
-          color: #FFD700;
-          margin-bottom: 0.25rem;
-        }
-        
-        .gem-popularity {
-          font-size: 0.9rem;
-          opacity: 0.7;
-        }
-        
-        .stat-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 2rem;
+
+        .year-display {
+          font-family: 'Space Mono', monospace;
+          font-size: 12rem;
+          font-weight: 700;
+          color: #00FF00;
+          line-height: 1;
           margin: 2rem 0;
+          text-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+          animation: scaleIn 1s ease-out;
         }
-        
-        .stat-item {
-          background: rgba(0, 0, 0, 0.2);
-          padding: 2rem;
-          border-radius: 20px;
-          backdrop-filter: blur(10px);
-          border: 2px solid rgba(255, 255, 255, 0.1);
+
+        .subtitle {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.25rem;
+          color: #ffffff;
+          margin-top: 1rem;
+          animation: fadeIn 1.2s ease-in;
         }
-        
-        .nav-button {
-          padding: 1rem 2rem;
-          border-radius: 50px;
-          border: none;
-          font-weight: bold;
+
+        .subtitle .highlight {
+          color: #00FF00;
+        }
+
+        .section-title {
+          font-family: 'Space Mono', monospace;
+          font-size: 3.5rem;
+          font-weight: 700;
+          color: #00FF00;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-bottom: 0.5rem;
+          animation: slideDown 0.6s ease-out;
+        }
+
+        .title-underline {
+          width: 200px;
+          height: 2px;
+          background: #00FF00;
+          margin-bottom: 1.5rem;
+          animation: slideDown 0.8s ease-out;
+        }
+
+        .section-subtitle {
+          font-family: 'Inter', sans-serif;
           font-size: 1rem;
-          cursor: pointer;
-          transition: all 0.3s;
+          color: #CCCCCC;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin-bottom: 3rem;
+          animation: fadeIn 1s ease-in;
+        }
+
+        .stat-number {
+          font-family: 'Space Mono', monospace;
+          font-size: 10rem;
+          font-weight: 700;
+          color: #ffffff;
+          line-height: 1;
+          margin: 2rem 0;
+          animation: scaleIn 0.8s ease-out;
+        }
+
+        .stat-label {
+          font-family: 'Space Mono', monospace;
+          font-size: 2rem;
+          font-weight: 700;
+          color: #00FF00;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          animation: fadeIn 1.2s ease-in;
+        }
+
+        .ranked-list {
+          width: 100%;
+          max-width: 800px;
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          margin-top: 2rem;
+        }
+
+        .ranked-item {
           display: flex;
           align-items: center;
+          padding: 1.5rem 2rem;
+          border-bottom: 1px solid #333333;
+          animation: slideUp 0.6s ease-out;
+          animation-fill-mode: both;
+        }
+
+        .ranked-item:nth-child(1) { animation-delay: 0.1s; }
+        .ranked-item:nth-child(2) { animation-delay: 0.2s; }
+        .ranked-item:nth-child(3) { animation-delay: 0.3s; }
+        .ranked-item:nth-child(4) { animation-delay: 0.4s; }
+        .ranked-item:nth-child(5) { animation-delay: 0.5s; }
+
+        .ranked-item.highlighted {
+          background: #1a3a1a;
+          border-left: 3px solid #00FF00;
+          border-bottom: 1px solid #00FF00;
+        }
+
+        .rank-number {
+          font-family: 'Space Mono', monospace;
+          font-size: 2rem;
+          font-weight: 700;
+          color: #00FF00;
+          min-width: 80px;
+        }
+
+        .ranked-item.highlighted .rank-number {
+          color: #00FF00;
+        }
+
+        .rank-name {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: #ffffff;
+          flex: 1;
+          margin-left: 2rem;
+        }
+
+        .rank-count {
+          font-family: 'Inter', sans-serif;
+          font-size: 1rem;
+          color: #999999;
+          margin-right: 2rem;
+        }
+
+        .star-icon {
+          color: #FFD700;
+          font-size: 1.5rem;
+        }
+
+        .featured-card {
+          position: relative;
+          display: flex;
+          width: 100%;
+          max-width: 900px;
+          background: #1a1a1a;
+          border-radius: 12px;
+          overflow: hidden;
+          margin-bottom: 2rem;
+          animation: slideUp 0.8s ease-out;
+        }
+
+        .featured-image {
+          width: 300px;
+          height: 400px;
+          flex-shrink: 0;
+        }
+
+        .featured-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .featured-content {
+          flex: 1;
+          padding: 2rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .featured-tag {
+          font-family: 'Space Mono', monospace;
+          font-size: 0.875rem;
+          color: #00FF00;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          margin-bottom: 1rem;
+        }
+
+        .featured-title {
+          font-family: 'Inter', sans-serif;
+          font-size: 2.5rem;
+          font-weight: 700;
+          color: #ffffff;
+          margin-bottom: 0.5rem;
+        }
+
+        .featured-studio {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.25rem;
+          color: #00FF00;
+          margin-bottom: 1rem;
+        }
+
+        .featured-rating {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.5rem;
+          color: #ffffff;
+          margin-bottom: 1rem;
+        }
+
+        .star {
+          color: #FFD700;
+        }
+
+        .featured-genres {
+          display: flex;
           gap: 0.5rem;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+          margin-top: 1rem;
         }
-        
-        .nav-button:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+
+        .genre-tag {
+          font-family: 'Inter', sans-serif;
+          font-size: 0.75rem;
+          padding: 0.25rem 0.75rem;
+          background: #333333;
+          color: #CCCCCC;
+          border-radius: 4px;
+          text-transform: uppercase;
         }
-        
-        .nav-button:disabled {
+
+        .rank-badge {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: #ffffff;
+          color: #000000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Inter', sans-serif;
+          font-size: 1.5rem;
+          font-weight: 700;
+        }
+
+        .anime-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1rem;
+          width: 100%;
+          max-width: 900px;
+        }
+
+        .anime-card {
+          position: relative;
+          background: #1a1a1a;
+          border-radius: 8px;
+          overflow: hidden;
+          animation: slideUp 0.6s ease-out;
+          animation-fill-mode: both;
+        }
+
+        .anime-card:nth-child(1) { animation-delay: 0.2s; }
+        .anime-card:nth-child(2) { animation-delay: 0.3s; }
+        .anime-card:nth-child(3) { animation-delay: 0.4s; }
+        .anime-card:nth-child(4) { animation-delay: 0.5s; }
+
+        .anime-card img {
+          width: 100%;
+          aspect-ratio: 2/3;
+          object-fit: cover;
+        }
+
+        .anime-title {
+          font-family: 'Inter', sans-serif;
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #ffffff;
+          padding: 0.75rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .anime-rating {
+          font-family: 'Inter', sans-serif;
+          font-size: 0.875rem;
+          color: #ffffff;
+          padding: 0 0.75rem 0.75rem 0.75rem;
+        }
+
+        .rank-badge-small {
+          position: absolute;
+          top: 0.5rem;
+          right: 0.5rem;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: #ffffff;
+          color: #000000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.875rem;
+          font-weight: 700;
+        }
+
+        .seasonal-featured {
+          display: flex;
+          width: 100%;
+          max-width: 800px;
+          gap: 2rem;
+          align-items: center;
+          animation: slideUp 0.8s ease-out;
+        }
+
+        .seasonal-image {
+          width: 200px;
+          height: 280px;
+          flex-shrink: 0;
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        .seasonal-image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .seasonal-content {
+          flex: 1;
+        }
+
+        .seasonal-title {
+          font-family: 'Inter', sans-serif;
+          font-size: 2rem;
+          font-weight: 700;
+          color: #ffffff;
+          margin-bottom: 0.5rem;
+        }
+
+        .seasonal-studio {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.25rem;
+          color: #00FF00;
+          margin-bottom: 0.5rem;
+        }
+
+        .seasonal-season {
+          font-family: 'Inter', sans-serif;
+          font-size: 1rem;
+          color: #ffffff;
+          margin-bottom: 1rem;
+        }
+
+        .seasonal-rating {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.5rem;
+          color: #ffffff;
+        }
+
+        .gems-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1.5rem;
+          width: 100%;
+          max-width: 1000px;
+          margin-top: 2rem;
+        }
+
+        .gem-card {
+          background: #1a1a1a;
+          border-radius: 8px;
+          overflow: hidden;
+          animation: slideUp 0.6s ease-out;
+          animation-fill-mode: both;
+        }
+
+        .gem-card:nth-child(1) { animation-delay: 0.1s; }
+        .gem-card:nth-child(2) { animation-delay: 0.2s; }
+        .gem-card:nth-child(3) { animation-delay: 0.3s; }
+
+        .gem-card img {
+          width: 100%;
+          aspect-ratio: 2/3;
+          object-fit: cover;
+        }
+
+        .gem-title {
+          font-family: 'Inter', sans-serif;
+          font-size: 1rem;
+          font-weight: 600;
+          color: #ffffff;
+          padding: 1rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .gem-rating {
+          font-family: 'Inter', sans-serif;
+          font-size: 1rem;
+          color: #ffffff;
+          padding: 0 1rem 1rem 1rem;
+        }
+
+        .no-data {
+          font-family: 'Inter', sans-serif;
+          font-size: 1.5rem;
+          color: #666666;
+          margin-top: 3rem;
+        }
+
+        .slide-nav {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 2rem 0;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 2rem;
+        }
+
+        .nav-arrow {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: rgba(255, 255, 255, 0.1);
+          border: none;
+          color: #ffffff;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+        }
+
+        .nav-arrow:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.2);
+          transform: scale(1.1);
+        }
+
+        .nav-arrow:disabled {
           opacity: 0.3;
           cursor: not-allowed;
         }
-        
-        .nav-prev {
-          background: rgba(255, 255, 255, 0.2);
-          color: white;
+
+        .slide-counter {
+          font-family: 'Space Mono', monospace;
+          font-size: 1rem;
+          color: #999999;
         }
-        
-        .nav-next {
-          background: linear-gradient(135deg, #FF1493, #FF6B9D);
-          color: white;
+
+        .finale-slide {
+          text-align: center;
         }
-        
-        .progress-dots {
-          display: flex;
-          gap: 0.75rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-        
-        .progress-dot {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.3);
-          transition: all 0.3s;
-        }
-        
-        .progress-dot.active {
-          background: #FF1493;
-          transform: scale(1.5);
-          box-shadow: 0 0 15px rgba(255, 20, 147, 0.6);
-        }
-        
-        .cta-button {
-          padding: 1.25rem 3rem;
-          border-radius: 50px;
-          border: none;
-          font-weight: 900;
+
+        .finale-text {
+          font-family: 'Inter', sans-serif;
           font-size: 1.25rem;
-          cursor: pointer;
-          transition: all 0.3s;
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-          background: linear-gradient(135deg, #9370DB, #8A2BE2);
-          color: white;
+          color: #CCCCCC;
+          margin-top: 2rem;
+          max-width: 600px;
         }
-        
-        .cta-button:hover:not(:disabled) {
-          transform: translateY(-4px) scale(1.05);
-          box-shadow: 0 12px 35px rgba(147, 112, 219, 0.5);
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-        
-        .cta-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
+
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        
-        .error-box {
-          background: rgba(220, 38, 38, 0.9);
-          padding: 1.5rem;
-          border-radius: 20px;
-          margin-bottom: 2rem;
-          border: 2px solid rgba(255, 255, 255, 0.2);
-          font-weight: 600;
+
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
-        
-        .loading-text {
-          font-size: 1.5rem;
-          color: #00CED1;
-          animation: pulse 2s ease-in-out infinite;
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
         }
-        
+
         @media (max-width: 768px) {
-          .slide-card { padding: 2rem; min-height: 500px; }
-          h2 { font-size: 2.5rem !important; }
-          .stat-box { padding: 1.5rem 2rem; }
-          .show-rank { font-size: 1.5rem; min-width: 40px; }
-          .show-title { font-size: 1rem; }
-          .stat-grid { grid-template-columns: 1fr; gap: 1rem; }
+          .year-display {
+            font-size: 6rem;
+          }
+
+          .stat-number {
+            font-size: 5rem;
+          }
+
+          .section-title {
+            font-size: 2rem;
+          }
+
+          .main-title {
+            font-size: 2rem;
+          }
+
+          .anime-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .gems-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .featured-card {
+            flex-direction: column;
+          }
+
+          .featured-image {
+            width: 100%;
+            height: 300px;
+          }
+
+          .seasonal-featured {
+            flex-direction: column;
+          }
+
+          .seasonal-image {
+            width: 100%;
+            height: 300px;
+          }
         }
       `}</style>
-      
-      <div style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem'
-      }}>
-        <div style={{
-          background: 'rgba(0, 0, 0, 0.6)',
-          borderRadius: '32px',
-          padding: '3rem',
-          maxWidth: '900px',
-          width: '100%',
-          backdropFilter: 'blur(20px)',
-          border: '2px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 25px 80px rgba(0, 0, 0, 0.5)'
-        }}>
-          {error && (
-            <div className="error-box">
-              <p style={{whiteSpace: 'pre-line', fontSize: '0.95rem'}}>{error}</p>
+
+      <div style={{ minHeight: '100vh', background: '#000000' }}>
+        {error && (
+          <div style={{
+            position: 'fixed',
+            top: '2rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(220, 38, 38, 0.9)',
+            padding: '1rem 2rem',
+            borderRadius: '8px',
+            color: '#ffffff',
+            zIndex: 1000,
+            maxWidth: '90%',
+            textAlign: 'center'
+          }}>
+            {error}
+          </div>
+        )}
+
+        {isLoading && (
+          <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: '1rem'
+          }}>
+            <div style={{
+              width: '50px',
+              height: '50px',
+              border: '3px solid #333333',
+              borderTopColor: '#00FF00',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }}></div>
+            <p style={{ color: '#00FF00', fontFamily: 'Space Mono, monospace', fontSize: '1rem' }}>
+              {loadingProgress || 'Loading...'}
+            </p>
+          </div>
+        )}
+
+        {!isAuthenticated && !isLoading && (
+          <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            padding: '2rem',
+            textAlign: 'center'
+          }}>
+            <h1 style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: '4rem',
+              fontWeight: 700,
+              color: '#00FF00',
+              marginBottom: '1rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em'
+            }}>
+              MYANIMELIST WRAPPED
+            </h1>
+            <div style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: '8rem',
+              fontWeight: 700,
+              color: '#00FF00',
+              lineHeight: 1,
+              marginBottom: '2rem',
+              textShadow: '0 0 30px rgba(0, 255, 0, 0.5)'
+            }}>
+              2025
             </div>
-          )}
-          
-          {isLoading && (
-            <div style={{textAlign: 'center', padding: '2rem'}}>
-              <div className="loading-text">{loadingProgress || 'Loading...'}</div>
-            </div>
-          )}
-          
-          {!isAuthenticated && !isLoading && (
-            <div style={{textAlign: 'center'}}>
-              <div style={{
-                marginBottom: '2rem',
-                animation: 'float 3s ease-in-out infinite'
-              }}>
-                <Sparkles size={64} style={{color: '#9370DB'}} />
-              </div>
-              
-              <h1 style={{
-                fontSize: '4rem',
-                fontWeight: 900,
-                marginBottom: '1.5rem',
-                background: 'linear-gradient(135deg, #FF1493, #00CED1, #FFD700)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                textShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-              }}>
-                MAL Wrapped 2025
-              </h1>
-              
-              <p style={{
-                fontSize: '1.5rem',
-                marginBottom: '3rem',
-                color: '#00CED1'
-              }}>
-                Your anime year in review ✨
-              </p>
-              
-              <button onClick={handleBegin} className="cta-button" disabled={!CLIENT_ID}>
-                Connect with MAL
-              </button>
-              
-              <div style={{
-                marginTop: '2rem',
-                padding: '1rem',
-                background: 'rgba(147, 112, 219, 0.1)',
-                borderRadius: '16px',
-                fontSize: '0.9rem',
-                color: '#9370DB'
-              }}>
-                ✓ Secure authentication<br />
-                ✓ View your complete stats<br />
-                ✓ Discover your anime journey
-              </div>
-            </div>
-          )}
-          
-          {isAuthenticated && stats && (
-            <>
-              <SlideContent slide={slides[currentSlide]} />
-              
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: '2rem',
-                gap: '1rem'
-              }}>
-                <button
-                  className="nav-button nav-prev"
-                  onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
-                  disabled={currentSlide === 0}
-                >
-                  <ChevronLeft size={20} />
-                  Prev
-                </button>
-                
-                <div className="progress-dots">
-                  {slides.map((slide, idx) => (
-                    <div
-                      key={slide.id}
-                      className={`progress-dot ${idx === currentSlide ? 'active' : ''}`}
-                    />
-                  ))}
-                </div>
-                
-                <button
-                  className="nav-button nav-next"
-                  onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
-                  disabled={currentSlide === slides.length - 1}
-                >
-                  Next
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+            <p style={{
+              fontFamily: "'Inter', sans-serif",
+              fontSize: '1.25rem',
+              color: '#CCCCCC',
+              marginBottom: '3rem'
+            }}>
+              Enter your MyAnimeList username to see your year in review.
+            </p>
+            <button
+              onClick={handleBegin}
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: '1.25rem',
+                fontWeight: 700,
+                color: '#000000',
+                background: '#00FF00',
+                border: 'none',
+                padding: '1rem 3rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.transform = 'scale(1.05)';
+                e.target.style.boxShadow = '0 0 20px rgba(0, 255, 0, 0.5)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.transform = 'scale(1)';
+                e.target.style.boxShadow = 'none';
+              }}
+              disabled={!CLIENT_ID || CLIENT_ID === '<your_client_id_here>'}
+            >
+              GENERATE
+            </button>
+          </div>
+        )}
+
+        {isAuthenticated && stats && (
+          <SlideContent slide={slides[currentSlide]} />
+        )}
       </div>
+
+      <style jsx global>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
   );
 }

@@ -15,8 +15,17 @@ export default async function handler(req, res) {
     try {
       console.log(`Fetching manga list (offset: ${offset}, limit: ${limit})...`);
       
+      const fields = [
+        'list_status{status,score}',
+        'genres{name}',
+        'authors{node{first_name,last_name}}',
+        'title',
+        'main_picture',
+        'id'
+      ].join(',');
+      
       const response = await fetch(
-        `https://api.myanimelist.net/v2/users/@me/mangalist?offset=${offset}&limit=${limit}&fields=list_status,genres,authors,num_chapters,start_date,num_list_users,media_type`, 
+        `https://api.myanimelist.net/v2/users/@me/mangalist?offset=${offset}&limit=${limit}&fields=${fields}&nsfw=true`, 
         {
           method: 'GET',
           headers: {

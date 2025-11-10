@@ -15,8 +15,21 @@ export default async function handler(req, res) {
     try {
       console.log(`Fetching anime list (offset: ${offset}, limit: ${limit})...`);
       
+      const fields = [
+        'list_status{status,score,start_date,finish_date,num_episodes_watched}',
+        'genres{name}',
+        'studios{name}',
+        'start_season{year,season}',
+        'mean',
+        'num_list_users',
+        'title',
+        'main_picture',
+        'id',
+        'num_episodes'
+      ].join(',');
+      
       const response = await fetch(
-        `https://api.myanimelist.net/v2/users/@me/animelist?offset=${offset}&limit=${limit}&fields=list_status,genres,studios,num_episodes,start_date,num_list_users,media_type`, 
+        `https://api.myanimelist.net/v2/users/@me/animelist?offset=${offset}&limit=${limit}&fields=${fields}&nsfw=true`, 
         {
           method: 'GET',
           headers: {

@@ -3,20 +3,23 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { code, code_verifier } = req.body;
+  const { code, code_verifier, redirect_uri } = req.body;
 
-  if (!code || !code_verifier) {
-    return res.status(400).json({ error: 'Missing code or code_verifier' });
+  if (!code || !code_verifier || !redirect_uri) {
+    return res.status(400).json({ 
+      error: 'Missing required parameters',
+      required: ['code', 'code_verifier', 'redirect_uri']
+    });
   }
 
   const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
-  const CLIENT_SECRET = process.env.MAL_CLIENT_SECRET;
 
-  if (!CLIENT_ID || !CLIENT_SECRET) {
-    console.error('Missing CLIENT_ID or CLIENT_SECRET');
+  if (!CLIENT_ID) {
+    console.error('CLIENT_ID is not set in environment variables');
     return res.status(500).json({ 
       error: 'Server configuration error',
-      message: 'CLIENT_ID or CLIENT_SECRET not configured'
+      error_description: 'CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID in Vercel environment variables.',
+      message: 'CLIENT_ID is not configured'
     });
   }
 
@@ -25,10 +28,10 @@ export default async function handler(req, res) {
     
     const formData = new URLSearchParams({
       client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
       code: code,
       code_verifier: code_verifier,
-      grant_type: 'authorization_code'
+      grant_type: 'authorization_code',
+      redirect_uri: redirect_uri
     });
 
     const response = await fetch('https://myanimelist.net/v1/oauth2/token', {
