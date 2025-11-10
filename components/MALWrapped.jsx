@@ -185,25 +185,56 @@ export default function MALWrapped() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    // Check for CLIENT_ID configuration
+    if (CLIENT_ID === '<your_client_id_here>') {
+      setError('Please configure your MAL API Client ID in the component file. See README for instructions.');
+      return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
+    const errorParam = urlParams.get('error');
+    const errorDescription = urlParams.get('error_description');
     const storedVerifier = window.localStorage.getItem('pkce_verifier');
     const storedToken = window.localStorage.getItem('mal_access_token');
 
+    // Check for OAuth errors
+    if (errorParam) {
+      setError(`Authorization failed: ${errorDescription || errorParam}. Please try again.`);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      window.localStorage.removeItem('pkce_verifier');
+      return;
+    }
+
     if (code && storedVerifier) {
       exchangeCodeForToken(code, storedVerifier);
+    } else if (code && !storedVerifier) {
+      // Code returned but no verifier - likely page was refreshed
+      setError('Authorization session expired. Please try connecting again.');
+      window.history.replaceState({}, document.title, window.location.pathname);
     } else if (storedToken) {
       // Check if token is still valid and fetch data
       fetchUserData(storedToken);
     }
   }, []);
 
+  // Helper to normalize redirect URI (remove trailing slash, ensure consistency)
+  function getRedirectUri() {
+    if (typeof window === 'undefined') return '';
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    // Remove trailing slash from pathname if present (except for root)
+    const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+    return origin + normalizedPath;
+  }
+
   async function exchangeCodeForToken(code, verifier) {
     if (typeof window === 'undefined') return;
 
     setIsLoading(true);
     setError('');
-    const redirectUri = window.location.origin + window.location.pathname;
+    const redirectUri = getRedirectUri();
     
     try {
       const response = await fetch(TOKEN_URL, {
@@ -221,20 +252,47 @@ export default function MALWrapped() {
       });
 
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error('Failed to exchange code for token');
+        let errorMessage = 'Failed to exchange authorization code for token.';
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            errorMessage = `Authentication error: ${errorData.error}`;
+            if (errorData.error_description) {
+              errorMessage += ` - ${errorData.error_description}`;
+            }
+          }
+        } catch (e) {
+          const errorText = await response.text();
+          if (errorText) {
+            errorMessage += ` Server response: ${errorText.substring(0, 100)}`;
+          }
+        }
+        
+        // Common error: redirect_uri mismatch
+        if (response.status === 400) {
+          errorMessage += `\n\nMake sure your redirect URI in MAL app settings matches exactly:\n${redirectUri}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      
+      if (!data.access_token) {
+        throw new Error('No access token received from MAL API');
+      }
+      
       window.localStorage.setItem('mal_access_token', data.access_token);
       window.localStorage.removeItem('pkce_verifier');
 
+      // Clear the URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
 
       await fetchUserData(data.access_token);
       setIsAuthenticated(true);
     } catch (err) {
       setError(err.message || 'Authentication failed');
+      console.error('Token exchange error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -381,6 +439,12 @@ export default function MALWrapped() {
       return;
     }
 
+    // Validate CLIENT_ID
+    if (CLIENT_ID === '<your_client_id_here>' || !CLIENT_ID || CLIENT_ID.trim() === '') {
+      setError('Please configure your MAL API Client ID. Open components/MALWrapped.jsx and replace <your_client_id_here> with your actual Client ID from https://myanimelist.net/apiconfig');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -390,7 +454,10 @@ export default function MALWrapped() {
       window.localStorage.setItem('pkce_verifier', verifier);
 
       const challenge = await pkceChallenge(verifier);
-      const redirectUri = window.location.origin + window.location.pathname;
+      const redirectUri = getRedirectUri();
+
+      console.log('Redirect URI:', redirectUri); // Debug log
+      console.log('Make sure this exact URL is set in your MAL app settings as the redirect URI');
 
       const params = new URLSearchParams({
         response_type: 'code',
@@ -400,10 +467,15 @@ export default function MALWrapped() {
         code_challenge_method: 'S256',
       });
 
-      window.location.href = `${AUTH_URL}?${params.toString()}`;
+      const authUrl = `${AUTH_URL}?${params.toString()}`;
+      console.log('Redirecting to:', AUTH_URL); // Debug log
+      
+      // Redirect to MAL authorization page
+      window.location.href = authUrl;
     } catch (err) {
       setError(err.message || 'Failed to initiate OAuth');
       setIsLoading(false);
+      console.error('OAuth initiation error:', err);
     }
   }
 
@@ -667,8 +739,16 @@ export default function MALWrapped() {
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-violet-900 to-pink-900 flex items-center justify-center p-4">
       <div className="bg-black/60 backdrop-blur-md rounded-3xl shadow-2xl p-8 md:p-12 text-white w-full max-w-4xl text-center border border-violet-700/50">
         {error && (
-          <div className="bg-red-600/90 p-4 rounded-xl mb-6 animate-shake border border-red-400">
-            <p className="font-semibold">{error}</p>
+          <div className="bg-red-600/90 p-4 rounded-xl mb-6 border border-red-400">
+            <p className="font-semibold whitespace-pre-line">{error}</p>
+            {error.includes('redirect URI') && (
+              <div className="mt-4 p-3 bg-red-700/50 rounded-lg">
+                <p className="text-sm font-mono break-all">{getRedirectUri()}</p>
+                <p className="text-xs mt-2 text-red-200">
+                  Copy this exact URL and paste it in your MAL app's redirect URI field at https://myanimelist.net/apiconfig
+                </p>
+              </div>
+            )}
           </div>
         )}
         
@@ -694,13 +774,25 @@ export default function MALWrapped() {
             <p className="text-lg text-gray-300 mb-8">Discover your anime statistics and favorite titles!</p>
             <button 
               onClick={handleBegin} 
-              className="bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 px-10 py-4 text-xl rounded-full font-bold shadow-2xl transition-all transform hover:scale-105 active:scale-95"
+              className="bg-gradient-to-r from-violet-600 to-pink-600 hover:from-violet-500 hover:to-pink-500 px-10 py-4 text-xl rounded-full font-bold shadow-2xl transition-all transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={CLIENT_ID === '<your_client_id_here>' || !CLIENT_ID}
             >
               Connect with MyAnimeList
             </button>
-            <p className="text-sm text-gray-400 mt-6">
-              Secure OAuth authentication • Your data stays private
-            </p>
+            <div className="mt-6 space-y-2">
+              <p className="text-sm text-gray-400">
+                Secure OAuth authentication • Your data stays private
+              </p>
+              {typeof window !== 'undefined' && (
+                <div className="text-xs text-gray-500 mt-4 p-3 bg-gray-800/50 rounded-lg">
+                  <p className="font-semibold mb-1">Redirect URI (for MAL app settings):</p>
+                  <p className="font-mono break-all text-violet-300">{getRedirectUri()}</p>
+                  <p className="mt-2 text-gray-400">
+                    Make sure this URL is set in your MAL app settings at <a href="https://myanimelist.net/apiconfig" target="_blank" rel="noopener noreferrer" className="text-violet-400 underline">myanimelist.net/apiconfig</a>
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
