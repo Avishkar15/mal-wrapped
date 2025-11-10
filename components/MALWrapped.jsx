@@ -40,7 +40,6 @@ async function pkceChallenge(verifier) {
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID || '<your_client_id_here>';
 const AUTH_URL = 'https://myanimelist.net/v1/oauth2/authorize';
-const TOKEN_URL = 'https://myanimelist.net/v1/oauth2/token';
 
 export default function MALWrapped() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -125,16 +124,15 @@ export default function MALWrapped() {
       console.log('Redirect URI:', redirectUri);
       console.log('Client ID:', CLIENT_ID ? 'Set' : 'Missing');
       
-      const response = await fetch(TOKEN_URL, {
+      // Use our API route instead of calling MAL API directly (avoids CORS)
+      const response = await fetch('/api/auth/token', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: new URLSearchParams({
-          client_id: CLIENT_ID,
+        body: JSON.stringify({
           code,
           code_verifier: verifier,
-          grant_type: 'authorization_code',
           redirect_uri: redirectUri,
         }),
       });
@@ -144,19 +142,14 @@ export default function MALWrapped() {
       // Try to parse error response even if not ok
       if (!response.ok) {
         let errorData = null;
-        let errorText = '';
         
         try {
-          errorText = await response.text();
-          console.error('Error response text:', errorText);
-          
-          try {
-            errorData = JSON.parse(errorText);
-          } catch (e) {
-            // Not JSON, use text as is
-          }
+          errorData = await response.json();
+          console.error('Error response:', errorData);
         } catch (e) {
-          console.error('Failed to read error response:', e);
+          const errorText = await response.text();
+          console.error('Error response text:', errorText);
+          errorData = { error: 'Unknown error', message: errorText };
         }
         
         let errorMessage = 'Failed to exchange authorization code for token.';
@@ -166,10 +159,10 @@ export default function MALWrapped() {
             errorMessage = `Authentication error: ${errorData.error}`;
             if (errorData.error_description) {
               errorMessage += ` - ${errorData.error_description}`;
+            } else if (errorData.message) {
+              errorMessage += ` - ${errorData.message}`;
             }
           }
-        } else if (errorText) {
-          errorMessage += ` Response: ${errorText.substring(0, 200)}`;
         }
         
         // Common errors
@@ -184,6 +177,12 @@ export default function MALWrapped() {
           }
         } else if (response.status === 401) {
           errorMessage += '\n\nInvalid CLIENT_ID. Please check your configuration.';
+        } else if (response.status === 500) {
+          if (errorData?.message?.includes('CLIENT_ID')) {
+            errorMessage = 'Server configuration error: CLIENT_ID is not set. Please configure NEXT_PUBLIC_MAL_CLIENT_ID in Vercel.';
+          } else {
+            errorMessage += '\n\nServer error. Please try again later.';
+          }
         }
         
         throw new Error(errorMessage);
@@ -209,18 +208,15 @@ export default function MALWrapped() {
       
       // Check for network errors
       if (err instanceof TypeError && err.message === 'Failed to fetch') {
-        errorMessage = 'Network error: Could not connect to MAL API.\n\n';
+        errorMessage = 'Network error: Could not connect to server.\n\n';
         errorMessage += 'Possible causes:\n';
         errorMessage += '1. Check your internet connection\n';
-        errorMessage += '2. CORS issue - make sure you\'re accessing from the correct domain\n';
-        errorMessage += '3. MAL API might be temporarily unavailable\n\n';
+        errorMessage += '2. Server might be temporarily unavailable\n';
+        errorMessage += '3. Please try again in a moment\n\n';
         errorMessage += 'Please check the browser console (F12) for more details.';
       } else if (err.name === 'NetworkError' || (err.message && err.message.includes('fetch'))) {
-        errorMessage = 'Network error: Unable to reach MAL API servers.\n\n';
-        errorMessage += 'This might be a CORS issue. Make sure:\n';
-        errorMessage += `- Your redirect URI in MAL settings matches: ${redirectUri}\n`;
-        errorMessage += '- You\'re accessing the app from the correct domain\n';
-        errorMessage += '- Your browser isn\'t blocking the request';
+        errorMessage = 'Network error: Unable to reach server.\n\n';
+        errorMessage += 'Please check your connection and try again.';
       } else {
         // Use the detailed error message we constructed
         errorMessage = err.message || 'Authentication failed';
