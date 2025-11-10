@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   }
 
   const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
-  const CLIENT_SECRET = process.env.MAL_CLIENT_SECRET; // Not NEXT_PUBLIC!
+  const CLIENT_SECRET = process.env.MAL_CLIENT_SECRET;
 
   if (!CLIENT_ID || !CLIENT_SECRET) {
     console.error('Missing CLIENT_ID or CLIENT_SECRET');

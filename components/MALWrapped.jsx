@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
 
-// Helper for PKCE plain code challenge (same as verifier)
 function generateCodeVerifier(length = 128) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
   let result = '';
@@ -72,7 +71,6 @@ export default function MALWrapped() {
     try {
       console.log('Exchanging code for token via API route...');
       
-      // Call our API route (avoids CORS)
       const response = await fetch('/api/auth/token', {
         method: 'POST',
         headers: {
@@ -127,17 +125,14 @@ export default function MALWrapped() {
       console.log('Token type:', data.token_type);
       console.log('Expires in:', data.expires_in, 'seconds');
       
-      // Store tokens
       localStorage.setItem('mal_access_token', data.access_token);
       if (data.refresh_token) {
         localStorage.setItem('mal_refresh_token', data.refresh_token);
       }
       localStorage.removeItem('pkce_verifier');
 
-      // Clear URL
       window.history.replaceState({}, document.title, window.location.pathname);
 
-      // Fetch user data
       await fetchUserData(data.access_token);
       setIsAuthenticated(true);
     } catch (err) {
@@ -170,9 +165,11 @@ export default function MALWrapped() {
     setError('');
     
     try {
-      console.log('Fetching user data...');
+      console.log('Fetching user data via API route...');
       
-      const response = await fetch('https://api.myanimelist.net/v2/users/@me?fields=id,name,picture,anime_statistics,manga_statistics', {
+      // Use our API proxy instead of calling MAL directly
+      const response = await fetch('/api/mal/user', {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
@@ -206,7 +203,7 @@ export default function MALWrapped() {
       let errorMessage = 'Failed to fetch user data';
       
       if (err instanceof TypeError && err.message === 'Failed to fetch') {
-        errorMessage = 'Network error: Could not connect to MAL API.\n\nPlease check your internet connection and try again.';
+        errorMessage = 'Network error: Could not connect to server.\n\nPlease check your internet connection and try again.';
       } else {
         errorMessage = err.message || 'Failed to fetch user data';
       }
@@ -233,18 +230,15 @@ export default function MALWrapped() {
     setError('');
 
     try {
-      // Generate verifier - in PKCE plain, challenge = verifier
       const verifier = generateCodeVerifier();
       localStorage.setItem('pkce_verifier', verifier);
 
       console.log('Initiating OAuth flow with PKCE plain method...');
-      console.log('code_challenge = code_verifier (plain method)');
 
-      // Build authorization URL - NO redirect_uri needed according to MAL docs
       const params = new URLSearchParams({
         response_type: 'code',
         client_id: CLIENT_ID,
-        code_challenge: verifier,  // Same as verifier in plain method
+        code_challenge: verifier,
       });
 
       window.location.href = `${AUTH_URL}?${params.toString()}`;
@@ -349,8 +343,8 @@ export default function MALWrapped() {
               Connect with MAL
             </button>
             <div className="text-xs text-gray-400 mt-6 p-3 bg-gray-800/50 rounded-lg">
-              <p className="text-violet-300">✓ Using secure API route (CLIENT_SECRET is protected)</p>
-              <p className="mt-1">✓ PKCE plain method as per MAL documentation</p>
+              <p className="text-violet-300">✓ Secure API routes (no CORS issues)</p>
+              <p className="mt-1">✓ PKCE plain method</p>
             </div>
           </>
         )}
