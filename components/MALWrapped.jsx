@@ -12,9 +12,7 @@ function generateCodeVerifier(length = 128) {
 }
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
-const CLIENT_SECRET = process.env.NEXT_PUBLIC_MAL_CLIENT_SECRET;
 const AUTH_URL = 'https://myanimelist.net/v1/oauth2/authorize';
-const TOKEN_URL = 'https://myanimelist.net/v1/oauth2/token';
 
 export default function MALWrapped() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -71,31 +69,19 @@ export default function MALWrapped() {
     setIsLoading(true);
     setError('');
     
-    if (!CLIENT_ID || !CLIENT_SECRET) {
-      setError('CLIENT_ID or CLIENT_SECRET is not configured. Please set environment variables in Vercel.');
-      setIsLoading(false);
-      return;
-    }
-    
     try {
-      console.log('Exchanging code for token...');
-      console.log('Using PKCE plain method (code_challenge = code_verifier)');
+      console.log('Exchanging code for token via API route...');
       
-      // Call MAL token endpoint directly with CLIENT_SECRET
-      const formData = new URLSearchParams({
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-        code: code,
-        code_verifier: verifier,
-        grant_type: 'authorization_code'
-      });
-
-      const response = await fetch(TOKEN_URL, {
+      // Call our API route (avoids CORS)
+      const response = await fetch('/api/auth/token', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/json',
         },
-        body: formData.toString(),
+        body: JSON.stringify({
+          code: code,
+          code_verifier: verifier,
+        }),
       });
 
       console.log('Token exchange response status:', response.status);
@@ -123,6 +109,8 @@ export default function MALWrapped() {
           }
         } else if (response.status === 401) {
           errorMessage = 'Invalid CLIENT_ID or CLIENT_SECRET.\n\nPlease verify your credentials at https://myanimelist.net/apiconfig';
+        } else if (response.status === 500) {
+          errorMessage = `Server error: ${errorData?.message || 'Unknown error'}\n\nPlease check server logs.`;
         }
         
         throw new Error(errorMessage);
@@ -156,7 +144,7 @@ export default function MALWrapped() {
       let errorMessage = 'Authentication failed';
       
       if (err instanceof TypeError && err.message === 'Failed to fetch') {
-        errorMessage = 'Network error: Could not connect to MAL servers.\n\nPlease check your internet connection and try again.';
+        errorMessage = 'Network error: Could not connect to server.\n\nPlease check your internet connection and try again.';
       } else {
         errorMessage = err.message || 'Authentication failed';
       }
@@ -361,9 +349,8 @@ export default function MALWrapped() {
               Connect with MAL
             </button>
             <div className="text-xs text-gray-400 mt-6 p-3 bg-gray-800/50 rounded-lg">
-              <p className="font-semibold mb-2">⚠️ Security Note:</p>
-              <p className="mb-2">CLIENT_SECRET should be kept private. Consider moving token exchange to a backend API route to avoid exposing it in the browser.</p>
-              <p className="text-violet-300">Using PKCE plain method as per MAL documentation</p>
+              <p className="text-violet-300">✓ Using secure API route (CLIENT_SECRET is protected)</p>
+              <p className="mt-1">✓ PKCE plain method as per MAL documentation</p>
             </div>
           </>
         )}
