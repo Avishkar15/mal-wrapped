@@ -547,16 +547,17 @@ export default function MALWrapped() {
     
     setIsCapturing(true);
     try {
-      // Wait for animations to settle
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait for animations and carousels to settle
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Dynamically import html2canvas
       const html2canvas = (await import('html2canvas')).default;
       
-      // Get the card element (the actual slide content)
-      const cardElement = slideRef.current.querySelector('.slide-card') || slideRef.current;
+      // Get the main card container
+      const cardElement = slideRef.current;
       const rect = cardElement.getBoundingClientRect();
       
+      // Capture the entire card without scrolling
       const canvas = await html2canvas(cardElement, {
         backgroundColor: '#101010',
         scale: 2,
@@ -567,10 +568,18 @@ export default function MALWrapped() {
         height: rect.height,
         x: 0,
         y: 0,
-        scrollX: -window.scrollX,
-        scrollY: -window.scrollY,
-        windowWidth: rect.width,
-        windowHeight: rect.height,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
+        onclone: (clonedDoc) => {
+          // Fix any text positioning issues in the cloned document
+          const clonedCard = clonedDoc.querySelector('.slide-card');
+          if (clonedCard) {
+            clonedCard.style.transform = 'none';
+            clonedCard.style.position = 'relative';
+          }
+        },
       });
       
       const link = document.createElement('a');
@@ -629,17 +638,87 @@ export default function MALWrapped() {
     }
   }
 
+  // Drumroll Slide Component
+  function DrumrollSlide({ type, topItem, verticalText }) {
+    const [revealed, setRevealed] = useState(false);
+    
+    useEffect(() => {
+      const timer = setTimeout(() => setRevealed(true), 2000);
+      return () => clearTimeout(timer);
+    }, []);
+
+    const SlideLayout = ({ children, verticalText }) => (
+      <div className="w-full h-full relative px-4 py-2 md:p-8 flex flex-col items-center justify-center slide-card" style={{ transform: 'translateZ(0)' }}>
+        {verticalText && (
+          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#9EFF00]/50 font-bold uppercase tracking-[.3em] [writing-mode:vertical-lr] text-base z-10">
+            {verticalText}
+          </p>
+        )}
+        <div className="w-full relative z-10">
+          {children}
+        </div>
+      </div>
+    );
+
+    return (
+      <SlideLayout verticalText={verticalText}>
+        <div className="text-center relative overflow-hidden">
+          {!revealed ? (
+            <div className="animate-pop-in">
+              <h1 className="text-6xl md:text-8xl font-bold uppercase text-[#9EFF00] animate-pulse">{type === 'anime' ? '🎬' : '📚'}</h1>
+              <h2 className="text-4xl md:text-6xl font-bold uppercase text-white mt-8">Your Favorite</h2>
+              <h2 className="text-4xl md:text-6xl font-bold uppercase text-[#9EFF00] mt-4 animate-pulse">{type === 'anime' ? 'Anime' : 'Manga'} Awaits...</h2>
+            </div>
+          ) : topItem ? (
+            <div className="animate-pop-in">
+              <h1 className="text-3xl md:text-4xl font-bold uppercase text-[#9EFF00] mb-6">Your #1 Favorite</h1>
+              <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8">
+                <div className="w-32 md:w-48 aspect-[2/3] bg-black/50 border-2 border-[#9EFF00] rounded-lg overflow-hidden shadow-2xl shadow-[#9EFF00]/50 transition-all duration-500 hover:scale-105">
+                  {topItem.node?.main_picture?.large && (
+                    <img 
+                      src={topItem.node.main_picture.large} 
+                      alt={topItem.node.title} 
+                      crossOrigin="anonymous" 
+                      className="w-full h-full object-cover" 
+                    />
+                  )}
+                </div>
+                <div className="text-center md:text-left">
+                  <h3 className="text-3xl md:text-5xl font-bold text-white mb-2">{topItem.node?.title}</h3>
+                  {type === 'anime' && topItem.node?.studios?.[0]?.name && (
+                    <p className="text-xl md:text-2xl text-[#9EFF00] mb-4">{topItem.node.studios[0].name}</p>
+                  )}
+                  {type === 'manga' && topItem.node?.authors?.[0] && (
+                    <p className="text-xl md:text-2xl text-[#9EFF00] mb-4">
+                      {`${topItem.node.authors[0].node?.first_name || ''} ${topItem.node.authors[0].node?.last_name || ''}`.trim()}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-center md:justify-start text-3xl md:text-4xl text-yellow-300">
+                    <span className="mr-2">★</span>
+                    <span>{topItem.list_status?.score?.toFixed(1)} / 10</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-white/50">No favorite {type} found</div>
+          )}
+        </div>
+      </SlideLayout>
+    );
+  }
+
   function SlideContent({ slide, mangaListData }) {
     if (!slide || !stats) return null;
 
     const SlideLayout = ({ children, verticalText }) => (
-      <div className="w-full h-full relative px-4 py-2 md:p-8 flex flex-col items-center justify-center slide-card">
+      <div className="w-full h-full relative px-4 py-2 md:p-8 flex flex-col items-center justify-center slide-card" style={{ transform: 'translateZ(0)' }}>
         {verticalText && (
-          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#9EFF00]/50 font-bold uppercase tracking-[.3em] [writing-mode:vertical-lr] text-base">
+          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#9EFF00]/50 font-bold uppercase tracking-[.3em] [writing-mode:vertical-lr] text-base z-10">
             {verticalText}
           </p>
         )}
-        <div className="w-full">
+        <div className="w-full relative z-10">
           {children}
         </div>
       </div>
@@ -648,38 +727,63 @@ export default function MALWrapped() {
     // Image Carousel Component
     const ImageCarousel = ({ items, maxItems = 20 }) => {
       const [currentIndex, setCurrentIndex] = useState(0);
+      const [isHovered, setIsHovered] = useState(false);
+      const [hoveredItem, setHoveredItem] = useState(null);
       const visibleItems = items.slice(0, maxItems);
       const itemsPerView = 5;
       
       useEffect(() => {
-        if (visibleItems.length <= itemsPerView) return;
+        if (visibleItems.length <= itemsPerView || isHovered) return;
         const interval = setInterval(() => {
           setCurrentIndex((prev) => {
             const maxIndex = Math.max(0, visibleItems.length - itemsPerView);
             return (prev + 1) % (maxIndex + 1);
           });
-        }, 2000);
+        }, 1500);
         return () => clearInterval(interval);
-      }, [visibleItems.length, itemsPerView]);
+      }, [visibleItems.length, itemsPerView, isHovered]);
 
       if (visibleItems.length === 0) return null;
 
       return (
-        <div className="mt-6 overflow-hidden">
+        <div 
+          className="mt-6 overflow-hidden relative"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => {
+            setIsHovered(false);
+            setHoveredItem(null);
+          }}
+        >
           <div 
-            className="flex transition-transform duration-500 ease-in-out"
+            className="flex transition-transform duration-700 ease-in-out"
             style={{ transform: `translateX(-${currentIndex * (100 / itemsPerView)}%)` }}
           >
             {visibleItems.map((item, idx) => (
-              <div key={idx} className="flex-shrink-0" style={{ width: `${100 / itemsPerView}%` }}>
-                <div className="mx-1 aspect-[2/3] bg-black/50 border border-white/10 rounded-lg overflow-hidden">
+              <div 
+                key={idx} 
+                className="flex-shrink-0 relative group" 
+                style={{ width: `${100 / itemsPerView}%` }}
+                onMouseEnter={() => setHoveredItem(idx)}
+                onMouseLeave={() => setHoveredItem(null)}
+              >
+                <div className="mx-1 aspect-[2/3] bg-black/50 border border-white/10 rounded-lg overflow-hidden transition-all duration-300 group-hover:border-[#9EFF00] group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-[#9EFF00]/30">
                   {item.coverImage && (
                     <img 
                       src={item.coverImage} 
                       alt={item.title || ''} 
                       crossOrigin="anonymous" 
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
                     />
+                  )}
+                  {hoveredItem === idx && item.title && (
+                    <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-2 z-10 transition-opacity duration-300">
+                      <p className="text-white text-sm font-bold text-center leading-tight">{item.title}</p>
+                      {item.userRating && (
+                        <div className="absolute bottom-2 right-2 text-yellow-300 text-xs font-bold">
+                          ★ {item.userRating.toFixed(1)}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
@@ -814,15 +918,11 @@ export default function MALWrapped() {
         );
 
       case 'drumroll_anime':
-        return (
-          <SlideLayout verticalText="DRUMROLL">
-            <div className="text-center">
-              <h1 className="text-6xl md:text-8xl font-bold uppercase text-[#9EFF00] animate-pop-in animation-delay-100">🎬</h1>
-              <h2 className="text-4xl md:text-6xl font-bold uppercase text-white mt-8 animate-pop-in animation-delay-200">Your Favorite</h2>
-              <h2 className="text-4xl md:text-6xl font-bold uppercase text-[#9EFF00] mt-4 animate-pop-in animation-delay-300">Anime Awaits...</h2>
-            </div>
-          </SlideLayout>
-        );
+        return <DrumrollSlide 
+          type="anime" 
+          topItem={stats.topRated.length > 0 ? stats.topRated[0] : null}
+          verticalText="DRUMROLL"
+        />;
 
       case 'favorite_anime':
         const topAnime = stats.topRated.slice(0, 5).map(item => ({
@@ -1030,7 +1130,19 @@ export default function MALWrapped() {
               5 shows that didn't land with you.
             </h2>
             {didntLandAnime.length > 0 ? (
-              <ImageCarousel items={didntLandAnime} maxItems={10} />
+              <>
+                <ImageCarousel items={didntLandAnime} maxItems={10} />
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+                  {didntLandAnime.map((item, idx) => (
+                    <div key={idx} className="text-center">
+                      <p className="text-sm text-white font-bold truncate mb-1">{item.title}</p>
+                      {item.userRating && (
+                        <p className="text-xs text-yellow-300">★ {item.userRating.toFixed(1)}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="mt-8 text-center text-white/50">No data available</div>
             )}
@@ -1179,15 +1291,11 @@ export default function MALWrapped() {
         );
 
       case 'drumroll_manga':
-        return (
-          <SlideLayout verticalText="DRUMROLL">
-            <div className="text-center">
-              <h1 className="text-6xl md:text-8xl font-bold uppercase text-[#9EFF00] animate-pop-in animation-delay-100">📚</h1>
-              <h2 className="text-4xl md:text-6xl font-bold uppercase text-white mt-8 animate-pop-in animation-delay-200">Your Favorite</h2>
-              <h2 className="text-4xl md:text-6xl font-bold uppercase text-[#9EFF00] mt-4 animate-pop-in animation-delay-300">Manga Awaits...</h2>
-            </div>
-          </SlideLayout>
-        );
+        return <DrumrollSlide 
+          type="manga" 
+          topItem={stats.topManga.length > 0 ? stats.topManga[0] : null}
+          verticalText="DRUMROLL"
+        />;
 
       case 'favorite_manga':
         const topManga = stats.topManga.slice(0, 5).map(item => ({
@@ -1397,7 +1505,19 @@ export default function MALWrapped() {
               5 manga that didn't land with you.
             </h2>
             {didntLandManga.length > 0 ? (
-              <ImageCarousel items={didntLandManga} maxItems={10} />
+              <>
+                <ImageCarousel items={didntLandManga} maxItems={10} />
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+                  {didntLandManga.map((item, idx) => (
+                    <div key={idx} className="text-center">
+                      <p className="text-sm text-white font-bold truncate mb-1">{item.title}</p>
+                      {item.userRating && (
+                        <p className="text-xs text-yellow-300">★ {item.userRating.toFixed(1)}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="mt-8 text-center text-white/50">No data available</div>
             )}
@@ -1405,6 +1525,7 @@ export default function MALWrapped() {
         );
 
       case 'finale':
+        const totalDays = Math.floor(stats.totalTimeSpent / 24);
         return (
           <SlideLayout verticalText="FINAL-REPORT">
             <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100">
@@ -1432,15 +1553,30 @@ export default function MALWrapped() {
                 </div>
               </div>
               <div className="border border-white/20 p-3 rounded-lg col-span-1">
-                <p className="text-sm uppercase text-white/70 mb-2">Hours Watched</p>
+                <p className="text-sm uppercase text-white/70 mb-2">Episodes Watched</p>
                 <p className="text-2xl md:text-3xl font-bold text-white">
-                  <AnimatedNumber value={stats.watchTime} duration={1000} />
+                  <AnimatedNumber value={stats.totalEpisodes || 0} duration={1000} />
                 </p>
               </div>
               <div className="border border-white/20 p-3 rounded-lg col-span-1">
                 <p className="text-sm uppercase text-white/70 mb-2">Chapters Read</p>
                 <p className="text-2xl md:text-3xl font-bold text-white">
                   <AnimatedNumber value={stats.totalChapters || 0} duration={1000} />
+                </p>
+              </div>
+              <div className="border border-white/20 p-3 rounded-lg col-span-2">
+                <p className="text-sm uppercase text-white/70 mb-2">Total Time Spent</p>
+                <p className="text-3xl md:text-4xl font-bold text-white">
+                  {totalDays > 0 ? (
+                    <>
+                      <AnimatedNumber value={totalDays} duration={1000} /> Days
+                      <span className="text-xl text-white/70 ml-2">({stats.totalTimeSpent} hours)</span>
+                    </>
+                  ) : (
+                    <>
+                      <AnimatedNumber value={stats.totalTimeSpent} duration={1000} /> Hours
+                    </>
+                  )}
                 </p>
               </div>
               <div className="border border-white/20 p-3 rounded-lg col-span-1">
@@ -1532,9 +1668,50 @@ export default function MALWrapped() {
               </div>
               
               {/* Slide Content */}
-              <div key={currentSlide} className={`w-full flex-grow flex items-center justify-center overflow-hidden py-2 ${!isCapturing && 'animate-pop-in'}`}>
-                <div className="w-full h-full">
-            <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} />
+              <div key={currentSlide} className={`w-full flex-grow flex items-center justify-center overflow-hidden py-2 transition-opacity duration-700 ease-in-out ${!isCapturing && 'animate-fade-in'}`}>
+                <div className="w-full h-full relative">
+                  {/* Background anime elements - show relevant images based on slide */}
+                  {stats && (
+                    <div className="absolute inset-0 pointer-events-none opacity-5 overflow-hidden z-0">
+                      {(() => {
+                        const slideId = slides[currentSlide]?.id;
+                        let bgItems = [];
+                        if (slideId?.includes('anime') || slideId === 'top_genre' || slideId === 'top_studio' || slideId === 'seasonal_highlights') {
+                          bgItems = stats.thisYearAnime?.slice(0, 4) || [];
+                        } else if (slideId?.includes('manga') || slideId === 'top_manga_genre' || slideId === 'top_author') {
+                          bgItems = (mangaList || []).slice(0, 4);
+                        } else {
+                          bgItems = [...(stats.thisYearAnime?.slice(0, 2) || []), ...(mangaList?.slice(0, 2) || [])];
+                        }
+                        return bgItems.map((item, idx) => {
+                          const image = item.node?.main_picture?.large || item.node?.main_picture?.medium;
+                          if (!image) return null;
+                          const positions = [
+                            { top: '10%', left: '5%', rotate: -12 },
+                            { top: '50%', right: '5%', rotate: 15 },
+                            { bottom: '10%', left: '20%', rotate: -8 },
+                            { bottom: '15%', right: '15%', rotate: 10 }
+                          ];
+                          const pos = positions[idx % positions.length];
+                          return (
+                            <img
+                              key={idx}
+                              src={image}
+                              alt=""
+                              className="absolute w-24 h-36 md:w-32 md:h-48 object-cover rounded-lg blur-md"
+                              style={{
+                                ...pos,
+                                transform: `rotate(${pos.rotate}deg)`,
+                                animation: `float 6s ease-in-out infinite`,
+                                animationDelay: `${idx * 0.5}s`
+                              }}
+                            />
+                          );
+                        });
+                      })()}
+                    </div>
+                  )}
+                  <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} />
                 </div>
               </div>
               
@@ -1544,14 +1721,14 @@ export default function MALWrapped() {
                 onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
                 disabled={currentSlide === 0}
                   className="p-2 md:p-3 text-white rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 hover:scale-110 disabled:opacity-30 transition-all duration-200"
-                >
+              >
                   <ChevronLeft className="w-6 h-6"/>
-                </button>
+              </button>
                 
                 <p className="text-white/50 text-base font-mono py-2 px-4 rounded-full bg-black/30 backdrop-blur-sm">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</p>
 
                 {currentSlide === slides.length - 1 ? (
-                  <button 
+              <button
                     onClick={() => { setCurrentSlide(0); setIsAuthenticated(false); setStats(null); }} 
                     className="bg-[#9EFF00] text-black font-bold uppercase px-4 md:px-6 py-2 md:py-3 rounded-full hover:bg-white hover:scale-105 transition-all duration-300 text-base animate-pop-in"
                   >
