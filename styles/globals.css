@@ -29,14 +29,40 @@
   .moving-grid-bg {
     background-image: 
       linear-gradient(to right, rgba(158, 255, 0, 0.1) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(158, 255, 0, 0.1) 1px, transparent 1px);
-    background-size: 40px 40px;
-    animation: move-grid 60s linear infinite;
+      linear-gradient(to bottom, rgba(158, 255, 0, 0.1) 1px, transparent 1px),
+      radial-gradient(circle at 20% 30%, rgba(158, 255, 0, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(158, 255, 0, 0.03) 0%, transparent 50%);
+    background-size: 40px 40px, 40px 40px, 200px 200px, 200px 200px;
+    animation: move-grid 60s linear infinite, float-bg 20s ease-in-out infinite;
+    position: relative;
+  }
+
+  .moving-grid-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(158, 255, 0, 0.02) 2px, rgba(158, 255, 0, 0.02) 4px);
+    animation: scan-line 8s linear infinite;
+    pointer-events: none;
   }
 
   @keyframes move-grid {
-    0% { background-position: 0 0; }
-    100% { background-position: 480px 480px; }
+    0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+    100% { background-position: 480px 480px, 480px 480px, 100px 100px, -100px -100px; }
+  }
+
+  @keyframes float-bg {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes scan-line {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
   }
 
   @keyframes pop-in {
@@ -85,5 +111,114 @@
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  @keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  @keyframes neon-pulse {
+    0%, 100% { 
+      text-shadow: 0 0 10px rgba(158, 255, 0, 0.5),
+                   0 0 20px rgba(158, 255, 0, 0.3),
+                   0 0 30px rgba(158, 255, 0, 0.2);
+    }
+    50% { 
+      text-shadow: 0 0 20px rgba(158, 255, 0, 0.8),
+                   0 0 30px rgba(158, 255, 0, 0.6),
+                   0 0 40px rgba(158, 255, 0, 0.4);
+    }
+  }
+
+  .animate-glitch {
+    animation: glitch 0.3s infinite;
+  }
+
+  .animate-flicker {
+    animation: flicker 2s infinite;
+  }
+
+  .animate-neon-pulse {
+    animation: neon-pulse 2s ease-in-out infinite;
+  }
+
+  .retro-scan {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .retro-scan::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(158, 255, 0, 0.1), transparent);
+    animation: scan 3s linear infinite;
+  }
+
+  @keyframes scan {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+
+  @keyframes retro-flicker {
+    0%, 100% { opacity: 1; }
+    41.99% { opacity: 1; }
+    42% { opacity: 0; }
+    43% { opacity: 0; }
+    43.01% { opacity: 1; }
+    45.99% { opacity: 1; }
+    46% { opacity: 0; }
+    46.9% { opacity: 0; }
+    46.91% { opacity: 1; }
+    51.99% { opacity: 1; }
+    52% { opacity: 0; }
+    52.8% { opacity: 0; }
+    52.81% { opacity: 1; }
+  }
+
+  .animate-retro-flicker {
+    animation: retro-flicker 3s infinite;
+  }
+
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.6s ease-out;
+  }
+
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.6s ease-out;
   }
 }

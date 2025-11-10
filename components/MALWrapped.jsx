@@ -37,6 +37,34 @@ async function pkceChallenge(verifier) {
 const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
 const AUTH_URL = 'https://myanimelist.net/v1/oauth2/authorize';
 
+// Animated Number Component
+function AnimatedNumber({ value, duration = 1500, className = '' }) {
+  const [count, setCount] = useState(0);
+  const frameRef = useRef(null);
+
+  useEffect(() => {
+    let startTime = null;
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = timestamp - startTime;
+      const percentage = Math.min(progress / duration, 1);
+      setCount(Math.floor(percentage * value));
+      if (progress < duration) {
+        frameRef.current = requestAnimationFrame(animate);
+      } else {
+        setCount(value);
+      }
+    };
+    frameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    };
+  }, [value, duration]);
+
+  return <span className={className}>{count.toLocaleString()}</span>;
+}
+
 export default function MALWrapped() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [username, setUsername] = useState('');
@@ -49,6 +77,7 @@ export default function MALWrapped() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [selectedYear, setSelectedYear] = useState(2025);
   const slideRef = useRef(null);
 
   const slides = stats ? [
@@ -220,6 +249,7 @@ export default function MALWrapped() {
       // Recalculate stats with both anime and manga
       // Use the passed animeData or fall back to state (shouldn't be needed)
       const animeToUse = animeData.length > 0 ? animeData : animeList;
+      // Recalculate with current year selection
       calculateStats(animeToUse, allManga);
     } catch (err) {
       console.error('Error fetching manga list:', err);
@@ -227,27 +257,38 @@ export default function MALWrapped() {
   }
 
   function calculateStats(anime, manga) {
-    const currentYear = 2025;
+    const currentYear = selectedYear;
     
     console.log('Calculating stats for:', {
       animeCount: anime.length,
       mangaCount: manga.length,
+      selectedYear: currentYear,
       sampleAnime: anime.length > 0 ? anime[0] : null
     });
     
-    // Filter anime from current year (completed in 2025)
-    const thisYearAnime = anime.filter(item => {
+    // Filter anime based on selected year
+    // Use finish_date if available, otherwise use start_date or updated_at
+    const filteredAnime = currentYear === 'all' ? anime : anime.filter(item => {
       const finishDate = item.list_status?.finish_date;
-      if (!finishDate) return false;
+      const startDate = item.list_status?.start_date;
+      const updatedAt = item.list_status?.updated_at;
+      
+      // Try finish_date first, then start_date, then updated_at
+      let dateToCheck = finishDate || startDate || updatedAt;
+      if (!dateToCheck) return false;
+      
       try {
-        return new Date(finishDate).getFullYear() === currentYear;
+        const year = new Date(dateToCheck).getFullYear();
+        return year === currentYear;
       } catch (e) {
         return false;
       }
     });
 
-    // Get completed anime with ratings
-    const completedAnime = anime.filter(item => {
+    const thisYearAnime = filteredAnime;
+
+    // Get completed anime with ratings (from filtered list)
+    const completedAnime = thisYearAnime.filter(item => {
       const status = item.list_status?.status;
       const score = item.list_status?.score;
       return status === 'completed' && score && score > 0;
@@ -258,9 +299,9 @@ export default function MALWrapped() {
       completedCount: completedAnime.length
     });
 
-    // Calculate genres
+    // Calculate genres (from filtered anime)
     const genreCounts = {};
-    anime.forEach(item => {
+    thisYearAnime.forEach(item => {
       item.node?.genres?.forEach(genre => {
         genreCounts[genre.name] = (genreCounts[genre.name] || 0) + 1;
       });
@@ -270,9 +311,9 @@ export default function MALWrapped() {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    // Calculate studios
+    // Calculate studios (from filtered anime)
     const studioCounts = {};
-    anime.forEach(item => {
+    thisYearAnime.forEach(item => {
       item.node?.studios?.forEach(studio => {
         studioCounts[studio.name] = (studioCounts[studio.name] || 0) + 1;
       });
@@ -302,8 +343,8 @@ export default function MALWrapped() {
       })
       .slice(0, 5);
 
-    // Watch time calculation
-    const totalEpisodes = anime.reduce((sum, item) => 
+    // Watch time calculation (from filtered anime)
+    const totalEpisodes = thisYearAnime.reduce((sum, item) => 
       sum + (item.list_status?.num_episodes_watched || 0), 0
     );
     const avgEpisodeLength = 24; // minutes
@@ -356,8 +397,24 @@ export default function MALWrapped() {
       }
     }
 
-    // Manga stats
-    const completedManga = manga.filter(item => 
+    // Manga stats - filter by year
+    const filteredManga = currentYear === 'all' ? manga : manga.filter(item => {
+      const finishDate = item.list_status?.finish_date;
+      const startDate = item.list_status?.start_date;
+      const updatedAt = item.list_status?.updated_at;
+      
+      let dateToCheck = finishDate || startDate || updatedAt;
+      if (!dateToCheck) return false;
+      
+      try {
+        const year = new Date(dateToCheck).getFullYear();
+        return year === currentYear;
+      } catch (e) {
+        return false;
+      }
+    });
+
+    const completedManga = filteredManga.filter(item => 
       item.list_status?.status === 'completed' && item.list_status?.score > 0
     );
 
@@ -365,9 +422,9 @@ export default function MALWrapped() {
       .sort((a, b) => b.list_status.score - a.list_status.score)
       .slice(0, 5);
 
-    // Manga authors
+    // Manga authors (from filtered manga)
     const authorCounts = {};
-    manga.forEach(item => {
+    filteredManga.forEach(item => {
       item.node?.authors?.forEach(author => {
         const name = `${author.node?.first_name || ''} ${author.node?.last_name || ''}`.trim();
         if (name) {
@@ -382,8 +439,8 @@ export default function MALWrapped() {
 
     const statsData = {
       thisYearAnime: thisYearAnime.length > 0 ? thisYearAnime : [],
-      totalAnime: anime.length,
-      totalManga: manga.length,
+      totalAnime: thisYearAnime.length,
+      totalManga: filteredManga.length,
       topGenres: topGenres.length > 0 ? topGenres : [],
       topStudios: topStudios.length > 0 ? topStudios : [],
       topRated: topRated.length > 0 ? topRated : [],
@@ -393,6 +450,7 @@ export default function MALWrapped() {
       topManga: topManga.length > 0 ? topManga : [],
       topAuthors: topAuthors.length > 0 ? topAuthors : [],
       seasonalAnime: seasonalAnime || null,
+      selectedYear: currentYear,
     };
     
     console.log('Calculated stats:', {
@@ -421,8 +479,16 @@ export default function MALWrapped() {
     
     setIsCapturing(true);
     try {
+      // Wait a bit for animations to settle
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
       // Dynamically import html2canvas
       const html2canvas = (await import('html2canvas')).default;
+      
+      // Get the actual dimensions
+      const rect = slideRef.current.getBoundingClientRect();
+      const scrollWidth = slideRef.current.scrollWidth;
+      const scrollHeight = slideRef.current.scrollHeight;
       
       const canvas = await html2canvas(slideRef.current, {
         backgroundColor: '#101010',
@@ -430,11 +496,20 @@ export default function MALWrapped() {
         logging: false,
         useCORS: true,
         allowTaint: true,
+        width: scrollWidth,
+        height: scrollHeight,
+        windowWidth: scrollWidth,
+        windowHeight: scrollHeight,
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0,
+        removeContainer: false,
       });
       
       const link = document.createElement('a');
       link.download = `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
     } catch (err) {
       console.error('Error generating PNG:', err);
@@ -443,6 +518,14 @@ export default function MALWrapped() {
       setIsCapturing(false);
     }
   }
+
+  // Recalculate stats when year changes
+  useEffect(() => {
+    if (animeList.length > 0 || mangaList.length > 0) {
+      calculateStats(animeList, mangaList);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedYear]);
 
   async function handleBegin() {
     if (typeof window === 'undefined') {
@@ -540,8 +623,8 @@ export default function MALWrapped() {
           <SlideLayout verticalText="INITIALIZE">
             <div className="text-center">
               <h2 className="text-3xl md:text-4xl font-medium uppercase text-white/80 animate-pop-in animation-delay-100">MyAnimeList Wrapped</h2>
-              <h1 className="text-7xl md:text-9xl font-bold uppercase text-[#9EFF00] my-4 animate-pop-in animation-delay-200">2025</h1>
-              <p className="text-2xl md:text-3xl text-white animate-pop-in animation-delay-300">A look back at your year, <span className="text-[#9EFF00]">{username || 'a'}</span>.</p>
+              <h1 className="text-7xl md:text-9xl font-bold uppercase text-[#9EFF00] my-4 animate-pop-in animation-delay-200 animate-neon-pulse">{stats.selectedYear === 'all' ? 'ALL TIME' : stats.selectedYear}</h1>
+              <p className="text-2xl md:text-3xl text-white animate-pop-in animation-delay-300">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-[#9EFF00]">{username || 'a'}</span>.</p>
             </div>
           </SlideLayout>
         );
@@ -550,14 +633,16 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="ANIME-LOG">
             <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100">
-              2025 Anime Log
+              {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Anime Log
             </h1>
             <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in animation-delay-200">
-              A look at the series you completed this year.
+              A look at the series you completed {stats.selectedYear === 'all' ? 'over time' : 'this year'}.
             </h2>
-            <div className="mt-8 text-center animate-pop-in animation-delay-400">
-              <p className="text-9xl md:text-[10rem] font-bold text-white">{stats.thisYearAnime.length}</p>
-              <p className="text-3xl font-medium uppercase text-[#9EFF00] mt-2">Anime Series Watched</p>
+            <div className="mt-8 text-center animate-pop-in animation-delay-400 retro-scan">
+              <p className="text-9xl md:text-[10rem] font-bold text-white animate-neon-pulse">
+                <AnimatedNumber value={stats.thisYearAnime.length} />
+              </p>
+              <p className="text-3xl font-medium uppercase text-[#9EFF00] mt-2 animate-flicker">Anime Series Watched</p>
             </div>
           </SlideLayout>
         );
@@ -571,9 +656,11 @@ export default function MALWrapped() {
             <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in animation-delay-200">
               How much time you spent in other worlds.
             </h2>
-            <div className="mt-8 text-center animate-pop-in animation-delay-400">
-              <p className="text-9xl md:text-[10rem] font-bold text-white">{stats.watchTime}</p>
-              <p className="text-3xl font-medium uppercase text-[#9EFF00] mt-2">Hours of Anime Watched</p>
+            <div className="mt-8 text-center animate-pop-in animation-delay-400 retro-scan">
+              <p className="text-9xl md:text-[10rem] font-bold text-white animate-neon-pulse">
+                <AnimatedNumber value={stats.watchTime} />
+              </p>
+              <p className="text-3xl font-medium uppercase text-[#9EFF00] mt-2 animate-flicker">Hours of Anime Watched</p>
             </div>
           </SlideLayout>
         );
@@ -581,7 +668,7 @@ export default function MALWrapped() {
       case 'top_genres':
         return (
           <SlideLayout verticalText="GENRE-MATRIX">
-            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100">
+            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100 animate-retro-flicker">
               Your Top Genres
             </h1>
             <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in animation-delay-200">
@@ -610,7 +697,7 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="TOP-SELECTION">
-            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100">
+            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100 animate-retro-flicker">
               Your Favorite Anime
             </h1>
             <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in animation-delay-200">
@@ -680,7 +767,7 @@ export default function MALWrapped() {
       case 'top_studios':
         return (
           <SlideLayout verticalText="PRODUCTION">
-            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100">
+            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100 animate-retro-flicker">
               Top Animation Studios
             </h1>
             <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in animation-delay-200">
@@ -765,14 +852,16 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="MANGA-LOG">
             <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100">
-              2025 Manga Log
+              {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Manga Log
             </h1>
             <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in animation-delay-200">
               You didn't just watch, you read.
             </h2>
-            <div className="mt-8 text-center animate-pop-in animation-delay-400">
-              <p className="text-9xl md:text-[10rem] font-bold text-white">{stats.totalManga}</p>
-              <p className="text-3xl font-medium uppercase text-[#9EFF00] mt-2">Manga Read</p>
+            <div className="mt-8 text-center animate-pop-in animation-delay-400 retro-scan">
+              <p className="text-9xl md:text-[10rem] font-bold text-white animate-neon-pulse">
+                <AnimatedNumber value={stats.totalManga} />
+              </p>
+              <p className="text-3xl font-medium uppercase text-[#9EFF00] mt-2 animate-flicker">Manga Read</p>
             </div>
           </SlideLayout>
         );
@@ -883,7 +972,7 @@ export default function MALWrapped() {
               Year In Review
             </h1>
             <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in animation-delay-200">
-              Your complete 2025 stats.
+              Your complete {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} stats.
             </h2>
             <div className="mt-6 grid grid-cols-2 gap-2 md:gap-3 text-white stagger-children">
               <div className="border border-white/20 p-2 rounded-lg col-span-1 flex flex-col">
@@ -908,7 +997,9 @@ export default function MALWrapped() {
               </div>
               <div className="border border-white/20 p-3 rounded-lg col-span-1">
                 <p className="text-base uppercase text-white/70">Time Spent</p>
-                <p className="text-lg md:text-xl font-bold text-white">{stats.watchTime} Hours</p>
+                <p className="text-lg md:text-xl font-bold text-white">
+                  <AnimatedNumber value={stats.watchTime} duration={1000} /> Hours
+                </p>
               </div>
               <div className="border border-white/20 p-3 rounded-lg col-span-1">
                 <p className="text-base uppercase text-white/70">Favorite Studio</p>
@@ -929,7 +1020,7 @@ export default function MALWrapped() {
 
   return (
     <main className="bg-[#0A0A0A] text-white h-screen flex items-center justify-center p-2 selection:bg-[#9EFF00] selection:text-black relative overflow-hidden moving-grid-bg">
-      <div ref={slideRef} className={`w-full max-w-5xl h-full bg-[#101010] border-2 border-white/10 rounded-xl shadow-2xl shadow-black/50 flex flex-col justify-center relative overflow-hidden ${isCapturing ? 'capturing' : ''}`}>
+      <div ref={slideRef} className={`w-full max-w-5xl h-full bg-[#101010] border-2 border-white/10 rounded-xl shadow-2xl shadow-black/50 flex flex-col justify-center relative ${isCapturing ? 'capturing overflow-visible' : 'overflow-hidden'}`}>
         <div className="z-10 w-full h-full flex flex-col items-center justify-center">
           {error && (
             <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500/90 text-white px-6 py-3 rounded-lg z-50">
@@ -981,6 +1072,17 @@ export default function MALWrapped() {
                   })}
                 </div>
                 <div className="flex-shrink-0 flex items-center gap-2 md:gap-4">
+                  {/* Year Selector */}
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                    className="px-3 py-1.5 bg-black/50 border border-[#9EFF00]/50 text-[#9EFF00] rounded-md text-sm font-bold uppercase tracking-wider focus:outline-none focus:border-[#9EFF00] transition-all hover:bg-black/70"
+                  >
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="all">ALL TIME</option>
+                  </select>
                   <button onClick={handleDownloadPNG} className="p-2 md:p-3 text-white rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition" title="Download Slide">
                     <Download className="w-5 h-5 md:w-6 md:h-6" />
                   </button>
@@ -989,23 +1091,35 @@ export default function MALWrapped() {
               
               {/* Slide Content */}
               <div key={currentSlide} className={`w-full flex-grow flex items-center justify-center overflow-hidden py-2 ${!isCapturing && 'animate-pop-in'}`}>
-                <SlideContent slide={slides[currentSlide]} />
+                <div className="w-full h-full">
+                  <SlideContent slide={slides[currentSlide]} />
+                </div>
               </div>
               
               {/* Bottom Controls */}
               <div className="flex-shrink-0 w-full px-4 md:px-6 pb-4 flex items-center justify-between">
-                <button onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} disabled={currentSlide === 0} className="p-2 md:p-3 text-white rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 disabled:opacity-30 transition">
+                <button 
+                  onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))} 
+                  disabled={currentSlide === 0} 
+                  className="p-2 md:p-3 text-white rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 hover:scale-110 disabled:opacity-30 transition-all duration-200"
+                >
                   <ChevronLeft className="w-6 h-6"/>
                 </button>
                 
-                <p className="text-white/50 text-base font-mono py-2 px-4 rounded-full bg-black/30 backdrop-blur-sm">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</p>
+                <p className="text-white/50 text-base font-mono py-2 px-4 rounded-full bg-black/30 backdrop-blur-sm animate-flicker">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</p>
 
                 {currentSlide === slides.length - 1 ? (
-                  <button onClick={() => { setCurrentSlide(0); setIsAuthenticated(false); setStats(null); }} className="bg-[#9EFF00] text-black font-bold uppercase px-4 md:px-6 py-2 md:py-3 rounded-full hover:bg-white transition-colors duration-300 text-base animate-pop-in">
+                  <button 
+                    onClick={() => { setCurrentSlide(0); setIsAuthenticated(false); setStats(null); }} 
+                    className="bg-[#9EFF00] text-black font-bold uppercase px-4 md:px-6 py-2 md:py-3 rounded-full hover:bg-white hover:scale-105 transition-all duration-300 text-base animate-pop-in animate-neon-pulse"
+                  >
                     Restart
                   </button>
                 ) : (
-                  <button onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} className="p-2 md:p-3 text-white rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition">
+                  <button 
+                    onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))} 
+                    className="p-2 md:p-3 text-white rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 hover:scale-110 transition-all duration-200"
+                  >
                     <ChevronRight className="w-6 h-6"/>
                   </button>
                 )}
