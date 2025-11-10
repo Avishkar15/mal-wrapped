@@ -35,7 +35,7 @@ async function pkceChallenge(verifier) {
   return base64urlencode(hashed);
 }
 
-const CLIENT_ID = '<your_client_id_here>';
+const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID || '<your_client_id_here>';
 const AUTH_URL = 'https://myanimelist.net/v1/oauth2/authorize';
 const TOKEN_URL = 'https://myanimelist.net/v1/oauth2/token';
 
