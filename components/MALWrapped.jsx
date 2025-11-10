@@ -112,10 +112,11 @@ export default function MALWrapped() {
     setError('');
     const redirectUri = getRedirectUri();
     
-    // Validate CLIENT_ID
-    if (CLIENT_ID === '<your_client_id_here>' || !CLIENT_ID || CLIENT_ID.trim() === '') {
-      setError('CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID environment variable or update the CLIENT_ID constant.');
+    // Validate CLIENT_ID (client-side check)
+    if (!CLIENT_ID || CLIENT_ID.trim() === '') {
+      setError('CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID environment variable in Vercel settings.');
       setIsLoading(false);
+      console.error('CLIENT_ID is not set on client side');
       return;
     }
     
@@ -175,11 +176,20 @@ export default function MALWrapped() {
             errorMessage += `\n\nStatus: ${response.status}. Please check your CLIENT_ID and redirect URI settings.`;
             errorMessage += `\n\nExpected redirect URI: ${redirectUri}`;
           }
-        } else if (response.status === 401) {
-          errorMessage += '\n\nInvalid CLIENT_ID. Please check your configuration.';
+        } else if (response.status === 401 || errorData?.error === 'invalid_client') {
+          errorMessage = 'Invalid CLIENT_ID.\n\n';
+          errorMessage += 'Please verify:\n';
+          errorMessage += '1. NEXT_PUBLIC_MAL_CLIENT_ID is set in Vercel environment variables\n';
+          errorMessage += '2. The value matches your MAL app Client ID exactly\n';
+          errorMessage += '3. You have redeployed after setting the environment variable\n';
+          errorMessage += '4. The Client ID is correct in your MAL app settings at https://myanimelist.net/apiconfig';
         } else if (response.status === 500) {
-          if (errorData?.message?.includes('CLIENT_ID')) {
-            errorMessage = 'Server configuration error: CLIENT_ID is not set. Please configure NEXT_PUBLIC_MAL_CLIENT_ID in Vercel.';
+          if (errorData?.message?.includes('CLIENT_ID') || errorData?.error_description?.includes('CLIENT_ID')) {
+            errorMessage = 'Server configuration error: CLIENT_ID is not set.\n\n';
+            errorMessage += 'Please:\n';
+            errorMessage += '1. Go to Vercel project settings → Environment Variables\n';
+            errorMessage += '2. Add NEXT_PUBLIC_MAL_CLIENT_ID with your MAL Client ID\n';
+            errorMessage += '3. Redeploy your application';
           } else {
             errorMessage += '\n\nServer error. Please try again later.';
           }
