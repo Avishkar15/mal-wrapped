@@ -788,17 +788,17 @@ export default function MALWrapped() {
             <h2 className="body-lg font-semibold uppercase text-white/80 mt-2 sm:mt-3 animate-fade-slide-up whitespace-nowrap">
               The {type === 'anime' ? 'series' : 'manga'} you rated the highest.
             </h2>
-            <div className="mt-2 flex flex-col gap-3 w-full">
+            <div className="mt-2 flex flex-col gap-3 w-full max-w-full">
               {(() => {
                 const [featured, ...others] = top5Formatted;
                 return (
                   <>
-                    <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00]/50 flex flex-row relative w-full">
-                      <div className="absolute top-2.5 right-2.5 z-10 w-7 h-7 sm:w-9 sm:h-9 bg-black text-white rounded-full flex items-center justify-center font-bold text-sm sm:text-xl">1</div>
+                    <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00]/50 flex flex-col sm:flex-row relative w-full">
+                      <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-9 md:h-9 bg-black text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm md:text-xl">1</div>
                       {(() => {
                         const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                         const featuredImage = (
-                          <div className="w-20 sm:w-28 md:w-36 flex-shrink-0 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
+                          <div className="w-24 sm:w-28 md:w-36 mx-auto sm:mx-0 flex-shrink-0 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
                             {featured.coverImage && (
                               <img src={featured.coverImage} crossOrigin="anonymous" alt={featured.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
                             )}
@@ -810,17 +810,17 @@ export default function MALWrapped() {
                           </a>
                         ) : featuredImage;
                       })()}
-                      <div className="p-2 sm:p-3 flex flex-col justify-center flex-grow min-w-0">
-                        <p className="text-xs sm:text-base uppercase tracking-widest text-[#9EFF00] font-bold">#1 Favorite</p>
-                        <h3 className="font-bold text-white text-sm sm:text-lg md:text-xl mt-1 leading-tight truncate">{featured.title}</h3>
+                      <div className="p-2 sm:p-3 flex flex-col justify-center flex-grow min-w-0 text-center sm:text-left">
+                        <p className="text-xs sm:text-sm md:text-base uppercase tracking-widest text-[#9EFF00] font-bold">#1 Favorite</p>
+                        <h3 className="font-bold text-white text-sm sm:text-base md:text-xl mt-1 leading-tight truncate">{featured.title}</h3>
                         {featured.studio && <p className="text-xs sm:text-sm md:text-base text-[#9EFF00] truncate">{featured.studio}</p>}
                         {featured.author && <p className="text-xs sm:text-sm md:text-base text-[#9EFF00] truncate">{featured.author}</p>}
-                        <div className="flex items-center text-sm sm:text-base md:text-lg text-yellow-300 mt-1 sm:mt-2">
+                        <div className="flex items-center justify-center sm:justify-start text-sm sm:text-base md:text-lg text-yellow-300 mt-1 sm:mt-2">
                           <span className="mr-1 sm:mr-2">★</span>
                           <span>{featured.userRating.toFixed(1)} / 10</span>
                         </div>
                         {featured.genres.length > 0 && (
-                          <div className="mt-1 sm:mt-2 flex flex-wrap gap-1 sm:gap-2">
+                          <div className="mt-1 sm:mt-2 flex flex-wrap gap-1 sm:gap-2 justify-center sm:justify-start">
                             {featured.genres.slice(0, 2).map(g => (
                               <span key={g} className="text-xs sm:text-sm uppercase tracking-wider bg-white/10 text-white/80 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">{g}</span>
                             ))}
@@ -835,7 +835,7 @@ export default function MALWrapped() {
                           const itemContent = (
                             <div className="flex flex-col w-full">
                               <div className="bg-transparent border border-white/10 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2 w-full" style={{ boxSizing: 'border-box' }}>
-                                <div className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 z-10 w-5 h-5 sm:w-7 sm:h-7 bg-black text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">{index + 2}</div>
+                                <div className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 z-10 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 bg-black text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">{index + 2}</div>
                                 {item.coverImage && (
                                   <img src={item.coverImage} alt={item.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
                                 )}
