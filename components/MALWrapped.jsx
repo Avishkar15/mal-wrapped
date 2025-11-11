@@ -30,8 +30,9 @@ function base64urlencode(a) {
 }
 
 async function pkceChallenge(verifier) {
-  const hashed = await sha256(verifier);
-  return base64urlencode(hashed);
+  // MAL API only supports 'plain' method, not S256
+  // For plain method, code_challenge is the code_verifier itself
+  return verifier;
 }
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
@@ -648,7 +649,7 @@ export default function MALWrapped() {
         client_id: CLIENT_ID,
         redirect_uri: redirectUri,
         code_challenge: challenge,
-        code_challenge_method: 'S256',
+        code_challenge_method: 'plain',
       });
 
       window.location.href = `${AUTH_URL}?${params.toString()}`;
