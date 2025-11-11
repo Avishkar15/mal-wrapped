@@ -986,7 +986,7 @@ export default function MALWrapped() {
               const malUrl = getMALUrl(item);
               const content = (
                 <div className="flex flex-col flex-shrink-0">
-                  <div className="aspect-[2/3] w-28 sm:w-32 md:w-40 bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#9EFF00] group-hover:border-2">
+                  <div className="aspect-[2/3] w-28 sm:w-32 md:w-40 bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#9EFF00] group-hover:border-2" style={{ maxHeight: '270px', boxSizing: 'border-box' }}>
                     {item.coverImage && (
                       <img 
                         src={item.coverImage} 
