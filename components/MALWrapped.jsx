@@ -896,7 +896,8 @@ export default function MALWrapped() {
       const [isHovered, setIsHovered] = useState(false);
       const [hoveredItem, setHoveredItem] = useState(null);
       const [scrollPosition, setScrollPosition] = useState(0);
-      const [gapSize, setGapSize] = useState('4px');
+      const [gapSize, setGapSize] = useState('2px');
+      const [itemsPerView, setItemsPerView] = useState(3);
       
       // Deduplicate items by title to prevent repeats
       const uniqueItemsMap = new Map();
@@ -908,21 +909,27 @@ export default function MALWrapped() {
       });
       const uniqueItems = Array.from(uniqueItemsMap.values());
       const visibleItems = uniqueItems.slice(0, maxItems);
-      const itemsPerView = 5;
-      const itemWidth = 100 / itemsPerView;
       
       // Duplicate items for infinite loop
       const duplicatedItems = [...visibleItems, ...visibleItems, ...visibleItems];
       
-      // Update gap size based on screen width
+      // Update gap size and items per view based on screen width
       useEffect(() => {
-        const updateGap = () => {
-          setGapSize(window.innerWidth >= 768 ? '2px' : '4px');
+        const updateResponsive = () => {
+          if (window.innerWidth >= 768) {
+            setGapSize('2px');
+            setItemsPerView(5);
+          } else {
+            setGapSize('2px');
+            setItemsPerView(3);
+          }
         };
-        updateGap();
-        window.addEventListener('resize', updateGap);
-        return () => window.removeEventListener('resize', updateGap);
+        updateResponsive();
+        window.addEventListener('resize', updateResponsive);
+        return () => window.removeEventListener('resize', updateResponsive);
       }, []);
+      
+      const itemWidth = 100 / itemsPerView;
       
       useEffect(() => {
         if (visibleItems.length <= itemsPerView || isHovered) return;
