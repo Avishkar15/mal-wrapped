@@ -93,14 +93,16 @@ export default function MALWrapped() {
     { id: 'drumroll_anime' },
     { id: 'top_studio' },
     { id: 'seasonal_highlights' },
-    { id: 'hidden_gems_didnt_land_anime' },
+    { id: 'hidden_gems_anime' },
+    { id: 'didnt_land_anime' },
     { id: 'planned_anime' },
     { id: 'manga_count' },
     { id: 'manga_time' },
     { id: 'top_manga_genre' },
     { id: 'drumroll_manga' },
     { id: 'top_author' },
-    { id: 'hidden_gems_didnt_land_manga' },
+    { id: 'hidden_gems_manga' },
+    { id: 'didnt_land_manga' },
     { id: 'planned_manga' },
     { id: 'finale' },
   ] : [];
@@ -356,7 +358,7 @@ export default function MALWrapped() {
       .filter(item => item.list_status?.status === 'plan_to_watch')
       .slice(0, 5);
 
-    // Hidden gems (high rating, low popularity)
+    // Hidden gems (high rating, low popularity) - 3 items
     const hiddenGems = completedAnime
       .filter(item => {
         const score = item.list_status.score;
@@ -369,7 +371,7 @@ export default function MALWrapped() {
         }
         return (a.node?.num_list_users || 0) - (b.node?.num_list_users || 0);
       })
-      .slice(0, 5);
+      .slice(0, 3);
 
     // Watch time calculation (from filtered anime)
     const totalEpisodes = thisYearAnime.reduce((sum, item) => 
@@ -473,6 +475,21 @@ export default function MALWrapped() {
       .sort((a, b) => a.list_status.score - b.list_status.score)
       .slice(0, 5);
     
+    // Hidden gems manga (high rating, low popularity) - 3 items
+    const hiddenGemsManga = completedManga
+      .filter(item => {
+        const score = item.list_status.score;
+        const popularity = item.node?.num_list_users || 0;
+        return score >= 8 && popularity < 100000;
+      })
+      .sort((a, b) => {
+        if (b.list_status.score !== a.list_status.score) {
+          return b.list_status.score - a.list_status.score;
+        }
+        return (a.node?.num_list_users || 0) - (b.node?.num_list_users || 0);
+      })
+      .slice(0, 3);
+    
     // Planned to read
     const plannedManga = filteredManga
       .filter(item => item.list_status?.status === 'plan_to_read')
@@ -521,6 +538,7 @@ export default function MALWrapped() {
       topStudios: topStudios.length > 0 ? topStudios : [],
       topRated: topRated.length > 0 ? topRated : [],
       hiddenGems: hiddenGems.length > 0 ? hiddenGems : [],
+      hiddenGemsManga: hiddenGemsManga.length > 0 ? hiddenGemsManga : [],
       watchTime: totalHours,
       watchDays: Math.floor(totalHours / 24),
       completedCount: completedAnime.length,
@@ -567,14 +585,20 @@ export default function MALWrapped() {
     
     setIsCapturing(true);
     try {
-      // Wait for all animations to complete and settle
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for all animations to complete - longer wait to ensure everything is settled
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Stop all animations on the actual element before capturing
+      const cardElement = slideRef.current;
+      const originalStyle = cardElement.getAttribute('style') || '';
+      cardElement.style.animation = 'none';
+      cardElement.style.transition = 'none';
+      
+      // Wait a bit more for style changes to apply
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       // Dynamically import html2canvas
       const html2canvas = (await import('html2canvas')).default;
-      
-      // Get the main card container
-      const cardElement = slideRef.current;
       
       // Capture the entire card with final positions
       const canvas = await html2canvas(cardElement, {
@@ -584,6 +608,13 @@ export default function MALWrapped() {
         useCORS: true,
         allowTaint: false,
         removeContainer: false,
+        ignoreElements: (element) => {
+          // Ignore elements that are animating
+          return element.classList?.contains('animate-pop-in') || 
+                 element.classList?.contains('animate-fade-in') ||
+                 element.style?.animation !== '' ||
+                 element.style?.transition !== '';
+        },
         onclone: (clonedDoc, element) => {
           // Stop all animations and transitions in cloned document
           const style = clonedDoc.createElement('style');
@@ -592,8 +623,10 @@ export default function MALWrapped() {
               animation: none !important;
               transition: none !important;
               transform: none !important;
+              animation-delay: 0 !important;
+              transition-delay: 0 !important;
             }
-            .slide-card {
+            .slide-card, .slide-card * {
               transform: none !important;
               position: relative !important;
               top: 0 !important;
@@ -609,7 +642,7 @@ export default function MALWrapped() {
           `;
           clonedDoc.head.appendChild(style);
           
-          // Reset all transforms and positions
+          // Reset all transforms, positions, and animations
           const allElements = clonedDoc.querySelectorAll('*');
           allElements.forEach(el => {
             if (el.style) {
@@ -617,6 +650,14 @@ export default function MALWrapped() {
               el.style.position = 'static';
               el.style.top = 'auto';
               el.style.left = 'auto';
+              el.style.animation = 'none';
+              el.style.transition = 'none';
+              el.style.animationDelay = '0';
+              el.style.transitionDelay = '0';
+            }
+            // Remove animation classes
+            if (el.classList) {
+              el.classList.remove('animate-pop-in', 'animate-fade-in', 'animation-delay-100', 'animation-delay-200', 'animation-delay-300', 'animation-delay-400', 'animation-delay-500', 'animation-delay-600', 'animation-delay-700');
             }
           });
           
@@ -629,6 +670,13 @@ export default function MALWrapped() {
           });
         },
       });
+      
+      // Restore original style
+      if (originalStyle) {
+        cardElement.setAttribute('style', originalStyle);
+      } else {
+        cardElement.removeAttribute('style');
+      }
       
       const link = document.createElement('a');
       link.download = `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`;
@@ -737,7 +785,7 @@ export default function MALWrapped() {
           <div className="text-center relative overflow-hidden animate-pop-in">
             <h1 className="text-3xl md:text-4xl font-bold uppercase text-[#9EFF00] mb-6">Your #1 Favorite</h1>
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8">
-              <div className="w-32 md:w-48 aspect-[2/3] bg-black/50 border-2 border-[#9EFF00] rounded-lg overflow-hidden group transition-all duration-300" style={{ boxSizing: 'border-box' }}>
+              <div className="w-32 md:w-48 aspect-[2/3] bg-transparent border-2 border-[#9EFF00] rounded-lg overflow-hidden group transition-all duration-300" style={{ boxSizing: 'border-box' }}>
                 {topItem.node?.main_picture?.large && (
                   <img 
                     src={topItem.node.main_picture.large} 
@@ -779,7 +827,7 @@ export default function MALWrapped() {
                   <>
                     <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00]/50 flex flex-row relative">
                       <div className="absolute top-2.5 right-2.5 z-10 w-9 h-9 bg-black text-white rounded-full flex items-center justify-center font-bold text-xl">1</div>
-                      <div className="w-32 md:w-40 flex-shrink-0 aspect-[2/3] bg-black/50 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
+                      <div className="w-32 md:w-40 flex-shrink-0 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
                         {featured.coverImage && (
                           <img src={featured.coverImage} crossOrigin="anonymous" alt={featured.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
                         )}
@@ -806,7 +854,7 @@ export default function MALWrapped() {
                       <div className="grid grid-cols-4 gap-2 md:gap-3">
                         {others.map((item, index) => (
                           <div key={item.id}>
-                            <div className="bg-black/50 border border-white/10 rounded-lg overflow-hidden group aspect-[4/5] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
+                            <div className="bg-transparent border border-white/10 rounded-lg overflow-hidden group aspect-[4/5] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
                                 <div className="absolute top-1.5 right-1.5 z-10 w-7 h-7 bg-black text-white rounded-full flex items-center justify-center font-bold text-base">{index + 2}</div>
                                 {item.coverImage && (
                                   <img src={item.coverImage} alt={item.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
@@ -912,7 +960,7 @@ export default function MALWrapped() {
                 onMouseEnter={() => showHover && setHoveredItem(idx % visibleItems.length)}
                 onMouseLeave={() => showHover && setHoveredItem(null)}
               >
-                <div className={`mx-1 aspect-[2/3] bg-black/50 border border-white/10 rounded-lg overflow-hidden transition-all duration-300 ${showHover ? 'group-hover:border-[#9EFF00] group-hover:border-2' : ''}`} style={{ boxSizing: 'border-box' }}>
+                <div className={`mx-1 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 ${showHover ? 'group-hover:border-[#9EFF00] group-hover:border-2' : ''}`} style={{ boxSizing: 'border-box' }}>
                   {item.coverImage && (
                     <img 
                       src={item.coverImage} 
@@ -922,7 +970,7 @@ export default function MALWrapped() {
                     />
                   )}
                   {showHover && hoveredItem === (idx % visibleItems.length) && item.title && (
-                    <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-2 z-10 transition-opacity duration-300">
+                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center p-2 z-10 transition-opacity duration-300 rounded-lg">
                       <p className="text-white text-sm font-bold text-center leading-tight">{item.title}</p>
                       {item.userRating && (
                         <div className="absolute bottom-2 right-2 text-yellow-300 text-xs font-bold">
@@ -965,7 +1013,7 @@ export default function MALWrapped() {
 
     const MediaCard = ({ item, rank }) => (
       <div className="flex flex-col group">
-        <div className="bg-black/50 border border-white/10 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
+        <div className="bg-transparent border border-white/10 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
           {rank && (
             <div className="absolute top-2 right-2 z-10 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg">
               {rank}
@@ -1173,7 +1221,7 @@ export default function MALWrapped() {
                     {highlight && (
                       <>
                         <div className="flex gap-3 mb-3">
-                          <div className="w-16 aspect-[2/3] bg-black/50 border border-white/10 rounded overflow-hidden flex-shrink-0 group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
+                          <div className="w-16 aspect-[2/3] bg-transparent border border-white/10 rounded overflow-hidden flex-shrink-0 group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
                             {highlight.node?.main_picture?.large && (
                               <img src={highlight.node.main_picture.large} alt={highlight.node.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded transition-transform duration-300 group-hover:scale-110" />
                             )}
@@ -1198,7 +1246,7 @@ export default function MALWrapped() {
           </SlideLayout>
         );
 
-      case 'hidden_gems_didnt_land_anime':
+      case 'hidden_gems_anime':
         const gems = stats.hiddenGems.slice(0, 3).map(item => ({
           id: item.node.id,
           title: item.node.title,
@@ -1207,7 +1255,41 @@ export default function MALWrapped() {
           studio: item.node.studios?.[0]?.name || '',
           genres: item.node.genres?.map(g => g.name) || []
         }));
-        const didntLand = stats.lowestRatedAnime.slice(0, 3).map(item => ({
+        return (
+          <SlideLayout verticalText="HIDDEN-GEMS">
+            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in">
+              Hidden Gems
+            </h1>
+            <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in">
+              High-rated anime with low popularity
+            </h2>
+            {gems.length > 0 ? (
+              <div className="mt-6 space-y-3 animate-pop-in">
+                {gems.map((item, idx) => (
+                  <div key={item.id} className="flex gap-3">
+                    <div className="w-16 md:w-20 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
+                      {item.coverImage && (
+                        <img src={item.coverImage} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <h3 className="font-bold text-white text-sm md:text-base leading-tight truncate">{item.title}</h3>
+                      <div className="flex items-center text-sm md:text-base text-yellow-300 mt-1">
+                        <span className="mr-1 shrink-0">★</span>
+                        <span>{item.userRating.toFixed(1)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-8 text-center text-white/50 animate-pop-in">No hidden gems found</div>
+            )}
+          </SlideLayout>
+        );
+
+      case 'didnt_land_anime':
+        const didntLand = stats.lowestRatedAnime.slice(0, 5).map(item => ({
           id: item.node.id,
           title: item.node.title,
           coverImage: item.node.main_picture?.large || item.node.main_picture?.medium || '',
@@ -1216,66 +1298,35 @@ export default function MALWrapped() {
           genres: item.node.genres?.map(g => g.name) || []
         }));
         return (
-          <SlideLayout verticalText="MIXED-BAG">
-            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100">
-              Hidden Gems & Didn't Land
+          <SlideLayout verticalText="DIDNT-LAND">
+            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in">
+              Didn't Land
             </h1>
-            <div className="mt-6 grid grid-cols-2 gap-6 animate-pop-in animation-delay-200">
-              <div>
-                <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mb-4">
-                  Hidden Gems
-                </h2>
-                {gems.length > 0 ? (
-                  <div className="space-y-3">
-                    {gems.map((item, idx) => (
-                      <div key={item.id} className="flex gap-3">
-                        <div className="w-16 md:w-20 aspect-[2/3] bg-black/50 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
-                          {item.coverImage && (
-                            <img src={item.coverImage} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0 text-left">
-                          <h3 className="font-bold text-white text-sm md:text-base leading-tight truncate">{item.title}</h3>
-                          <div className="flex items-center text-sm md:text-base text-yellow-300 mt-1">
-                            <span className="mr-1 shrink-0">★</span>
-                            <span>{item.userRating.toFixed(1)}</span>
-                          </div>
-                        </div>
+            <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in">
+              5 shows you rated the lowest
+            </h2>
+            {didntLand.length > 0 ? (
+              <div className="mt-6 space-y-3 animate-pop-in">
+                {didntLand.map((item, idx) => (
+                  <div key={item.id} className="flex gap-3">
+                    <div className="w-16 md:w-20 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
+                      {item.coverImage && (
+                        <img src={item.coverImage} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <h3 className="font-bold text-white text-sm md:text-base leading-tight truncate">{item.title}</h3>
+                      <div className="flex items-center text-sm md:text-base text-yellow-300 mt-1">
+                        <span className="mr-1 shrink-0">★</span>
+                        <span>{item.userRating.toFixed(1)}</span>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center text-white/50">No hidden gems found</div>
-                )}
+                ))}
               </div>
-              <div>
-                <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mb-4">
-                  Didn't Land
-                </h2>
-                {didntLand.length > 0 ? (
-                  <div className="space-y-3">
-                    {didntLand.map((item, idx) => (
-                      <div key={item.id} className="flex gap-3">
-                        <div className="w-16 md:w-20 aspect-[2/3] bg-black/50 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
-                          {item.coverImage && (
-                            <img src={item.coverImage} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0 text-left">
-                          <h3 className="font-bold text-white text-sm md:text-base leading-tight truncate">{item.title}</h3>
-                          <div className="flex items-center text-sm md:text-base text-yellow-300 mt-1">
-                            <span className="mr-1 shrink-0">★</span>
-                            <span>{item.userRating.toFixed(1)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center text-white/50">No data available</div>
-                )}
-              </div>
-            </div>
+            ) : (
+              <div className="mt-8 text-center text-white/50 animate-pop-in">No data available</div>
+            )}
           </SlideLayout>
         );
 
@@ -1293,11 +1344,11 @@ export default function MALWrapped() {
               5 shows you plan to watch {stats.selectedYear === 'all' ? '' : 'this year'}.
             </h2>
             {plannedAnimeItems.length > 0 ? (
-              <div className="mt-6">
+              <div className="mt-6 animate-pop-in">
                 <ImageCarousel items={plannedAnimeItems} maxItems={10} showHover={true} showNames={true} />
               </div>
             ) : (
-              <div className="mt-8 text-center text-white/50">No planned anime found</div>
+              <div className="mt-8 text-center text-white/50 animate-pop-in">No planned anime found</div>
             )}
           </SlideLayout>
         );
@@ -1529,40 +1580,8 @@ export default function MALWrapped() {
           </SlideLayout>
         );
 
-      case 'hidden_gems_didnt_land_manga':
-        // Calculate hidden gems for manga (high rating, low popularity)
-        const mangaHiddenGems = (mangaListData || []).filter(item => {
-          if (stats.selectedYear !== 'all') {
-            const finishDate = item.list_status?.finish_date;
-            const startDate = item.list_status?.start_date;
-            const updatedAt = item.list_status?.updated_at;
-            let dateToCheck = finishDate || startDate || updatedAt;
-            if (!dateToCheck) return false;
-            try {
-              const year = new Date(dateToCheck).getFullYear();
-              if (year !== stats.selectedYear) return false;
-            } catch (e) {
-              return false;
-            }
-          }
-          const status = item.list_status?.status;
-          const score = item.list_status?.score;
-          const popularity = item.node?.num_list_users || 0;
-          return (status === 'completed' || status === 'reading') && score && score >= 8 && popularity < 100000;
-        }).sort((a, b) => {
-          if (b.list_status.score !== a.list_status.score) {
-            return b.list_status.score - a.list_status.score;
-          }
-          return (a.node?.num_list_users || 0) - (b.node?.num_list_users || 0);
-        }).slice(0, 3).map(item => ({
-          id: item.node.id,
-          title: item.node.title,
-          coverImage: item.node.main_picture?.large || item.node.main_picture?.medium || '',
-          userRating: item.list_status.score,
-          author: item.node.authors?.[0] ? `${item.node.authors[0].node?.first_name || ''} ${item.node.authors[0].node?.last_name || ''}`.trim() : '',
-          genres: item.node.genres?.map(g => g.name) || []
-        }));
-        const mangaDidntLand = stats.lowestRatedManga.slice(0, 3).map(item => ({
+      case 'hidden_gems_manga':
+        const mangaGems = stats.hiddenGemsManga.slice(0, 3).map(item => ({
           id: item.node.id,
           title: item.node.title,
           coverImage: item.node.main_picture?.large || item.node.main_picture?.medium || '',
@@ -1571,66 +1590,77 @@ export default function MALWrapped() {
           genres: item.node.genres?.map(g => g.name) || []
         }));
         return (
-          <SlideLayout verticalText="MIXED-BAG">
-            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in animation-delay-100">
-              Hidden Gems & Didn't Land
+          <SlideLayout verticalText="HIDDEN-GEMS">
+            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in">
+              Hidden Gems
             </h1>
-            <div className="mt-6 grid grid-cols-2 gap-6 animate-pop-in animation-delay-200">
-              <div>
-                <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mb-4">
-                  Hidden Gems
-                </h2>
-                {mangaHiddenGems.length > 0 ? (
-                  <div className="space-y-3">
-                    {mangaHiddenGems.map((item, idx) => (
-                      <div key={item.id} className="flex gap-3">
-                        <div className="w-16 md:w-20 aspect-[2/3] bg-black/50 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
-                          {item.coverImage && (
-                            <img src={item.coverImage} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0 text-left">
-                          <h3 className="font-bold text-white text-sm md:text-base leading-tight truncate">{item.title}</h3>
-                          <div className="flex items-center text-sm md:text-base text-yellow-300 mt-1">
-                            <span className="mr-1 shrink-0">★</span>
-                            <span>{item.userRating.toFixed(1)}</span>
-                          </div>
-                        </div>
+            <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in">
+              High-rated manga with low popularity
+            </h2>
+            {mangaGems.length > 0 ? (
+              <div className="mt-6 space-y-3 animate-pop-in">
+                {mangaGems.map((item, idx) => (
+                  <div key={item.id} className="flex gap-3">
+                    <div className="w-16 md:w-20 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
+                      {item.coverImage && (
+                        <img src={item.coverImage} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <h3 className="font-bold text-white text-sm md:text-base leading-tight truncate">{item.title}</h3>
+                      <div className="flex items-center text-sm md:text-base text-yellow-300 mt-1">
+                        <span className="mr-1 shrink-0">★</span>
+                        <span>{item.userRating.toFixed(1)}</span>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center text-white/50">No hidden gems found</div>
-                )}
+                ))}
               </div>
-              <div>
-                <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mb-4">
-                  Didn't Land
-                </h2>
-                {mangaDidntLand.length > 0 ? (
-                  <div className="space-y-3">
-                    {mangaDidntLand.map((item, idx) => (
-                      <div key={item.id} className="flex gap-3">
-                        <div className="w-16 md:w-20 aspect-[2/3] bg-black/50 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
-                          {item.coverImage && (
-                            <img src={item.coverImage} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0 text-left">
-                          <h3 className="font-bold text-white text-sm md:text-base leading-tight truncate">{item.title}</h3>
-                          <div className="flex items-center text-sm md:text-base text-yellow-300 mt-1">
-                            <span className="mr-1 shrink-0">★</span>
-                            <span>{item.userRating.toFixed(1)}</span>
-                          </div>
-                        </div>
+            ) : (
+              <div className="mt-8 text-center text-white/50 animate-pop-in">No hidden gems found</div>
+            )}
+          </SlideLayout>
+        );
+
+      case 'didnt_land_manga':
+        const mangaDidntLand = stats.lowestRatedManga.slice(0, 5).map(item => ({
+          id: item.node.id,
+          title: item.node.title,
+          coverImage: item.node.main_picture?.large || item.node.main_picture?.medium || '',
+          userRating: item.list_status.score,
+          author: item.node.authors?.[0] ? `${item.node.authors[0].node?.first_name || ''} ${item.node.authors[0].node?.last_name || ''}`.trim() : '',
+          genres: item.node.genres?.map(g => g.name) || []
+        }));
+        return (
+          <SlideLayout verticalText="DIDNT-LAND">
+            <h1 className="relative z-10 text-[2.5rem] md:text-[3.25rem] leading-tight font-bold uppercase tracking-widest text-[#9EFF00] border-b-2 border-[#9EFF00] pb-2 px-2 inline-block animate-pop-in">
+              Didn't Land
+            </h1>
+            <h2 className="text-xl md:text-2xl font-semibold uppercase tracking-wider text-white/80 mt-3 animate-pop-in">
+              5 manga you rated the lowest
+            </h2>
+            {mangaDidntLand.length > 0 ? (
+              <div className="mt-6 space-y-3 animate-pop-in">
+                {mangaDidntLand.map((item, idx) => (
+                  <div key={item.id} className="flex gap-3">
+                    <div className="w-16 md:w-20 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2 flex-shrink-0" style={{ boxSizing: 'border-box' }}>
+                      {item.coverImage && (
+                        <img src={item.coverImage} crossOrigin="anonymous" alt={item.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <h3 className="font-bold text-white text-sm md:text-base leading-tight truncate">{item.title}</h3>
+                      <div className="flex items-center text-sm md:text-base text-yellow-300 mt-1">
+                        <span className="mr-1 shrink-0">★</span>
+                        <span>{item.userRating.toFixed(1)}</span>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center text-white/50">No data available</div>
-                )}
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="mt-8 text-center text-white/50 animate-pop-in">No data available</div>
+            )}
           </SlideLayout>
         );
 
@@ -1648,11 +1678,11 @@ export default function MALWrapped() {
               5 manga you plan to read {stats.selectedYear === 'all' ? '' : 'this year'}.
             </h2>
             {plannedMangaItems.length > 0 ? (
-              <div className="mt-6">
+              <div className="mt-6 animate-pop-in">
                 <ImageCarousel items={plannedMangaItems} maxItems={10} showHover={true} showNames={true} />
               </div>
             ) : (
-              <div className="mt-8 text-center text-white/50">No planned manga found</div>
+              <div className="mt-8 text-center text-white/50 animate-pop-in">No planned manga found</div>
             )}
           </SlideLayout>
         );
