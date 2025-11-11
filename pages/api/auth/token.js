@@ -1,36 +1,22 @@
 export default async function handler(req, res) {
-  // Set CORS headers first
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { code, code_verifier, redirect_uri } = req.body;
+  const { code, code_verifier } = req.body;
 
-  if (!code || !code_verifier || !redirect_uri) {
-    return res.status(400).json({ 
-      error: 'Missing required parameters',
-      required: ['code', 'code_verifier', 'redirect_uri']
-    });
+  if (!code || !code_verifier) {
+    return res.status(400).json({ error: 'Missing code or code_verifier' });
   }
 
   const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
+  const CLIENT_SECRET = process.env.MAL_CLIENT_SECRET;
 
-  if (!CLIENT_ID) {
-    console.error('CLIENT_ID is not set in environment variables');
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    console.error('Missing CLIENT_ID or CLIENT_SECRET');
     return res.status(500).json({ 
       error: 'Server configuration error',
-      error_description: 'CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID in Vercel environment variables.',
-      message: 'CLIENT_ID is not configured'
+      message: 'CLIENT_ID or CLIENT_SECRET not configured'
     });
   }
 
@@ -39,10 +25,10 @@ export default async function handler(req, res) {
     
     const formData = new URLSearchParams({
       client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
       code: code,
       code_verifier: code_verifier,
-      grant_type: 'authorization_code',
-      redirect_uri: redirect_uri
+      grant_type: 'authorization_code'
     });
 
     const response = await fetch('https://myanimelist.net/v1/oauth2/token', {
