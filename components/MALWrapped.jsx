@@ -798,7 +798,7 @@ export default function MALWrapped() {
                       {(() => {
                         const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                         const featuredImage = (
-                          <div className="flex-shrink-0 bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxWidth: '300px' }}>
+                          <div className="flex-shrink-0 bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '300px' }}>
                             {featured.coverImage && (
                               <img src={featured.coverImage} crossOrigin="anonymous" alt={featured.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
                             )}
@@ -834,7 +834,7 @@ export default function MALWrapped() {
                           const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                           const itemContent = (
                             <div className="flex flex-col w-full min-w-0">
-                              <div className="bg-transparent border border-white/10 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2 w-full" style={{ boxSizing: 'border-box', maxWidth: '300px' }}>
+                              <div className="bg-transparent border border-white/10 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2 w-full" style={{ boxSizing: 'border-box', maxHeight: '300px' }}>
                                 <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-4 h-4 sm:w-5 sm:h-5 bg-black text-white rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs">{index + 2}</div>
                                 {item.coverImage && (
                                   <img src={item.coverImage} alt={item.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
