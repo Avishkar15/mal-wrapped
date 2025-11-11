@@ -793,12 +793,12 @@ export default function MALWrapped() {
                 const [featured, ...others] = top5Formatted;
                 return (
                   <>
-                    <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00]/50 flex flex-row relative w-full">
+                    <div className="bg-white/5 border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00]/50 flex flex-row relative w-full h-20 sm:h-24 md:h-28">
                       <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 bg-black text-white rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs md:text-sm">1</div>
                       {(() => {
                         const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                         const featuredImage = (
-                          <div className="w-16 sm:w-20 md:w-24 flex-shrink-0 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
+                          <div className="h-full aspect-[2/3] flex-shrink-0 bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
                             {featured.coverImage && (
                               <img src={featured.coverImage} crossOrigin="anonymous" alt={featured.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
                             )}
@@ -829,12 +829,12 @@ export default function MALWrapped() {
                       </div>
                     </div>
                     {others.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-1.5 sm:gap-2 w-full">
+                      <div className="grid grid-cols-4 gap-1.5 sm:gap-2 w-full">
                         {others.map((item, index) => {
                           const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                           const itemContent = (
-                            <div className="flex flex-col w-full min-w-0">
-                              <div className="bg-transparent border border-white/10 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2 w-full" style={{ boxSizing: 'border-box' }}>
+                            <div className="flex flex-col w-full min-w-0 h-20 sm:h-24 md:h-28">
+                              <div className="bg-transparent border border-white/10 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2 w-full h-full" style={{ boxSizing: 'border-box' }}>
                                 <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-4 h-4 sm:w-5 sm:h-5 bg-black text-white rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs">{index + 2}</div>
                                 {item.coverImage && (
                                   <img src={item.coverImage} alt={item.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
