@@ -898,6 +898,7 @@ export default function MALWrapped() {
       const [scrollPosition, setScrollPosition] = useState(0);
       const [gapSize, setGapSize] = useState('2px');
       const [itemsPerView, setItemsPerView] = useState(3);
+      const [maxHeight, setMaxHeight] = useState(null);
       
       // Deduplicate items by title to prevent repeats
       const uniqueItemsMap = new Map();
@@ -919,9 +920,11 @@ export default function MALWrapped() {
           if (window.innerWidth >= 768) {
             setGapSize('2px');
             setItemsPerView(5);
+            setMaxHeight('270px');
           } else {
             setGapSize('2px');
             setItemsPerView(3);
+            setMaxHeight(null);
           }
         };
         updateResponsive();
@@ -986,7 +989,7 @@ export default function MALWrapped() {
               const malUrl = getMALUrl(item);
               const content = (
                 <div className="flex flex-col flex-shrink-0">
-                  <div className="aspect-[2/3] w-28 sm:w-32 md:w-40 bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#9EFF00] group-hover:border-2" style={{ maxHeight: '270px', boxSizing: 'border-box' }}>
+                  <div className="aspect-[2/3] w-28 sm:w-32 md:w-40 bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#9EFF00] group-hover:border-2" style={{ ...(maxHeight && { maxHeight }), boxSizing: 'border-box' }}>
                     {item.coverImage && (
                       <img 
                         src={item.coverImage} 
