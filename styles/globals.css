@@ -12,6 +12,10 @@
     font-family: 'Hanken Grotesk', sans-serif;
     color: #ffffff;
   }
+  
+  img {
+    @apply inline-block;
+  }
 }
 
 @layer components {
@@ -194,15 +198,39 @@
     }
   }
   
-  /* Staggered animation delays for left-to-right effect */
-  .stagger-1 { animation-delay: 0.1s; opacity: 0; }
-  .stagger-2 { animation-delay: 0.2s; opacity: 0; }
-  .stagger-3 { animation-delay: 0.3s; opacity: 0; }
-  .stagger-4 { animation-delay: 0.4s; opacity: 0; }
-  .stagger-5 { animation-delay: 0.5s; opacity: 0; }
-  .stagger-6 { animation-delay: 0.6s; opacity: 0; }
-  .stagger-7 { animation-delay: 0.7s; opacity: 0; }
-  .stagger-8 { animation-delay: 0.8s; opacity: 0; }
+  /* Staggered animation delays for left-to-right, top-to-bottom effect */
+  .stagger-1 { 
+    animation: fade-slide-up 0.6s ease-out 0.1s forwards;
+    opacity: 0;
+  }
+  .stagger-2 { 
+    animation: fade-slide-up 0.6s ease-out 0.2s forwards;
+    opacity: 0;
+  }
+  .stagger-3 { 
+    animation: fade-slide-up 0.6s ease-out 0.3s forwards;
+    opacity: 0;
+  }
+  .stagger-4 { 
+    animation: fade-slide-up 0.6s ease-out 0.4s forwards;
+    opacity: 0;
+  }
+  .stagger-5 { 
+    animation: fade-slide-up 0.6s ease-out 0.5s forwards;
+    opacity: 0;
+  }
+  .stagger-6 { 
+    animation: fade-slide-up 0.6s ease-out 0.6s forwards;
+    opacity: 0;
+  }
+  .stagger-7 { 
+    animation: fade-slide-up 0.6s ease-out 0.7s forwards;
+    opacity: 0;
+  }
+  .stagger-8 { 
+    animation: fade-slide-up 0.6s ease-out 0.8s forwards;
+    opacity: 0;
+  }
   
   /* When capturing, remove stagger delays and show all */
   .slide-card.capturing .stagger-1,
@@ -213,8 +241,9 @@
   .slide-card.capturing .stagger-6,
   .slide-card.capturing .stagger-7,
   .slide-card.capturing .stagger-8 {
-    animation-delay: 0s !important;
+    animation: none !important;
     opacity: 1 !important;
+    transform: translateY(0) !important;
   }
 
   .animate-slide-in {
