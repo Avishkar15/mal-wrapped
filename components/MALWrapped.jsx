@@ -473,10 +473,17 @@ export default function MALWrapped() {
       .slice(0, 5);
     
     // Lowest rated manga (6 or below)
-    const lowestRatedManga = completedManga
+    const lowestRatedMangaRaw = completedManga
       .filter(item => item.list_status.score > 0 && item.list_status.score <= 6)
-      .sort((a, b) => a.list_status.score - b.list_status.score)
-      .slice(0, 5);
+      .sort((a, b) => a.list_status.score - b.list_status.score);
+    const lowestRatedMangaMap = new Map();
+    lowestRatedMangaRaw.forEach(item => {
+      const title = item.node?.title || '';
+      if (title && !lowestRatedMangaMap.has(title)) {
+        lowestRatedMangaMap.set(title, item);
+      }
+    });
+    const lowestRatedManga = Array.from(lowestRatedMangaMap.values()).slice(0, 5);
     
     // Hidden gems manga (high rating, low popularity) - 3 items, deduplicate by title
     const hiddenGemsMangaRaw = completedManga
@@ -888,20 +895,30 @@ export default function MALWrapped() {
       </div>
     );
 
-    // Image Carousel Component - Responsive grid on mobile, carousel on desktop
+    // Image Carousel Component - Always carousel, responsive items per view
     const ImageCarousel = ({ items, maxItems = 20, showHover = true, showNames = false, imageSize = 'md' }) => {
       const [isHovered, setIsHovered] = useState(false);
       const [hoveredItem, setHoveredItem] = useState(null);
       const [scrollPosition, setScrollPosition] = useState(0);
+      const [itemsPerView, setItemsPerView] = useState(5);
       const visibleItems = items.slice(0, maxItems);
-      const itemsPerView = 5;
       const itemWidth = 100 / itemsPerView;
+      
+      // Update items per view on resize
+      useEffect(() => {
+        const updateItemsPerView = () => {
+          setItemsPerView(window.innerWidth < 768 ? 3 : 5);
+        };
+        updateItemsPerView();
+        window.addEventListener('resize', updateItemsPerView);
+        return () => window.removeEventListener('resize', updateItemsPerView);
+      }, []);
       
       // Image size classes - consistent sizing with aspect ratio 2:3
       const imageSizeClasses = {
         sm: 'w-16 aspect-[2/3] sm:w-20',
         md: 'w-20 aspect-[2/3] sm:w-24 md:w-28',
-        lg: 'w-24 aspect-[2/3] sm:w-28 md:w-32'
+        lg: 'w-20 aspect-[2/3] sm:w-24 md:w-28 lg:w-32'
       };
       const imageClass = imageSizeClasses[imageSize] || imageSizeClasses.md;
       
@@ -942,59 +959,16 @@ export default function MALWrapped() {
 
       if (visibleItems.length === 0) return null;
 
-      // Mobile: Grid layout, Desktop: Carousel
+      // Always use carousel (no mobile grid)
       return (
-        <>
-          {/* Mobile Grid */}
-          <div className="mt-4 sm:mt-6 grid grid-cols-2 sm:grid-cols-3 md:hidden gap-2 sm:gap-3">
-            {visibleItems.map((item, idx) => {
-              const malUrl = getMALUrl(item);
-              const itemContent = (
-                <div className="flex flex-col">
-                  <div className={`${imageClass} bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 relative ${showHover ? 'group-hover:border-[#9EFF00] group-hover:border-2' : ''} ${malUrl ? 'cursor-pointer' : ''}`} style={{ boxSizing: 'border-box' }}>
-                    {item.coverImage && (
-                      <img 
-                        src={item.coverImage} 
-                        alt={item.title || ''} 
-                        crossOrigin="anonymous" 
-                        className={`w-full h-full object-cover rounded-lg transition-transform duration-300 ${showHover ? 'group-hover:scale-110' : ''}`}
-                      />
-                    )}
-                  </div>
-                  {showNames && item.title && (
-                    <div className="mt-1.5 sm:mt-2 text-left">
-                      <p className="body-sm font-bold text-white truncate">{item.title}</p>
-                      {item.userRating && (
-                        <p className="body-sm text-yellow-300">★ {item.userRating.toFixed(1)}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-              
-              return (
-                <div key={idx} className="group">
-                  {malUrl ? (
-                    <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                      {itemContent}
-                    </a>
-                  ) : (
-                    itemContent
-                  )}
-                </div>
-              );
-            })}
-          </div>
-          
-          {/* Desktop Carousel */}
-          <div 
-            className="mt-4 sm:mt-6 overflow-hidden relative hidden md:block"
-            onMouseEnter={() => showHover && setIsHovered(true)}
-            onMouseLeave={() => {
-              showHover && setIsHovered(false);
-              setHoveredItem(null);
-            }}
-          >
+        <div 
+          className="mt-4 sm:mt-6 overflow-hidden relative"
+          onMouseEnter={() => showHover && setIsHovered(true)}
+          onMouseLeave={() => {
+            showHover && setIsHovered(false);
+            setHoveredItem(null);
+          }}
+        >
             <div 
               className="flex"
               style={{ 
@@ -1005,7 +979,7 @@ export default function MALWrapped() {
               {duplicatedItems.map((item, idx) => {
                 const malUrl = getMALUrl(item);
                 const content = (
-                  <div className="flex flex-col mx-1">
+                  <div className="flex flex-col mx-0.5 sm:mx-1">
                     <div className={`${imageClass} bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 relative ${showHover ? 'group-hover:border-[#9EFF00] group-hover:border-2' : ''} ${malUrl ? 'cursor-pointer' : ''}`} style={{ boxSizing: 'border-box' }}>
                       {item.coverImage && (
                         <img 
@@ -1057,7 +1031,71 @@ export default function MALWrapped() {
               })}
             </div>
           </div>
-        </>
+      );
+    };
+
+    // Grid Image Component for hidden gems, didn't land, and planned sections
+    const GridImages = ({ items, maxItems = 5, imageSize = 'sm' }) => {
+      const visibleItems = items.slice(0, maxItems);
+      const imageSizeClasses = {
+        sm: 'w-16 aspect-[2/3] sm:w-20 md:w-24',
+        md: 'w-20 aspect-[2/3] sm:w-24 md:w-28',
+        lg: 'w-24 aspect-[2/3] sm:w-28 md:w-32'
+      };
+      const imageClass = imageSizeClasses[imageSize] || imageSizeClasses.sm;
+
+      const getMALUrl = (item) => {
+        if (item.malId) {
+          return `https://myanimelist.net/anime/${item.malId}`;
+        }
+        if (item.mangaId) {
+          return `https://myanimelist.net/manga/${item.mangaId}`;
+        }
+        return null;
+      };
+
+      if (visibleItems.length === 0) return null;
+
+      return (
+        <div className="mt-4 sm:mt-6 grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
+          {visibleItems.map((item, idx) => {
+            const malUrl = getMALUrl(item);
+            const itemContent = (
+              <div className="flex flex-col">
+                <div className={`${imageClass} bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#9EFF00] group-hover:border-2 ${malUrl ? 'cursor-pointer' : ''}`} style={{ boxSizing: 'border-box' }}>
+                  {item.coverImage && (
+                    <img 
+                      src={item.coverImage} 
+                      alt={item.title || ''} 
+                      crossOrigin="anonymous" 
+                      className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
+                    />
+                  )}
+                </div>
+                {item.title && (
+                  <div className="mt-1.5 sm:mt-2 text-left">
+                    <p className="body-sm font-bold text-white truncate">{item.title}</p>
+                    {item.userRating && (
+                      <p className="body-sm text-yellow-300">★ {item.userRating.toFixed(1)}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+            
+            return (
+              <div key={idx} className="group">
+                {malUrl ? (
+                  <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                    {itemContent}
+                  </a>
+                ) : (
+                  itemContent
+                )}
+              </div>
+            );
+          })}
+        </div>
       );
     };
 
@@ -1362,8 +1400,8 @@ export default function MALWrapped() {
               High-rated anime with low popularity
             </h2>
             {gems.length > 0 ? (
-              <div className="mt-4 sm:mt-6 stagger-3">
-                <ImageCarousel items={gems} maxItems={10} showHover={true} showNames={true} imageSize="md" />
+              <div className="stagger-3">
+                <GridImages items={gems} maxItems={5} imageSize="sm" />
               </div>
             ) : (
               <div className="mt-6 sm:mt-8 text-center text-white/50 stagger-3">No hidden gems found</div>
@@ -1387,8 +1425,8 @@ export default function MALWrapped() {
               5 shows you rated the lowest
             </h2>
             {didntLand.length > 0 ? (
-              <div className="mt-4 sm:mt-6 stagger-3">
-                <ImageCarousel items={didntLand} maxItems={10} showHover={true} showNames={true} imageSize="md" />
+              <div className="stagger-3">
+                <GridImages items={didntLand} maxItems={5} imageSize="sm" />
               </div>
             ) : (
               <div className="mt-6 sm:mt-8 text-center text-white/50 stagger-3">No data available</div>
@@ -1411,11 +1449,11 @@ export default function MALWrapped() {
               5 shows you plan to watch {stats.selectedYear === 'all' ? '' : 'this year'}.
             </h2>
             {plannedAnimeItems.length > 0 ? (
-              <div className="mt-4 sm:mt-6 stagger-3">
-                <ImageCarousel items={plannedAnimeItems} maxItems={10} showHover={true} showNames={true} imageSize="md" />
+              <div className="stagger-3">
+                <GridImages items={plannedAnimeItems} maxItems={5} imageSize="sm" />
               </div>
             ) : (
-              <div className="mt-8 text-center text-white/50 animate-fade-slide-up">No planned anime found</div>
+              <div className="mt-6 sm:mt-8 text-center text-white/50 stagger-3">No planned anime found</div>
             )}
           </SlideLayout>
         );
@@ -1697,7 +1735,7 @@ export default function MALWrapped() {
         );
 
       case 'hidden_gems_manga':
-        const mangaGems = stats.hiddenGemsManga.slice(0, 3).map(item => ({
+        const mangaGems = stats.hiddenGemsManga.slice(0, 5).map(item => ({
           title: item.node.title,
           coverImage: item.node.main_picture?.large || item.node.main_picture?.medium || '',
           userRating: item.list_status.score,
@@ -1712,8 +1750,8 @@ export default function MALWrapped() {
               High-rated manga with low popularity
             </h2>
             {mangaGems.length > 0 ? (
-              <div className="mt-4 sm:mt-6 stagger-3">
-                <ImageCarousel items={mangaGems} maxItems={10} showHover={true} showNames={true} imageSize="md" />
+              <div className="stagger-3">
+                <GridImages items={mangaGems} maxItems={5} imageSize="sm" />
               </div>
             ) : (
               <div className="mt-6 sm:mt-8 text-center text-white/50 stagger-3">No hidden gems found</div>
@@ -1737,8 +1775,8 @@ export default function MALWrapped() {
               5 manga you rated the lowest
             </h2>
             {mangaDidntLand.length > 0 ? (
-              <div className="mt-4 sm:mt-6 stagger-3">
-                <ImageCarousel items={mangaDidntLand} maxItems={10} showHover={true} showNames={true} imageSize="md" />
+              <div className="stagger-3">
+                <GridImages items={mangaDidntLand} maxItems={5} imageSize="sm" />
               </div>
             ) : (
               <div className="mt-6 sm:mt-8 text-center text-white/50 stagger-3">No data available</div>
@@ -1761,8 +1799,8 @@ export default function MALWrapped() {
               5 manga you plan to read {stats.selectedYear === 'all' ? '' : 'this year'}.
             </h2>
             {plannedMangaItems.length > 0 ? (
-              <div className="mt-4 sm:mt-6 stagger-3">
-                <ImageCarousel items={plannedMangaItems} maxItems={10} showHover={true} showNames={true} imageSize="md" />
+              <div className="stagger-3">
+                <GridImages items={plannedMangaItems} maxItems={5} imageSize="sm" />
               </div>
             ) : (
               <div className="mt-6 sm:mt-8 text-center text-white/50 stagger-3">No planned manga found</div>
@@ -1779,46 +1817,58 @@ export default function MALWrapped() {
             <h1 className="relative z-10 heading-lg uppercase text-[#9EFF00] border-b-2 border-[#9EFF00] pb-1 sm:pb-2 px-2 inline-block whitespace-nowrap stagger-1">
               {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} In Review
             </h1>
-            <div className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-white">
-              <div className="border border-white/20 p-2 sm:p-3 rounded-lg flex flex-col stagger-3">
-                <h3 className="heading-sm text-[#9EFF00] mb-2">Top 5 Anime</h3>
-                <div className="space-y-1 flex-grow">
-                  {stats.topRated.slice(0, 5).map((a, i) => (
-                    <p key={a.node.id} className="body-sm truncate bg-white/5 py-1 px-2 rounded">
-                      <span className="font-bold text-[#9EFF00] w-6 inline-block">{i+1}.</span>{a.node.title}
-                    </p>
-                  ))}
+            <div className="mt-2 sm:mt-3 flex flex-col gap-2 text-white" style={{ maxHeight: 'calc(100vh - 200px)', overflow: 'hidden' }}>
+              <div className="flex flex-col sm:flex-row gap-2 flex-shrink-0">
+                <div className="border border-white/20 p-2 rounded-lg flex flex-col flex-1 stagger-3" style={{ minHeight: 0 }}>
+                  <h3 className="heading-sm text-[#9EFF00] mb-1">Top 5 Anime</h3>
+                  <div className="space-y-0.5 flex-grow overflow-hidden">
+                    {stats.topRated.slice(0, 5).map((a, i) => (
+                      <p key={a.node.id} className="body-sm truncate bg-white/5 py-0.5 px-1.5 rounded">
+                        <span className="font-bold text-[#9EFF00] w-5 inline-block">{i+1}.</span>{a.node.title}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+                <div className="border border-white/20 p-2 rounded-lg flex flex-col flex-1 stagger-4" style={{ minHeight: 0 }}>
+                  <h3 className="heading-sm text-[#9EFF00] mb-1">Top 5 Manga</h3>
+                  <div className="space-y-0.5 flex-grow overflow-hidden">
+                    {stats.topManga.slice(0, 5).map((m, i) => (
+                      <p key={m.node.id} className="body-sm truncate bg-white/5 py-0.5 px-1.5 rounded">
+                        <span className="font-bold text-[#9EFF00] w-5 inline-block">{i+1}.</span>{m.node.title}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="border border-white/20 p-2 sm:p-3 rounded-lg flex flex-col stagger-4">
-                <h3 className="heading-sm text-[#9EFF00] mb-2">Top 5 Manga</h3>
-                <div className="space-y-1 flex-grow">
-                  {stats.topManga.slice(0, 5).map((m, i) => (
-                    <p key={m.node.id} className="body-sm truncate bg-white/5 py-1 px-2 rounded">
-                      <span className="font-bold text-[#9EFF00] w-6 inline-block">{i+1}.</span>{m.node.title}
-                    </p>
-                  ))}
+              <div className="grid grid-cols-2 gap-2 flex-shrink-0">
+                <div className="border border-white/20 p-2 rounded-lg stagger-5">
+                  <p className="body-sm text-white/70 mb-0.5">Episodes</p>
+                  <p className="number-md text-white">
+                    <AnimatedNumber value={stats.totalEpisodes || 0} duration={1000} />
+                  </p>
+                </div>
+                <div className="border border-white/20 p-2 rounded-lg stagger-6">
+                  <p className="body-sm text-white/70 mb-0.5">Chapters</p>
+                  <p className="number-md text-white">
+                    <AnimatedNumber value={stats.totalChapters || 0} duration={1000} />
+                  </p>
+                </div>
+                <div className="border border-white/20 p-2 rounded-lg stagger-7">
+                  <p className="body-sm text-white/70 mb-0.5">Top Studio</p>
+                  <p className="heading-sm text-white truncate">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
+                </div>
+                <div className="border border-white/20 p-2 rounded-lg stagger-8">
+                  <p className="body-sm text-white/70 mb-0.5">Top Author</p>
+                  <p className="heading-sm text-white truncate">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
                 </div>
               </div>
-              <div className="border border-white/20 p-2 sm:p-3 rounded-lg stagger-5">
-                <p className="body-sm text-white/70 mb-1">Episodes Watched</p>
+              <div className="border border-white/20 p-2 rounded-lg stagger-7 flex-shrink-0">
+                <p className="body-sm text-white/70 mb-0.5">Total Time Spent</p>
                 <p className="number-md text-white">
-                  <AnimatedNumber value={stats.totalEpisodes || 0} duration={1000} />
-                </p>
-              </div>
-              <div className="border border-white/20 p-2 sm:p-3 rounded-lg stagger-6">
-                <p className="body-sm text-white/70 mb-1">Chapters Read</p>
-                <p className="number-md text-white">
-                  <AnimatedNumber value={stats.totalChapters || 0} duration={1000} />
-                </p>
-              </div>
-              <div className="border border-white/20 p-2 sm:p-3 rounded-lg col-span-1 sm:col-span-2 stagger-7">
-                <p className="body-sm text-white/70 mb-1">Total Time Spent</p>
-                <p className="number-lg text-white">
                   {totalDays > 0 ? (
                     <>
                       <AnimatedNumber value={totalDays} duration={1000} /> Days
-                      <span className="body-md text-white/70 ml-2">({totalTimeSpent} hours)</span>
+                      <span className="body-sm text-white/70 ml-2">({totalTimeSpent}h)</span>
                     </>
                   ) : (
                     <>
@@ -1826,14 +1876,6 @@ export default function MALWrapped() {
                     </>
                   )}
                 </p>
-              </div>
-              <div className="border border-white/20 p-2 sm:p-3 rounded-lg stagger-8">
-                <p className="body-sm text-white/70 mb-1">Top Studio</p>
-                <p className="heading-sm text-white truncate">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
-              </div>
-              <div className="border border-white/20 p-2 sm:p-3 rounded-lg stagger-8">
-                <p className="body-sm text-white/70 mb-1">Top Author</p>
-                <p className="heading-sm text-white truncate">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
               </div>
             </div>
           </SlideLayout>
