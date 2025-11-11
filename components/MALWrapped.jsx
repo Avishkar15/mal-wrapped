@@ -829,28 +829,28 @@ export default function MALWrapped() {
                       </div>
                     </div>
                     {others.length > 0 && (
-                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 w-full">
+                      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 w-full">
                         {others.map((item, index) => {
                           const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                           const itemContent = (
                             <div className="flex flex-col w-full">
-                              <div className="bg-transparent border border-white/10 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2 w-full" style={{ boxSizing: 'border-box' }}>
-                                <div className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 z-10 w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 bg-black text-white rounded-full flex items-center justify-center font-bold text-xs sm:text-sm">{index + 2}</div>
+                              <div className="bg-transparent border border-white/10 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#9EFF00] hover:border-2 w-full max-w-full" style={{ boxSizing: 'border-box' }}>
+                                <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 md:top-1.5 md:right-1.5 z-10 w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 bg-black text-white rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs md:text-sm">{index + 2}</div>
                                 {item.coverImage && (
                                   <img src={item.coverImage} alt={item.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
                                 )}
                               </div>
-                              <div className="mt-1.5 sm:mt-2 text-left w-full">
-                                <h3 className="body-sm font-bold text-white truncate leading-tight">{item.title}</h3>
-                                <div className="flex items-center body-sm text-yellow-300">
-                                  <span className="mr-1 shrink-0">★</span>
+                              <div className="mt-1 sm:mt-1.5 md:mt-2 text-left w-full">
+                                <h3 className="text-xs sm:text-sm font-bold text-white truncate leading-tight">{item.title}</h3>
+                                <div className="flex items-center text-xs sm:text-sm text-yellow-300">
+                                  <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
                                   <span>{item.userRating.toFixed(1)}</span>
                                 </div>
                               </div>
                             </div>
                           );
                           return (
-                            <div key={item.id} className="w-full">
+                            <div key={item.id} className="w-full max-w-full">
                               {malUrl ? (
                                 <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                   {itemContent}
