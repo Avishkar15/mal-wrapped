@@ -359,7 +359,7 @@ export default function MALWrapped() {
       .filter(item => {
         const score = item.list_status.score;
         const popularity = item.node?.num_list_users || 0;
-        return score >= 8 && popularity < 100000;
+        return score >= 5 && popularity < 200000;
       })
       .sort((a, b) => {
         if (b.list_status.score !== a.list_status.score) {
@@ -1275,7 +1275,7 @@ export default function MALWrapped() {
                   <ImageCarousel items={studioAnime} maxItems={30} showHover={true} showNames={false} />
                 )}
                 {otherStudios.length > 0 && (
-                  <div className="mt-4 sm:mt-6 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
+                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 animate-fade-in">
                     {otherStudios.map(([studioName, count], idx) => (
                       <div key={idx} className="text-center p-2 sm:p-3 border border-white/10 rounded-lg animate-fade-slide-up">
                         <p className="body-sm text-[#9EFF00] font-bold mb-1">#{idx + 2}</p>
