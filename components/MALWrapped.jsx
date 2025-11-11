@@ -788,7 +788,7 @@ export default function MALWrapped() {
             <h2 className="body-lg font-semibold uppercase text-white/80 mt-2 sm:mt-3 animate-fade-slide-up whitespace-nowrap">
               The {type === 'anime' ? 'series' : 'manga'} you rated the highest.
             </h2>
-            <div className="mt-2 flex flex-col gap-3 w-full max-w-full overflow-hidden">
+            <div className="mt-2 flex flex-col gap-3 w-full">
               {(() => {
                 const [featured, ...others] = top5Formatted;
                 return (
@@ -798,7 +798,7 @@ export default function MALWrapped() {
                       {(() => {
                         const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                         const featuredImage = (
-                          <div className="w-24 sm:w-32 md:w-40 flex-shrink-0 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
+                          <div className="w-20 sm:w-28 md:w-36 flex-shrink-0 aspect-[2/3] bg-transparent border border-white/10 rounded-lg overflow-hidden group transition-all duration-300 hover:border-[#9EFF00] hover:border-2" style={{ boxSizing: 'border-box' }}>
                             {featured.coverImage && (
                               <img src={featured.coverImage} crossOrigin="anonymous" alt={featured.title} className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
                             )}
@@ -810,19 +810,19 @@ export default function MALWrapped() {
                           </a>
                         ) : featuredImage;
                       })()}
-                      <div className="p-2 sm:p-3 flex flex-col justify-center flex-grow min-w-0 overflow-hidden">
+                      <div className="p-2 sm:p-3 flex flex-col justify-center flex-grow min-w-0">
                         <p className="text-xs sm:text-base uppercase tracking-widest text-[#9EFF00] font-bold">#1 Favorite</p>
-                        <h3 className="font-bold text-white text-sm sm:text-lg md:text-2xl mt-1 leading-tight truncate">{featured.title}</h3>
-                        {featured.studio && <p className="text-xs sm:text-base md:text-lg text-[#9EFF00] truncate">{featured.studio}</p>}
-                        {featured.author && <p className="text-xs sm:text-base md:text-lg text-[#9EFF00] truncate">{featured.author}</p>}
-                        <div className="flex items-center text-sm sm:text-lg md:text-xl text-yellow-300 mt-1 sm:mt-2">
+                        <h3 className="font-bold text-white text-sm sm:text-lg md:text-xl mt-1 leading-tight truncate">{featured.title}</h3>
+                        {featured.studio && <p className="text-xs sm:text-sm md:text-base text-[#9EFF00] truncate">{featured.studio}</p>}
+                        {featured.author && <p className="text-xs sm:text-sm md:text-base text-[#9EFF00] truncate">{featured.author}</p>}
+                        <div className="flex items-center text-sm sm:text-base md:text-lg text-yellow-300 mt-1 sm:mt-2">
                           <span className="mr-1 sm:mr-2">★</span>
                           <span>{featured.userRating.toFixed(1)} / 10</span>
                         </div>
                         {featured.genres.length > 0 && (
-                          <div className="mt-1 sm:mt-2 md:mt-3 flex flex-wrap gap-1 sm:gap-2">
+                          <div className="mt-1 sm:mt-2 flex flex-wrap gap-1 sm:gap-2">
                             {featured.genres.slice(0, 2).map(g => (
-                              <span key={g} className="text-xs sm:text-base uppercase tracking-wider bg-white/10 text-white/80 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">{g}</span>
+                              <span key={g} className="text-xs sm:text-sm uppercase tracking-wider bg-white/10 text-white/80 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">{g}</span>
                             ))}
                           </div>
                         )}
@@ -896,7 +896,17 @@ export default function MALWrapped() {
       const [isHovered, setIsHovered] = useState(false);
       const [hoveredItem, setHoveredItem] = useState(null);
       const [scrollPosition, setScrollPosition] = useState(0);
-      const visibleItems = items.slice(0, maxItems);
+      
+      // Deduplicate items by title to prevent repeats
+      const uniqueItemsMap = new Map();
+      items.forEach(item => {
+        const title = item.title || '';
+        if (title && !uniqueItemsMap.has(title)) {
+          uniqueItemsMap.set(title, item);
+        }
+      });
+      const uniqueItems = Array.from(uniqueItemsMap.values());
+      const visibleItems = uniqueItems.slice(0, maxItems);
       const itemsPerView = 5;
       const itemWidth = 100 / itemsPerView;
       
@@ -950,14 +960,15 @@ export default function MALWrapped() {
             className="flex"
             style={{ 
               transform: `translateX(-${scrollPosition}%)`,
-              willChange: 'transform'
+              willChange: 'transform',
+              gap: '8px'
             }}
           >
             {duplicatedItems.map((item, idx) => {
               const malUrl = getMALUrl(item);
               const content = (
-                <div className="flex flex-col flex-shrink-0 mx-1">
-                  <div className="aspect-[2/3] w-20 sm:w-24 md:w-32 bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#9EFF00] group-hover:border-2">
+                <div className="flex flex-col flex-shrink-0">
+                  <div className="aspect-[2/3] w-24 sm:w-28 md:w-36 bg-transparent border border-white/10 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#9EFF00] group-hover:border-2">
                     {item.coverImage && (
                       <img 
                         src={item.coverImage} 
@@ -1299,7 +1310,7 @@ export default function MALWrapped() {
             <h1 className="relative z-10 heading-lg uppercase text-[#9EFF00] border-b-2 border-[#9EFF00] pb-1 sm:pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up">
               Seasonal Highlights
             </h1>
-            <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="mt-4 sm:mt-6 flex flex-col md:grid md:grid-cols-2 gap-2 sm:gap-3">
               {seasons.map(season => {
                 const seasonData = stats.seasonalHighlights?.[season];
                 if (!seasonData) return null;
@@ -1734,40 +1745,44 @@ export default function MALWrapped() {
             <h1 className="relative z-10 heading-lg uppercase text-[#9EFF00] border-b-2 border-[#9EFF00] pb-1 sm:pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up">
               {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} In Review
             </h1>
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 text-white animate-fade-slide-up">
-              <div className="border border-white/20 p-3 md:p-4 rounded-lg flex flex-col">
-                <h3 className="heading-sm text-[#9EFF00] mb-3">Top 5 Anime</h3>
-                <div className="space-y-2 flex-grow">
-                  {stats.topRated.slice(0, 5).map((a, i) => (
-                    <p key={a.node.id} className="body-sm truncate bg-white/5 py-1.5 px-2 rounded">
-                      <span className="font-bold text-[#9EFF00] w-6 inline-block">{i+1}.</span>{a.node.title}
-                    </p>
-                  ))}
+            <div className="mt-6 flex flex-col gap-3 text-white animate-fade-slide-up w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="border border-white/20 p-3 rounded-lg flex flex-col">
+                  <h3 className="heading-sm text-[#9EFF00] mb-3">Top 5 Anime</h3>
+                  <div className="space-y-2 flex-grow">
+                    {stats.topRated.slice(0, 5).map((a, i) => (
+                      <p key={a.node.id} className="body-sm truncate bg-white/5 py-1.5 px-2 rounded">
+                        <span className="font-bold text-[#9EFF00] w-6 inline-block">{i+1}.</span>{a.node.title}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+                <div className="border border-white/20 p-3 rounded-lg flex flex-col">
+                  <h3 className="heading-sm text-[#9EFF00] mb-3">Top 5 Manga</h3>
+                  <div className="space-y-2 flex-grow">
+                    {stats.topManga.slice(0, 5).map((m, i) => (
+                      <p key={m.node.id} className="body-sm truncate bg-white/5 py-1.5 px-2 rounded">
+                        <span className="font-bold text-[#9EFF00] w-6 inline-block">{i+1}.</span>{m.node.title}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="border border-white/20 p-3 md:p-4 rounded-lg flex flex-col">
-                <h3 className="heading-sm text-[#9EFF00] mb-3">Top 5 Manga</h3>
-                <div className="space-y-2 flex-grow">
-                  {stats.topManga.slice(0, 5).map((m, i) => (
-                    <p key={m.node.id} className="body-sm truncate bg-white/5 py-1.5 px-2 rounded">
-                      <span className="font-bold text-[#9EFF00] w-6 inline-block">{i+1}.</span>{m.node.title}
-                    </p>
-                  ))}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="border border-white/20 p-3 rounded-lg">
+                  <p className="body-sm text-white/70 mb-2">Episodes Watched</p>
+                  <p className="number-md text-white">
+                    <AnimatedNumber value={stats.totalEpisodes || 0} duration={1000} />
+                  </p>
+                </div>
+                <div className="border border-white/20 p-3 rounded-lg">
+                  <p className="body-sm text-white/70 mb-2">Chapters Read</p>
+                  <p className="number-md text-white">
+                    <AnimatedNumber value={stats.totalChapters || 0} duration={1000} />
+                  </p>
                 </div>
               </div>
-              <div className="border border-white/20 p-3 md:p-4 rounded-lg">
-                <p className="body-sm text-white/70 mb-2">Episodes Watched</p>
-                <p className="number-md text-white">
-                  <AnimatedNumber value={stats.totalEpisodes || 0} duration={1000} />
-                </p>
-              </div>
-              <div className="border border-white/20 p-3 md:p-4 rounded-lg">
-                <p className="body-sm text-white/70 mb-2">Chapters Read</p>
-                <p className="number-md text-white">
-                  <AnimatedNumber value={stats.totalChapters || 0} duration={1000} />
-                </p>
-              </div>
-              <div className="border border-white/20 p-3 md:p-4 rounded-lg col-span-1 sm:col-span-2">
+              <div className="border border-white/20 p-3 rounded-lg">
                 <p className="body-sm text-white/70 mb-2">Total Time Spent</p>
                 <p className="number-lg text-white">
                   {totalDays > 0 ? (
@@ -1782,13 +1797,15 @@ export default function MALWrapped() {
                   )}
                 </p>
               </div>
-              <div className="border border-white/20 p-3 md:p-4 rounded-lg">
-                <p className="body-sm text-white/70 mb-2">Top Studio</p>
-                <p className="heading-sm text-white truncate">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
-              </div>
-              <div className="border border-white/20 p-3 md:p-4 rounded-lg">
-                <p className="body-sm text-white/70 mb-2">Top Author</p>
-                <p className="heading-sm text-white truncate">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="border border-white/20 p-3 rounded-lg">
+                  <p className="body-sm text-white/70 mb-2">Top Studio</p>
+                  <p className="heading-sm text-white truncate">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
+                </div>
+                <div className="border border-white/20 p-3 rounded-lg">
+                  <p className="body-sm text-white/70 mb-2">Top Author</p>
+                  <p className="heading-sm text-white truncate">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
+                </div>
               </div>
             </div>
           </SlideLayout>
