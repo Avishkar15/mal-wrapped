@@ -140,7 +140,7 @@ export default function MALWrapped() {
     setLoadingProgress('Connecting to MAL...');
     
     try {
-      const redirectUri = window.location.origin + window.location.pathname;
+      const redirectUri = getRedirectUri();
       const response = await fetch('/api/auth/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

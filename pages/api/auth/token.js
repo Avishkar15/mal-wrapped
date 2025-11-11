@@ -17,10 +17,21 @@ export default async function handler(req, res) {
   const { code, code_verifier, redirect_uri } = req.body;
 
   if (!code || !code_verifier || !redirect_uri) {
+    console.error('Missing parameters:', { 
+      has_code: !!code, 
+      has_verifier: !!code_verifier, 
+      has_redirect_uri: !!redirect_uri 
+    });
     return res.status(400).json({ 
       error: 'Missing required parameters',
       required: ['code', 'code_verifier', 'redirect_uri']
     });
+  }
+
+  // Normalize redirect_uri (remove trailing slash if present, except for root)
+  let normalizedRedirectUri = redirect_uri;
+  if (normalizedRedirectUri.endsWith('/') && normalizedRedirectUri !== 'https://' + req.headers.host + '/') {
+    normalizedRedirectUri = normalizedRedirectUri.slice(0, -1);
   }
 
   const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
@@ -42,7 +53,14 @@ export default async function handler(req, res) {
       code: code,
       code_verifier: code_verifier,
       grant_type: 'authorization_code',
-      redirect_uri: redirect_uri
+      redirect_uri: normalizedRedirectUri
+    });
+
+    console.log('Token exchange request:', {
+      redirect_uri: normalizedRedirectUri,
+      code_length: code.length,
+      verifier_length: code_verifier.length,
+      client_id_set: !!CLIENT_ID
     });
 
     const response = await fetch('https://myanimelist.net/v1/oauth2/token', {
@@ -53,10 +71,32 @@ export default async function handler(req, res) {
       body: formData.toString(),
     });
 
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (e) {
+      // If response is not JSON, try to get text
+      const text = await response.text();
+      console.error('MAL API error (non-JSON):', text);
+      return res.status(response.status).json({ 
+        error: 'invalid_request',
+        error_description: text || 'Unknown error',
+        status: response.status
+      });
+    }
 
     if (!response.ok) {
-      console.error('MAL API error:', data);
+      console.error('MAL API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: data.error,
+        error_description: data.error_description,
+        message: data.message,
+        redirect_uri: redirect_uri,
+        has_code: !!code,
+        has_verifier: !!code_verifier,
+        client_id_length: CLIENT_ID?.length
+      });
       return res.status(response.status).json(data);
     }
 
