@@ -186,12 +186,35 @@
   @keyframes fade-slide-down {
     0% {
       opacity: 0;
-      transform: translateY(-20px);
+      transform: translateY(20px);
     }
     100% {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+  
+  /* Staggered animation delays for left-to-right effect */
+  .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+  .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+  .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+  .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+  .stagger-5 { animation-delay: 0.5s; opacity: 0; }
+  .stagger-6 { animation-delay: 0.6s; opacity: 0; }
+  .stagger-7 { animation-delay: 0.7s; opacity: 0; }
+  .stagger-8 { animation-delay: 0.8s; opacity: 0; }
+  
+  /* When capturing, remove stagger delays and show all */
+  .slide-card.capturing .stagger-1,
+  .slide-card.capturing .stagger-2,
+  .slide-card.capturing .stagger-3,
+  .slide-card.capturing .stagger-4,
+  .slide-card.capturing .stagger-5,
+  .slide-card.capturing .stagger-6,
+  .slide-card.capturing .stagger-7,
+  .slide-card.capturing .stagger-8 {
+    animation-delay: 0s !important;
+    opacity: 1 !important;
   }
 
   .animate-slide-in {
@@ -214,23 +237,16 @@
   }
   
   /* Elements are in final position by default - animation only plays on mount when not capturing */
-  .animate-fade-slide-up {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
+  .animate-fade-slide-up,
   .animate-fade-slide-down {
     opacity: 1;
     transform: translateY(0);
   }
   
   /* Only animate when not capturing - use animation to override default */
-  .slide-card:not(.capturing) .animate-fade-slide-up {
-    animation: fade-slide-up 0.6s ease-out forwards;
-  }
-  
+  .slide-card:not(.capturing) .animate-fade-slide-up,
   .slide-card:not(.capturing) .animate-fade-slide-down {
-    animation: fade-slide-down 0.6s ease-out forwards;
+    animation: fade-slide-up 0.6s ease-out forwards;
   }
   
   /* Stop all animations when capturing - ensure final state */
