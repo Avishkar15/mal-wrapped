@@ -766,14 +766,14 @@ export default function MALWrapped() {
               <div className="text-center">
                 <h3 className="title-xl mb-2">{topItem.node?.title}</h3>
                 {type === 'anime' && topItem.node?.studios?.[0]?.name && (
-                  <p className="text-xl md:text-2xl text-[#3B82F6] mb-4">{topItem.node.studios[0].name}</p>
+                  <p className="body-md text-[#3B82F6] mb-4">{topItem.node.studios[0].name}</p>
                 )}
                 {type === 'manga' && topItem.node?.authors?.[0] && (
-                  <p className="text-xl md:text-2xl text-[#3B82F6] mb-4">
+                  <p className="body-md text-[#3B82F6] mb-4">
                     {`${topItem.node.authors[0].node?.first_name || ''} ${topItem.node.authors[0].node?.last_name || ''}`.trim()}
                   </p>
                 )}
-                <div className="flex items-center justify-center text-3xl md:text-4xl text-yellow-300">
+                <div className="flex items-center justify-center heading-md text-yellow-300">
                   <span className="mr-2">★</span>
                   <span>{topItem.list_status?.score?.toFixed(1)} / 10</span>
                 </div>
@@ -813,18 +813,18 @@ export default function MALWrapped() {
                         ) : featuredImage;
                       })()}
                       <div className="p-2 flex flex-col justify-center flex-grow min-w-0 text-center">
-                        <p className="text-[10px] sm:text-xs md:text-sm uppercase tracking-widest text-[#3B82F6] font-bold">#1 Favorite</p>
+                        <p className="body-sm uppercase tracking-widest text-[#3B82F6] font-bold">#1 Favorite</p>
                         <h3 className="title-sm mt-0.5 sm:mt-1 truncate">{featured.title}</h3>
-                        {featured.studio && <p className="text-[10px] sm:text-xs md:text-sm text-[#3B82F6] truncate">{featured.studio}</p>}
-                        {featured.author && <p className="text-[10px] sm:text-xs md:text-sm text-[#3B82F6] truncate">{featured.author}</p>}
-                        <div className="flex items-center justify-center text-xs sm:text-sm md:text-base text-yellow-300 mt-0.5 sm:mt-1">
+                        {featured.studio && <p className="body-sm text-[#3B82F6] truncate">{featured.studio}</p>}
+                        {featured.author && <p className="body-sm text-[#3B82F6] truncate">{featured.author}</p>}
+                        <div className="flex items-center justify-center body-sm text-yellow-300 mt-0.5 sm:mt-1">
                           <span className="mr-0.5 sm:mr-1">★</span>
                           <span>{featured.userRating.toFixed(1)} / 10</span>
                         </div>
                         {featured.genres.length > 0 && (
                           <div className="mt-1 flex flex-wrap gap-1 justify-center">
                             {featured.genres.slice(0, 2).map(g => (
-                              <span key={g} className="text-[10px] sm:text-xs uppercase tracking-wider bg-white/10 text-white/80 px-1 sm:px-1.5 py-0.5 rounded">{g}</span>
+                              <span key={g} className="body-sm uppercase tracking-wider bg-white/10 text-white/80 px-1 sm:px-1.5 py-0.5 rounded">{g}</span>
                             ))}
                           </div>
                         )}
@@ -844,7 +844,7 @@ export default function MALWrapped() {
                               </div>
                               <div className="mt-1 text-center w-full min-w-0">
                                 <h3 className="title-sm truncate">{item.title}</h3>
-                                <div className="flex items-center justify-center text-xs sm:text-sm md:text-base text-yellow-300">
+                                <div className="flex items-center justify-center body-sm text-yellow-300">
                                   <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
                                   <span>{item.userRating.toFixed(1)}</span>
                                 </div>
@@ -1135,14 +1135,14 @@ export default function MALWrapped() {
       const isTop = rank === 1;
       return (
         <div className={`flex items-center p-3 border-b transition-all duration-300 hover:bg-white/5 ${isTop ? 'border-[#3B82F6]/60 bg-[#3B82F6]/5' : 'border-white/5'}`}>
-          <div className={`text-3xl font-bold w-12 shrink-0 ${isTop ? 'text-[#3B82F6]' : 'text-white/60'}`}>#{rank}</div>
+          <div className={`heading-lg font-bold w-12 shrink-0 ${isTop ? 'text-[#3B82F6]' : 'text-white/60'}`}>#{rank}</div>
           <div className="flex-grow flex items-center gap-4 min-w-0">
             <div className="flex-grow min-w-0">
               <p className="title-lg truncate">{item.name}</p>
-              <p className="text-base text-white/50">{item.count} entries</p>
+              <p className="body-md text-white/50">{item.count} entries</p>
             </div>
           </div>
-          {isTop && <span className="text-yellow-300 text-2xl ml-3 shrink-0">★</span>}
+          {isTop && <span className="text-yellow-300 heading-md ml-3 shrink-0">★</span>}
         </div>
       );
     };
@@ -1161,7 +1161,7 @@ export default function MALWrapped() {
         </div>
         <div className="mt-2">
           <h3 className="title-md truncate">{item.title}</h3>
-          <div className="flex items-center text-base text-yellow-300">
+          <div className="flex items-center body-md text-yellow-300">
             <span className="mr-1">★</span>
             <span>{item.userRating?.toFixed(1) || 'N/A'}</span>
           </div>
@@ -1233,15 +1233,15 @@ export default function MALWrapped() {
                     <p className="number-lg text-white">
                       <AnimatedNumber value={stats.watchDays} />
                     </p>
-                    <p className="text-2xl font-medium uppercase text-[#3B82F6] mt-2">Days</p>
-                    <p className="text-xl text-white/70 mt-2">or <AnimatedNumber value={stats.watchTime} /> hours</p>
+                    <p className="heading-sm uppercase text-[#3B82F6] mt-2">Days</p>
+                    <p className="body-md text-white/70 mt-2">or <AnimatedNumber value={stats.watchTime} /> hours</p>
                   </>
                 ) : (
                   <>
                     <p className="number-lg text-white">
                       <AnimatedNumber value={stats.watchTime} />
                     </p>
-                    <p className="text-2xl font-medium uppercase text-[#3B82F6] mt-2">Hours</p>
+                    <p className="heading-sm uppercase text-[#3B82F6] mt-2">Hours</p>
                   </>
                 )}
               </div>
@@ -1342,12 +1342,10 @@ export default function MALWrapped() {
             </div>
             {topStudio ? (
               <>
-                <div className="mt-4 sm:mt-6 flex items-center justify-center gap-3 sm:gap-4 animate-fade-slide-up">
-                  <div className="text-center">
-                    <p className="text-sm text-[#3B82F6] font-bold mb-2">#1</p>
-                    <p className="text-4xl md:text-6xl font-bold text-[#3B82F6]">{topStudio}</p>
-                    <p className="text-xl text-white/70 mt-2">{stats.topStudios[0][1]} anime</p>
-                  </div>
+                <div className="mt-4 sm:mt-6 text-center animate-fade-slide-up">
+                  <p className="body-sm text-[#3B82F6] font-bold mb-1 sm:mb-2">#1</p>
+                  <p className="heading-xl font-bold text-[#3B82F6] uppercase">{topStudio}</p>
+                  <p className="body-md text-white/70 mt-1 sm:mt-2">{stats.topStudios[0][1]} anime</p>
                 </div>
                 {studioAnime.length > 0 && (
                   <ImageCarousel items={studioAnime} maxItems={30} showHover={true} showNames={false} />
@@ -1398,8 +1396,8 @@ export default function MALWrapped() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="title-sm truncate">{highlight.node?.title}</p>
-                            <p className="text-xs text-[#3B82F6] truncate">{highlight.node?.studios?.[0]?.name || ''}</p>
-                            <p className="text-xs sm:text-sm md:text-base text-yellow-300 mt-1">★ {highlight.list_status?.score || 'N/A'}</p>
+                            <p className="body-sm text-[#3B82F6] truncate">{highlight.node?.studios?.[0]?.name || ''}</p>
+                            <p className="body-sm text-yellow-300 mt-1">★ {highlight.list_status?.score || 'N/A'}</p>
                             <p className="body-sm text-white/70 mt-1">{seasonData.totalAnime} anime</p>
                           </div>
                         </div>
@@ -1729,12 +1727,10 @@ export default function MALWrapped() {
             </div>
             {topAuthor ? (
               <>
-                <div className="mt-4 sm:mt-6 flex items-center justify-center gap-3 sm:gap-4 animate-fade-slide-up">
-                  <div className="text-center">
-                    <p className="text-sm text-[#3B82F6] font-bold mb-2">#1</p>
-                    <p className="text-4xl md:text-6xl font-bold text-[#3B82F6]">{topAuthor}</p>
-                    <p className="text-xl text-white/70 mt-2">{stats.topAuthors[0][1]} manga</p>
-                  </div>
+                <div className="mt-4 sm:mt-6 text-center animate-fade-slide-up">
+                  <p className="body-sm text-[#3B82F6] font-bold mb-1 sm:mb-2">#1</p>
+                  <p className="heading-xl font-bold text-[#3B82F6] uppercase">{topAuthor}</p>
+                  <p className="body-md text-white/70 mt-1 sm:mt-2">{stats.topAuthors[0][1]} manga</p>
                 </div>
                 {authorManga.length > 0 && (
                   <ImageCarousel items={authorManga} maxItems={30} showHover={true} showNames={false} />
