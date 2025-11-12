@@ -1060,19 +1060,7 @@ export default function MALWrapped() {
     // Grid Image Component for hidden gems, didn't land, and planned sections
     const GridImages = ({ items, maxItems = 5 }) => {
       const visibleItems = items.slice(0, maxItems);
-      const itemCount = visibleItems.length;
-      
-      // Dynamically set columns based on number of items
-      // On mobile: max 3 columns, on larger screens: use item count (max 5)
-      const getGridCols = () => {
-        if (itemCount === 0) return 'grid-cols-1';
-        if (itemCount === 1) return 'grid-cols-1';
-        if (itemCount === 2) return 'grid-cols-2';
-        if (itemCount === 3) return 'grid-cols-3';
-        if (itemCount === 4) return 'grid-cols-2 sm:grid-cols-4';
-        // 5 or more items
-        return 'grid-cols-3 sm:grid-cols-5';
-      };
+
       const getMALUrl = (item) => {
         if (item.malId) {
           return `https://myanimelist.net/anime/${item.malId}`;
@@ -1087,7 +1075,7 @@ export default function MALWrapped() {
 
       return (
         <div className="mt-6 flex justify-center w-full px-2 sm:px-4">
-          <div className={`grid ${getGridCols()} gap-3 sm:gap-4 place-items-center w-full max-w-4xl mx-auto`}>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-4 justify-items-center items-start w-full max-w-4xl">
             {visibleItems.map((item, idx) => {
               const malUrl = getMALUrl(item);
               const itemContent = (
