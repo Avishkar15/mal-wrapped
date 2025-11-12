@@ -56,6 +56,13 @@
   }
   
   /* Body Styles - Hanken Grotesk */
+  .body {
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  
   .body-lg {
     font-family: 'Hanken Grotesk', sans-serif;
     font-size: 1rem;
@@ -105,6 +112,10 @@
     .heading-lg { font-size: 1.5rem; }
     .heading-md { font-size: 1.25rem; }
     .heading-sm { font-size: 1.125rem; }
+    .body { font-size: 0.9375rem; }
+    .body-lg { font-size: 0.9375rem; }
+    .body-md { font-size: 0.9375rem; }
+    .body-sm { font-size: 0.8125rem; }
     .number-xl { font-size: 3rem; }
     .number-lg { font-size: 2.5rem; }
     .number-md { font-size: 1.75rem; }
@@ -113,6 +124,10 @@
   @media (min-width: 1024px) {
     .heading-xl { font-size: 3rem; }
     .heading-lg { font-size: 2.5rem; }
+    .body { font-size: 1.125rem; }
+    .body-lg { font-size: 1.125rem; }
+    .body-md { font-size: 1.125rem; }
+    .body-sm { font-size: 1rem; }
     .number-xl { font-size: 5rem; }
     .number-lg { font-size: 4rem; }
   }
