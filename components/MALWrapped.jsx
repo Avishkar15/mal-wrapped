@@ -1856,21 +1856,21 @@ export default function MALWrapped() {
             <div className="mt-6 flex flex-col gap-3 text-white animate-fade-slide-up w-full">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="border border-white/5 p-3 rounded-lg flex flex-col bg-white/2 hover:bg-white/5 transition-colors">
-                  <h3 className="heading-sm text-[#3B82F6] mb-3">Top 5 Anime</h3>
+                  <p className="body-sm text-white/70 mb-2">Top 5 Anime</p>
                   <div className="space-y-2 flex-grow">
                     {stats.topRated.slice(0, 5).map((a, i) => (
-                        <p key={a.node.id} className="body-sm truncate bg-white/3 py-1.5 px-2 rounded hover:bg-white/5 transition-colors">
-                        <span className="font-bold text-[#3B82F6] w-6 inline-block">{i+1}.</span>{a.node.title}
+                        <p key={a.node.id} className="bg-white/3 py-1.5 px-2 rounded hover:bg-white/5 transition-colors">
+                        <span className="font-bold text-[#3B82F6] w-6 inline-block">{i+1}.</span><span className="heading-sm text-white truncate">{a.node.title}</span>
                       </p>
                     ))}
                   </div>
                 </div>
                 <div className="border border-white/5 p-3 rounded-lg flex flex-col bg-white/2 hover:bg-white/5 transition-colors">
-                  <h3 className="heading-sm text-[#3B82F6] mb-3">Top 5 Manga</h3>
+                  <p className="body-sm text-white/70 mb-2">Top 5 Manga</p>
                   <div className="space-y-2 flex-grow">
                     {stats.topManga.slice(0, 5).map((m, i) => (
-                        <p key={m.node.id} className="body-sm truncate bg-white/3 py-1.5 px-2 rounded hover:bg-white/5 transition-colors">
-                        <span className="font-bold text-[#3B82F6] w-6 inline-block">{i+1}.</span>{m.node.title}
+                        <p key={m.node.id} className="bg-white/3 py-1.5 px-2 rounded hover:bg-white/5 transition-colors">
+                        <span className="font-bold text-[#3B82F6] w-6 inline-block">{i+1}.</span><span className="heading-sm text-white truncate">{m.node.title}</span>
                       </p>
                     ))}
                   </div>
