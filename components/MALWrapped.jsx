@@ -1350,7 +1350,7 @@ export default function MALWrapped() {
                   </div>
                 </div>
                 {studioAnime.length > 0 && (
-                  <GridImages items={studioAnime} maxItems={30} />
+                  <ImageCarousel items={studioAnime} maxItems={30} showHover={true} showNames={false} />
                 )}
                 {otherStudios.length > 0 && (
                   <div className="mt-4 sm:mt-6 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
@@ -1737,7 +1737,7 @@ export default function MALWrapped() {
                   </div>
                 </div>
                 {authorManga.length > 0 && (
-                  <GridImages items={authorManga} maxItems={30} />
+                  <ImageCarousel items={authorManga} maxItems={30} showHover={true} showNames={false} />
                 )}
                 {otherAuthors.length > 0 && (
                   <div className="mt-4 sm:mt-6 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
