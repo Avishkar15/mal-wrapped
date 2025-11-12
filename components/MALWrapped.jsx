@@ -763,7 +763,7 @@ export default function MALWrapped() {
                   />
                 )}
               </div>
-              <div className="text-center md:text-left">
+              <div className="text-center">
                 <h3 className="text-3xl md:text-5xl font-bold text-white mb-2">{topItem.node?.title}</h3>
                 {type === 'anime' && topItem.node?.studios?.[0]?.name && (
                   <p className="text-xl md:text-2xl text-[#3B82F6] mb-4">{topItem.node.studios[0].name}</p>
@@ -773,7 +773,7 @@ export default function MALWrapped() {
                     {`${topItem.node.authors[0].node?.first_name || ''} ${topItem.node.authors[0].node?.last_name || ''}`.trim()}
                   </p>
                 )}
-                <div className="flex items-center justify-center md:justify-start text-3xl md:text-4xl text-yellow-300">
+                <div className="flex items-center justify-center text-3xl md:text-4xl text-yellow-300">
                   <span className="mr-2">★</span>
                   <span>{topItem.list_status?.score?.toFixed(1)} / 10</span>
                 </div>
@@ -810,17 +810,17 @@ export default function MALWrapped() {
                           </a>
                         ) : featuredImage;
                       })()}
-                      <div className="p-2 flex flex-col justify-center flex-grow min-w-0 text-left">
+                      <div className="p-2 flex flex-col justify-center flex-grow min-w-0 text-center">
                         <p className="text-[10px] sm:text-xs md:text-sm uppercase tracking-widest text-[#3B82F6] font-bold">#1 Favorite</p>
                         <h3 className="font-bold text-white text-xs sm:text-sm md:text-base mt-0.5 sm:mt-1 leading-tight truncate">{featured.title}</h3>
                         {featured.studio && <p className="text-[10px] sm:text-xs md:text-sm text-[#3B82F6] truncate">{featured.studio}</p>}
                         {featured.author && <p className="text-[10px] sm:text-xs md:text-sm text-[#3B82F6] truncate">{featured.author}</p>}
-                        <div className="flex items-center text-xs sm:text-sm md:text-base text-yellow-300 mt-0.5 sm:mt-1">
+                        <div className="flex items-center justify-center text-xs sm:text-sm md:text-base text-yellow-300 mt-0.5 sm:mt-1">
                           <span className="mr-0.5 sm:mr-1">★</span>
                           <span>{featured.userRating.toFixed(1)} / 10</span>
                         </div>
                         {featured.genres.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
+                          <div className="mt-1 flex flex-wrap gap-1 justify-center">
                             {featured.genres.slice(0, 2).map(g => (
                               <span key={g} className="text-[10px] sm:text-xs uppercase tracking-wider bg-white/10 text-white/80 px-1 sm:px-1.5 py-0.5 rounded">{g}</span>
                             ))}
@@ -840,9 +840,9 @@ export default function MALWrapped() {
                                   <img src={item.coverImage} alt={item.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" />
                                 )}
                               </div>
-                              <div className="mt-1 text-left w-full min-w-0">
+                              <div className="mt-1 text-center w-full min-w-0">
                                 <h3 className="font-bold text-white text-xs sm:text-sm md:text-base truncate leading-tight">{item.title}</h3>
-                                <div className="flex items-center text-xs sm:text-sm md:text-base text-yellow-300">
+                                <div className="flex items-center justify-center text-xs sm:text-sm md:text-base text-yellow-300">
                                   <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
                                   <span>{item.userRating.toFixed(1)}</span>
                                 </div>
@@ -1026,7 +1026,7 @@ export default function MALWrapped() {
                     )}
                   </div>
                   {showNames && item.title && (
-                    <div className="mt-2 text-left">
+                    <div className="mt-2 text-center">
                       <p className="body-sm font-bold text-white truncate">{item.title}</p>
                       {item.userRating && (
                         <p className="body-sm text-yellow-300">★ {item.userRating.toFixed(1)}</p>
@@ -1092,7 +1092,7 @@ export default function MALWrapped() {
                   )}
                 </div>
                 {item.title && (
-                  <div className="mt-2 text-left">
+                  <div className="mt-2 text-center">
                     <p className="body-sm font-bold text-white truncate">{item.title}</p>
                     {item.userRating && (
                       <p className="body-sm text-yellow-300">★ {item.userRating.toFixed(1)}</p>
@@ -1322,7 +1322,7 @@ export default function MALWrapped() {
             {topStudio ? (
               <>
                 <div className="mt-4 sm:mt-6 flex items-center justify-center gap-3 sm:gap-4 animate-fade-slide-up">
-                  <div className="text-left">
+                  <div className="text-center">
                     <p className="text-sm text-[#3B82F6] font-bold mb-2">#1</p>
                     <p className="text-4xl md:text-6xl font-bold text-[#3B82F6]">{topStudio}</p>
                     <p className="text-xl text-white/70 mt-2">{stats.topStudios[0][1]} anime</p>
@@ -1693,7 +1693,7 @@ export default function MALWrapped() {
             {topAuthor ? (
               <>
                 <div className="mt-4 sm:mt-6 flex items-center justify-center gap-3 sm:gap-4 animate-fade-slide-up">
-                  <div className="text-left">
+                  <div className="text-center">
                     <p className="text-sm text-[#3B82F6] font-bold mb-2">#1</p>
                     <p className="text-4xl md:text-6xl font-bold text-[#3B82F6]">{topAuthor}</p>
                     <p className="text-xl text-white/70 mt-2">{stats.topAuthors[0][1]} manga</p>
@@ -1954,7 +1954,7 @@ export default function MALWrapped() {
           {isAuthenticated && stats && slides.length > 0 && (
             <div className="w-full h-full flex flex-col overflow-hidden">
               {/* Top Bar - Year Selector and Download */}
-              <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 pt-3 pb-2 flex items-center justify-end gap-2 sm:gap-3">
+              <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 pt-3 pb-2 flex items-center justify-center gap-2 sm:gap-3">
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
