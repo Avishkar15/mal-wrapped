@@ -813,7 +813,7 @@ export default function MALWrapped() {
                 return (
                   <>
                     <div className="rounded-xl overflow-hidden group transition-all duration-300 flex flex-row items-center relative w-full shadow-2xl" style={{ background: 'rgba(9, 233, 254, 0.5)', padding: '2px' }}>
-                      <div className="bg-gradient-to-r from-white/15 to-white/8 rounded-xl w-full h-full hover:from-white/25 hover:to-white/15 flex flex-row items-center">
+                      <div className="bg-gradient-to-r from-white/5 to-white/2 rounded-xl w-full h-full hover:from-white/8 hover:to-white/4 flex flex-row items-center">
                         <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-[#09e9fe] text-white rounded-full flex items-center justify-center font-black text-xs sm:text-sm md:text-base shadow-lg">1</div>
                         {(() => {
                           const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
@@ -1324,7 +1324,7 @@ export default function MALWrapped() {
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherGenres.map(([genreName, count], idx) => (
                       <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                        <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl hover:from-white/20 hover:to-white/10 p-2 h-full">
+                        <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white">{genreName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} anime</p>
@@ -1393,7 +1393,7 @@ export default function MALWrapped() {
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherStudios.map(([studioName, count], idx) => (
                       <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                        <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl hover:from-white/20 hover:to-white/10 p-2 h-full">
+                        <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white truncate">{studioName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} anime</p>
@@ -1427,7 +1427,7 @@ export default function MALWrapped() {
                 const seasonIndex = seasons.indexOf(season);
                 return (
                   <div key={season} className="rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                    <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
+                    <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                       <h3 className="heading-md font-black text-[#09e9fe] mb-2">{season}</h3>
                       {highlight && (
                         <>
@@ -1702,7 +1702,7 @@ export default function MALWrapped() {
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherMangaGenres.map(([genreName, count], idx) => (
                       <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                        <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl hover:from-white/20 hover:to-white/10 p-2 h-full">
+                        <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white">{genreName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} manga</p>
@@ -1794,7 +1794,7 @@ export default function MALWrapped() {
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherAuthors.map(([authorName, count], idx) => (
                       <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                        <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl hover:from-white/20 hover:to-white/10 p-2 h-full">
+                        <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white truncate">{authorName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} manga</p>
@@ -1908,12 +1908,12 @@ export default function MALWrapped() {
             <div className="mt-4 flex flex-col gap-2 text-white animate-fade-slide-up w-full max-h-full overflow-y-auto relative z-10">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="rounded-xl flex flex-col transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                  <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 flex flex-col h-full">
+                  <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 flex flex-col h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top 5 Anime</p>
                   <div className="space-y-1 flex-grow">
                     {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="rounded-lg transition-all relative" style={{ background: 'rgba(9, 233, 254, 0.2)', padding: '1px' }}>
-                          <span className="bg-gradient-to-r from-white/10 to-white/5 rounded-lg hover:from-white/20 hover:to-white/10 py-1 px-2 block">
+                          <span className="bg-gradient-to-r from-white/5 to-white/2 rounded-lg hover:from-white/8 hover:to-white/4 py-1 px-2 block">
                             <span className="font-black text-[#09e9fe] w-6 inline-block">{i+1}.</span><span className="heading-sm text-white truncate font-bold">{a.node.title}</span>
                           </span>
                         </p>
@@ -1922,12 +1922,12 @@ export default function MALWrapped() {
                   </div>
                 </div>
                 <div className="rounded-xl flex flex-col transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                  <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 flex flex-col h-full">
+                  <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 flex flex-col h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top 5 Manga</p>
                   <div className="space-y-1 flex-grow">
                     {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="rounded-lg transition-all relative" style={{ background: 'rgba(9, 233, 254, 0.2)', padding: '1px' }}>
-                          <span className="bg-gradient-to-r from-white/10 to-white/5 rounded-lg hover:from-white/20 hover:to-white/10 py-1 px-2 block">
+                          <span className="bg-gradient-to-r from-white/5 to-white/2 rounded-lg hover:from-white/8 hover:to-white/4 py-1 px-2 block">
                             <span className="font-black text-[#09e9fe] w-6 inline-block">{i+1}.</span><span className="heading-sm text-white truncate font-bold">{m.node.title}</span>
                           </span>
                         </p>
@@ -1938,7 +1938,7 @@ export default function MALWrapped() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                  <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
+                  <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Episodes Watched</p>
                   <p className="number-md text-[#09e9fe] drop-shadow-lg">
                     <AnimatedNumber value={stats.totalEpisodes || 0} duration={1000} />
@@ -1946,7 +1946,7 @@ export default function MALWrapped() {
                   </div>
                 </div>
                 <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                  <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
+                  <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Chapters Read</p>
                   <p className="number-md text-[#09e9fe] drop-shadow-lg">
                     <AnimatedNumber value={stats.totalChapters || 0} duration={1000} />
@@ -1955,7 +1955,7 @@ export default function MALWrapped() {
                 </div>
               </div>
               <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
+                <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                 <p className="body-sm text-white/90 mb-2 font-bold">Total Time Spent</p>
                 <p className="number-lg text-[#09e9fe] drop-shadow-lg">
                   {totalDays > 0 ? (
@@ -1973,13 +1973,13 @@ export default function MALWrapped() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                  <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
+                  <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top Studio</p>
                   <p className="heading-sm text-white truncate font-black">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
-                  <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
+                  <div className="bg-gradient-to-br from-white/5 to-white/2 rounded-xl hover:from-white/8 hover:to-white/4 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top Author</p>
                   <p className="heading-sm text-white truncate font-black">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
                   </div>
@@ -2139,9 +2139,9 @@ export default function MALWrapped() {
                 {currentSlide === slides.length - 1 ? (
               <button
                     onClick={() => { setCurrentSlide(0); setIsAuthenticated(false); setStats(null); }} 
-                    className="bg-[#09e9fe] text-white font-bold uppercase px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 rounded-full hover:opacity-90 transition-opacity text-xs sm:text-sm md:text-base"
+                    className="text-white font-bold uppercase transition-all text-xs sm:text-sm md:text-base rounded-full" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px', borderRadius: '9999px' }}
                   >
-                    Restart
+                    <span className="bg-gradient-to-br from-white/5 to-white/2 rounded-full px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 block hover:from-white/8 hover:to-white/4 transition-all">Restart</span>
                   </button>
                 ) : (
                   <button
