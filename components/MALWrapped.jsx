@@ -767,7 +767,7 @@ export default function MALWrapped() {
                   />
                 )}
               </div>
-              <div className="text-center">
+              <div className="text-left">
                 <h3 className="title-lg mb-2">{topItem.node?.title}</h3>
                 {type === 'anime' && topItem.node?.studios?.[0]?.name && (
                   <p className="body-md text-[#09e9fe] mb-2 font-bold">{topItem.node.studios[0].name}</p>
@@ -843,7 +843,7 @@ export default function MALWrapped() {
               const [featured, ...others] = top5Formatted;
               return (
                 <>
-                  <div className="border-box-cyan rounded-xl overflow-hidden group transition-all duration-300 flex flex-row items-center relative w-full shadow-2xl" style={{ padding: '2px' }}>
+                  <div className="border-box-cyan rounded-xl overflow-hidden group transition-all duration-300 flex flex-row items-left relative w-full shadow-2xl" style={{ padding: '2px' }}>
                     <div className="bg-black/20 rounded-xl w-full h-full hover:bg-black/30 flex flex-row items-center">
                       <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-[#09e9fe] text-white rounded-full flex items-center justify-center font-black text-xs sm:text-sm md:text-base shadow-lg">1</div>
                       {(() => {
