@@ -1467,7 +1467,7 @@ export default function MALWrapped() {
                   <p className="body-sm text-[#09e9fe] font-black mb-2">#1</p>
                   <p className="heading-xl font-black text-[#09e9fe] drop-shadow-lg">{topStudio}</p>
                   <p className="body-md text-white/80 mt-2 font-semibold">{stats.topStudios[0][1]} anime</p>
-                </div>
+                </motion.div>
                 {studioAnime.length > 0 && (
                   <div className="relative z-10"><ImageCarousel items={studioAnime} maxItems={30} showHover={true} showNames={false} /></div>
                 )}
@@ -1662,7 +1662,7 @@ export default function MALWrapped() {
                 <AnimatedNumber value={stats.totalManga} />
               </p>
               <p className="heading-sm text-white/90 mt-2 font-bold">Manga Series</p>
-            </div>
+            </motion.div>
             {allMangaItems.length > 0 && <ImageCarousel items={allMangaItems} maxItems={50} showHover={true} showNames={false} />}
           </SlideLayout>
         );
@@ -1707,7 +1707,7 @@ export default function MALWrapped() {
                   </div>
                 )}
               </div>
-            </div>
+            </motion.div>
           </SlideLayout>
         );
 
@@ -1778,7 +1778,7 @@ export default function MALWrapped() {
                   <p className="body-sm text-[#09e9fe] font-black mb-2">#1</p>
                   <p className="heading-xl font-black text-[#09e9fe] drop-shadow-lg">{topMangaGenre[0]}</p>
                   <p className="body-md text-white/80 mt-2 font-semibold">{topMangaGenre[1]} manga</p>
-                </div>
+                </motion.div>
                 {mangaGenreItems.length > 0 && <div className="relative z-10"><ImageCarousel items={mangaGenreItems} maxItems={30} showHover={true} showNames={false} /></div>}
                 {otherMangaGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
@@ -1874,7 +1874,7 @@ export default function MALWrapped() {
                   <p className="body-sm text-[#09e9fe] font-black mb-2">#1</p>
                   <p className="heading-xl font-black text-[#09e9fe] drop-shadow-lg">{topAuthor}</p>
                   <p className="body-md text-white/80 mt-2 font-semibold">{stats.topAuthors[0][1]} manga</p>
-                </div>
+                </motion.div>
                 {authorManga.length > 0 && (
                   <div className="relative z-10"><ImageCarousel items={authorManga} maxItems={30} showHover={true} showNames={false} /></div>
                 )}
@@ -2069,7 +2069,7 @@ export default function MALWrapped() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </SlideLayout>
         );
 
@@ -2171,7 +2171,7 @@ export default function MALWrapped() {
                 >
               Connect with MAL
             </button>
-              </div>
+              </motion.div>
             </div>
           )}
 
