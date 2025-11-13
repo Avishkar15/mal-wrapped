@@ -734,7 +734,7 @@ export default function MALWrapped() {
     const SlideLayout = ({ children, verticalText }) => (
       <div className="w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden">
         {verticalText && (
-          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#3B82F6]/50 font-bold uppercase tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none">
+          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#09e9fe]/50 font-bold uppercase tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none">
             {verticalText}
           </p>
         )}
@@ -769,7 +769,7 @@ export default function MALWrapped() {
           <div className="text-center relative overflow-hidden animate-fade-slide-up">
             <h1 className="text-3xl md:text-4xl font-bold uppercase text-[#09e9fe] mb-4">Your #1 Favorite</h1>
             <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-              <div className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden group transition-all duration-300" style={{ boxSizing: 'border-box', border: '1px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden group transition-all duration-300" style={{ boxSizing: 'border-box', border: '1px solid #09e9fe' }}>
                 {topItem.node?.main_picture?.large && (
                   <img 
                     src={topItem.node.main_picture.large} 
@@ -798,9 +798,9 @@ export default function MALWrapped() {
           </div>
         ) : phase === 2 && top5Formatted.length > 0 ? (
           <div className="animate-fade-slide-up relative">
-            <div className="absolute inset-0 gradient-purple-pink opacity-15 blur-3xl -z-10"></div>
+            <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-15 blur-3xl -z-10"></div>
             <div className="text-center relative z-10">
-              <h1 className="heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <h1 className="heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid #09e9fe' }}>
                 Your Favorite {type === 'anime' ? 'Anime' : 'Manga'}
               </h1>
             </div>
@@ -812,13 +812,13 @@ export default function MALWrapped() {
                 const [featured, ...others] = top5Formatted;
                 return (
                   <>
-                    <div className="rounded-xl overflow-hidden group transition-all duration-300 flex flex-row items-center relative w-full shadow-2xl" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.5) 0%, rgba(0, 242, 254, 0.5) 100%)', padding: '2px' }}>
+                    <div className="rounded-xl overflow-hidden group transition-all duration-300 flex flex-row items-center relative w-full shadow-2xl" style={{ background: 'rgba(9, 233, 254, 0.5)', padding: '2px' }}>
                       <div className="bg-gradient-to-r from-white/15 to-white/8 rounded-xl w-full h-full hover:from-white/25 hover:to-white/15 flex flex-row items-center">
-                        <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-gradient-blue text-white rounded-full flex items-center justify-center font-black text-xs sm:text-sm md:text-base shadow-lg">1</div>
+                        <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-[#09e9fe] text-white rounded-full flex items-center justify-center font-black text-xs sm:text-sm md:text-base shadow-lg">1</div>
                         {(() => {
                           const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                           const featuredImage = (
-                            <div className="flex-shrink-0 rounded-xl overflow-hidden group transition-all duration-300 shadow-xl relative" style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '275px', background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.4) 0%, rgba(0, 242, 254, 0.4) 100%)', padding: '2px' }}>
+                            <div className="flex-shrink-0 rounded-xl overflow-hidden group transition-all duration-300 shadow-xl relative" style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '275px', background: 'rgba(9, 233, 254, 0.4)', padding: '2px' }}>
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
                                 {featured.coverImage && (
                                   <img src={featured.coverImage} crossOrigin="anonymous" alt={featured.title} className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
@@ -844,7 +844,7 @@ export default function MALWrapped() {
                         {featured.genres.length > 0 && (
                           <div className="mt-2 flex flex-wrap gap-2 justify-center">
                             {featured.genres.slice(0, 2).map(g => (
-                              <span key={g} className="body-sm uppercase tracking-wider text-white px-2 py-0.5 rounded-lg font-semibold" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', border: '1px solid', borderImage: 'linear-gradient(135deg, rgba(79, 172, 254, 0.4) 0%, rgba(0, 242, 254, 0.4) 100%) 1' }}>{g}</span>
+                              <span key={g} className="body-sm uppercase tracking-wider text-white px-2 py-0.5 rounded-lg font-semibold" style={{ background: 'rgba(9, 233, 254, 0.3)', border: '1px solid rgba(9, 233, 254, 0.4)' }}>{g}</span>
                             ))}
                           </div>
                         )}
@@ -857,9 +857,9 @@ export default function MALWrapped() {
                           const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                           const itemContent = (
                             <div className="flex flex-col w-full min-w-0">
-                              <div className="rounded-xl overflow-hidden group aspect-[2/3] relative transition-all duration-300 w-full shadow-lg" style={{ boxSizing: 'border-box', maxHeight: '275px', background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                              <div className="rounded-xl overflow-hidden group aspect-[2/3] relative transition-all duration-300 w-full shadow-lg" style={{ boxSizing: 'border-box', maxHeight: '275px', background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                                 <div className="bg-transparent rounded-xl w-full h-full overflow-hidden relative">
-                                  <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-gradient-blue text-white rounded-full flex items-center justify-center font-black text-xs sm:text-sm shadow-md">{index + 2}</div>
+                                  <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-[#09e9fe] text-white rounded-full flex items-center justify-center font-black text-xs sm:text-sm shadow-md">{index + 2}</div>
                                   {item.coverImage && (
                                     <img src={item.coverImage} alt={item.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
                                   )}
@@ -906,7 +906,7 @@ export default function MALWrapped() {
     const SlideLayout = ({ children, verticalText }) => (
       <div className="w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden">
         {verticalText && (
-          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#3B82F6]/50 font-bold uppercase tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none">
+          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#09e9fe]/50 font-bold uppercase tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none">
             {verticalText}
           </p>
         )}
@@ -1031,7 +1031,7 @@ export default function MALWrapped() {
               const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}-${actualIndex}`;
               const content = (
                 <div className="flex flex-col flex-shrink-0 items-center w-full">
-                  <div className="aspect-[2/3] w-full bg-transparent border border-white/5 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#3B82F6]/60" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box' }}>
+                  <div className="aspect-[2/3] w-full bg-transparent border border-white/5 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#09e9fe]/60" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box' }}>
                     {item.coverImage && (
                       <img 
                         src={item.coverImage} 
@@ -1125,7 +1125,7 @@ export default function MALWrapped() {
               const malUrl = getMALUrl(item);
               const itemContent = (
                 <div className="flex flex-col items-center w-full">
-                  <div className="aspect-[2/3] bg-transparent border border-white/5 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#3B82F6]/60" style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}>
+                  <div className="aspect-[2/3] bg-transparent border border-white/5 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#09e9fe]/60" style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}>
                     {item.coverImage && (
                       <img 
                         src={item.coverImage} 
@@ -1166,8 +1166,8 @@ export default function MALWrapped() {
     const RankedListItem = ({ item, rank }) => {
       const isTop = rank === 1;
       return (
-        <div className={`flex items-center p-3 border-b transition-all duration-300 hover:bg-white/5 ${isTop ? 'border-[#3B82F6]/60 bg-[#3B82F6]/5' : 'border-white/5'}`}>
-          <div className={`heading-lg font-bold w-12 shrink-0 ${isTop ? 'text-[#3B82F6]' : 'text-white/60'}`}>#{rank}</div>
+        <div className={`flex items-center p-3 border-b transition-all duration-300 hover:bg-white/5 ${isTop ? 'border-[#09e9fe]/60 bg-[#09e9fe]/5' : 'border-white/5'}`}>
+          <div className={`heading-lg font-bold w-12 shrink-0 ${isTop ? 'text-[#09e9fe]' : 'text-white/60'}`}>#{rank}</div>
           <div className="flex-grow flex items-center gap-2 min-w-0">
             <div className="flex-grow min-w-0">
               <p className="title-lg truncate">{item.name}</p>
@@ -1181,7 +1181,7 @@ export default function MALWrapped() {
 
     const MediaCard = ({ item, rank }) => (
       <div className="flex flex-col group">
-        <div className="bg-transparent border border-white/5 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#3B82F6]/60" style={{ boxSizing: 'border-box' }}>
+        <div className="bg-transparent border border-white/5 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#09e9fe]/60" style={{ boxSizing: 'border-box' }}>
           {rank && (
             <div className="absolute top-2 right-2 z-10 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg">
               {rank}
@@ -1206,7 +1206,7 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="INITIALIZE">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <div className="animate-fade-in">
                 <h2 className="text-3xl md:text-4xl font-bold uppercase text-white/90">MyAnimeList Wrapped</h2>
                 <h1 className="text-7xl md:text-9xl font-black uppercase text-[#09e9fe] my-4 drop-shadow-2xl">{stats.selectedYear === 'all' ? 'ALL TIME' : stats.selectedYear}</h1>
@@ -1225,8 +1225,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="ANIME-LOG">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up font-black" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up font-black" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Anime Watched
               </h1>
             </div>
@@ -1244,8 +1244,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="TIME-ANALYSIS">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Anime Stats
               </h1>
             </div>
@@ -1307,8 +1307,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="GENRE-MATRIX">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Most Watched Genre
               </h1>
             </div>
@@ -1323,7 +1323,7 @@ export default function MALWrapped() {
                 {otherGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherGenres.map(([genreName, count], idx) => (
-                      <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                      <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                         <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl hover:from-white/20 hover:to-white/10 p-2 h-full">
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white">{genreName}</p>
@@ -1374,8 +1374,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="PRODUCTION">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Favorite Studio
               </h1>
             </div>
@@ -1392,7 +1392,7 @@ export default function MALWrapped() {
                 {otherStudios.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherStudios.map(([studioName, count], idx) => (
-                      <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                      <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                         <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl hover:from-white/20 hover:to-white/10 p-2 h-full">
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white truncate">{studioName}</p>
@@ -1414,8 +1414,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="SEASONAL">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Seasonal Highlights
               </h1>
             </div>
@@ -1426,13 +1426,13 @@ export default function MALWrapped() {
                 const highlight = seasonData.highlight;
                 const seasonIndex = seasons.indexOf(season);
                 return (
-                  <div key={season} className="rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                  <div key={season} className="rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                     <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
                       <h3 className="heading-md font-black text-[#09e9fe] mb-2">{season}</h3>
                       {highlight && (
                         <>
                           <div className="flex gap-2">
-                            <div className="w-12 sm:w-16 aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 group transition-all duration-300 shadow-md relative" style={{ boxSizing: 'border-box', background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                            <div className="w-12 sm:w-16 aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 group transition-all duration-300 shadow-md relative" style={{ boxSizing: 'border-box', background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
                                 {highlight.node?.main_picture?.large && (
                                   <img src={highlight.node.main_picture.large} alt={highlight.node.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
@@ -1466,8 +1466,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="HIDDEN-GEMS">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Hidden Gems
               </h1>
             </div>
@@ -1494,8 +1494,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="DIDNT-LAND">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Didn't Land
               </h1>
             </div>
@@ -1521,8 +1521,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="PLANNED">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Planned to Watch
               </h1>
             </div>
@@ -1570,8 +1570,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="MANGA-LOG">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Manga Read
               </h1>
             </div>
@@ -1589,8 +1589,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="READING-TIME">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Reading Stats
               </h1>
             </div>
@@ -1685,8 +1685,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="GENRE-MATRIX">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Most Read Genre
               </h1>
             </div>
@@ -1701,7 +1701,7 @@ export default function MALWrapped() {
                 {otherMangaGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherMangaGenres.map(([genreName, count], idx) => (
-                      <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                      <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                         <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl hover:from-white/20 hover:to-white/10 p-2 h-full">
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white">{genreName}</p>
@@ -1775,8 +1775,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="CREATORS">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Favorite Author
               </h1>
             </div>
@@ -1793,7 +1793,7 @@ export default function MALWrapped() {
                 {otherAuthors.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherAuthors.map(([authorName, count], idx) => (
-                      <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                      <div key={idx} className="text-center rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                         <div className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl hover:from-white/20 hover:to-white/10 p-2 h-full">
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white truncate">{authorName}</p>
@@ -1820,8 +1820,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="HIDDEN-GEMS">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Hidden Gems
               </h1>
             </div>
@@ -1848,8 +1848,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="DIDNT-LAND">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Didn't Land
               </h1>
             </div>
@@ -1875,8 +1875,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="PLANNED">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 Planned to Read
               </h1>
             </div>
@@ -1900,19 +1900,19 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="FINAL-REPORT">
             <div className="text-center relative">
-              <div className="absolute inset-0 gradient-blue opacity-10 blur-3xl -z-10"></div>
-              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderImage: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) 1' }}>
+              <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
+              <h1 className="relative z-10 heading-lg uppercase text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap animate-fade-slide-up" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }}>
                 {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} In Review
               </h1>
             </div>
             <div className="mt-4 flex flex-col gap-2 text-white animate-fade-slide-up w-full max-h-full overflow-y-auto relative z-10">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="rounded-xl flex flex-col transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                <div className="rounded-xl flex flex-col transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                   <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 flex flex-col h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top 5 Anime</p>
                   <div className="space-y-1 flex-grow">
                     {stats.topRated.slice(0, 5).map((a, i) => (
-                        <p key={a.node.id} className="rounded-lg transition-all relative" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.2) 100%)', padding: '1px' }}>
+                        <p key={a.node.id} className="rounded-lg transition-all relative" style={{ background: 'rgba(9, 233, 254, 0.2)', padding: '1px' }}>
                           <span className="bg-gradient-to-r from-white/10 to-white/5 rounded-lg hover:from-white/20 hover:to-white/10 py-1 px-2 block">
                             <span className="font-black text-[#09e9fe] w-6 inline-block">{i+1}.</span><span className="heading-sm text-white truncate font-bold">{a.node.title}</span>
                           </span>
@@ -1921,12 +1921,12 @@ export default function MALWrapped() {
                   </div>
                   </div>
                 </div>
-                <div className="rounded-xl flex flex-col transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                <div className="rounded-xl flex flex-col transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                   <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 flex flex-col h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top 5 Manga</p>
                   <div className="space-y-1 flex-grow">
                     {stats.topManga.slice(0, 5).map((m, i) => (
-                        <p key={m.node.id} className="rounded-lg transition-all relative" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.2) 100%)', padding: '1px' }}>
+                        <p key={m.node.id} className="rounded-lg transition-all relative" style={{ background: 'rgba(9, 233, 254, 0.2)', padding: '1px' }}>
                           <span className="bg-gradient-to-r from-white/10 to-white/5 rounded-lg hover:from-white/20 hover:to-white/10 py-1 px-2 block">
                             <span className="font-black text-[#09e9fe] w-6 inline-block">{i+1}.</span><span className="heading-sm text-white truncate font-bold">{m.node.title}</span>
                           </span>
@@ -1937,7 +1937,7 @@ export default function MALWrapped() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-xl transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                   <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Episodes Watched</p>
                   <p className="number-md text-[#09e9fe] drop-shadow-lg">
@@ -1945,7 +1945,7 @@ export default function MALWrapped() {
                   </p>
                   </div>
                 </div>
-                <div className="rounded-xl transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                   <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Chapters Read</p>
                   <p className="number-md text-[#09e9fe] drop-shadow-lg">
@@ -1954,7 +1954,7 @@ export default function MALWrapped() {
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+              <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                 <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
                 <p className="body-sm text-white/90 mb-2 font-bold">Total Time Spent</p>
                 <p className="number-lg text-[#09e9fe] drop-shadow-lg">
@@ -1972,13 +1972,13 @@ export default function MALWrapped() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-xl transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                   <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top Studio</p>
                   <p className="heading-sm text-white truncate font-black">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="rounded-xl transition-all shadow-lg" style={{ background: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%)', padding: '2px' }}>
+                <div className="rounded-xl transition-all shadow-lg" style={{ background: 'rgba(9, 233, 254, 0.3)', padding: '2px' }}>
                   <div className="bg-gradient-to-br from-white/15 to-white/8 rounded-xl hover:from-white/25 hover:to-white/15 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top Author</p>
                   <p className="heading-sm text-white truncate font-black">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
@@ -1995,7 +1995,7 @@ export default function MALWrapped() {
   }
 
   return (
-    <main className="bg-[#0A0A0A] text-white w-screen flex items-center justify-center p-2 selection:bg-[#3B82F6] selection:text-white relative overflow-hidden moving-grid-bg" style={{ height: '100dvh' }}>
+    <main className="bg-[#0A0A0A] text-white w-screen flex items-center justify-center p-2 selection:bg-[#09e9fe] selection:text-white relative overflow-hidden moving-grid-bg" style={{ height: '100dvh' }}>
       {/* Background floating anime elements - outside the card on grid bg */}
       {stats && isAuthenticated && slides.length > 0 && (
         <div className="absolute inset-0 pointer-events-none opacity-5 overflow-hidden" style={{ zIndex: 0 }}>
@@ -2038,7 +2038,7 @@ export default function MALWrapped() {
           })()}
         </div>
       )}
-      <div ref={slideRef} className={`w-full max-w-5xl bg-[#0A0A0A] rounded-2xl shadow-2xl shadow-black/50 flex flex-col justify-center relative overflow-hidden slide-card ${isCapturing ? 'capturing' : ''}`} style={{ zIndex: 10, height: '100dvh', border: '2px solid', borderImage: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%) 1' }}>
+      <div ref={slideRef} className={`w-full max-w-5xl bg-[#0A0A0A] rounded-2xl shadow-2xl shadow-black/50 flex flex-col justify-center relative overflow-hidden slide-card ${isCapturing ? 'capturing' : ''}`} style={{ zIndex: 10, height: '100dvh', border: '2px solid', borderColor: 'rgba(9, 233, 254, 0.3)' }}>
         <div className="z-10 w-full h-full flex flex-col items-center justify-center">
           {error && (
             <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500/90 text-white px-6 py-3 rounded-lg z-50">
@@ -2048,7 +2048,7 @@ export default function MALWrapped() {
 
           {isLoading && (
             <div className="text-center">
-              <div className="animate-pulse-fast text-[#3B82F6] mb-4 text-4xl">*</div>
+              <div className="animate-pulse-fast text-[#09e9fe] mb-4 text-4xl">*</div>
               <h1 className="text-3xl text-white uppercase tracking-widest">{loadingProgress || 'Generating your report...'}</h1>
             </div>
           )}
@@ -2062,7 +2062,7 @@ export default function MALWrapped() {
               <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
                 <button
                   onClick={handleBegin}
-                  className="bg-gradient-blue text-white font-bold uppercase text-lg px-8 py-3 rounded-md hover:opacity-90 transition-opacity duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-[#09e9fe] text-white font-bold uppercase text-lg px-8 py-3 rounded-md hover:opacity-90 transition-opacity duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!CLIENT_ID || CLIENT_ID === '<your_client_id_here>'}
                 >
               Connect with MAL
@@ -2081,10 +2081,7 @@ export default function MALWrapped() {
                     onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
                     className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-black/50 rounded-lg text-xs sm:text-sm font-bold uppercase tracking-wider focus:outline-none transition-all hover:bg-black/70 appearance-none pr-8 sm:pr-10 text-white"
                     style={{ 
-                      border: '1px solid transparent', 
-                      backgroundImage: 'linear-gradient(black, black), linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', 
-                      backgroundOrigin: 'border-box', 
-                      backgroundClip: 'padding-box, border-box',
+                      border: '1px solid #09e9fe',
                       color: '#ffffff'
                     }}
                   >
@@ -2112,7 +2109,7 @@ export default function MALWrapped() {
                   return (
                     <div key={i} className="flex-1 h-1 sm:h-1.5 rounded-full bg-white/10 overflow-hidden">
                       <div 
-                        className={`h-full rounded-full transition-all duration-500 ease-out ${isActive ? 'bg-gradient-blue' : 'bg-white/30'}`} 
+                        className={`h-full rounded-full transition-all duration-500 ease-out ${isActive ? 'bg-[#09e9fe]' : 'bg-white/30'}`} 
                         style={{ width: (isCompleted || isActive) ? '100%' : '0%' }} 
                       />
                     </div>
@@ -2142,7 +2139,7 @@ export default function MALWrapped() {
                 {currentSlide === slides.length - 1 ? (
               <button
                     onClick={() => { setCurrentSlide(0); setIsAuthenticated(false); setStats(null); }} 
-                    className="bg-gradient-blue text-white font-bold uppercase px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 rounded-full hover:opacity-90 transition-opacity text-xs sm:text-sm md:text-base"
+                    className="bg-[#09e9fe] text-white font-bold uppercase px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 rounded-full hover:opacity-90 transition-opacity text-xs sm:text-sm md:text-base"
                   >
                     Restart
                   </button>
