@@ -599,7 +599,7 @@ export default function MALWrapped() {
         }
       });
     });
-    
+
     const topAuthors = Object.entries(authorCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
@@ -850,7 +850,7 @@ export default function MALWrapped() {
         )}
         <div className="w-full relative z-10">
           {children}
-        </div>
+          </div>
       </div>
     );
 
@@ -883,14 +883,14 @@ export default function MALWrapped() {
               Your Favorite {type === 'anime' ? 'Anime' : 'Manga'}
             </motion.h1>
           </div>
-          <motion.h2 className="body-lg font-bold text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-            The {type === 'anime' ? 'series' : 'manga'} you rated the highest.
-          </motion.h2>
+            <motion.h2 className="body-lg font-bold text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
+              The {type === 'anime' ? 'series' : 'manga'} you rated the highest.
+            </motion.h2>
           <div className="mt-4 flex flex-col gap-2 w-full">
-            {(() => {
-              const [featured, ...others] = top5Formatted;
-              return (
-                <>
+              {(() => {
+                const [featured, ...others] = top5Formatted;
+                return (
+                  <>
                   <div className="border-box-cyan rounded-xl overflow-hidden group transition-all duration-300 flex flex-row items-left relative w-full shadow-2xl" style={{ padding: '2px' }}>
                     <div className="bg-black/20 rounded-xl w-full h-full hover:bg-black/30 flex flex-row items-center">
                       <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-[#09e9fe] text-black rounded-full flex items-center justify-center font-black text-xs sm:text-sm md:text-base shadow-lg">1</div>
@@ -899,9 +899,9 @@ export default function MALWrapped() {
                         const featuredImage = (
                           <div className="border-box-cyan flex-shrink-0 rounded-xl overflow-hidden group transition-all duration-300 shadow-xl relative" style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '275px', padding: '2px' }}>
                             <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
-                              {featured.coverImage && (
+                            {featured.coverImage && (
                                 <img src={featured.coverImage} crossOrigin="anonymous" alt={featured.title} className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
-                              )}
+                            )}
                             </div>
                           </div>
                         );
@@ -917,25 +917,25 @@ export default function MALWrapped() {
                       {featured.studio && <p className="body-md text-[#09e9fe] truncate font-bold text-left">{featured.studio}</p>}
                       {featured.author && <p className="body-md text-[#09e9fe] truncate font-bold text-left">{featured.author}</p>}
                       <div className="flex items-left justify-left body-md text-yellow-300 mt-2 font-bold">
-                        <span className="mr-0.5 sm:mr-1">★</span>
-                        <span>{featured.userRating.toFixed(1)} / 10</span>
-                      </div>
-                      {featured.genres.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2 justify-left items-left">
-                          {featured.genres.slice(0, 2).map(g => (
-                            <span key={g} className="border-box-cyan body-sm tracking-wider text-white px-2 py-0.5 rounded-lg font-semibold" style={{ border: '1px solid rgba(9, 233, 254, 0.1)' }}>{g}</span>
-                          ))}
+                          <span className="mr-0.5 sm:mr-1">★</span>
+                          <span>{featured.userRating.toFixed(1)} / 10</span>
                         </div>
-                      )}
+                        {featured.genres.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-2 justify-left items-left">
+                            {featured.genres.slice(0, 2).map(g => (
+                            <span key={g} className="border-box-cyan body-sm tracking-wider text-white px-2 py-0.5 rounded-lg font-semibold" style={{ border: '1px solid rgba(9, 233, 254, 0.1)' }}>{g}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       </div>
                     </div>
-                  </div>
-                  {others.length > 0 && (
+                    {others.length > 0 && (
                     <div className="grid grid-cols-4 gap-2 w-full">
-                      {others.map((item, index) => {
-                        const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
-                        const itemContent = (
-                          <div className="flex flex-col w-full min-w-0">
+                        {others.map((item, index) => {
+                          const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
+                          const itemContent = (
+                            <div className="flex flex-col w-full min-w-0">
                             <div className="border-box-cyan rounded-xl overflow-hidden group aspect-[2/3] relative transition-all duration-300 w-full shadow-lg" style={{ boxSizing: 'border-box', maxHeight: '275px', padding: '2px' }}>
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden relative">
                                 <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-[#09e9fe] text-black rounded-full flex items-center justify-center font-black text-xs sm:text-sm shadow-md">{index + 2}</div>
@@ -947,30 +947,30 @@ export default function MALWrapped() {
                             <div className="mt-2 text-center w-full min-w-0">
                               <h3 className="title-sm truncate font-black text-white">{item.title}</h3>
                               <div className="flex items-center justify-center body-sm text-yellow-300 font-bold">
-                                <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
-                                <span>{item.userRating.toFixed(1)}</span>
+                                  <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
+                                  <span>{item.userRating.toFixed(1)}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                        return (
-                          <div key={item.id} className="w-full min-w-0">
-                            {malUrl ? (
-                              <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                {itemContent}
-                              </a>
-                            ) : (
-                              itemContent
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
+                          );
+                          return (
+                            <div key={item.id} className="w-full min-w-0">
+                              {malUrl ? (
+                                <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                  {itemContent}
+                                </a>
+                              ) : (
+                                itemContent
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
         </motion.div>
       </SlideLayout>
     );
@@ -1197,43 +1197,43 @@ export default function MALWrapped() {
       return (
         <div className="mt-4 flex justify-center w-full px-2">
           <div className={`grid ${getGridCols()} gap-4 place-items-center w-full max-w-4xl mx-auto`}>
-            {visibleItems.map((item, idx) => {
-              const malUrl = getMALUrl(item);
-              const itemContent = (
+          {visibleItems.map((item, idx) => {
+            const malUrl = getMALUrl(item);
+            const itemContent = (
                 <div className="flex flex-col items-center w-full">
                   <div className="aspect-[2/3] bg-transparent border border-white/5 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#09e9fe]/60" style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}>
-                    {item.coverImage && (
-                      <img 
-                        src={item.coverImage} 
-                        alt={item.title || ''} 
-                        crossOrigin="anonymous" 
-                        className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
-                      />
-                    )}
-                  </div>
-                  {item.title && (
+                  {item.coverImage && (
+                    <img 
+                      src={item.coverImage} 
+                      alt={item.title || ''} 
+                      crossOrigin="anonymous" 
+                      className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
+                    />
+                  )}
+                </div>
+                {item.title && (
                     <div className="mt-2 text-center w-full px-1">
                       <p className="title-sm truncate">{item.title}</p>
-                      {item.userRating && (
-                        <p className="body-sm text-yellow-300">★ {item.userRating.toFixed(1)}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-              
-              return (
+                    {item.userRating && (
+                      <p className="body-sm text-yellow-300">★ {item.userRating.toFixed(1)}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+            
+            return (
                 <div key={idx} className="group w-full flex justify-center">
-                  {malUrl ? (
+                {malUrl ? (
                     <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="w-full flex justify-center">
-                      {itemContent}
-                    </a>
-                  ) : (
-                    itemContent
-                  )}
-                </div>
-              );
-            })}
+                    {itemContent}
+                  </a>
+                ) : (
+                  itemContent
+                )}
+              </div>
+            );
+          })}
           </div>
         </div>
       );
@@ -1303,7 +1303,7 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] pb-2 px-2 inline-block whitespace-nowrap font-black" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Anime Watched
+              {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Anime Watched
               </motion.h1>
             </div>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -1322,7 +1322,7 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Anime Stats
+              Anime Stats
               </motion.h1>
             </div>
             <motion.div className="mt-4 space-y-4 relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -1385,7 +1385,7 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Most Watched Genre
+              Most Watched Genre
               </motion.h1>
             </div>
             {topGenre ? (
@@ -1404,8 +1404,8 @@ export default function MALWrapped() {
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white">{genreName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} anime</p>
-                        </div>
                       </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
@@ -1458,8 +1458,8 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Favorite Studio
-              </h1>
+              Favorite Studio
+            </h1>
             </div>
             {topStudio ? (
               <>
@@ -1479,14 +1479,14 @@ export default function MALWrapped() {
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white truncate">{studioName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} anime</p>
-                        </div>
                       </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
               </>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No studio data available</div>
+              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No studio data available</motion.div>
             )}
           </SlideLayout>
         );
@@ -1498,8 +1498,8 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Seasonal Highlights
-              </h1>
+              Seasonal Highlights
+            </h1>
             </div>
             <div className="mt-2 sm:mt-4 flex flex-col md:grid md:grid-cols-2 gap-1.5 sm:gap-2 relative z-10">
               {seasons.map(season => {
@@ -1511,27 +1511,27 @@ export default function MALWrapped() {
                   <motion.div key={season} className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }} {...fadeSlideUp} data-framer-motion>
                     <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
                       <h3 className="heading-md font-black text-[#09e9fe] mb-1 sm:mb-2 text-sm sm:text-base">{season}</h3>
-                      {highlight && (
-                        <>
+                    {highlight && (
+                      <>
                           <div className="flex gap-1.5 sm:gap-2">
                             <div className="border-box-cyan aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 group transition-all duration-300 shadow-md relative w-12 sm:w-16 md:w-20" style={{ boxSizing: 'border-box', padding: '2px' }}>
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
-                                {highlight.node?.main_picture?.large && (
+                            {highlight.node?.main_picture?.large && (
                                   <img src={highlight.node.main_picture.large} alt={highlight.node.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
-                                )}
+                            )}
                               </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
+                          </div>
+                          <div className="flex-1 min-w-0">
                               <p className="title-md truncate font-black text-white text-xs sm:text-sm md:text-base">{highlight.node?.title}</p>
                               <p className="body-md text-[#09e9fe] truncate font-bold text-xs sm:text-sm">{highlight.node?.studios?.[0]?.name || ''}</p>
                               <p className="body-md text-yellow-300 mt-1 sm:mt-2 font-bold text-xs sm:text-sm">★ {highlight.list_status?.score || 'N/A'}</p>
                               <p className="body-sm text-white/80 mt-1 sm:mt-2 font-semibold text-xs sm:text-sm">{seasonData.totalAnime} anime</p>
-                            </div>
                           </div>
-                        </>
-                      )}
-                    </div>
+                        </div>
+                      </>
+                    )}
                   </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -1550,18 +1550,18 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Hidden Gems
-              </h1>
+              Hidden Gems
+            </h1>
             </div>
             <motion.h2 className="body-lg font-bold text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
               High-rated anime with low popularity
-            </h2>
+            </motion.h2>
             {gems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={gems} maxItems={5} />
-              </div>
+              </motion.div>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No hidden gems found</div>
+              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No hidden gems found</motion.div>
             )}
           </SlideLayout>
         );
@@ -1578,18 +1578,18 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Didn't Land
-              </h1>
+              Didn't Land
+            </h1>
             </div>
             <motion.h2 className="body-lg font-bold text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
               5 shows you rated the lowest
-            </h2>
+            </motion.h2>
             {didntLand.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={didntLand} maxItems={5} />
-              </div>
+              </motion.div>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No data available</div>
+              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No data available</motion.div>
             )}
           </SlideLayout>
         );
@@ -1605,18 +1605,18 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Planned to Watch
-              </h1>
+              Planned to Watch
+            </h1>
             </div>
             <motion.h2 className="body-lg font-bold text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
               5 shows you plan to watch {stats.selectedYear === 'all' ? '' : 'this year'}.
-            </h2>
+            </motion.h2>
             {plannedAnimeItems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedAnimeItems} maxItems={5} />
-              </div>
+              </motion.div>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No planned anime found</div>
+              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No planned anime found</motion.div>
             )}
           </SlideLayout>
         );
@@ -1654,8 +1654,8 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Manga Read
-              </h1>
+              {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Manga Read
+            </h1>
             </div>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-[#09e9fe] drop-shadow-lg">
@@ -1673,8 +1673,8 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Reading Stats
-              </h1>
+              Reading Stats
+            </h1>
             </div>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="space-y-4">
@@ -1769,8 +1769,8 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Most Read Genre
-              </h1>
+              Most Read Genre
+            </h1>
             </div>
             {topMangaGenre ? (
               <>
@@ -1788,8 +1788,8 @@ export default function MALWrapped() {
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white">{genreName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} manga</p>
-                        </div>
                       </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
@@ -1866,7 +1866,7 @@ export default function MALWrapped() {
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
                 Favorite Author
-              </h1>
+              </motion.h1>
             </div>
             {topAuthor ? (
               <>
@@ -1886,8 +1886,8 @@ export default function MALWrapped() {
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white truncate">{authorName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} manga</p>
-                        </div>
                       </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
@@ -1910,18 +1910,18 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Hidden Gems
-              </h1>
+              Hidden Gems
+            </h1>
             </div>
             <motion.h2 className="body-lg font-bold text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
               High-rated manga with low popularity
-            </h2>
+            </motion.h2>
             {mangaGems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={mangaGems} maxItems={5} />
-              </div>
+              </motion.div>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No hidden gems found</div>
+              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No hidden gems found</motion.div>
             )}
           </SlideLayout>
         );
@@ -1938,18 +1938,18 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Didn't Land
-              </h1>
+              Didn't Land
+            </h1>
             </div>
             <motion.h2 className="body-lg font-bold text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
               5 manga you rated the lowest
-            </h2>
+            </motion.h2>
             {mangaDidntLand.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={mangaDidntLand} maxItems={5} />
-              </div>
+              </motion.div>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No data available</div>
+              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No data available</motion.div>
             )}
           </SlideLayout>
         );
@@ -1965,18 +1965,18 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                Planned to Read
-              </h1>
+              Planned to Read
+            </h1>
             </div>
             <motion.h2 className="body-lg font-bold text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
               5 manga you plan to read {stats.selectedYear === 'all' ? '' : 'this year'}.
-            </h2>
+            </motion.h2>
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedMangaItems} maxItems={5} />
-              </div>
+              </motion.div>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No planned manga found</div>
+              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No planned manga found</motion.div>
             )}
           </SlideLayout>
         );
@@ -1990,7 +1990,7 @@ export default function MALWrapped() {
             <div className="text-center relative">
               <div className="absolute inset-0 bg-[#09e9fe]/10 opacity-10 blur-3xl -z-10"></div>
               <motion.h1 className="relative z-10 heading-lg text-[#09e9fe] font-black pb-2 px-2 inline-block whitespace-nowrap" style={{ borderBottom: '2px solid', borderColor: '#09e9fe' }} {...fadeSlideUp} data-framer-motion>
-                {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} In Review
+              {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} In Review
               </motion.h1>
             </div>
             <motion.div className="mt-2 sm:mt-4 flex flex-col gap-1 sm:gap-1.5 text-white w-full max-h-full overflow-y-auto relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -2002,10 +2002,10 @@ export default function MALWrapped() {
                     {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="py-0 px-1 sm:px-2">
                           <span className="font-black text-[#09e9fe] w-4 sm:w-6 inline-block text-xs sm:text-sm">{i+1}.</span><span className="heading-sm text-white truncate font-bold text-xs sm:text-sm md:text-base">{a.node.title}</span>
-                        </p>
+                      </p>
                     ))}
                   </div>
-                  </div>
+                </div>
                 </div>
                 <div className="border-box-cyan rounded-xl flex flex-col transition-all shadow-lg" style={{ padding: '2px' }}>
                   <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 flex flex-col h-full">
@@ -2014,11 +2014,11 @@ export default function MALWrapped() {
                     {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="py-0 px-1 sm:px-2">
                           <span className="font-black text-[#09e9fe] w-4 sm:w-6 inline-block text-xs sm:text-sm">{i+1}.</span><span className="heading-sm text-white truncate font-bold text-xs sm:text-sm md:text-base">{m.node.title}</span>
-                        </p>
+                      </p>
                     ))}
-                    </div>
                   </div>
                 </div>
+              </div>
               </div>
               <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
                 <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
@@ -2027,7 +2027,7 @@ export default function MALWrapped() {
                   <p className="number-md text-[#09e9fe] drop-shadow-lg text-lg sm:text-xl md:text-2xl">
                     {stats.totalEpisodes || 0}
                   </p>
-                  </div>
+                </div>
                 </div>
                 <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
                   <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
@@ -2035,8 +2035,8 @@ export default function MALWrapped() {
                   <p className="number-md text-[#09e9fe] drop-shadow-lg text-lg sm:text-xl md:text-2xl">
                     {stats.totalChapters || 0}
                   </p>
-                  </div>
                 </div>
+              </div>
               </div>
               <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
                 <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
@@ -2053,8 +2053,8 @@ export default function MALWrapped() {
                     </>
                   )}
                 </p>
-                </div>
               </div>
+                </div>
               <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
                 <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
                   <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
@@ -2079,7 +2079,26 @@ export default function MALWrapped() {
   }
 
   return (
-    <main className="bg-[#0A0A0A] text-white w-screen flex items-center justify-center p-2 selection:bg-[#09e9fe] selection:text-white relative overflow-hidden moving-grid-bg" style={{ height: '100dvh' }}>
+    <motion.main 
+      className="bg-[#0A0A0A] text-white w-screen flex items-center justify-center p-2 selection:bg-[#09e9fe] selection:text-white relative overflow-hidden" 
+      style={{ 
+        height: '100dvh',
+        backgroundImage: `
+          linear-gradient(to right, rgba(9, 233, 254, 0.08) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(9, 233, 254, 0.08) 1px, transparent 1px)
+        `,
+        backgroundSize: '40px 40px'
+      }}
+      animate={{
+        backgroundPosition: ['0 0', '480px 480px']
+      }}
+      transition={{
+        duration: 60,
+        repeat: Infinity,
+        ease: 'linear'
+      }}
+      data-framer-motion
+    >
       {/* Background floating anime elements - outside the card on grid bg */}
       {stats && isAuthenticated && slides.length > 0 && (
         <div className="absolute inset-0 pointer-events-none opacity-5 overflow-hidden" style={{ zIndex: 0 }}>
@@ -2106,16 +2125,17 @@ export default function MALWrapped() {
               ];
               const pos = positions[idx % positions.length];
               return (
-                <img
+                <motion.img
                   key={idx}
                   src={image}
                   alt=""
                   className="absolute w-24 h-36 md:w-32 md:h-48 object-cover rounded-lg blur-md"
                   style={{
                     ...pos,
-                    transform: `rotate(${pos.rotate}deg)`,
-                    animation: `float 8s ease-in-out infinite`,
+                    rotate: `${pos.rotate}deg`,
                   }}
+                  {...float}
+                  data-framer-motion
                 />
               );
             });
@@ -2160,9 +2180,9 @@ export default function MALWrapped() {
               {/* Top Bar - Year Selector and Download */}
               <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 pt-3 pb-2 flex items-center justify-center gap-2 sm:gap-3">
                 <div className="relative min-w-[120px] sm:min-w-[140px]">
-                  <select
-                    value={selectedYear}
-                    onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
                     className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-black/50 rounded-lg text-xs sm:text-sm font-bold tracking-wider focus:outline-none transition-all hover:bg-black/70 appearance-none pr-8 sm:pr-10 text-white"
                     style={{ 
                       border: '1px solid #09e9fe',
@@ -2173,7 +2193,7 @@ export default function MALWrapped() {
                     <option value="2024" style={{ background: '#0A0A0A', color: '#ffffff' }}>2024</option>
                     <option value="2025" style={{ background: '#0A0A0A', color: '#ffffff' }}>2025</option>
                     <option value="all" style={{ background: '#0A0A0A', color: '#ffffff' }}>ALL TIME</option>
-                  </select>
+                </select>
                   <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
                     <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#09e9fe]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -2240,6 +2260,6 @@ export default function MALWrapped() {
         )}
       </div>
     </div>
-    </main>
+    </motion.main>
   );
 }
