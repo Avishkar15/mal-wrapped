@@ -1453,7 +1453,7 @@ export default function MALWrapped() {
                 Seasonal Highlights
               </h1>
             </div>
-            <div className="mt-4 flex flex-col md:grid md:grid-cols-2 gap-2 relative z-10">
+            <div className="mt-2 sm:mt-4 flex flex-col md:grid md:grid-cols-2 gap-1.5 sm:gap-2 relative z-10">
               {seasons.map(season => {
                 const seasonData = stats.seasonalHighlights?.[season];
                 if (!seasonData) return null;
@@ -1461,12 +1461,12 @@ export default function MALWrapped() {
                 const seasonIndex = seasons.indexOf(season);
                 return (
                   <div key={season} className="border-box-cyan rounded-xl animate-fade-slide-up transition-all shadow-lg" style={{ padding: '2px' }}>
-                    <div className="bg-black/20 rounded-xl hover:bg-black/30 p-2 h-full">
-                      <h3 className="heading-md font-black text-[#09e9fe] mb-2">{season}</h3>
+                    <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
+                      <h3 className="heading-md font-black text-[#09e9fe] mb-1 sm:mb-2 text-sm sm:text-base">{season}</h3>
                       {highlight && (
                         <>
-                          <div className="flex gap-2">
-                            <div className="border-box-cyan aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 group transition-all duration-300 shadow-md relative w-16 sm:w-20 md:w-24" style={{ boxSizing: 'border-box', padding: '2px' }}>
+                          <div className="flex gap-1.5 sm:gap-2">
+                            <div className="border-box-cyan aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 group transition-all duration-300 shadow-md relative w-12 sm:w-16 md:w-20" style={{ boxSizing: 'border-box', padding: '2px' }}>
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
                                 {highlight.node?.main_picture?.large && (
                                   <img src={highlight.node.main_picture.large} alt={highlight.node.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
@@ -1474,10 +1474,10 @@ export default function MALWrapped() {
                               </div>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="title-md truncate font-black text-white">{highlight.node?.title}</p>
-                              <p className="body-md text-[#09e9fe] truncate font-bold">{highlight.node?.studios?.[0]?.name || ''}</p>
-                              <p className="body-md text-yellow-300 mt-2 font-bold">★ {highlight.list_status?.score || 'N/A'}</p>
-                              <p className="body-sm text-white/80 mt-2 font-semibold">{seasonData.totalAnime} anime</p>
+                              <p className="title-md truncate font-black text-white text-xs sm:text-sm md:text-base">{highlight.node?.title}</p>
+                              <p className="body-md text-[#09e9fe] truncate font-bold text-xs sm:text-sm">{highlight.node?.studios?.[0]?.name || ''}</p>
+                              <p className="body-md text-yellow-300 mt-1 sm:mt-2 font-bold text-xs sm:text-sm">★ {highlight.list_status?.score || 'N/A'}</p>
+                              <p className="body-sm text-white/80 mt-1 sm:mt-2 font-semibold text-xs sm:text-sm">{seasonData.totalAnime} anime</p>
                             </div>
                           </div>
                         </>
