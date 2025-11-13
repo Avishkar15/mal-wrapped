@@ -1466,10 +1466,10 @@ export default function MALWrapped() {
                       {highlight && (
                         <>
                           <div className="flex gap-2">
-                            <div className="border-box-cyan aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 group transition-all duration-300 shadow-md relative w-12 sm:w-16 md:w-20" style={{ boxSizing: 'border-box', padding: '2px' }}>
+                            <div className="border-box-cyan aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 group transition-all duration-300 shadow-md relative" style={{ boxSizing: 'border-box', maxHeight: '275px', maxWidth: '183px', width: 'auto', height: 'auto', padding: '2px' }}>
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
                                 {highlight.node?.main_picture?.large && (
-                                  <img src={highlight.node.main_picture.large} alt={highlight.node.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
+                                  <img src={highlight.node.main_picture.large} alt={highlight.node.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" style={{ aspectRatio: '2/3' }} />
                                 )}
                               </div>
                             </div>
