@@ -835,8 +835,8 @@ export default function MALWrapped() {
                         <div className="p-2 flex flex-col justify-center flex-grow min-w-0 text-center">
                         <p className="body-sm uppercase tracking-widest text-[#09e9fe] font-black">#1 Favorite</p>
                         <h3 className="title-sm mt-2 truncate font-black text-white">{featured.title}</h3>
-                        {featured.studio && <p className="body-sm text-[#09e9fe] truncate font-bold">{featured.studio}</p>}
-                        {featured.author && <p className="body-sm text-[#09e9fe] truncate font-bold">{featured.author}</p>}
+                        {featured.studio && <p className="body-md text-[#09e9fe] truncate font-bold">{featured.studio}</p>}
+                        {featured.author && <p className="body-md text-[#09e9fe] truncate font-bold">{featured.author}</p>}
                         <div className="flex items-center justify-center body-sm text-yellow-300 mt-2 font-bold">
                           <span className="mr-0.5 sm:mr-1">★</span>
                           <span>{featured.userRating.toFixed(1)} / 10</span>
@@ -1441,7 +1441,7 @@ export default function MALWrapped() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="title-sm truncate font-black text-white">{highlight.node?.title}</p>
-                              <p className="body-sm text-[#09e9fe] truncate font-bold">{highlight.node?.studios?.[0]?.name || ''}</p>
+                              <p className="body-md text-[#09e9fe] truncate font-bold">{highlight.node?.studios?.[0]?.name || ''}</p>
                               <p className="body-sm text-yellow-300 mt-2 font-bold">★ {highlight.list_status?.score || 'N/A'}</p>
                               <p className="body-sm text-white/80 mt-2 font-semibold">{seasonData.totalAnime} anime</p>
                             </div>
@@ -1975,13 +1975,13 @@ export default function MALWrapped() {
                 <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
                   <div className="bg-black/20 rounded-xl hover:bg-black/30 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top Studio</p>
-                  <p className="heading-sm text-white truncate font-black">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
+                  <p className="heading-md text-white truncate font-black">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
                   <div className="bg-black/20 rounded-xl hover:bg-black/30 p-2 h-full">
                   <p className="body-sm text-white/90 mb-2 font-bold">Top Author</p>
-                  <p className="heading-sm text-white truncate font-black">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
+                  <p className="heading-md text-white truncate font-black">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
                   </div>
                 </div>
               </div>
