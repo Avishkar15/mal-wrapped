@@ -620,7 +620,7 @@ export default function MALWrapped() {
       
       // Capture with all animations stopped
       const canvas = await html2canvas(cardElement, {
-        backgroundColor: '#101010',
+        backgroundColor: '#0A0A0A',
         scale: 2,
         logging: false,
         useCORS: true,
@@ -639,8 +639,26 @@ export default function MALWrapped() {
             allElements.forEach(el => {
               el.style.animation = 'none';
               el.style.transform = 'none';
+              // Ensure text gradients are visible
+              if (el.classList.contains('text-gradient-blue')) {
+                el.style.webkitBackgroundClip = 'text';
+                el.style.backgroundClip = 'text';
+                el.style.webkitTextFillColor = 'transparent';
+              }
             });
           }
+          // Hide all navigation and control bars in cloned document
+          const flexShrinkBars = clonedDoc.querySelectorAll('.flex-shrink-0');
+          flexShrinkBars.forEach(bar => {
+            // Check if this is a control bar (has buttons, select, or progress indicators)
+            const hasControls = bar.querySelector('button') || 
+                               bar.querySelector('select') || 
+                               bar.querySelectorAll('div[class*="rounded-full"]').length > 0 ||
+                               bar.textContent.includes('/');
+            if (hasControls) {
+              bar.style.display = 'none';
+            }
+          });
         }
       });
       
@@ -2022,7 +2040,7 @@ export default function MALWrapped() {
           })()}
         </div>
       )}
-      <div ref={slideRef} className={`w-full max-w-5xl bg-[#0A0A0A] rounded-2xl shadow-2xl shadow-black/50 flex flex-col justify-center relative overflow-hidden ${isCapturing ? 'capturing' : ''}`} style={{ zIndex: 10, height: '100dvh', border: '2px solid', borderImage: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%) 1' }}>
+      <div ref={slideRef} className={`w-full max-w-5xl bg-[#0A0A0A] rounded-2xl shadow-2xl shadow-black/50 flex flex-col justify-center relative overflow-hidden slide-card ${isCapturing ? 'capturing' : ''}`} style={{ zIndex: 10, height: '100dvh', border: '2px solid', borderImage: 'linear-gradient(135deg, rgba(79, 172, 254, 0.3) 0%, rgba(0, 242, 254, 0.3) 100%) 1' }}>
         <div className="z-10 w-full h-full flex flex-col items-center justify-center">
           {error && (
             <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500/90 text-white px-6 py-3 rounded-lg z-50">
