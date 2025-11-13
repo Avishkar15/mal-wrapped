@@ -768,7 +768,7 @@ export default function MALWrapped() {
                 )}
               </div>
               <div className="text-center">
-                <h3 className="title-l mb-2">{topItem.node?.title}</h3>
+                <h3 className="title-lg mb-2">{topItem.node?.title}</h3>
                 {type === 'anime' && topItem.node?.studios?.[0]?.name && (
                   <p className="body-md text-[#09e9fe] mb-2 font-bold">{topItem.node.studios[0].name}</p>
                 )}
@@ -863,12 +863,12 @@ export default function MALWrapped() {
                           </a>
                         ) : featuredImage;
                       })()}
-                      <div className="p-2 flex flex-col justify-center flex-grow min-w-0 text-center">
+                      <div className="p-2 flex flex-col justify-left flex-grow min-w-0 text-center">
                       <p className="body-sm tracking-widest text-[#09e9fe] font-black">#1 Favorite</p>
-                      <h3 className="title-md mt-2 truncate font-black text-white">{featured.title}</h3>
-                      {featured.studio && <p className="body-sm text-[#09e9fe] truncate font-bold">{featured.studio}</p>}
-                      {featured.author && <p className="body-sm text-[#09e9fe] truncate font-bold">{featured.author}</p>}
-                      <div className="flex items-center justify-center body-sm text-yellow-300 mt-2 font-bold">
+                      <h3 className="title-lg mt-2 truncate font-black text-white">{featured.title}</h3>
+                      {featured.studio && <p className="body-md text-[#09e9fe] truncate font-bold">{featured.studio}</p>}
+                      {featured.author && <p className="body-md text-[#09e9fe] truncate font-bold">{featured.author}</p>}
+                      <div className="flex items-left justify-left body-md text-yellow-300 mt-2 font-bold">
                         <span className="mr-0.5 sm:mr-1">★</span>
                         <span>{featured.userRating.toFixed(1)} / 10</span>
                       </div>
@@ -1474,9 +1474,9 @@ export default function MALWrapped() {
                               </div>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="title-sm truncate font-black text-white">{highlight.node?.title}</p>
-                              <p className="body-sm text-[#09e9fe] truncate font-bold">{highlight.node?.studios?.[0]?.name || ''}</p>
-                              <p className="body-sm text-yellow-300 mt-2 font-bold">★ {highlight.list_status?.score || 'N/A'}</p>
+                              <p className="title-md truncate font-black text-white">{highlight.node?.title}</p>
+                              <p className="body-md text-[#09e9fe] truncate font-bold">{highlight.node?.studios?.[0]?.name || ''}</p>
+                              <p className="body-md text-yellow-300 mt-2 font-bold">★ {highlight.list_status?.score || 'N/A'}</p>
                               <p className="body-sm text-white/80 mt-2 font-semibold">{seasonData.totalAnime} anime</p>
                             </div>
                           </div>
