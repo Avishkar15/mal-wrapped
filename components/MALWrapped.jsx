@@ -865,7 +865,7 @@ export default function MALWrapped() {
                       })()}
                       <div className="p-2 flex flex-col justify-center flex-grow min-w-0 text-center">
                       <p className="body-sm tracking-widest text-[#09e9fe] font-black">#1 Favorite</p>
-                      <h3 className="title-sm mt-2 truncate font-black text-white">{featured.title}</h3>
+                      <h3 className="title-md mt-2 truncate font-black text-white">{featured.title}</h3>
                       {featured.studio && <p className="body-sm text-[#09e9fe] truncate font-bold">{featured.studio}</p>}
                       {featured.author && <p className="body-sm text-[#09e9fe] truncate font-bold">{featured.author}</p>}
                       <div className="flex items-center justify-center body-sm text-yellow-300 mt-2 font-bold">
