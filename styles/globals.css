@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,9 +7,10 @@
 @layer base {
   body {
     @apply antialiased;
-    background-color: #0A0A0A;
-    font-family: 'Hanken Grotesk', sans-serif;
+    background-color: #000000;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     color: #ffffff;
+    font-weight: 400;
   }
   
   img {
@@ -22,87 +22,94 @@
   /* Typography System - Named Styles */
   /* Use font weights more, fewer size variations */
   
-  /* Heading Styles - Chakra Petch */
+  /* Heading Styles - Spotify-like clean sans-serif */
   .heading-xl {
-    font-family: 'Chakra Petch', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 2.5rem;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: 0.05em;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #ffffff;
   }
   
   .heading-lg {
-    font-family: 'Chakra Petch', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.3;
-    letter-spacing: 0.05em;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: #ffffff;
   }
   
   .heading-md {
-    font-family: 'Chakra Petch', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.4;
-    letter-spacing: 0.03em;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    color: #ffffff;
   }
   
   .heading-sm {
-    font-family: 'Chakra Petch', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.4;
-    letter-spacing: 0.03em;
+    color: #ffffff;
   }
   
-  /* Body Styles - Hanken Grotesk */
+  /* Body Styles - Clean sans-serif */
   .body {
-    font-family: 'Hanken Grotesk', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.6;
+    color: #ffffff;
   }
   
   .body-lg {
-    font-family: 'Hanken Grotesk', sans-serif;
-    font-size: 1rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1.125rem;
     font-weight: 500;
     line-height: 1.6;
+    color: #ffffff;
   }
   
   .body-md {
-    font-family: 'Hanken Grotesk', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.6;
+    color: #ffffff;
   }
   
   .body-sm {
-    font-family: 'Hanken Grotesk', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 0.875rem;
     font-weight: 400;
     line-height: 1.5;
+    color: #ffffff;
   }
   
   /* Title Styles - For series names, anime/manga titles */
   .title-xl {
-    font-family: 'Hanken Grotesk', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 2.5rem;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.2;
     color: #ffffff;
   }
   
   .title-lg {
-    font-family: 'Hanken Grotesk', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.3;
     color: #ffffff;
   }
   
   .title-md {
-    font-family: 'Hanken Grotesk', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.4;
@@ -110,33 +117,39 @@
   }
   
   .title-sm {
-    font-family: 'Hanken Grotesk', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.4;
     color: #ffffff;
   }
   
-  /* Number Styles - Chakra Petch */
+  /* Number Styles - Bold clean sans-serif */
   .number-xl {
-    font-family: 'Chakra Petch', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 4rem;
-    font-weight: 700;
+    font-weight: 900;
     line-height: 1;
+    color: #ffffff;
+    letter-spacing: -0.02em;
   }
   
   .number-lg {
-    font-family: 'Chakra Petch', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 3rem;
-    font-weight: 700;
+    font-weight: 900;
     line-height: 1;
+    color: #ffffff;
+    letter-spacing: -0.02em;
   }
   
   .number-md {
-    font-family: 'Chakra Petch', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 2rem;
-    font-weight: 600;
+    font-weight: 800;
     line-height: 1;
+    color: #ffffff;
+    letter-spacing: -0.01em;
   }
   
   /* Responsive adjustments */
@@ -175,43 +188,100 @@
 }
 
 @layer utilities {
-  .moving-grid-bg {
-    background-image: 
-      linear-gradient(to right, rgba(9, 233, 254, 0.08) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(9, 233, 254, 0.08) 1px, transparent 1px);
-    background-size: 40px 40px;
+  /* Abstract geometric shapes for Spotify-like backgrounds */
+  .abstract-shapes {
+    position: relative;
+    overflow: hidden;
   }
 
-
-  /* Solid Blue Color */
-  .gradient-blue {
-    background: #09e9fe;
+  .abstract-shapes::before,
+  .abstract-shapes::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.15;
   }
 
-  .text-gradient {
-    color: #09e9fe;
+  .abstract-shapes-angular::before {
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+    clip-path: polygon(0% 0%, 100% 0%, 100% 60%, 60% 100%, 0% 100%);
+    transform: rotate(-10deg);
   }
 
-  .text-gradient-blue {
-    color: #09e9fe;
+  .abstract-shapes-angular::after {
+    bottom: 0;
+    right: 0;
+    width: 180px;
+    height: 180px;
+    background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+    clip-path: polygon(40% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 40%);
+    transform: rotate(15deg);
   }
 
-  .border-gradient-blue {
-    border-color: #09e9fe;
+  .abstract-shapes-pixelated::before {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: repeating-linear-gradient(
+      90deg,
+      #1db954 0px,
+      #1db954 10px,
+      transparent 10px,
+      transparent 20px
+    );
+    opacity: 0.2;
   }
 
-  .bg-gradient-blue {
-    background: #09e9fe;
+  .abstract-shapes-pixelated::after {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: repeating-linear-gradient(
+      90deg,
+      #1db954 0px,
+      #1db954 10px,
+      transparent 10px,
+      transparent 20px
+    );
+    opacity: 0.2;
   }
 
-  /* Border box with cyan border effect */
+  .abstract-shapes-wavy::before {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(45deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+    clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 0% 100%);
+    opacity: 0.2;
+  }
+
+  .abstract-shapes-wavy::after {
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+    clip-path: polygon(0% 30%, 100% 0%, 100% 100%, 0% 100%);
+    opacity: 0.2;
+  }
+
+  /* Simple border box - Spotify style */
   .border-box-cyan {
-    background: rgba(9, 233, 254, 0.1) !important;
-    transition: background 0.2s ease;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    transition: background 0.2s ease, border-color 0.2s ease;
   }
 
   .border-box-cyan:hover {
-    background: rgba(9, 233, 254, 0.15) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
   }
 
   /* Stop animations when capturing */
