@@ -928,7 +928,6 @@ export default function MALWrapped() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ scale: 1.05 }}
               >
                 {topItem.node?.main_picture?.large && (
                   <motion.img 
@@ -1022,7 +1021,6 @@ export default function MALWrapped() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                    whileHover={{ scale: 1.01 }}
                   >
                     <motion.div 
                       className="bg-black/20 rounded-xl w-full h-full flex flex-row items-center"
@@ -1036,7 +1034,6 @@ export default function MALWrapped() {
                           <motion.div 
                             className="border-box-cyan flex-shrink-0 rounded-xl overflow-hidden shadow-xl relative" 
                             style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '275px', padding: '2px' }}
-                            whileHover={{ scale: 1.02 }}
                             transition={{ duration: 0.3 }}
                           >
                             <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
@@ -1110,7 +1107,6 @@ export default function MALWrapped() {
                             <motion.div 
                               className="border-box-cyan rounded-xl overflow-hidden aspect-[2/3] relative w-full shadow-lg" 
                               style={{ boxSizing: 'border-box', maxHeight: '275px', padding: '2px' }}
-                              whileHover={{ scale: 1.05 }}
                               transition={{ duration: 0.3 }}
                             >
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden relative">
@@ -1316,7 +1312,7 @@ export default function MALWrapped() {
                   <motion.div 
                     className="aspect-[2/3] w-full bg-transparent border border-white/5 rounded-lg overflow-hidden relative" 
                     style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box' }}
-                    whileHover={{ borderColor: '#09e9fe', scale: 1.02 }}
+                    whileHover={{ borderColor: '#09e9fe' }}
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   >
                     {item.coverImage && (
@@ -1431,7 +1427,7 @@ export default function MALWrapped() {
                   <motion.div 
                     className="aspect-[2/3] bg-transparent border border-white/5 rounded-lg overflow-hidden relative" 
                     style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}
-                    whileHover={{ borderColor: '#09e9fe', scale: 1.05 }}
+                    whileHover={{ borderColor: '#09e9fe' }}
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   >
                   {item.coverImage && (
@@ -1512,7 +1508,7 @@ export default function MALWrapped() {
         <motion.div 
           className="bg-transparent border border-white/5 rounded-lg overflow-hidden aspect-[2/3] relative" 
           style={{ boxSizing: 'border-box' }}
-          whileHover={{ borderColor: '#09e9fe', scale: 1.05 }}
+          whileHover={{ borderColor: '#09e9fe' }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
           {rank && (
@@ -1799,7 +1795,6 @@ export default function MALWrapped() {
                             <motion.div 
                               className="border-box-cyan aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 shadow-md relative w-12 sm:w-16 md:w-20" 
                               style={{ boxSizing: 'border-box', padding: '2px' }}
-                              whileHover={{ scale: 1.1 }}
                               transition={{ duration: 0.3 }}
                             >
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
