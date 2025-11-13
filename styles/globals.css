@@ -199,77 +199,79 @@
     content: '';
     position: absolute;
     pointer-events: none;
-    opacity: 0.15;
+    z-index: 0;
   }
 
   .abstract-shapes-angular::before {
-    top: 0;
-    left: 0;
-    width: 200px;
-    height: 200px;
-    background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+    top: -100px;
+    left: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 107, 157, 0.4) 0%, rgba(196, 69, 105, 0.2) 50%, transparent 100%);
     clip-path: polygon(0% 0%, 100% 0%, 100% 60%, 60% 100%, 0% 100%);
     transform: rotate(-10deg);
+    filter: blur(40px);
   }
 
   .abstract-shapes-angular::after {
-    bottom: 0;
-    right: 0;
-    width: 180px;
-    height: 180px;
-    background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+    bottom: -100px;
+    right: -100px;
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(255, 107, 157, 0.4) 0%, rgba(196, 69, 105, 0.2) 50%, transparent 100%);
     clip-path: polygon(40% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 40%);
     transform: rotate(15deg);
+    filter: blur(40px);
   }
 
   .abstract-shapes-pixelated::before {
     top: 0;
     left: 0;
     width: 100%;
-    height: 40px;
+    height: 120px;
     background: repeating-linear-gradient(
       90deg,
-      #1db954 0px,
-      #1db954 10px,
-      transparent 10px,
-      transparent 20px
+      rgba(29, 185, 84, 0.3) 0px,
+      rgba(29, 185, 84, 0.3) 25px,
+      transparent 25px,
+      transparent 50px
     );
-    opacity: 0.2;
+    filter: blur(15px);
   }
 
   .abstract-shapes-pixelated::after {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 40px;
+    height: 120px;
     background: repeating-linear-gradient(
       90deg,
-      #1db954 0px,
-      #1db954 10px,
-      transparent 10px,
-      transparent 20px
+      rgba(29, 185, 84, 0.3) 0px,
+      rgba(29, 185, 84, 0.3) 25px,
+      transparent 25px,
+      transparent 50px
     );
-    opacity: 0.2;
+    filter: blur(15px);
   }
 
   .abstract-shapes-wavy::before {
     top: 0;
     left: 0;
     width: 100%;
-    height: 150px;
-    background: linear-gradient(45deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+    height: 300px;
+    background: radial-gradient(ellipse at top, rgba(245, 158, 11, 0.3) 0%, rgba(251, 191, 36, 0.2) 40%, transparent 80%);
     clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 0% 100%);
-    opacity: 0.2;
+    filter: blur(50px);
   }
 
   .abstract-shapes-wavy::after {
     bottom: 0;
     right: 0;
     width: 100%;
-    height: 150px;
-    background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+    height: 300px;
+    background: radial-gradient(ellipse at bottom, rgba(245, 158, 11, 0.3) 0%, rgba(251, 191, 36, 0.2) 40%, transparent 80%);
     clip-path: polygon(0% 30%, 100% 0%, 100% 100%, 0% 100%);
-    opacity: 0.2;
+    filter: blur(50px);
   }
 
   /* Simple border box - Spotify style */
