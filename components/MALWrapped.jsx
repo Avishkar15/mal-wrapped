@@ -777,7 +777,7 @@ export default function MALWrapped() {
                     {`${topItem.node.authors[0].node?.first_name || ''} ${topItem.node.authors[0].node?.last_name || ''}`.trim()}
                   </p>
                 )}
-                <div className="flex items-center justify-center heading-md text-yellow-300">
+                <div className="flex items-left justify-left heading-md text-yellow-300">
                   <span className="mr-2">★</span>
                   <span>{topItem.list_status?.score?.toFixed(1)} / 10</span>
                 </div>
@@ -863,17 +863,17 @@ export default function MALWrapped() {
                           </a>
                         ) : featuredImage;
                       })()}
-                      <div className="p-2 flex flex-col justify-left flex-grow min-w-0 text-center">
+                      <div className="p-2 flex flex-col justify-left flex-grow min-w-0 text-left">
                       <p className="body-sm tracking-widest text-[#09e9fe] font-black">#1 Favorite</p>
-                      <h3 className="title-lg mt-2 truncate font-black text-white">{featured.title}</h3>
-                      {featured.studio && <p className="body-md text-[#09e9fe] truncate font-bold">{featured.studio}</p>}
-                      {featured.author && <p className="body-md text-[#09e9fe] truncate font-bold">{featured.author}</p>}
+                      <h3 className="title-lg mt-2 truncate font-black text-white text-left">{featured.title}</h3>
+                      {featured.studio && <p className="body-md text-[#09e9fe] truncate font-bold text-left">{featured.studio}</p>}
+                      {featured.author && <p className="body-md text-[#09e9fe] truncate font-bold text-left">{featured.author}</p>}
                       <div className="flex items-left justify-left body-md text-yellow-300 mt-2 font-bold">
                         <span className="mr-0.5 sm:mr-1">★</span>
                         <span>{featured.userRating.toFixed(1)} / 10</span>
                       </div>
                       {featured.genres.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-2 justify-center">
+                        <div className="mt-2 flex flex-wrap gap-2 justify-left items-left">
                           {featured.genres.slice(0, 2).map(g => (
                             <span key={g} className="border-box-cyan body-sm tracking-wider text-white px-2 py-0.5 rounded-lg font-semibold" style={{ border: '1px solid rgba(9, 233, 254, 0.1)' }}>{g}</span>
                           ))}
