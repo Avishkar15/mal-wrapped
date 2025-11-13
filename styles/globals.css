@@ -180,46 +180,8 @@
       linear-gradient(to right, rgba(9, 233, 254, 0.08) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(9, 233, 254, 0.08) 1px, transparent 1px);
     background-size: 40px 40px;
-    animation: move-grid 60s linear infinite;
   }
 
-  @keyframes move-grid {
-    0% { background-position: 0 0; }
-    100% { background-position: 480px 480px; }
-  }
-
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes fade-slide-up {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(var(--rotate, 0deg)); }
-    50% { transform: translateY(-20px) rotate(var(--rotate, 0deg)); }
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.5s ease-out;
-  }
-
-  .animate-fade-slide-up {
-    animation: fade-slide-up 0.5s ease-out;
-  }
-
-  .animate-float {
-    animation: float 8s ease-in-out infinite;
-  }
 
   /* Solid Blue Color */
   .gradient-blue {
@@ -253,7 +215,7 @@
   }
 
   /* Stop animations when capturing */
-  .slide-card.capturing [class*="animate-"] {
+  .slide-card.capturing [data-framer-motion] {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
