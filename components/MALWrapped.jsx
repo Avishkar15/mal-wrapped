@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 function generateCodeVerifier(length = 128) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
@@ -24,25 +24,25 @@ const AUTH_URL = 'https://myanimelist.net/v1/oauth2/authorize';
 const fadeSlideUp = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, ease: 'easeOut' }
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
 };
 
 const fadeIn = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
-  transition: { duration: 0.5, ease: 'easeOut' }
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
 };
 
 const fadeIn100 = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
-  transition: { duration: 0.1, ease: 'easeOut' }
+  transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
 };
 
 const fadeIn300 = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
-  transition: { duration: 0.3, ease: 'easeOut' }
+  transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
 };
 
 const pulse = {
@@ -67,37 +67,66 @@ const float = {
   }
 };
 
-// Animated Number Component
-function AnimatedNumber({ value, duration = 1500, className = '' }) {
-  const [count, setCount] = useState(0);
-  const frameRef = useRef(null);
+// Stagger container variants
+const staggerContainer = {
+  initial: { opacity: 0 },
+  animate: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1
+    }
+  }
+};
+
+const staggerItem = {
+  initial: { opacity: 0, y: 20 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1]
+    }
+  }
+};
+
+// Hover animation variants
+const hoverScale = {
+  scale: 1.05,
+  transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
+};
+
+const hoverImage = {
+  scale: 1.1,
+  transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] }
+};
+
+// Animated Number Component using Framer Motion
+function AnimatedNumber({ value, duration = 1.5, className = '' }) {
+  const numValue = Number(value) || 0;
+  const motionValue = useMotionValue(0);
+  const spring = useSpring(motionValue, {
+    damping: 30,
+    stiffness: 100,
+    duration: duration * 1000
+  });
+  const display = useTransform(spring, (latest) => Math.floor(latest).toLocaleString());
 
   useEffect(() => {
-    const numValue = Number(value) || 0;
-    if (numValue === 0) {
-      setCount(0);
-      return;
-    }
-    let startTime = null;
-    const animate = (timestamp) => {
-      if (!startTime) startTime = timestamp;
-      const progress = timestamp - startTime;
-      const percentage = Math.min(progress / duration, 1);
-      setCount(Math.floor(percentage * numValue));
-      if (progress < duration) {
-        frameRef.current = requestAnimationFrame(animate);
-      } else {
-        setCount(numValue);
-      }
-    };
-    frameRef.current = requestAnimationFrame(animate);
+    motionValue.set(numValue);
+  }, [motionValue, numValue]);
 
-    return () => {
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
-    };
-  }, [value, duration]);
-
-  return <span className={className}>{count.toLocaleString()}</span>;
+  return (
+    <motion.span 
+      className={className}
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {display}
+    </motion.span>
+  );
 }
 
 export default function MALWrapped() {
@@ -780,16 +809,31 @@ export default function MALWrapped() {
     }, []);
 
     const SlideLayout = ({ children, verticalText }) => (
-      <div className="w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden">
+      <motion.div 
+        className="w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         {verticalText && (
-          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#09e9fe]/50 font-bold tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none">
+          <motion.p 
+            className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#09e9fe]/50 font-bold tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             {verticalText}
-          </p>
+          </motion.p>
         )}
-        <div className="w-full relative z-10">
+        <motion.div 
+          className="w-full relative z-10"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
           {children}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     );
 
     const yearText = stats.selectedYear === 'all' ? 'of all time' : `of ${stats.selectedYear}`;
@@ -805,16 +849,24 @@ export default function MALWrapped() {
           <motion.div className="text-center relative overflow-hidden" {...fadeSlideUp} data-framer-motion>
             <h1 className="text-3xl md:text-4xl font-bold text-[#09e9fe] mb-4">Your #1 Favorite</h1>
             <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-              <div className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden group transition-all duration-300" style={{ boxSizing: 'border-box', border: '1px solid #09e9fe' }}>
+              <motion.div 
+                className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden" 
+                style={{ boxSizing: 'border-box', border: '1px solid #09e9fe' }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.05 }}
+              >
                 {topItem.node?.main_picture?.large && (
-                  <img 
+                  <motion.img 
                     src={topItem.node.main_picture.large} 
                     alt={topItem.node.title} 
                     crossOrigin="anonymous" 
-                    className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110" 
+                    className="w-full h-full object-cover rounded-lg"
+                    whileHover={hoverImage}
                   />
                 )}
-              </div>
+              </motion.div>
               <div className="text-left">
                 <h3 className="title-lg mb-2">{topItem.node?.title}</h3>
                 {type === 'anime' && topItem.node?.studios?.[0]?.name && (
@@ -891,19 +943,41 @@ export default function MALWrapped() {
                 const [featured, ...others] = top5Formatted;
                 return (
                   <>
-                  <div className="border-box-cyan rounded-xl overflow-hidden group transition-all duration-300 flex flex-row items-left relative w-full shadow-2xl" style={{ padding: '2px' }}>
-                    <div className="bg-black/20 rounded-xl w-full h-full hover:bg-black/30 flex flex-row items-center">
+                  <motion.div 
+                    className="border-box-cyan rounded-xl overflow-hidden flex flex-row items-left relative w-full shadow-2xl" 
+                    style={{ padding: '2px' }}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                    whileHover={{ scale: 1.01 }}
+                  >
+                    <motion.div 
+                      className="bg-black/20 rounded-xl w-full h-full flex flex-row items-center"
+                      whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                      transition={{ duration: 0.3 }}
+                    >
                       <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-[#09e9fe] text-black rounded-full flex items-center justify-center font-black text-xs sm:text-sm md:text-base shadow-lg">1</div>
                       {(() => {
                         const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                         const featuredImage = (
-                          <div className="border-box-cyan flex-shrink-0 rounded-xl overflow-hidden group transition-all duration-300 shadow-xl relative" style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '275px', padding: '2px' }}>
+                          <motion.div 
+                            className="border-box-cyan flex-shrink-0 rounded-xl overflow-hidden shadow-xl relative" 
+                            style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '275px', padding: '2px' }}
+                            whileHover={{ scale: 1.02 }}
+                            transition={{ duration: 0.3 }}
+                          >
                             <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
                             {featured.coverImage && (
-                                <img src={featured.coverImage} crossOrigin="anonymous" alt={featured.title} className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
+                                <motion.img 
+                                  src={featured.coverImage} 
+                                  crossOrigin="anonymous" 
+                                  alt={featured.title} 
+                                  className="w-full h-full object-cover rounded-xl"
+                                  whileHover={hoverImage}
+                                />
                             )}
                             </div>
-                          </div>
+                          </motion.div>
                         );
                         return featuredUrl ? (
                           <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
@@ -911,7 +985,12 @@ export default function MALWrapped() {
                           </a>
                         ) : featuredImage;
                       })()}
-                      <div className="p-2 flex flex-col justify-left flex-grow min-w-0 text-left">
+                      <motion.div 
+                        className="p-2 flex flex-col justify-left flex-grow min-w-0 text-left"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                      >
                       <p className="body-sm tracking-widest text-[#09e9fe] font-black">#1 Favorite</p>
                       <h3 className="title-lg mt-2 truncate font-black text-white text-left">{featured.title}</h3>
                       {featured.studio && <p className="body-md text-[#09e9fe] truncate font-bold text-left">{featured.studio}</p>}
@@ -923,27 +1002,57 @@ export default function MALWrapped() {
                         {featured.genres.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-2 justify-left items-left">
                             {featured.genres.slice(0, 2).map(g => (
-                            <span key={g} className="border-box-cyan body-sm tracking-wider text-white px-2 py-0.5 rounded-lg font-semibold" style={{ border: '1px solid rgba(9, 233, 254, 0.1)' }}>{g}</span>
+                            <motion.span 
+                              key={g} 
+                              className="border-box-cyan body-sm tracking-wider text-white px-2 py-0.5 rounded-lg font-semibold" 
+                              style={{ border: '1px solid rgba(9, 233, 254, 0.1)' }}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.3, delay: 0.3 }}
+                            >
+                              {g}
+                            </motion.span>
                             ))}
                           </div>
                         )}
-                      </div>
-                      </div>
-                    </div>
+                      </motion.div>
+                    </motion.div>
+                  </motion.div>
                     {others.length > 0 && (
-                    <div className="grid grid-cols-4 gap-2 w-full">
+                    <motion.div 
+                      className="grid grid-cols-4 gap-2 w-full"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delayChildren: 0.4, staggerChildren: 0.1 }}
+                    >
                         {others.map((item, index) => {
                           const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                           const itemContent = (
-                            <div className="flex flex-col w-full min-w-0">
-                            <div className="border-box-cyan rounded-xl overflow-hidden group aspect-[2/3] relative transition-all duration-300 w-full shadow-lg" style={{ boxSizing: 'border-box', maxHeight: '275px', padding: '2px' }}>
+                            <motion.div 
+                              className="flex flex-col w-full min-w-0"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.4 }}
+                            >
+                            <motion.div 
+                              className="border-box-cyan rounded-xl overflow-hidden aspect-[2/3] relative w-full shadow-lg" 
+                              style={{ boxSizing: 'border-box', maxHeight: '275px', padding: '2px' }}
+                              whileHover={{ scale: 1.05 }}
+                              transition={{ duration: 0.3 }}
+                            >
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden relative">
                                 <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-[#09e9fe] text-black rounded-full flex items-center justify-center font-black text-xs sm:text-sm shadow-md">{index + 2}</div>
                                 {item.coverImage && (
-                                  <img src={item.coverImage} alt={item.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
+                                  <motion.img 
+                                    src={item.coverImage} 
+                                    alt={item.title} 
+                                    crossOrigin="anonymous" 
+                                    className="w-full h-full object-cover rounded-xl"
+                                    whileHover={hoverImage}
+                                  />
                                 )}
                               </div>
-                            </div>
+                            </motion.div>
                             <div className="mt-2 text-center w-full min-w-0">
                               <h3 className="title-sm truncate font-black text-white">{item.title}</h3>
                               <div className="flex items-center justify-center body-sm text-yellow-300 font-bold">
@@ -951,10 +1060,10 @@ export default function MALWrapped() {
                                   <span>{item.userRating.toFixed(1)}</span>
                                 </div>
                               </div>
-                            </div>
+                            </motion.div>
                           );
                           return (
-                            <div key={item.id} className="w-full min-w-0">
+                            <motion.div key={item.id} className="w-full min-w-0">
                               {malUrl ? (
                                 <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                   {itemContent}
@@ -962,10 +1071,10 @@ export default function MALWrapped() {
                               ) : (
                                 itemContent
                               )}
-                            </div>
+                            </motion.div>
                           );
                         })}
-                      </div>
+                      </motion.div>
                     )}
                   </>
                 );
@@ -980,16 +1089,31 @@ export default function MALWrapped() {
     if (!slide || !stats) return null;
 
     const SlideLayout = ({ children, verticalText }) => (
-      <div className="w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden">
+      <motion.div 
+        className="w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
         {verticalText && (
-          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#09e9fe]/50 font-bold tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none">
+          <motion.p 
+            className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-[#09e9fe]/50 font-bold tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             {verticalText}
-          </p>
+          </motion.p>
         )}
-        <div className="w-full relative z-10">
+        <motion.div 
+          className="w-full relative z-10"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
           {children}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     );
 
     // Image Carousel Component - Always carousel on all screen sizes
@@ -1106,27 +1230,48 @@ export default function MALWrapped() {
               const actualIndex = idx % visibleItems.length;
               const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}-${actualIndex}`;
               const content = (
-                <div className="flex flex-col flex-shrink-0 items-center w-full">
-                  <div className="aspect-[2/3] w-full bg-transparent border border-white/5 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#09e9fe]/60" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box' }}>
+                <motion.div 
+                  className="flex flex-col flex-shrink-0 items-center w-full"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ 
+                    duration: 0.4,
+                    delay: (idx % visibleItems.length) * 0.05,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
+                >
+                  <motion.div 
+                    className="aspect-[2/3] w-full bg-transparent border border-white/5 rounded-lg overflow-hidden relative" 
+                    style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box' }}
+                    whileHover={{ borderColor: '#09e9fe', scale: 1.02 }}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  >
                     {item.coverImage && (
-                      <img 
+                      <motion.img 
                         src={item.coverImage} 
                         alt={item.title || ''} 
                         crossOrigin="anonymous" 
-                        className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
+                        className="w-full h-full object-cover rounded-lg"
+                        whileHover={hoverImage}
                       />
                     )}
                     {showHover && hoveredItem === actualIndex && item.title && (
-                      <div className="absolute inset-0 bg-black/70 flex items-center justify-center p-2 z-10 transition-opacity duration-300 rounded-lg">
+                      <motion.div 
+                        className="absolute inset-0 bg-black/70 flex items-center justify-center p-2 z-10 rounded-lg"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
                         <p className="title-sm text-center">{item.title}</p>
                         {item.userRating && (
                           <div className="absolute bottom-2 right-2 text-yellow-300 body-sm font-bold">
                             ★ {item.userRating.toFixed(1)}
                           </div>
                         )}
-                      </div>
+                      </motion.div>
                     )}
-                  </div>
+                  </motion.div>
                   {showNames && item.title && (
                     <div className="mt-2 text-center">
                       <p className="title-sm truncate">{item.title}</p>
@@ -1135,7 +1280,7 @@ export default function MALWrapped() {
                       )}
                     </div>
                   )}
-                </div>
+                </motion.div>
               );
               
               return (
@@ -1200,17 +1345,32 @@ export default function MALWrapped() {
           {visibleItems.map((item, idx) => {
             const malUrl = getMALUrl(item);
             const itemContent = (
-                <div className="flex flex-col items-center w-full">
-                  <div className="aspect-[2/3] bg-transparent border border-white/5 rounded-lg overflow-hidden transition-all duration-300 relative group-hover:border-[#09e9fe]/60" style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}>
+                <motion.div 
+                  className="flex flex-col items-center w-full"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.5,
+                    delay: idx * 0.08,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
+                >
+                  <motion.div 
+                    className="aspect-[2/3] bg-transparent border border-white/5 rounded-lg overflow-hidden relative" 
+                    style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}
+                    whileHover={{ borderColor: '#09e9fe', scale: 1.05 }}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  >
                   {item.coverImage && (
-                    <img 
+                    <motion.img 
                       src={item.coverImage} 
                       alt={item.title || ''} 
                       crossOrigin="anonymous" 
-                      className="w-full h-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-110"
+                      className="w-full h-full object-cover rounded-lg"
+                      whileHover={hoverImage}
                     />
                   )}
-                </div>
+                </motion.div>
                 {item.title && (
                     <div className="mt-2 text-center w-full px-1">
                       <p className="title-sm truncate">{item.title}</p>
@@ -1219,11 +1379,11 @@ export default function MALWrapped() {
                     )}
                   </div>
                 )}
-              </div>
+              </motion.div>
             );
             
             return (
-                <div key={idx} className="group w-full flex justify-center">
+                <motion.div key={idx} className="w-full flex justify-center">
                 {malUrl ? (
                     <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="w-full flex justify-center">
                     {itemContent}
@@ -1231,7 +1391,7 @@ export default function MALWrapped() {
                 ) : (
                   itemContent
                 )}
-              </div>
+              </motion.div>
             );
           })}
           </div>
@@ -1242,7 +1402,21 @@ export default function MALWrapped() {
     const RankedListItem = ({ item, rank }) => {
       const isTop = rank === 1;
       return (
-        <div className={`flex items-center p-3 border-b transition-all duration-300 hover:bg-white/5 ${isTop ? 'border-[#09e9fe]/60 bg-[#09e9fe]/5' : 'border-white/5'}`}>
+        <motion.div 
+          className={`flex items-center p-3 border-b ${isTop ? 'border-[#09e9fe]/60 bg-[#09e9fe]/5' : 'border-white/5'}`}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ 
+            duration: 0.4,
+            delay: rank * 0.05,
+            ease: [0.22, 1, 0.36, 1]
+          }}
+          whileHover={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            x: 5,
+            transition: { duration: 0.2 }
+          }}
+        >
           <div className={`heading-lg font-bold w-12 shrink-0 ${isTop ? 'text-[#09e9fe]' : 'text-white/60'}`}>#{rank}</div>
           <div className="flex-grow flex items-center gap-2 min-w-0">
             <div className="flex-grow min-w-0">
@@ -1251,22 +1425,38 @@ export default function MALWrapped() {
             </div>
           </div>
           {isTop && <span className="text-yellow-300 heading-md ml-3 shrink-0">★</span>}
-        </div>
+        </motion.div>
       );
     };
 
     const MediaCard = ({ item, rank }) => (
-      <div className="flex flex-col group">
-        <div className="bg-transparent border border-white/5 rounded-lg overflow-hidden group aspect-[2/3] relative transition-all duration-300 hover:border-[#09e9fe]/60" style={{ boxSizing: 'border-box' }}>
+      <motion.div 
+        className="flex flex-col"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, delay: rank * 0.05 }}
+      >
+        <motion.div 
+          className="bg-transparent border border-white/5 rounded-lg overflow-hidden aspect-[2/3] relative" 
+          style={{ boxSizing: 'border-box' }}
+          whileHover={{ borderColor: '#09e9fe', scale: 1.05 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        >
           {rank && (
             <div className="absolute top-2 right-2 z-10 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg">
               {rank}
             </div>
           )}
           {item.coverImage && (
-            <img src={item.coverImage} alt={item.title} crossOrigin="anonymous" className="w-full h-full object-cover" />
+            <motion.img 
+              src={item.coverImage} 
+              alt={item.title} 
+              crossOrigin="anonymous" 
+              className="w-full h-full object-cover"
+              whileHover={hoverImage}
+            />
           )}
-        </div>
+        </motion.div>
         <div className="mt-2">
           <h3 className="title-md truncate">{item.title}</h3>
           <div className="flex items-center body-md text-yellow-300">
@@ -1274,7 +1464,7 @@ export default function MALWrapped() {
             <span>{item.userRating?.toFixed(1) || 'N/A'}</span>
           </div>
         </div>
-      </div>
+      </motion.div>
     );
 
     switch (slide.id) {
@@ -1399,12 +1589,16 @@ export default function MALWrapped() {
                 {otherGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherGenres.map(([genreName, count], idx) => (
-                      <motion.div key={idx} className="border-box-cyan text-center rounded-xl transition-all shadow-lg" style={{ padding: '2px' }} {...fadeSlideUp} data-framer-motion>
-                        <div className="bg-black/20 rounded-xl hover:bg-black/30 p-2 h-full">
+                      <motion.div key={idx} className="border-box-cyan text-center rounded-xl shadow-lg" style={{ padding: '2px' }} variants={staggerItem}>
+                        <motion.div 
+                          className="bg-black/20 rounded-xl p-2 h-full"
+                          whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                          transition={{ duration: 0.2 }}
+                        >
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white">{genreName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} anime</p>
-                      </div>
+                      </motion.div>
                       </motion.div>
                     ))}
                   </div>
@@ -1474,12 +1668,16 @@ export default function MALWrapped() {
                 {otherStudios.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherStudios.map(([studioName, count], idx) => (
-                      <motion.div key={idx} className="border-box-cyan text-center rounded-xl transition-all shadow-lg" style={{ padding: '2px' }} {...fadeSlideUp} data-framer-motion>
-                        <div className="bg-black/20 rounded-xl hover:bg-black/30 p-2 h-full">
+                      <motion.div key={idx} className="border-box-cyan text-center rounded-xl shadow-lg" style={{ padding: '2px' }} variants={staggerItem}>
+                        <motion.div 
+                          className="bg-black/20 rounded-xl p-2 h-full"
+                          whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                          transition={{ duration: 0.2 }}
+                        >
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white truncate">{studioName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} anime</p>
-                      </div>
+                      </motion.div>
                       </motion.div>
                     ))}
                   </div>
@@ -1508,19 +1706,41 @@ export default function MALWrapped() {
                 const highlight = seasonData.highlight;
                 const seasonIndex = seasons.indexOf(season);
                 return (
-                  <motion.div key={season} className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }} {...fadeSlideUp} data-framer-motion>
-                    <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
+                  <motion.div 
+                    key={season} 
+                    className="border-box-cyan rounded-xl shadow-lg" 
+                    style={{ padding: '2px' }}
+                    variants={staggerItem}
+                    initial="initial"
+                    animate="animate"
+                  >
+                    <motion.div 
+                      className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
+                      whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                      transition={{ duration: 0.2 }}
+                    >
                       <h3 className="heading-md font-black text-[#09e9fe] mb-1 sm:mb-2 text-sm sm:text-base">{season}</h3>
                     {highlight && (
                       <>
                           <div className="flex gap-1.5 sm:gap-2">
-                            <div className="border-box-cyan aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 group transition-all duration-300 shadow-md relative w-12 sm:w-16 md:w-20" style={{ boxSizing: 'border-box', padding: '2px' }}>
+                            <motion.div 
+                              className="border-box-cyan aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 shadow-md relative w-12 sm:w-16 md:w-20" 
+                              style={{ boxSizing: 'border-box', padding: '2px' }}
+                              whileHover={{ scale: 1.1 }}
+                              transition={{ duration: 0.3 }}
+                            >
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
                             {highlight.node?.main_picture?.large && (
-                                  <img src={highlight.node.main_picture.large} alt={highlight.node.title} crossOrigin="anonymous" className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-110" />
+                                  <motion.img 
+                                    src={highlight.node.main_picture.large} 
+                                    alt={highlight.node.title} 
+                                    crossOrigin="anonymous" 
+                                    className="w-full h-full object-cover rounded-xl"
+                                    whileHover={hoverImage}
+                                  />
                             )}
                               </div>
-                          </div>
+                            </motion.div>
                           <div className="flex-1 min-w-0">
                               <p className="title-md truncate font-black text-white text-xs sm:text-sm md:text-base">{highlight.node?.title}</p>
                               <p className="body-md text-[#09e9fe] truncate font-bold text-xs sm:text-sm">{highlight.node?.studios?.[0]?.name || ''}</p>
@@ -1530,7 +1750,7 @@ export default function MALWrapped() {
                         </div>
                       </>
                     )}
-                  </div>
+                    </motion.div>
                   </motion.div>
                 );
               })}
@@ -1783,12 +2003,16 @@ export default function MALWrapped() {
                 {otherMangaGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherMangaGenres.map(([genreName, count], idx) => (
-                      <motion.div key={idx} className="border-box-cyan text-center rounded-xl transition-all shadow-lg" style={{ padding: '2px' }} {...fadeSlideUp} data-framer-motion>
-                        <div className="bg-black/20 rounded-xl hover:bg-black/30 p-2 h-full">
+                      <motion.div key={idx} className="border-box-cyan text-center rounded-xl shadow-lg" style={{ padding: '2px' }} variants={staggerItem}>
+                        <motion.div 
+                          className="bg-black/20 rounded-xl p-2 h-full"
+                          whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                          transition={{ duration: 0.2 }}
+                        >
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white">{genreName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} manga</p>
-                      </div>
+                      </motion.div>
                       </motion.div>
                     ))}
                   </div>
@@ -1881,12 +2105,16 @@ export default function MALWrapped() {
                 {otherAuthors.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherAuthors.map(([authorName, count], idx) => (
-                      <motion.div key={idx} className="border-box-cyan text-center rounded-xl transition-all shadow-lg" style={{ padding: '2px' }} {...fadeSlideUp} data-framer-motion>
-                        <div className="bg-black/20 rounded-xl hover:bg-black/30 p-2 h-full">
+                      <motion.div key={idx} className="border-box-cyan text-center rounded-xl shadow-lg" style={{ padding: '2px' }} variants={staggerItem}>
+                        <motion.div 
+                          className="bg-black/20 rounded-xl p-2 h-full"
+                          whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                          transition={{ duration: 0.2 }}
+                        >
                           <p className="body-sm text-[#09e9fe] font-black mb-2">#{idx + 2}</p>
                           <p className="heading-sm font-black text-white truncate">{authorName}</p>
                           <p className="body-sm text-white/80 font-semibold">{count} manga</p>
-                      </div>
+                      </motion.div>
                       </motion.div>
                     ))}
                   </div>
@@ -1995,8 +2223,18 @@ export default function MALWrapped() {
             </div>
             <motion.div className="mt-2 sm:mt-4 flex flex-col gap-1 sm:gap-1.5 text-white w-full max-h-full overflow-y-auto relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-1.5">
-                <div className="border-box-cyan rounded-xl flex flex-col transition-all shadow-lg" style={{ padding: '2px' }}>
-                  <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 flex flex-col h-full">
+                <motion.div 
+                  className="border-box-cyan rounded-xl flex flex-col shadow-lg" 
+                  style={{ padding: '2px' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <motion.div 
+                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 flex flex-col h-full"
+                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                    transition={{ duration: 0.2 }}
+                  >
                   <p className="body-sm text-white/90 mb-0.5 sm:mb-1 font-bold text-xs sm:text-sm">Top 5 Anime</p>
                   <div className="space-y-0 flex-grow">
                     {stats.topRated.slice(0, 5).map((a, i) => (
@@ -2005,10 +2243,20 @@ export default function MALWrapped() {
                       </p>
                     ))}
                   </div>
-                </div>
-                </div>
-                <div className="border-box-cyan rounded-xl flex flex-col transition-all shadow-lg" style={{ padding: '2px' }}>
-                  <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 flex flex-col h-full">
+                  </motion.div>
+                </motion.div>
+                <motion.div 
+                  className="border-box-cyan rounded-xl flex flex-col shadow-lg" 
+                  style={{ padding: '2px' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <motion.div 
+                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 flex flex-col h-full"
+                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                    transition={{ duration: 0.2 }}
+                  >
                   <p className="body-sm text-white/90 mb-0.5 sm:mb-1 font-bold text-xs sm:text-sm">Top 5 Manga</p>
                   <div className="space-y-0 flex-grow">
                     {stats.topManga.slice(0, 5).map((m, i) => (
@@ -2017,29 +2265,59 @@ export default function MALWrapped() {
                       </p>
                     ))}
                   </div>
-                </div>
-              </div>
+                  </motion.div>
+                </motion.div>
               </div>
               <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
-                <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
-                  <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
+                <motion.div 
+                  className="border-box-cyan rounded-xl shadow-lg" 
+                  style={{ padding: '2px' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <motion.div 
+                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                    transition={{ duration: 0.2 }}
+                  >
                   <p className="body-sm text-white/90 mb-0.5 sm:mb-1 font-bold text-xs sm:text-sm">Episodes Watched</p>
                   <p className="number-md text-[#09e9fe] drop-shadow-lg text-lg sm:text-xl md:text-2xl">
                     {stats.totalEpisodes || 0}
                   </p>
-                </div>
-                </div>
-                <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
-                  <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
+                  </motion.div>
+                </motion.div>
+                <motion.div 
+                  className="border-box-cyan rounded-xl shadow-lg" 
+                  style={{ padding: '2px' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <motion.div 
+                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                    transition={{ duration: 0.2 }}
+                  >
                   <p className="body-sm text-white/90 mb-0.5 sm:mb-1 font-bold text-xs sm:text-sm">Chapters Read</p>
                   <p className="number-md text-[#09e9fe] drop-shadow-lg text-lg sm:text-xl md:text-2xl">
                     {stats.totalChapters || 0}
                   </p>
-                </div>
+                  </motion.div>
+                </motion.div>
               </div>
-              </div>
-              <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
-                <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
+              <motion.div 
+                className="border-box-cyan rounded-xl shadow-lg" 
+                style={{ padding: '2px' }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <motion.div 
+                  className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
+                  whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                  transition={{ duration: 0.2 }}
+                >
                 <p className="body-sm text-white/90 mb-0.5 sm:mb-1 font-bold text-xs sm:text-sm">Total Time Spent</p>
                 <p className="number-lg text-[#09e9fe] drop-shadow-lg text-xl sm:text-2xl md:text-3xl">
                   {totalDays > 0 ? (
@@ -2053,21 +2331,41 @@ export default function MALWrapped() {
                     </>
                   )}
                 </p>
-              </div>
-                </div>
+                </motion.div>
+              </motion.div>
               <div className="grid grid-cols-2 gap-1 sm:gap-1.5">
-                <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
-                  <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
+                <motion.div 
+                  className="border-box-cyan rounded-xl shadow-lg" 
+                  style={{ padding: '2px' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <motion.div 
+                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                    transition={{ duration: 0.2 }}
+                  >
                   <p className="body-sm text-white/90 mb-0.5 sm:mb-1 font-bold text-xs sm:text-sm">Top Studio</p>
                   <p className="heading-sm text-white truncate font-black text-xs sm:text-sm md:text-base">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
-                  </div>
-                </div>
-                <div className="border-box-cyan rounded-xl transition-all shadow-lg" style={{ padding: '2px' }}>
-                  <div className="bg-black/20 rounded-xl hover:bg-black/30 p-1.5 sm:p-2 h-full">
+                  </motion.div>
+                </motion.div>
+                <motion.div 
+                  className="border-box-cyan rounded-xl shadow-lg" 
+                  style={{ padding: '2px' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <motion.div 
+                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                    transition={{ duration: 0.2 }}
+                  >
                   <p className="body-sm text-white/90 mb-0.5 sm:mb-1 font-bold text-xs sm:text-sm">Top Author</p>
                   <p className="heading-sm text-white truncate font-black text-xs sm:text-sm md:text-base">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </div>
             </motion.div>
           </SlideLayout>
@@ -2164,13 +2462,16 @@ export default function MALWrapped() {
               <motion.h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-wider text-white" {...fadeIn} data-framer-motion>Wrapped 2025</motion.h2>
               <motion.p className="mt-4 text-lg text-white/70 max-w-md mx-auto" {...fadeIn300} data-framer-motion>Enter your MyAnimeList username to see your year in review.</motion.p>
               <motion.div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center" {...fadeIn} data-framer-motion>
-                <button
+                <motion.button
                   onClick={handleBegin}
-                  className="bg-[#09e9fe] text-white font-bold text-lg px-8 py-3 rounded-md hover:opacity-90 transition-opacity duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-[#09e9fe] text-white font-bold text-lg px-8 py-3 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!CLIENT_ID || CLIENT_ID === '<your_client_id_here>'}
+                  whileHover={{ opacity: 0.9, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 >
               Connect with MAL
-            </button>
+            </motion.button>
               </motion.div>
             </div>
           )}
@@ -2245,15 +2546,25 @@ export default function MALWrapped() {
                     onClick={() => { setCurrentSlide(0); setIsAuthenticated(false); setStats(null); }} 
                     className="border-box-cyan text-white font-bold transition-all text-xs sm:text-sm md:text-base rounded-full" style={{ padding: '2px', borderRadius: '9999px' }}
                   >
-                    <span className="bg-black/20 rounded-full px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 block hover:bg-black/30 transition-all">Restart</span>
+                    <motion.span 
+                      className="bg-black/20 rounded-full px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 block"
+                      whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      Restart
+                    </motion.span>
                   </button>
                 ) : (
-                  <button
+                  <motion.button
                 onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
-                    className="p-1.5 sm:p-2 text-white rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50 transition-all"
+                    className="p-1.5 sm:p-2 text-white rounded-full bg-black/30 backdrop-blur-sm"
+                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
               >
                     <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6"/>
-              </button>
+              </motion.button>
                 )}
             </div>
             </div>
