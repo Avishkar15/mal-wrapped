@@ -227,17 +227,11 @@
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #09e9fe;
   }
 
   .text-gradient-blue {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #09e9fe;
   }
 
   .border-gradient-blue {
