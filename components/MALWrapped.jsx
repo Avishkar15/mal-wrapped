@@ -2054,7 +2054,7 @@ export default function MALWrapped() {
               <p className="number-xl text-white ">
                 <AnimatedNumber value={stats.totalManga} />
               </p>
-              <p className="heading-md text-white/90 mt-2 font-medium">Manga Series</p>
+              <p className="heading-sm text-white/90 mt-2 font-regular">Manga Series</p>
             </motion.div>
             {allMangaItems.length > 0 && <ImageCarousel items={allMangaItems} maxItems={50} showHover={true} showNames={false} />}
           </SlideLayout>
@@ -2074,21 +2074,21 @@ export default function MALWrapped() {
                   <p className="number-lg text-white ">
                     <AnimatedNumber value={stats.totalChapters || 0} />
                   </p>
-                  <p className="heading-md text-white/90 mt-2 font-medium">Chapters</p>
+                  <p className="heading-sm text-white/90 mt-2 font-regular">Chapters</p>
                 </div>
                 <div>
                   <p className="number-lg text-white ">
                     <AnimatedNumber value={stats.totalVolumes || 0} />
                   </p>
-                  <p className="heading-md text-white/90 mt-2 font-medium">Volumes</p>
+                  <p className="heading-sm text-white/90 mt-2 font-regular">Volumes</p>
                 </div>
                 {stats.mangaDays > 0 ? (
                   <div>
                     <p className="number-lg text-white ">
                       <AnimatedNumber value={stats.mangaDays} />
                     </p>
-                    <p className="heading-md text-white/90 mt-2 font-medium">Days</p>
-                    <p className="body-md text-white/80 mt-2 font-semibold">or <AnimatedNumber value={stats.mangaHours || 0} /> hours</p>
+                    <p className="heading-sm text-white/90 mt-2 font-regular">Days</p>
+                    <p className="body-md text-white/80 mt-2 font-regularS">(or <AnimatedNumber value={stats.mangaHours || 0} /> hours)</p>
                   </div>
                 ) : (
                   <div>
