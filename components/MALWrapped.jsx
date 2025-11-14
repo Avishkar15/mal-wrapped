@@ -2558,7 +2558,7 @@ export default function MALWrapped() {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-                    className="w-full px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-br from-black via-white/5 to-black rounded-lg text-xs sm:text-sm font-bold tracking-wider focus:outline-none transition-all hover:from-black hover:via-white/8 hover:to-black appearance-none pr-8 sm:pr-10 text-white"
+                    className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-white rounded-full border-box-cyan transition-all rounded-lg text-xs sm:text-sm font-bold tracking-wider focus:outline-none transition-all hover:from-black hover:via-white/8 hover:to-black appearance-none pr-8 sm:pr-10 text-white"
                     style={{ 
                       border: '1px solid rgba(255, 255, 255, 0.1)',
                       color: '#ffffff'
@@ -2567,7 +2567,7 @@ export default function MALWrapped() {
                     <option value="2023" style={{ background: '#000000', color: '#ffffff' }}>2023</option>
                     <option value="2024" style={{ background: '#000000', color: '#ffffff' }}>2024</option>
                     <option value="2025" style={{ background: '#000000', color: '#ffffff' }}>2025</option>
-                    <option value="all" style={{ background: '#000000', color: '#ffffff' }}>ALL TIME</option>
+                    <option value="all" style={{ background: '#000000', color: '#ffffff' }}>All Time</option>
                 </select>
                   <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
                     <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
