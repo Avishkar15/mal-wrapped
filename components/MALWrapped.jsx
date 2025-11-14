@@ -1195,11 +1195,13 @@ export default function MALWrapped() {
               {verticalText}
             </motion.p>
           )}
-          {/* Additional decorative elements on card */}
-          <div className="absolute inset-0 pointer-events-none z-5">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-2xl"></div>
-            <div className="absolute bottom-0 left-0 w-28 h-28 bg-gradient-to-tr from-white/5 to-transparent rounded-full blur-2xl"></div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-gradient-radial from-white/3 via-white/1 to-transparent rounded-full blur-3xl"></div>
+          {/* Additional decorative elements on card background */}
+          <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-white/10 via-white/5 to-transparent rounded-full blur-3xl opacity-80"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-white/10 via-white/5 to-transparent rounded-full blur-3xl opacity-80"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-gradient-radial from-white/8 via-white/4 to-transparent rounded-full blur-[60px] opacity-70"></div>
+            <div className="absolute top-1/4 right-1/4 w-32 h-32 bg-gradient-to-br from-white/8 to-transparent rounded-full blur-2xl opacity-60"></div>
+            <div className="absolute bottom-1/4 left-1/4 w-36 h-36 bg-gradient-to-tr from-white/8 to-transparent rounded-full blur-2xl opacity-60"></div>
           </div>
           <motion.div 
             className="w-full relative z-20"
