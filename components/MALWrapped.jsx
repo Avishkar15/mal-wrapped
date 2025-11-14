@@ -1169,10 +1169,11 @@ export default function MALWrapped() {
           <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
             {/* Large layered organic shape (left side) */}
             <motion.div 
-              className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60 rounded-full"
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60"
               style={{
                 background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
-                filter: 'blur(120px)',
+                clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
+                filter: 'blur(80px)',
                 willChange: 'transform, opacity'
               }}
               animate={{
@@ -1190,10 +1191,11 @@ export default function MALWrapped() {
             
             {/* Rainbow gradient rectangle (top right) */}
             <motion.div 
-              className="absolute top-0 right-0 w-96 h-64 opacity-50 rounded-3xl"
+              className="absolute top-0 right-0 w-96 h-64 opacity-50"
               style={{
                 background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
-                filter: 'blur(120px)',
+                clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
+                filter: 'blur(70px)',
                 willChange: 'transform, opacity'
               }}
               animate={{
@@ -1211,10 +1213,10 @@ export default function MALWrapped() {
             
             {/* Purple glow (center) */}
             <motion.div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40 rounded-full"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40"
               style={{
                 background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
-                filter: 'blur(140px)',
+                filter: 'blur(100px)',
                 willChange: 'transform, opacity'
               }}
               animate={{
@@ -1232,10 +1234,10 @@ export default function MALWrapped() {
             
             {/* Rainbow accent (bottom right) */}
             <motion.div 
-              className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50 rounded-full"
+              className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50"
               style={{
                 background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
-                filter: 'blur(120px)',
+                filter: 'blur(70px)',
                 willChange: 'transform, opacity'
               }}
               animate={{
