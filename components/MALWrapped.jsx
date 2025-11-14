@@ -1607,12 +1607,52 @@ export default function MALWrapped() {
       case 'welcome':
         return (
           <SlideLayout verticalText="INITIALIZE" bgColor="pink">
-            <div className="text-center relative">
-              <motion.div {...fadeIn} data-framer-motion>
-                <h2 className="text-3xl md:text-4xl font-bold text-white/90">MyAnimeList Wrapped</h2>
-                <h1 className="text-7xl md:text-9xl font-black text-white my-4 ">{stats.selectedYear === 'all' ? 'ALL TIME' : stats.selectedYear}</h1>
-                <p className="text-2xl md:text-3xl font-semibold text-white">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-bold">{username || 'a'}</span>.</p>
-              </motion.div>
+            <div className="text-center relative w-full h-full flex flex-col items-center justify-center">
+              {/* Colorful abstract shapes background */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
+                {/* Large layered organic shape (left side) */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60" style={{
+                  background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
+                  clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
+                  transform: 'rotate(-15deg)',
+                  filter: 'blur(60px)'
+                }}></div>
+                
+                {/* Pixelated green lines (bottom left) */}
+                <div className="absolute bottom-0 left-0 w-full h-32 opacity-50" style={{
+                  background: 'repeating-linear-gradient(45deg, rgba(0, 255, 100, 0.4) 0px, rgba(0, 255, 100, 0.4) 20px, transparent 20px, transparent 40px)',
+                  clipPath: 'polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%)',
+                  filter: 'blur(15px)'
+                }}></div>
+                
+                {/* Rainbow gradient rectangle (top right) */}
+                <div className="absolute top-0 right-0 w-96 h-64 opacity-50" style={{
+                  background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
+                  clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
+                  filter: 'blur(40px)'
+                }}></div>
+                
+                {/* Rainbow wavy lines (right side) */}
+                <div className="absolute top-1/4 right-0 w-80 h-96 opacity-60" style={{
+                  background: 'linear-gradient(180deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 16%, rgba(255, 255, 0, 0.3) 33%, rgba(0, 255, 0, 0.3) 50%, rgba(0, 0, 255, 0.3) 66%, rgba(75, 0, 130, 0.3) 83%, rgba(238, 130, 238, 0.3) 100%)',
+                  clipPath: 'polygon(0% 0%, 100% 20%, 100% 80%, 0% 100%)',
+                  filter: 'blur(50px)'
+                }}></div>
+                
+                {/* Additional purple glow (center) */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40" style={{
+                  background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
+                  filter: 'blur(80px)'
+                }}></div>
+              </div>
+              
+              <div className="relative z-20">
+                <motion.div {...fadeIn} data-framer-motion>
+                  <h1 className="text-6xl sm:text-8xl md:text-9xl font-black text-white mb-2 tracking-tight">{stats.selectedYear === 'all' ? 'ALL TIME' : stats.selectedYear}</h1>
+                  <h2 className="text-5xl sm:text-7xl md:text-8xl font-black text-white tracking-tight">Wrapped</h2>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-white mt-6">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-bold">{username || 'a'}</span>.</p>
+                </motion.div>
+              </div>
             </div>
           </SlideLayout>
         );
@@ -2575,23 +2615,62 @@ export default function MALWrapped() {
           )}
 
           {!isAuthenticated && !isLoading && (
-            <div className="text-center p-4">
-              <motion.div className="mb-4 text-white text-4xl" {...fadeIn} data-framer-motion>*</motion.div>
-              <motion.h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-wider text-white" {...fadeIn100} data-framer-motion>MyAnimeList</motion.h1>
-              <motion.h2 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-wider text-white" {...fadeIn} data-framer-motion>Wrapped 2025</motion.h2>
-              <motion.p className="mt-4 text-lg text-white/70 max-w-md mx-auto" {...fadeIn300} data-framer-motion>Enter your MyAnimeList username to see your year in review.</motion.p>
-              <motion.div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center" {...fadeIn} data-framer-motion>
-                <motion.button
-                  onClick={handleBegin}
-                  className="bg-white text-black font-bold text-lg px-8 py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={!CLIENT_ID || CLIENT_ID === '<your_client_id_here>'}
-                  whileHover={{ scale: 1.05, backgroundColor: '#f5f5f5' }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                >
-              Connect with MAL
-            </motion.button>
-              </motion.div>
+            <div className="text-center p-4 relative w-full h-full flex flex-col items-center justify-center">
+              {/* Colorful abstract shapes background */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+                {/* Large layered organic shape (left side) */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60" style={{
+                  background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
+                  clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
+                  transform: 'rotate(-15deg)',
+                  filter: 'blur(60px)'
+                }}></div>
+                
+                {/* Pixelated green lines (bottom left) */}
+                <div className="absolute bottom-0 left-0 w-full h-32 opacity-50" style={{
+                  background: 'repeating-linear-gradient(45deg, rgba(0, 255, 100, 0.4) 0px, rgba(0, 255, 100, 0.4) 20px, transparent 20px, transparent 40px)',
+                  clipPath: 'polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%)',
+                  filter: 'blur(15px)'
+                }}></div>
+                
+                {/* Rainbow gradient rectangle (top right) */}
+                <div className="absolute top-0 right-0 w-96 h-64 opacity-50" style={{
+                  background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
+                  clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
+                  filter: 'blur(40px)'
+                }}></div>
+                
+                {/* Rainbow wavy lines (right side) */}
+                <div className="absolute top-1/4 right-0 w-80 h-96 opacity-60" style={{
+                  background: 'linear-gradient(180deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 16%, rgba(255, 255, 0, 0.3) 33%, rgba(0, 255, 0, 0.3) 50%, rgba(0, 0, 255, 0.3) 66%, rgba(75, 0, 130, 0.3) 83%, rgba(238, 130, 238, 0.3) 100%)',
+                  clipPath: 'polygon(0% 0%, 100% 20%, 100% 80%, 0% 100%)',
+                  filter: 'blur(50px)'
+                }}></div>
+                
+                {/* Additional purple glow (center) */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40" style={{
+                  background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
+                  filter: 'blur(80px)'
+                }}></div>
+              </div>
+              
+              <div className="relative z-10">
+                <motion.h1 className="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight text-white mb-2" {...fadeIn100} data-framer-motion>{selectedYear === 'all' ? 'ALL TIME' : selectedYear}</motion.h1>
+                <motion.h2 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white" {...fadeIn} data-framer-motion>Wrapped</motion.h2>
+                <motion.p className="mt-6 text-lg sm:text-xl text-white/80 max-w-md mx-auto" {...fadeIn300} data-framer-motion>Enter your MyAnimeList username to see your year in review.</motion.p>
+                <motion.div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center" {...fadeIn} data-framer-motion>
+                  <motion.button
+                    onClick={handleBegin}
+                    className="bg-white text-black font-bold text-lg px-8 py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!CLIENT_ID || CLIENT_ID === '<your_client_id_here>'}
+                    whileHover={{ scale: 1.05, backgroundColor: '#f5f5f5' }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    Connect with MAL
+                  </motion.button>
+                </motion.div>
+              </div>
             </div>
           )}
 
