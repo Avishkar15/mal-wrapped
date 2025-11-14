@@ -731,12 +731,52 @@ export default function MALWrapped() {
           return false;
         },
         onclone: (clonedDoc, element) => {
-          // Stop all animations in cloned document
+          // CRITICAL: Preserve filter styles FIRST before any processing
           const clonedElement = clonedDoc.querySelector('.slide-card') || element;
           if (clonedElement) {
-            // Remove all transform and animation styles
+            // First pass: Preserve all blur filters from elements with data-shape-blur
+            const blurShapes = clonedElement.querySelectorAll('[data-shape-blur]');
+            blurShapes.forEach(shape => {
+              // Find original element
+              const originalShapes = document.querySelectorAll('[data-shape-blur]');
+              const originalShape = Array.from(originalShapes).find(orig => {
+                const origStyle = orig.getAttribute('style') || '';
+                const shapeStyle = shape.getAttribute('style') || '';
+                return origStyle.includes('filter') && shapeStyle.includes('filter');
+              });
+              
+              if (originalShape) {
+                const originalStyle = window.getComputedStyle(originalShape);
+                const filter = originalStyle.filter || originalShape.style.filter;
+                if (filter && filter !== 'none') {
+                  shape.style.setProperty('filter', filter, 'important');
+                }
+              }
+              
+              // Also preserve from inline style attribute
+              const styleAttr = shape.getAttribute('style');
+              if (styleAttr) {
+                const filterMatch = styleAttr.match(/filter:\s*([^;]+)/);
+                if (filterMatch && filterMatch[1] && filterMatch[1] !== 'none') {
+                  shape.style.setProperty('filter', filterMatch[1], 'important');
+                }
+              }
+            });
+            
+            // Second pass: Preserve all inline filter styles
+            const elementsWithFilters = clonedElement.querySelectorAll('[style*="filter"]');
+            elementsWithFilters.forEach(el => {
+              const styleAttr = el.getAttribute('style');
+              if (styleAttr) {
+                const filterMatch = styleAttr.match(/filter:\s*([^;]+)/);
+                if (filterMatch && filterMatch[1] && filterMatch[1] !== 'none') {
+                  el.style.setProperty('filter', filterMatch[1], 'important');
+                }
+              }
+            });
+            
+            // Now stop all animations in cloned document (but filters are already preserved)
             clonedElement.style.animation = 'none';
-            clonedElement.style.transform = 'none';
             clonedElement.style.transition = 'none';
             clonedElement.style.animationPlayState = 'paused';
             
@@ -746,6 +786,11 @@ export default function MALWrapped() {
               el.style.animation = 'none';
               el.style.transition = 'none';
               el.style.animationPlayState = 'paused';
+              
+              // Skip filter elements - already handled above
+              if (el.hasAttribute('data-shape-blur') || (el.getAttribute('style')?.includes('filter'))) {
+                return;
+              }
               
               // Get computed style from original element
               const originalEl = document.querySelector(`[data-framer-motion-id="${el.getAttribute('data-framer-motion-id')}"]`) || 
@@ -760,7 +805,7 @@ export default function MALWrapped() {
               try {
                 const computedStyle = window.getComputedStyle(originalEl);
                 
-                // Preserve opacity in final state (use midpoint of animation for smooth appearance)
+                // Preserve opacity in final state
                 const opacity = computedStyle.opacity;
                 if (opacity && opacity !== '0') {
                   el.style.opacity = opacity;
@@ -768,45 +813,10 @@ export default function MALWrapped() {
                   el.style.opacity = '1';
                 }
                 
-                // PRESERVE FILTER EFFECTS (blur, etc.) for abstract shapes - this is critical
-                // First check inline style, then computed style
-                const inlineFilter = el.style.filter || el.getAttribute('style')?.match(/filter:\s*([^;]+)/)?.[1];
-                const filter = inlineFilter && inlineFilter !== 'none' ? inlineFilter : computedStyle.filter;
-                
-                // Preserve transforms in final state - but use initial transform for animated elements
-                // This ensures animated shapes appear in their resting state, not mid-animation
-                const hasInlineFilter = filter && filter !== 'none';
+                // Preserve transforms in final state
                 const transform = computedStyle.transform;
-                // For elements with blur filters (abstract shapes), use their initial transform
-                if (hasInlineFilter) {
-                  // Keep the transform that was set in the style attribute
-                  const inlineTransform = el.style.transform || el.getAttribute('style')?.match(/transform:\s*([^;]+)/)?.[1];
-                  if (inlineTransform) {
-                    // Parse transform to get base rotation/position
-                    const transformMatch = inlineTransform.match(/rotate\(([^)]+)\)/);
-                    if (transformMatch) {
-                      const baseRotate = transformMatch[1];
-                      const translateYMatch = inlineTransform.match(/translateY\(([^)]+)\)/);
-                      if (translateYMatch && translateYMatch[1].includes('-50%')) {
-                        el.style.transform = `rotate(${baseRotate.split('deg')[0]}deg) translateY(-50%)`;
-                      } else {
-                        el.style.transform = `rotate(${baseRotate})`;
-                      }
-                    }
-                  }
-                } else if (transform && transform !== 'none' && transform !== 'matrix(1, 0, 0, 1, 0, 0)') {
+                if (transform && transform !== 'none' && transform !== 'matrix(1, 0, 0, 1, 0, 0)') {
                   el.style.transform = transform;
-                }
-                if (filter && filter !== 'none') {
-                  el.style.filter = filter;
-                  // Force filter rendering
-                  el.setAttribute('style', el.getAttribute('style') + `; filter: ${filter} !important;`);
-                }
-                
-                // Also check for backdrop-filter
-                const backdropFilter = computedStyle.backdropFilter;
-                if (backdropFilter && backdropFilter !== 'none') {
-                  el.style.backdropFilter = backdropFilter;
                 }
                 
                 // Ensure visibility
@@ -817,47 +827,8 @@ export default function MALWrapped() {
                   el.style.color = '#ffffff';
                 }
               } catch (e) {
-                // If we can't get computed style, preserve filters from inline styles or class names
-                const inlineFilter = el.style.filter;
-                if (inlineFilter && inlineFilter !== 'none') {
-                  el.style.filter = inlineFilter;
-                  el.setAttribute('style', el.getAttribute('style') + `; filter: ${inlineFilter} !important;`);
-                } else {
-                  const classes = el.className || '';
-                  if (classes.includes('blur-')) {
-                    // Extract blur value from class
-                    if (classes.includes('blur-3xl')) {
-                      el.style.filter = 'blur(64px)';
-                    } else if (classes.includes('blur-2xl')) {
-                      el.style.filter = 'blur(40px)';
-                    } else if (classes.includes('blur-xl')) {
-                      el.style.filter = 'blur(24px)';
-                    } else if (classes.includes('blur-lg')) {
-                      el.style.filter = 'blur(16px)';
-                    } else if (classes.includes('blur-md')) {
-                      el.style.filter = 'blur(12px)';
-                    } else if (classes.includes('blur-sm')) {
-                      el.style.filter = 'blur(4px)';
-                    }
-                  }
-                  // Check for custom blur values
-                  if (classes.includes('blur-[60px]')) {
-                    el.style.filter = 'blur(60px)';
-                  }
-                }
-                
                 el.style.opacity = '1';
                 el.style.visibility = 'visible';
-              }
-            });
-            
-            // Explicitly ensure all elements with inline filter styles preserve them
-            const elementsWithInlineFilters = clonedElement.querySelectorAll('[style*="filter"]');
-            elementsWithInlineFilters.forEach(el => {
-              const filterMatch = el.getAttribute('style')?.match(/filter:\s*([^;]+)/);
-              if (filterMatch && filterMatch[1] && filterMatch[1] !== 'none') {
-                el.style.filter = filterMatch[1];
-                el.setAttribute('style', el.getAttribute('style') + `; filter: ${filterMatch[1]} !important;`);
               }
             });
           }
@@ -1289,7 +1260,8 @@ export default function MALWrapped() {
               style={{
                 background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
                 clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
-                filter: 'blur(60px)'
+                filter: 'blur(80px)',
+                willChange: 'transform, opacity'
               }}
               animate={{
                 transform: ['rotate(-15deg) translateY(-50%)', 'rotate(-10deg) translateY(-50%)', 'rotate(-20deg) translateY(-50%)', 'rotate(-15deg) translateY(-50%)'],
@@ -1301,26 +1273,7 @@ export default function MALWrapped() {
                 ease: 'easeInOut'
               }}
               data-framer-motion
-            ></motion.div>
-            
-            {/* Pixelated green lines (bottom left) */}
-            <motion.div 
-              className="absolute bottom-0 left-0 w-full h-32 opacity-50"
-              style={{
-                background: 'repeating-linear-gradient(45deg, rgba(0, 255, 100, 0.4) 0px, rgba(0, 255, 100, 0.4) 20px, transparent 20px, transparent 40px)',
-                clipPath: 'polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%)',
-                filter: 'blur(15px)'
-              }}
-              animate={{
-                x: ['0%', '-10%', '0%'],
-                opacity: [0.5, 0.6, 0.5]
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: 'easeInOut'
-              }}
-              data-framer-motion
+              data-shape-blur
             ></motion.div>
             
             {/* Rainbow gradient rectangle (top right) */}
@@ -1329,7 +1282,8 @@ export default function MALWrapped() {
               style={{
                 background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
                 clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
-                filter: 'blur(40px)'
+                filter: 'blur(70px)',
+                willChange: 'transform, opacity'
               }}
               animate={{
                 transform: ['translateY(0%)', 'translateY(-5%)', 'translateY(0%)'],
@@ -1341,34 +1295,16 @@ export default function MALWrapped() {
                 ease: 'easeInOut'
               }}
               data-framer-motion
+              data-shape-blur
             ></motion.div>
             
-            {/* Rainbow wavy lines (right side) */}
-            <motion.div 
-              className="absolute top-1/4 right-0 w-80 h-96 opacity-60"
-              style={{
-                background: 'linear-gradient(180deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 16%, rgba(255, 255, 0, 0.3) 33%, rgba(0, 255, 0, 0.3) 50%, rgba(0, 0, 255, 0.3) 66%, rgba(75, 0, 130, 0.3) 83%, rgba(238, 130, 238, 0.3) 100%)',
-                clipPath: 'polygon(0% 0%, 100% 20%, 100% 80%, 0% 100%)',
-                filter: 'blur(50px)'
-              }}
-              animate={{
-                x: ['0%', '5%', '0%'],
-                opacity: [0.6, 0.7, 0.6]
-              }}
-              transition={{
-                duration: 9,
-                repeat: Infinity,
-                ease: 'easeInOut'
-              }}
-              data-framer-motion
-            ></motion.div>
-            
-            {/* Additional purple glow (center) */}
+            {/* Purple glow (center) */}
             <motion.div 
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40"
               style={{
                 background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
-                filter: 'blur(80px)'
+                filter: 'blur(100px)',
+                willChange: 'transform, opacity'
               }}
               animate={{
                 scale: [1, 1.1, 1],
@@ -1380,18 +1316,20 @@ export default function MALWrapped() {
                 ease: 'easeInOut'
               }}
               data-framer-motion
+              data-shape-blur
             ></motion.div>
             
-            {/* Additional colorful accent (bottom right) */}
+            {/* Rainbow accent (bottom right) */}
             <motion.div 
-              className="absolute bottom-1/4 right-1/4 w-64 h-64 opacity-45"
+              className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50"
               style={{
-                background: 'radial-gradient(circle, rgba(255, 165, 0, 0.4) 0%, rgba(255, 69, 0, 0.3) 50%, transparent 100%)',
-                filter: 'blur(50px)'
+                background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
+                filter: 'blur(70px)',
+                willChange: 'transform, opacity'
               }}
               animate={{
                 transform: ['rotate(0deg)', 'rotate(10deg)', 'rotate(-10deg)', 'rotate(0deg)'],
-                opacity: [0.45, 0.55, 0.45]
+                opacity: [0.5, 0.6, 0.5]
               }}
               transition={{
                 duration: 12,
@@ -1399,6 +1337,7 @@ export default function MALWrapped() {
                 ease: 'easeInOut'
               }}
               data-framer-motion
+              data-shape-blur
             ></motion.div>
           </div>
           <motion.div 
@@ -1776,34 +1715,26 @@ export default function MALWrapped() {
                   background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
                   clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
                   transform: 'rotate(-15deg)',
-                  filter: 'blur(60px)'
-                }}></div>
-                
-                {/* Pixelated green lines (bottom left) */}
-                <div className="absolute bottom-0 left-0 w-full h-32 opacity-50" style={{
-                  background: 'repeating-linear-gradient(45deg, rgba(0, 255, 100, 0.4) 0px, rgba(0, 255, 100, 0.4) 20px, transparent 20px, transparent 40px)',
-                  clipPath: 'polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%)',
-                  filter: 'blur(15px)'
+                  filter: 'blur(80px)'
                 }}></div>
                 
                 {/* Rainbow gradient rectangle (top right) */}
                 <div className="absolute top-0 right-0 w-96 h-64 opacity-50" style={{
                   background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
                   clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
-                  filter: 'blur(40px)'
+                  filter: 'blur(70px)'
                 }}></div>
                 
-                {/* Rainbow wavy lines (right side) */}
-                <div className="absolute top-1/4 right-0 w-80 h-96 opacity-60" style={{
-                  background: 'linear-gradient(180deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 16%, rgba(255, 255, 0, 0.3) 33%, rgba(0, 255, 0, 0.3) 50%, rgba(0, 0, 255, 0.3) 66%, rgba(75, 0, 130, 0.3) 83%, rgba(238, 130, 238, 0.3) 100%)',
-                  clipPath: 'polygon(0% 0%, 100% 20%, 100% 80%, 0% 100%)',
-                  filter: 'blur(50px)'
-                }}></div>
-                
-                {/* Additional purple glow (center) */}
+                {/* Purple glow (center) */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40" style={{
                   background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
-                  filter: 'blur(80px)'
+                  filter: 'blur(100px)'
+                }}></div>
+                
+                {/* Rainbow accent (bottom right) */}
+                <div className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50" style={{
+                  background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
+                  filter: 'blur(70px)'
                 }}></div>
               </div>
               
@@ -2784,34 +2715,26 @@ export default function MALWrapped() {
                   background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
                   clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
                   transform: 'rotate(-15deg)',
-                  filter: 'blur(60px)'
-                }}></div>
-                
-                {/* Pixelated green lines (bottom left) */}
-                <div className="absolute bottom-0 left-0 w-full h-32 opacity-50" style={{
-                  background: 'repeating-linear-gradient(45deg, rgba(0, 255, 100, 0.4) 0px, rgba(0, 255, 100, 0.4) 20px, transparent 20px, transparent 40px)',
-                  clipPath: 'polygon(0% 0%, 100% 0%, 80% 100%, 0% 100%)',
-                  filter: 'blur(15px)'
+                  filter: 'blur(80px)'
                 }}></div>
                 
                 {/* Rainbow gradient rectangle (top right) */}
                 <div className="absolute top-0 right-0 w-96 h-64 opacity-50" style={{
                   background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
                   clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
-                  filter: 'blur(40px)'
+                  filter: 'blur(70px)'
                 }}></div>
                 
-                {/* Rainbow wavy lines (right side) */}
-                <div className="absolute top-1/4 right-0 w-80 h-96 opacity-60" style={{
-                  background: 'linear-gradient(180deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 16%, rgba(255, 255, 0, 0.3) 33%, rgba(0, 255, 0, 0.3) 50%, rgba(0, 0, 255, 0.3) 66%, rgba(75, 0, 130, 0.3) 83%, rgba(238, 130, 238, 0.3) 100%)',
-                  clipPath: 'polygon(0% 0%, 100% 20%, 100% 80%, 0% 100%)',
-                  filter: 'blur(50px)'
-                }}></div>
-                
-                {/* Additional purple glow (center) */}
+                {/* Purple glow (center) */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40" style={{
                   background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
-                  filter: 'blur(80px)'
+                  filter: 'blur(100px)'
+                }}></div>
+                
+                {/* Rainbow accent (bottom right) */}
+                <div className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50" style={{
+                  background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
+                  filter: 'blur(70px)'
                 }}></div>
               </div>
               
@@ -2902,7 +2825,29 @@ export default function MALWrapped() {
 
                 {currentSlide === slides.length - 1 ? (
               <button
-                    onClick={() => { setCurrentSlide(0); setIsAuthenticated(false); setStats(null); }} 
+                    onClick={async () => {
+                      try {
+                        // First download the image
+                        await handleDownloadPNG();
+                        
+                        // Then try to share using Web Share API
+                        if (navigator.share && navigator.canShare) {
+                          const shareData = {
+                            title: `My ${stats?.selectedYear || '2024'} MAL Wrapped`,
+                            text: `Check out my ${stats?.selectedYear || '2024'} MyAnimeList Wrapped! Check yours out at ${window.location.href}`,
+                          };
+                          
+                          if (navigator.canShare(shareData)) {
+                            await navigator.share(shareData);
+                          }
+                        }
+                      } catch (error) {
+                        // If share fails, user cancelled, or isn't supported - download already happened
+                        if (error.name !== 'AbortError') {
+                          console.log('Share not available or failed');
+                        }
+                      }
+                    }}
                     className="border-box-cyan text-white font-bold transition-all text-xs sm:text-sm md:text-base rounded-full" style={{ padding: '2px', borderRadius: '9999px' }}
                   >
                     <motion.span 
@@ -2911,7 +2856,7 @@ export default function MALWrapped() {
                       whileTap={{ scale: 0.95 }}
                       transition={{ duration: 0.2 }}
                     >
-                      Restart
+                      Share
                     </motion.span>
                   </button>
                 ) : (
