@@ -1167,14 +1167,14 @@ export default function MALWrapped() {
       const shapeTypes = ['angular', 'pixelated', 'wavy'];
       const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)] || 'angular';
       
-      // Spotify-like background colors with subtle tint
+      // Spotify-like background colors with subtle tint (solid colors)
       const bgColorClasses = {
         black: 'bg-black',
-        pink: 'bg-gradient-to-br from-black via-[#ff6b9d]/5 to-black',
-        yellow: 'bg-gradient-to-br from-black via-[#f59e0b]/5 to-black',
-        blue: 'bg-gradient-to-br from-black via-[#3b82f6]/5 to-black',
-        green: 'bg-gradient-to-br from-black via-[#1db954]/5 to-black',
-        red: 'bg-gradient-to-br from-black via-[#ef4444]/5 to-black'
+        pink: 'bg-black',
+        yellow: 'bg-black',
+        blue: 'bg-black',
+        green: 'bg-black',
+        red: 'bg-black'
       };
       
       return (
@@ -2558,7 +2558,7 @@ export default function MALWrapped() {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
-                    className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-white rounded-full border-box-cyan transition-all rounded-lg text-xs sm:text-sm font-bold tracking-wider focus:outline-none transition-all hover:from-black hover:via-white/8 hover:to-black appearance-none pr-8 sm:pr-10 text-white"
+                    className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-white rounded-full border-box-cyan transition-all rounded-lg text-xs sm:text-sm font-bold tracking-wider focus:outline-none appearance-none pr-8 sm:pr-10"
                     style={{ 
                       border: '1px solid rgba(255, 255, 255, 0.1)',
                       color: '#ffffff'
@@ -2621,7 +2621,7 @@ export default function MALWrapped() {
                     className="border-box-cyan text-white font-bold transition-all text-xs sm:text-sm md:text-base rounded-full" style={{ padding: '2px', borderRadius: '9999px' }}
                   >
                     <motion.span 
-                      className="bg-gradient-to-br from-black via-white/5 to-black rounded-full px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 block"
+                      className="bg-black rounded-full px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-3 block"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       transition={{ duration: 0.2 }}
