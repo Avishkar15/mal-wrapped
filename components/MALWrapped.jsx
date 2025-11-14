@@ -819,27 +819,6 @@ export default function MALWrapped() {
                 el.style.visibility = 'visible';
               }
             });
-            
-            // Explicitly ensure abstract shapes preserve their filters (pseudo-elements)
-            const elementsWithBlur = clonedElement.querySelectorAll('[class*="blur"]');
-            elementsWithBlur.forEach(el => {
-              const originalEl = Array.from(document.querySelectorAll('*')).find(orig => {
-                if (!orig.className) return false;
-                const origClasses = orig.className.toString();
-                const elClasses = el.className.toString();
-                return origClasses === elClasses && orig.tagName === el.tagName;
-              });
-              if (originalEl) {
-                try {
-                  const computedStyle = window.getComputedStyle(originalEl);
-                  if (computedStyle.filter && computedStyle.filter !== 'none') {
-                    el.style.filter = computedStyle.filter;
-                  }
-                } catch (e) {
-                  // Fallback: preserve blur from class name
-                }
-              }
-            });
           }
           
           // Hide all navigation and control bars in cloned document

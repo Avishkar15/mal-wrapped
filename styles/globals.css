@@ -296,11 +296,6 @@
     border-color: rgba(255, 255, 255, 0.2) !important;
   }
 
-  /* Gradient radial utility for decorative elements */
-  .bg-gradient-radial {
-    background: radial-gradient(circle, var(--tw-gradient-stops));
-  }
-
   /* Stop animations when capturing but preserve filters */
   .slide-card.capturing [data-framer-motion] {
     animation: none !important;
