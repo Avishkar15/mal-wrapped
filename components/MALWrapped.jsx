@@ -725,6 +725,11 @@ export default function MALWrapped() {
         windowWidth: document.documentElement.offsetWidth,
         windowHeight: document.documentElement.offsetHeight,
         imageTimeout: 15000,
+        foreignObjectRendering: false, // Use native rendering which better handles filters
+        ignoreElements: (element) => {
+          // Don't ignore any elements - we want to capture everything
+          return false;
+        },
         onclone: (clonedDoc, element) => {
           // Stop all animations in cloned document
           const clonedElement = clonedDoc.querySelector('.slide-card') || element;
@@ -743,7 +748,13 @@ export default function MALWrapped() {
               el.style.animationPlayState = 'paused';
               
               // Get computed style from original element
-              const originalEl = document.querySelector(`[data-framer-motion-id="${el.getAttribute('data-framer-motion-id')}"]`) || el;
+              const originalEl = document.querySelector(`[data-framer-motion-id="${el.getAttribute('data-framer-motion-id')}"]`) || 
+                                Array.from(document.querySelectorAll('*')).find(orig => {
+                                  if (!orig.className) return false;
+                                  return orig.className === el.className && 
+                                         orig.tagName === el.tagName &&
+                                         orig.getBoundingClientRect().width === el.getBoundingClientRect().width;
+                                }) || el;
               try {
                 const computedStyle = window.getComputedStyle(originalEl);
                 
@@ -761,6 +772,18 @@ export default function MALWrapped() {
                   el.style.transform = transform;
                 }
                 
+                // PRESERVE FILTER EFFECTS (blur, etc.) for abstract shapes and decorative elements
+                const filter = computedStyle.filter;
+                if (filter && filter !== 'none') {
+                  el.style.filter = filter;
+                }
+                
+                // Also check for backdrop-filter
+                const backdropFilter = computedStyle.backdropFilter;
+                if (backdropFilter && backdropFilter !== 'none') {
+                  el.style.backdropFilter = backdropFilter;
+                }
+                
                 // Ensure visibility
                 el.style.visibility = 'visible';
                 
@@ -769,9 +792,54 @@ export default function MALWrapped() {
                   el.style.color = '#ffffff';
                 }
               } catch (e) {
-                // If we can't get computed style, just ensure visibility
+                // If we can't get computed style, try to preserve filters from class names
+                const classes = el.className || '';
+                if (classes.includes('blur-')) {
+                  // Extract blur value from class
+                  if (classes.includes('blur-3xl')) {
+                    el.style.filter = 'blur(64px)';
+                  } else if (classes.includes('blur-2xl')) {
+                    el.style.filter = 'blur(40px)';
+                  } else if (classes.includes('blur-xl')) {
+                    el.style.filter = 'blur(24px)';
+                  } else if (classes.includes('blur-lg')) {
+                    el.style.filter = 'blur(16px)';
+                  } else if (classes.includes('blur-md')) {
+                    el.style.filter = 'blur(12px)';
+                  } else if (classes.includes('blur-sm')) {
+                    el.style.filter = 'blur(4px)';
+                  }
+                }
+                // Check for custom blur values
+                if (classes.includes('blur-[60px]')) {
+                  el.style.filter = 'blur(60px)';
+                }
+                
                 el.style.opacity = '1';
                 el.style.visibility = 'visible';
+              }
+            });
+            
+            // Explicitly ensure abstract shapes and decorative elements preserve their filters
+            const abstractShapes = clonedElement.querySelectorAll('[class*="abstract-shapes"]::before, [class*="abstract-shapes"]::after, .absolute[style*="blur"]');
+            // Since we can't query pseudo-elements, we'll handle them through parent elements
+            const elementsWithBlur = clonedElement.querySelectorAll('[class*="blur"]');
+            elementsWithBlur.forEach(el => {
+              const originalEl = Array.from(document.querySelectorAll('*')).find(orig => {
+                if (!orig.className) return false;
+                const origClasses = orig.className.toString();
+                const elClasses = el.className.toString();
+                return origClasses === elClasses && orig.tagName === el.tagName;
+              });
+              if (originalEl) {
+                try {
+                  const computedStyle = window.getComputedStyle(originalEl);
+                  if (computedStyle.filter && computedStyle.filter !== 'none') {
+                    el.style.filter = computedStyle.filter;
+                  }
+                } catch (e) {
+                  // Fallback: preserve blur from class name
+                }
               }
             });
           }

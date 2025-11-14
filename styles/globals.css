@@ -301,10 +301,17 @@
     background: radial-gradient(circle, var(--tw-gradient-stops));
   }
 
-  /* Stop animations when capturing */
+  /* Stop animations when capturing but preserve filters */
   .slide-card.capturing [data-framer-motion] {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+  
+  /* Ensure filters are preserved during capture */
+  .slide-card.capturing [class*="blur"],
+  .slide-card.capturing .abstract-shapes::before,
+  .slide-card.capturing .abstract-shapes::after {
+    filter: inherit !important;
   }
 }
