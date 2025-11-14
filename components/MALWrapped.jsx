@@ -140,7 +140,6 @@ export default function MALWrapped() {
   const [error, setError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState(null);
-  const [isCapturing, setIsCapturing] = useState(false);
   const [selectedYear, setSelectedYear] = useState(2025);
   const slideRef = useRef(null);
 
@@ -686,11 +685,7 @@ export default function MALWrapped() {
   async function handleDownloadPNG() {
     if (!slideRef.current || typeof window === 'undefined') return;
     
-    setIsCapturing(true);
     try {
-      // Wait for animations to complete and images to load
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
       // Wait for all images to load
       const cardElement = slideRef.current;
       const images = cardElement.querySelectorAll('img');
@@ -706,129 +701,38 @@ export default function MALWrapped() {
         })
       );
       
-      // Wait a bit more for any final renders
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Dynamically import snapdom
+      const { snapdom } = await import('@zumer/snapdom');
       
-      // Dynamically import html2canvas
-      const html2canvas = (await import('html2canvas')).default;
-      
-      // Capture with all animations stopped
-      const canvas = await html2canvas(cardElement, {
-        backgroundColor: '#0A0A0A',
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        allowTaint: true, // Changed to true to allow cross-origin images
-        removeContainer: true,
-        scrollX: -window.scrollX,
-        scrollY: -window.scrollY,
-        windowWidth: document.documentElement.offsetWidth,
-        windowHeight: document.documentElement.offsetHeight,
-        imageTimeout: 15000,
-        foreignObjectRendering: false, // Use native rendering which better handles filters
-        ignoreElements: (element) => {
-          // Don't ignore any elements - we want to capture everything
-          return false;
-        },
-        onclone: (clonedDoc, element) => {
-          // CRITICAL: Preserve filter styles FIRST before any processing
-          const clonedElement = clonedDoc.querySelector('.slide-card') || element;
+      // Create a plugin to stop animations and hide navigation
+      const capturePlugin = {
+        name: 'mal-wrapped-capture',
+        async afterClone(context) {
+          const clonedDoc = context.clonedDocument;
+          if (!clonedDoc) return;
+          
+          // Stop animations without touching filters
+          const clonedElement = clonedDoc.querySelector('.slide-card') || clonedDoc.body;
           if (clonedElement) {
-            // First pass: Preserve all blur filters from elements with data-shape-blur
-            const blurShapes = clonedElement.querySelectorAll('[data-shape-blur]');
-            blurShapes.forEach(shape => {
-              // Find original element
-              const originalShapes = document.querySelectorAll('[data-shape-blur]');
-              const originalShape = Array.from(originalShapes).find(orig => {
-                const origStyle = orig.getAttribute('style') || '';
-                const shapeStyle = shape.getAttribute('style') || '';
-                return origStyle.includes('filter') && shapeStyle.includes('filter');
-              });
-              
-              if (originalShape) {
-                const originalStyle = window.getComputedStyle(originalShape);
-                const filter = originalStyle.filter || originalShape.style.filter;
-                if (filter && filter !== 'none') {
-                  shape.style.setProperty('filter', filter, 'important');
-                }
-              }
-              
-              // Also preserve from inline style attribute
-              const styleAttr = shape.getAttribute('style');
-              if (styleAttr) {
-                const filterMatch = styleAttr.match(/filter:\s*([^;]+)/);
-                if (filterMatch && filterMatch[1] && filterMatch[1] !== 'none') {
-                  shape.style.setProperty('filter', filterMatch[1], 'important');
-                }
-              }
-            });
-            
-            // Second pass: Preserve all inline filter styles
-            const elementsWithFilters = clonedElement.querySelectorAll('[style*="filter"]');
-            elementsWithFilters.forEach(el => {
-              const styleAttr = el.getAttribute('style');
-              if (styleAttr) {
-                const filterMatch = styleAttr.match(/filter:\s*([^;]+)/);
-                if (filterMatch && filterMatch[1] && filterMatch[1] !== 'none') {
-                  el.style.setProperty('filter', filterMatch[1], 'important');
-                }
-              }
-            });
-            
-            // Now stop all animations in cloned document (but filters are already preserved)
             clonedElement.style.animation = 'none';
             clonedElement.style.transition = 'none';
             clonedElement.style.animationPlayState = 'paused';
             
             const allElements = clonedElement.querySelectorAll('*');
             allElements.forEach(el => {
-              // Stop all CSS animations and transitions
+              // Stop CSS animations and transitions, but preserve all filter styles
               el.style.animation = 'none';
               el.style.transition = 'none';
               el.style.animationPlayState = 'paused';
               
-              // Skip filter elements - already handled above
-              if (el.hasAttribute('data-shape-blur') || (el.getAttribute('style')?.includes('filter'))) {
-                return;
-              }
-              
-              // Get computed style from original element
-              const originalEl = document.querySelector(`[data-framer-motion-id="${el.getAttribute('data-framer-motion-id')}"]`) || 
-                                Array.from(document.querySelectorAll('*')).find(orig => {
-                                  if (!orig.className) return false;
-                                  const origClass = orig.className?.toString() || '';
-                                  const elClass = el.className?.toString() || '';
-                                  return origClass === elClass && 
-                                         orig.tagName === el.tagName &&
-                                         orig.getBoundingClientRect().width === el.getBoundingClientRect().width;
-                                }) || el;
-              try {
-                const computedStyle = window.getComputedStyle(originalEl);
-                
-                // Preserve opacity in final state
-                const opacity = computedStyle.opacity;
-                if (opacity && opacity !== '0') {
-                  el.style.opacity = opacity;
-                } else {
-                  el.style.opacity = '1';
-                }
-                
-                // Preserve transforms in final state
-                const transform = computedStyle.transform;
-                if (transform && transform !== 'none' && transform !== 'matrix(1, 0, 0, 1, 0, 0)') {
-                  el.style.transform = transform;
-                }
-                
-                // Ensure visibility
-                el.style.visibility = 'visible';
+              // Ensure visibility for non-filter elements
+              if (!el.getAttribute('style')?.includes('filter')) {
+                el.style.visibility = el.style.visibility || 'visible';
                 
                 // Ensure colors are visible
                 if (el.classList.contains('text-white')) {
                   el.style.color = '#ffffff';
                 }
-              } catch (e) {
-                el.style.opacity = '1';
-                el.style.visibility = 'visible';
               }
             });
           }
@@ -867,19 +771,28 @@ export default function MALWrapped() {
             }
           });
         }
+      };
+      
+      // Capture with snapdom
+      const out = await snapdom(cardElement, {
+        backgroundColor: '#0A0A0A',
+        scale: 2,
+        plugins: [capturePlugin]
       });
       
+      // Export as PNG image element
+      const png = await out.toPng();
+      
+      // Create download link
       const link = document.createElement('a');
       link.download = `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
+      link.href = png.src;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (err) {
       console.error('Error generating PNG:', err);
       alert('Failed to download image. Please try again.');
-    } finally {
-      setIsCapturing(false);
     }
   }
 
@@ -2691,7 +2604,7 @@ export default function MALWrapped() {
           })()}
         </div>
       )}
-      <div ref={slideRef} className={`w-full max-w-5xl bg-black rounded-2xl shadow-2xl shadow-black/50 flex flex-col justify-center relative overflow-hidden slide-card ${isCapturing ? 'capturing' : ''}`} style={{ zIndex: 10, height: '100dvh', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+      <div ref={slideRef} className="w-full max-w-5xl bg-black rounded-2xl shadow-2xl shadow-black/50 flex flex-col justify-center relative overflow-hidden slide-card" style={{ zIndex: 10, height: '100dvh', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
         <div className="z-10 w-full h-full flex flex-col items-center justify-center">
           {error && (
             <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500/90 text-white px-6 py-3 rounded-lg z-50">
