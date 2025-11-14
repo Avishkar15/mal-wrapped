@@ -1195,6 +1195,12 @@ export default function MALWrapped() {
               {verticalText}
             </motion.p>
           )}
+          {/* Additional decorative elements on card */}
+          <div className="absolute inset-0 pointer-events-none z-5">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-2xl"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-white/5 to-transparent rounded-full blur-2xl"></div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-radial from-white/3 via-white/1 to-transparent rounded-full blur-3xl"></div>
+          </div>
           <motion.div 
             className="w-full relative z-20"
             variants={staggerContainer}
@@ -2465,7 +2471,7 @@ export default function MALWrapped() {
         backgroundPosition: ['0 0', '40px 40px']
       }}
       transition={{
-        duration: 20,
+        duration: 8,
         repeat: Infinity,
         ease: 'linear'
       }}
@@ -2473,7 +2479,7 @@ export default function MALWrapped() {
     >
       {/* Background floating anime elements - outside the card on grid bg */}
       {stats && isAuthenticated && slides.length > 0 && (
-        <div className="absolute inset-0 pointer-events-none opacity-5 overflow-hidden" style={{ zIndex: 0 }}>
+        <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden" style={{ zIndex: 0 }}>
           {(() => {
             const slideId = slides[currentSlide]?.id;
             let bgItems = [];
