@@ -470,16 +470,7 @@ export default function MALWrapped() {
     const totalMinutes = totalEpisodes * avgEpisodeLength;
     const totalHours = Math.floor(totalMinutes / 60);
 
-    // Seasonal highlights - group by all 4 seasons
-    const getSeason = (date) => {
-      const month = date.getMonth();
-      if (month >= 0 && month <= 1) return 'Winter';
-      if (month >= 2 && month <= 4) return 'Spring';
-      if (month >= 5 && month <= 7) return 'Summer';
-      if (month >= 8 && month <= 10) return 'Fall';
-      return 'Winter';
-    };
-
+    // Seasonal highlights - group by anime that released during each season of the selected year
     const seasonalData = {
       Winter: { anime: [], episodes: 0, hours: 0 },
       Spring: { anime: [], episodes: 0, hours: 0 },
@@ -487,18 +478,25 @@ export default function MALWrapped() {
       Fall: { anime: [], episodes: 0, hours: 0 }
     };
 
+    // Helper to capitalize season name (MAL returns lowercase)
+    const capitalizeSeason = (season) => {
+      if (!season) return null;
+      return season.charAt(0).toUpperCase() + season.slice(1).toLowerCase();
+    };
+
     thisYearAnime.forEach(item => {
-      const finishDate = item.list_status?.finish_date || item.list_status?.start_date || item.list_status?.updated_at;
-      if (finishDate) {
-        try {
-          const date = new Date(finishDate);
-          const season = getSeason(date);
-          seasonalData[season].anime.push(item);
-          const episodes = item.list_status?.num_episodes_watched || 0;
-          seasonalData[season].episodes += episodes;
-          seasonalData[season].hours += Math.floor((episodes * 24) / 60);
-        } catch (e) {
-          // Skip invalid dates
+      const startSeason = item.node?.start_season;
+      if (startSeason && startSeason.season && startSeason.year) {
+        // If a specific year is selected, only include anime that released in that year
+        // If 'all' is selected, include all anime with start_season data
+        if (currentYear === 'all' || startSeason.year === currentYear) {
+          const season = capitalizeSeason(startSeason.season);
+          if (season && seasonalData[season]) {
+            seasonalData[season].anime.push(item);
+            const episodes = item.list_status?.num_episodes_watched || 0;
+            seasonalData[season].episodes += episodes;
+            seasonalData[season].hours += Math.floor((episodes * 24) / 60);
+          }
         }
       }
     });
