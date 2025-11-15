@@ -1969,13 +1969,8 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="DIDNT-LAND" bgColor="red">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Didn't Land
-              </motion.h1>
-            </div>
-            <motion.h2 className="body-lg font-medium text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              5 shows you rated the lowest
+            <motion.h2 className="body-md font-regular text-white/90 mt-2 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+              Shows that didn't land with you
             </motion.h2>
             {didntLand.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -2330,20 +2325,15 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="DIDNT-LAND" bgColor="red">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Didn't Land
-              </motion.h1>
-            </div>
-            <motion.h2 className="body-md font-regular text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              Mangas you rated the lowest
+            <motion.h2 className="body-md font-regular text-white/90 mt-2 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+            But even great readers hit a few misses, and these were the ones that didn’t click.
             </motion.h2>
             {mangaDidntLand.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={mangaDidntLand} maxItems={5} />
               </motion.div>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No data available</motion.div>
+              <motion.div className="body-md font-regular text-white/50 mt-2 text-center relative z-10" {...fadeSlideUp} data-framer-motion>No data available</motion.div>
             )}
           </SlideLayout>
         );
@@ -2356,12 +2346,7 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="PLANNED" bgColor="green">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-              Planned to Read
-            </motion.h1>
-            </div>
-            <motion.h2 className="body-md font-regular text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white/90 mt-2 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               Mangas you planned to read {stats.selectedYear === 'all' ? '' : 'this year'}, but haven't yet.
             </motion.h2>
             {plannedMangaItems.length > 0 ? (
@@ -2369,7 +2354,7 @@ export default function MALWrapped() {
                 <GridImages items={plannedMangaItems} maxItems={5} />
               </motion.div>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No planned manga found</motion.div>
+              <motion.div className="body-md font-regular text-white/50 mt-2 text-center relative z-10" {...fadeSlideUp} data-framer-motion>No planned manga found</motion.div>
             )}
           </SlideLayout>
         );
