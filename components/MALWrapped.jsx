@@ -1668,21 +1668,22 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="ANIME-LOG" bgColor="blue">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white pb-2 px-2 inline-block whitespace-nowrap font-semibold" {...fadeSlideUp} data-framer-motion>
-              {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Anime Watched
-              </motion.h1>
-            </div>
             <motion.h2 className="body-md font-regular text-white/90 mt-1 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              You watched
+            {stats.selectedYear === 'all' ? 'Overall' : 'In ' + stats.selectedYear}, you binged through
             </motion.h2>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white ">
                 <AnimatedNumber value={stats.thisYearAnime.length} />
               </p>
-              <p className="body-md text-white/90 mt-2 font-regular">anime {stats.selectedYear === 'all' ? 'overall' : 'in ' + stats.selectedYear}</p>
+              <p className="body-md text-white/90 mt-2 font-regular">anime</p>
             </motion.div>
             {animeCarouselItems.length > 0 && <div className="relative z-10"><ImageCarousel items={animeCarouselItems} maxItems={50} showHover={true} showNames={false} /></div>}
+            <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+              <p className="number-xl text-white ">
+                <AnimatedNumber value={stats.thisYearAnime.length} />
+              </p>
+              <p className="body-md text-white/90 mt-2 font-regular">anime</p>
+            </motion.div>
           </SlideLayout>
         );
 
