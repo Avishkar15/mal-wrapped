@@ -1612,27 +1612,57 @@ export default function MALWrapped() {
       case 'welcome':
         return (
           <SlideLayout verticalText="INITIALIZE" bgColor="pink">
-            <div className="text-center relative w-full h-full flex flex-col items-center justify-center" style={{ background: '#ffffff' }}>
+            <div className="text-center relative w-full h-full flex flex-col items-center justify-center">
+              {/* Colorful abstract shapes background */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
+                {/* Large layered organic shape (left side) */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60" style={{
+                  background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
+                  clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
+                  transform: 'rotate(-15deg)',
+                  filter: 'blur(80px)'
+                }}></div>
+                
+                {/* Rainbow gradient rectangle (top right) */}
+                <div className="absolute top-0 right-0 w-96 h-64 opacity-50" style={{
+                  background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
+                  clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
+                  filter: 'blur(70px)'
+                }}></div>
+                
+                {/* Purple glow (center) */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40" style={{
+                  background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
+                  filter: 'blur(100px)'
+                }}></div>
+                
+                {/* Rainbow accent (bottom right) */}
+                <div className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50" style={{
+                  background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
+                  filter: 'blur(70px)'
+                }}></div>
+              </div>
+              
               <div className="relative z-20">
-                <motion.div {...fadeIn} data-framer-motion>
+              <motion.div {...fadeIn} data-framer-motion>
                   <div className="relative inline-block">
-                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-black mb-0 tracking-tight relative z-10" style={{ 
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white/60 mb-0 tracking-tight relative z-10" style={{ 
                       fontFamily: 'sans-serif',
                       textShadow: 'none',
                       marginBottom: '-0.2em'
                     }}>
                       MyAnimeList
                     </h1>
-                    <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-black tracking-tight relative z-10" style={{ 
+                    <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight relative z-10" style={{ 
                       fontFamily: 'sans-serif',
                       textShadow: 'none',
                       lineHeight: '0.9'
                     }}>
-                      Wrapped
+                      {stats.selectedYear === 'all' ? 'Wrapped' : stats.selectedYear + ' Wrapped'}
                     </h2>
                   </div>
-                  <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-black mt-6">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="font-medium">{username || 'a'}</span>.</p>
-                </motion.div>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-white mt-6">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
+              </motion.div>
               </div>
             </div>
           </SlideLayout>
@@ -2575,33 +2605,61 @@ export default function MALWrapped() {
           )}
 
           {!isAuthenticated && !isLoading && (
-            <div className="text-center p-4 relative w-full h-full flex flex-col items-center justify-center" style={{ background: '#ffffff' }}>
+            <div className="text-center p-4 relative w-full h-full flex flex-col items-center justify-center">
+              {/* Colorful abstract shapes background */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+                {/* Large layered organic shape (left side) */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60 rounded-full" style={{
+                  background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
+                  transform: 'rotate(-15deg)',
+                  filter: 'blur(120px)'
+                }}></div>
+                
+                {/* Rainbow gradient rectangle (top right) */}
+                <div className="absolute top-0 right-0 w-96 h-64 opacity-50 rounded-3xl" style={{
+                  background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
+                  filter: 'blur(120px)'
+                }}></div>
+                
+                {/* Purple glow (center) */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40 rounded-full" style={{
+                  background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
+                  filter: 'blur(140px)'
+                }}></div>
+                
+                {/* Rainbow accent (bottom right) */}
+                <div className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50 rounded-full" style={{
+                  background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
+                  filter: 'blur(120px)'
+                }}></div>
+              </div>
+              
               <div className="relative z-10">
                 <motion.div {...fadeIn100} data-framer-motion>
                   <div className="relative inline-block">
-                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-black mb-0 tracking-tight relative z-10" style={{ 
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white/60 mb-0 tracking-tight relative z-10" style={{ 
                       fontFamily: 'sans-serif',
                       textShadow: 'none',
                       marginBottom: '-0.2em'
                     }}>
                       MyAnimeList
                     </h1>
-                    <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-black tracking-tight relative z-10" style={{ 
+                    <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight relative z-10" style={{ 
                       fontFamily: 'sans-serif',
                       textShadow: 'none',
                       lineHeight: '0.9'
                     }}>
-                      Wrapped
+                      {selectedYear === 'all' ? 'Wrapped' : selectedYear + ' Wrapped'}
                     </h2>
                   </div>
                 </motion.div>
-                <motion.p className="mt-6 text-lg sm:text-xl text-black/80 max-w-md mx-auto" {...fadeIn300} data-framer-motion>Enter your MyAnimeList username to see your year in review.</motion.p>
+                <motion.p className="mt-6 text-lg sm:text-xl text-white/80 max-w-md mx-auto" {...fadeIn300} data-framer-motion>Enter your MyAnimeList username to see your year in review.</motion.p>
               <motion.div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center" {...fadeIn} data-framer-motion>
                   <motion.button
                   onClick={handleBegin}
-                    className="bg-black text-white font-medium text-lg px-8 py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="bg-white text-black font-medium text-lg px-8 py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={!CLIENT_ID || CLIENT_ID === '<your_client_id_here>'}
-                     whileHover={{ scale: 1.05, backgroundColor: '#333' }}
+                    whileHover={{ scale: 1.05, backgroundColor: '#f5f5f5' }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 >
