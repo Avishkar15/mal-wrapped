@@ -437,7 +437,7 @@ export default function MALWrapped() {
       .filter(item => {
         const score = item.list_status.score;
         const popularity = item.node?.num_list_users || 0;
-        return score >= 5 && popularity < 200000;
+        return score >= 8 && popularity > 2000;
       })
       .sort((a, b) => {
         if (b.list_status.score !== a.list_status.score) {
@@ -568,7 +568,7 @@ export default function MALWrapped() {
       .filter(item => {
         const score = item.list_status.score;
         const popularity = item.node?.num_list_users || 0;
-        return score >= 8 && popularity < 100000;
+        return score >= 8 && popularity > 2000;
       })
       .sort((a, b) => {
         if (b.list_status.score !== a.list_status.score) {
