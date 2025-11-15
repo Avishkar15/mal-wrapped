@@ -768,6 +768,20 @@ export default function MALWrapped() {
               }
             }
           });
+          
+          // Remove opacity: 1 and transform: none from text elements
+          const textElements = clonedDoc.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, div, a, button, label');
+          textElements.forEach(el => {
+            // Only process if it's not an image container
+            if (el.tagName !== 'IMG' && !el.querySelector('img')) {
+              if (el.style.opacity === '1') {
+                el.style.opacity = '';
+              }
+              if (el.style.transform === 'none') {
+                el.style.transform = '';
+              }
+            }
+          });
         }
       };
       
@@ -1668,14 +1682,6 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="ANIME-LOG" bgColor="blue">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white pb-2 px-2 inline-block whitespace-nowrap font-semibold" {...fadeSlideUp} data-framer-motion>
-              {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Anime Watched
-              </motion.h1>
-            </div>
-            <motion.h2 className="body-md font-regular text-white/90 mt-1 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              You watched
-            </motion.h2>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white ">
                 <AnimatedNumber value={stats.thisYearAnime.length} />
@@ -1689,11 +1695,6 @@ export default function MALWrapped() {
       case 'anime_time':
         return (
           <SlideLayout verticalText="TIME-ANALYSIS" bgColor="green">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-              Anime Stats
-              </motion.h1>
-            </div>
             <motion.div className="mt-4 space-y-4 relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="text-center">
                 <p className="number-lg text-white ">
@@ -1751,11 +1752,6 @@ export default function MALWrapped() {
         const otherGenres = stats.topGenres?.slice(1, 5) || [];
         return (
           <SlideLayout verticalText="GENRE-MATRIX" bgColor="yellow">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-              Most Watched Genre
-              </motion.h1>
-            </div>
             {topGenre ? (
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -1827,11 +1823,6 @@ export default function MALWrapped() {
         const otherStudios = stats.topStudios?.slice(1, 5) || [];
         return (
           <SlideLayout verticalText="PRODUCTION" bgColor="red">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Favorite Studio
-              </motion.h1>
-            </div>
             {topStudio ? (
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -1870,11 +1861,6 @@ export default function MALWrapped() {
         const seasons = ['Winter', 'Spring', 'Summer', 'Fall'];
         return (
           <SlideLayout verticalText="SEASONAL" bgColor="pink">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Seasonal Highlights
-              </motion.h1>
-            </div>
             <div className="mt-2 sm:mt-4 flex flex-col md:grid md:grid-cols-2 gap-1.5 sm:gap-2 relative z-10">
               {seasons.map(season => {
                 const seasonData = stats.seasonalHighlights?.[season];
@@ -1942,14 +1928,6 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="HIDDEN-GEMS" bgColor="blue">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Hidden Gems
-              </motion.h1>
-            </div>
-            <motion.h2 className="body-lg font-medium text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              High-rated anime with low popularity
-            </motion.h2>
             {gems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={gems} maxItems={5} />
@@ -1969,14 +1947,6 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="DIDNT-LAND" bgColor="red">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Didn't Land
-              </motion.h1>
-            </div>
-            <motion.h2 className="body-lg font-medium text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              5 shows you rated the lowest
-            </motion.h2>
             {didntLand.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={didntLand} maxItems={5} />
@@ -1995,14 +1965,6 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="PLANNED" bgColor="green">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Planned to Watch
-              </motion.h1>
-            </div>
-            <motion.h2 className="body-lg font-medium text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              5 shows you plan to watch {stats.selectedYear === 'all' ? '' : 'this year'}.
-            </motion.h2>
             {plannedAnimeItems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedAnimeItems} maxItems={5} />
@@ -2043,11 +2005,6 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="MANGA-LOG" bgColor="yellow">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-              {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} Manga Read
-            </motion.h1>
-            </div>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white ">
                 <AnimatedNumber value={stats.totalManga} />
@@ -2061,11 +2018,6 @@ export default function MALWrapped() {
       case 'manga_time':
         return (
           <SlideLayout verticalText="READING-TIME" bgColor="blue">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-              Reading Stats
-              </motion.h1>
-            </div>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="space-y-4">
                 <div>
@@ -2156,11 +2108,6 @@ export default function MALWrapped() {
         const otherMangaGenres = topMangaGenreList.slice(1, 5);
         return (
           <SlideLayout verticalText="GENRE-MATRIX" bgColor="yellow">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-              Most Read Genre
-              </motion.h1>
-            </div>
             {topMangaGenre ? (
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -2255,11 +2202,6 @@ export default function MALWrapped() {
         const otherAuthors = stats.topAuthors?.slice(1, 5) || [];
         return (
           <SlideLayout verticalText="CREATORS" bgColor="pink">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Your Favorite Author
-              </motion.h1>
-            </div>
             {topAuthor ? (
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -2303,14 +2245,6 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="HIDDEN-GEMS" bgColor="blue">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Hidden Gems
-              </motion.h1>
-            </div>
-            <motion.h2 className="body-md font-regular text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              High-rated manga with low popularity
-            </motion.h2>
             {mangaGems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={mangaGems} maxItems={5} />
@@ -2330,14 +2264,6 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="DIDNT-LAND" bgColor="red">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-                Didn't Land
-              </motion.h1>
-            </div>
-            <motion.h2 className="body-md font-regular text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              Mangas you rated the lowest
-            </motion.h2>
             {mangaDidntLand.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={mangaDidntLand} maxItems={5} />
@@ -2356,14 +2282,6 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="PLANNED" bgColor="green">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-              Planned to Read
-            </motion.h1>
-            </div>
-            <motion.h2 className="body-md font-regular text-white/90 mt-2 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              Mangas you planned to read {stats.selectedYear === 'all' ? '' : 'this year'}, but haven't yet.
-            </motion.h2>
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedMangaItems} maxItems={5} />
@@ -2380,11 +2298,6 @@ export default function MALWrapped() {
         const totalDays = Math.floor(totalTimeSpent / 24);
         return (
           <SlideLayout verticalText="FINAL-REPORT" bgColor="blue">
-            <div className="text-center relative">
-              <motion.h1 className="relative z-10 heading-md text-white font-semibold pb-2 px-2 inline-block whitespace-nowrap" {...fadeSlideUp} data-framer-motion>
-              {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} In Review
-              </motion.h1>
-            </div>
             <motion.div className="mt-2 sm:mt-4 flex flex-col gap-1 sm:gap-1.5 text-white w-full max-h-full overflow-y-auto relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-1.5">
                 <motion.div 
