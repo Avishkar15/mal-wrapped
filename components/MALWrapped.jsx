@@ -2063,7 +2063,7 @@ export default function MALWrapped() {
             </div>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-rows gap-4">
                   <div>
                     <p className="number-lg text-white ">
                       <AnimatedNumber value={stats.totalChapters || 0} />
