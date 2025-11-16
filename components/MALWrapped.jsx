@@ -143,27 +143,34 @@ export default function MALWrapped() {
   const [selectedYear, setSelectedYear] = useState(2025);
   const slideRef = useRef(null);
 
+  const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
+  const hasManga = stats && mangaList && mangaList.length > 0;
+  
   const slides = stats ? [
     { id: 'welcome' },
     { id: 'anime_count' },
-    { id: 'anime_time' },
-    { id: 'top_genre' },
-    { id: 'drumroll_anime' },
-    { id: 'top_5_anime' },
-    { id: 'top_studio' },
-    { id: 'seasonal_highlights' },
-    { id: 'hidden_gems_anime' },
-    { id: 'didnt_land_anime' },
-    { id: 'planned_anime' },
+    ...(hasAnime ? [
+      { id: 'anime_time' },
+      { id: 'top_genre' },
+      { id: 'drumroll_anime' },
+      { id: 'top_5_anime' },
+      { id: 'top_studio' },
+      { id: 'seasonal_highlights' },
+      { id: 'hidden_gems_anime' },
+      { id: 'didnt_land_anime' },
+      { id: 'planned_anime' },
+    ] : []),
     { id: 'manga_count' },
-    { id: 'manga_time' },
-    { id: 'top_manga_genre' },
-    { id: 'drumroll_manga' },
-    { id: 'top_5_manga' },
-    { id: 'top_author' },
-    { id: 'hidden_gems_manga' },
-    { id: 'didnt_land_manga' },
-    { id: 'planned_manga' },
+    ...(hasManga ? [
+      { id: 'manga_time' },
+      { id: 'top_manga_genre' },
+      { id: 'drumroll_manga' },
+      { id: 'top_5_manga' },
+      { id: 'top_author' },
+      { id: 'hidden_gems_manga' },
+      { id: 'didnt_land_manga' },
+      { id: 'planned_manga' },
+    ] : []),
     { id: 'finale' },
   ] : [];
 
@@ -1663,6 +1670,30 @@ export default function MALWrapped() {
         );
 
       case 'anime_count':
+        if (stats.thisYearAnime.length === 0) {
+          return (
+            <SlideLayout verticalText="ANIME-LOG" bgColor="blue">
+              <motion.div className="text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+                <h2 className="heading-md text-white mb-4">
+                  You didn't watch any anime {stats.selectedYear === 'all' ? '' : 'in ' + stats.selectedYear}.
+                </h2>
+                <p className="body-md text-white/80 mb-6">
+                  Log your watched anime on MyAnimeList to see your personalized wrapped!
+                </p>
+                <motion.a
+                  href="https://myanimelist.net/panel.php?go=edit&type=anime"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-white text-black font-medium text-lg px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Log Anime on MAL
+                </motion.a>
+              </motion.div>
+            </SlideLayout>
+          );
+        }
         const animeCarouselItems = stats.thisYearAnime.map(item => ({
           title: item.node?.title || '',
           coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
@@ -1756,7 +1787,7 @@ export default function MALWrapped() {
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                   <p className="heading-lg font-semibold text-white ">1. {topGenre}</p>
-                  <p className="body-sm text-white/50 font-regular">{stats.topGenres[0][1]} entries</p>
+                  <p className="mono text-white/50 font-regular">{stats.topGenres[0][1]} shows</p>
                 </motion.div>
                 {genreAnime.length > 0 && <div className="relative z-10"><ImageCarousel items={genreAnime} maxItems={30} showHover={true} showNames={false} /></div>}
                 {otherGenres.length > 0 && (
@@ -1769,7 +1800,7 @@ export default function MALWrapped() {
                           transition={{ duration: 0.2 }}
                         >
                           <p className="heading-sm font-semibold text-white">{idx + 2}. {genreName}</p>
-                          <p className="body-sm text-white/50 font-regular">{count} entries</p>
+                          <p className="mono text-white/50 font-regular">{count} shows</p>
                       </motion.div>
                       </motion.div>
                     ))}
@@ -1777,12 +1808,12 @@ export default function MALWrapped() {
                   </div>
                   
                 )}
-                <motion.h2 className="body-sm font-regular text-white mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>You know what you love
+                <motion.h2 className="body-sm font-regular text-white/50 mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>You know what you love
             </motion.h2>
               </>
               
             ) : (
-              <div className="mt-4 text-center text-white/50">No genre data available</div>
+              <div className="body-sm font-regular text-white/50 mt-4 text-center relative z-10">No genres topped your list this year</div>
             )}
             
           </SlideLayout>
@@ -1829,14 +1860,14 @@ export default function MALWrapped() {
           <SlideLayout verticalText="PRODUCTION" bgColor="red">
             <div className="text-center relative">
             <motion.h2 className="body-md font-regular text-white text-center  relative z-10" {...fadeSlideUp} data-framer-motion>
-            And these  studios shaped the bulk of what you love
+            These studios made the most of what you loved
             </motion.h2>
             </div>
             {topStudio ? (
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                   <p className="heading-lg font-semibold text-white ">1. {topStudio}</p>
-                  <p className="body-sm text-white/50 font-regular">{stats.topStudios[0][1]} entries</p>
+                  <p className="mono text-white/50 font-regular">{stats.topStudios[0][1]} shows watched</p>
                 </motion.div>
                 {studioAnime.length > 0 && (
                   <div className="relative z-10"><ImageCarousel items={studioAnime} maxItems={30} showHover={true} showNames={false} /></div>
@@ -1851,14 +1882,14 @@ export default function MALWrapped() {
                           transition={{ duration: 0.2 }}
                         >
                           <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {studioName}</p>
-                          <p className="body-sm text-white/50 font-regular">{count} entries</p>
+                          <p className="mono text-white/50 font-regular">{count} shows watched</p>
                       </motion.div>
                       </motion.div>
                     ))}
                   </div>
                   
                 )}
-                <motion.h2 className="body-sm font-regular text-white text-center mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
+                <motion.h2 className="body-sm font-regular text-white/50 text-center mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
                 Loyalty this strong deserves acknowledgment
             </motion.h2>
               </>
@@ -1976,15 +2007,15 @@ export default function MALWrapped() {
         }));
         return (
           <SlideLayout verticalText="DIDNT-LAND" bgColor="red">
-            <motion.h2 className="body-md font-regular text-white mt-2 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-              Shows that didn't land with you
+            <motion.h2 className="body-md font-regular text-white text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+            But hey, not everything was a win.
             </motion.h2>
             {didntLand.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={didntLand} maxItems={5} />
               </motion.div>
             ) : (
-              <motion.div className="mt-4 text-center text-white/50" {...fadeSlideUp} data-framer-motion>No data available</motion.div>
+              <motion.div className="mt-4  text-center text-white/50" {...fadeSlideUp} data-framer-motion>No data available</motion.div>
             )}
           </SlideLayout>
         );
@@ -2017,13 +2048,6 @@ export default function MALWrapped() {
 
 
       case 'manga_count':
-        const mangaCarouselItems = stats.thisYearAnime.filter(item => {
-          // Get manga from filtered list - need to check if we have manga data
-          return false; // This will be fixed when we have manga data structure
-        }).map(item => ({
-          title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || ''
-        }));
         // Get manga from stats - we need to access filtered manga
         const allMangaItems = (mangaListData || []).filter(item => {
           if (stats.selectedYear === 'all') return true;
@@ -2043,6 +2067,32 @@ export default function MALWrapped() {
           coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
           mangaId: item.node?.id
         }));
+        
+        if (allMangaItems.length === 0) {
+          return (
+            <SlideLayout verticalText="MANGA-LOG" bgColor="yellow">
+              <motion.div className="text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+                <h2 className="heading-md text-white mb-4">
+                  You didn't read any manga {stats.selectedYear === 'all' ? '' : 'in ' + stats.selectedYear}.
+                </h2>
+                <p className="body-md text-white/80 mb-6">
+                  Log your read manga on MyAnimeList to see your personalized wrapped!
+                </p>
+                <motion.a
+                  href="https://myanimelist.net/panel.php?go=edit&type=manga"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block bg-white text-black font-medium text-lg px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Log Manga on MAL
+                </motion.a>
+              </motion.div>
+            </SlideLayout>
+          );
+        }
+        
         return (
           <SlideLayout verticalText="MANGA-LOG" bgColor="yellow">
             <div className="text-center relative">
@@ -2190,7 +2240,7 @@ export default function MALWrapped() {
                 )}
               </>
             ) : (
-              <div className="mt-8 text-center text-white/50">No genre data available</div>
+              <div className="mt-4 text-center text-white/50">No genre data available</div>
             )}
           </SlideLayout>
         );
