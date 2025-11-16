@@ -344,7 +344,7 @@
 
   /* Text container with max width - editable in one place */
   .text-container {
-    max-width: 28rem; /* max-w-md equivalent - change this value to update all text containers */
+    max-width: 32rem; /* max-w-md equivalent - change this value to update all text containers */
     margin-left: auto;
     margin-right: auto;
   }
