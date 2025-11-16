@@ -1667,9 +1667,7 @@ export default function MALWrapped() {
               <div className="relative z-20">
               <motion.div {...fadeIn} data-framer-motion>
                   <div className="relative inline-block">
-                    <h1 className="wrapped-brand text-white/60 mb-0 relative z-10" style={{ 
-                      marginBottom: '-0.2em'
-                    }}>
+                    <h1 className="wrapped-brand text-white/60 mb-0 relative z-10">
                       {stats.selectedYear === 'all' ? 'MyAnimeList' : 'MyAnimeList ' + stats.selectedYear}
                     </h1>
                     <h2 className="wrapped-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white relative z-10">
@@ -2709,9 +2707,7 @@ export default function MALWrapped() {
               <div className="relative z-10">
                 <motion.div {...fadeIn100} data-framer-motion>
                   <div className="relative inline-block">
-                    <h1 className="wrapped-brand text-white/60 mb-0 relative z-10" style={{ 
-                      marginBottom: '-0.2em'
-                    }}>
+                    <h1 className="wrapped-brand text-white/60 mb-0 relative z-10">
                       MyAnimeList
                     </h1>
                     <h2 className="wrapped-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white relative z-10">
