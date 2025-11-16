@@ -2715,11 +2715,11 @@ export default function MALWrapped() {
                       MyAnimeList
                     </h1>
                     <h2 className="wrapped-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white relative z-10">
-                      {selectedYear === 'all' ? 'Wrapped' : selectedYear + ' Wrapped'}
+                      Wrapped
                     </h2>
                   </div>
                 </motion.div>
-                <motion.p className="mt-6 text-lg sm:text-xl text-white/80 max-w-md mx-auto" {...fadeIn300} data-framer-motion>Enter your MyAnimeList username to see your year in review.</motion.p>
+                <motion.p className="mt-6 text-lg sm:text-xl text-white/80 max-w-sm mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
               <motion.div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center" {...fadeIn} data-framer-motion>
                   <motion.button
                   onClick={handleBegin}
