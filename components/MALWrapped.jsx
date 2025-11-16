@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Download, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, LogOut, Share2 } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 function generateCodeVerifier(length = 128) {
@@ -688,15 +688,17 @@ export default function MALWrapped() {
   }
 
   function handleLogout() {
-    localStorage.removeItem('mal_access_token');
-    localStorage.removeItem('mal_refresh_token');
-    setIsAuthenticated(false);
-    setStats(null);
-    setAnimeList([]);
-    setMangaList([]);
-    setUserData(null);
-    setCurrentSlide(0);
-    window.history.replaceState({}, document.title, window.location.pathname);
+    if (window.confirm('Are you sure you want to log out?')) {
+      localStorage.removeItem('mal_access_token');
+      localStorage.removeItem('mal_refresh_token');
+      setIsAuthenticated(false);
+      setStats(null);
+      setAnimeList([]);
+      setMangaList([]);
+      setUserData(null);
+      setCurrentSlide(0);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }
 
   async function handleDownloadPNG() {
@@ -2764,8 +2766,9 @@ export default function MALWrapped() {
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
-                <button onClick={handleLogout} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all" title="Logout">
+                <button onClick={handleLogout} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2" title="Logout">
                   <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-xs sm:text-sm font-medium hidden sm:inline">Logout</span>
                 </button>
               </div>
               
@@ -2829,11 +2832,12 @@ export default function MALWrapped() {
                         }
                       }
                     }}
-                    className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all"
+                    className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                   >
+                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span className="text-xs sm:text-sm md:text-base font-medium">Share</span>
                   </motion.button>
                 ) : (
