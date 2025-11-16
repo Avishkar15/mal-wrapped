@@ -214,7 +214,7 @@
     }
   }
   
-   Responsive adjustments 
+  /* Responsive adjustments */
   @media (max-width: 640px) {
     .heading-xl { font-size: 1.75rem; }
     .heading-lg { font-size: 1.5rem; }
