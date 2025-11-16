@@ -890,11 +890,10 @@ export default function MALWrapped() {
         {phase === 0 ? (
           <motion.div className="text-center relative overflow-hidden" {...fadeSlideUp} data-framer-motion>
             <motion.h1 className="number-xl font-regular text-white" {...pulse} data-framer-motion>{type === 'anime' ? '🎬' : '📚'}</motion.h1>
-            <h2 className="body-md font-regular text-white mt-4">{type === 'anime' ? 'But one show beat everything else and became your absolute pick' : 'One series topped everything and became your standout read'} {yearText} is...</h2>
+            <h2 className="body-md font-regular text-white mt-4">{type === 'anime' ? 'But one show rose above everything this time.' : 'But only one series became your top read this time.'} {yearText} is...</h2>
           </motion.div>
         ) : phase === 1 && topItem ? (
           <motion.div className="text-center relative overflow-hidden" {...fadeSlideUp} data-framer-motion>
-            <h1 className="body-md font-regular text-white mb-4">It is</h1>
             <div className="flex flex-col items-center justify-center gap-4">
               <motion.div 
                 className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden" 
@@ -916,14 +915,14 @@ export default function MALWrapped() {
               <div className="text-left">
                 <h3 className="title-lg text-white font-semibold mb-2">{topItem.node?.title}</h3>
                 {type === 'anime' && topItem.node?.studios?.[0]?.name && (
-                  <p className="body-lg text-white/50 mb-2 font-regular">{topItem.node.studios[0].name}</p>
+                  <p className="body-md text-white/50  font-regular">{topItem.node.studios[0].name}</p>
                 )}
                 {type === 'manga' && topItem.node?.authors?.[0] && (
-                  <p className="body-lg text-white/50 mb-2 font-regular">
+                  <p className="body-md text-white/50  font-regular">
                     {`${topItem.node.authors[0].node?.first_name || ''} ${topItem.node.authors[0].node?.last_name || ''}`.trim()}
                   </p>
                 )}
-                <div className="flex items-left justify-left heading-md text-yellow-300">
+                <div className="flex items-left justify-left heading-sm text-yellow-300 font-semibold">
                   <span className="mr-2">★</span>
                   <span>{topItem.list_status?.score?.toFixed(1)} / 10</span>
                 </div>
@@ -976,7 +975,7 @@ export default function MALWrapped() {
       <SlideLayout verticalText={verticalText}>
         <motion.div className="relative" {...fadeSlideUp} data-framer-motion>
             <motion.h2 className="body-md font-regular text-white mt-1 text-center whitespace-nowrap relative z-10" {...fadeSlideUp} data-framer-motion>
-              The {type === 'anime' ? 'series' : 'manga'} you rated the highest.
+              {type === 'anime' ? 'And these five shows earned the highest praise from you' : 'And these five manga became your top-rated favorites'}
             </motion.h2>
           <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full">
               {(() => {
@@ -1032,7 +1031,7 @@ export default function MALWrapped() {
                       <h3 className="title-md mt-1.5 sm:mt-2 truncate font-semibold text-white text-left">{featured.title}</h3>
                       {featured.studio && <p className="body-sm text-white truncate font-regular text-left">{featured.studio}</p>}
                       {featured.author && <p className="body-md text-white truncate font-medium text-left">{featured.author}</p>}
-                      <div className="flex items-left justify-left body-md text-yellow-300 mt-2 font-medium">
+                      <div className="flex items-left justify-left body-sm text-yellow-300 mt-2 font-semibold">
                           <span className="mr-0.5 sm:mr-1">★</span>
                           <span>{featured.userRating.toFixed(1)} / 10</span>
                         </div>
@@ -1091,7 +1090,7 @@ export default function MALWrapped() {
                             </motion.div>
                             <div className="mt-2 text-center w-full min-w-0">
                               <h3 className="title-sm truncate font-semibold text-white">{item.title}</h3>
-                              <div className="flex items-center justify-center body-sm text-yellow-300 font-medium">
+                              <div className="flex items-center justify-center body-sm text-yellow-300 font-semibold">
                                   <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
                                   <span>{item.userRating.toFixed(1)}</span>
                                 </div>
@@ -1749,7 +1748,7 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="GENRE-MATRIX" bgColor="yellow">
             <motion.h2 className="body-md font-regular text-white mt-1 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-            But you kept coming back to the same genres,
+            But you kept coming back to the same genres
             </motion.h2>
             {topGenre ? (
               <>
@@ -1772,12 +1771,19 @@ export default function MALWrapped() {
                       </motion.div>
                       </motion.div>
                     ))}
+                    
                   </div>
+                  
                 )}
+                <motion.h2 className="body-md font-regular text-white mt-1 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+                You know what you love.
+            </motion.h2>
               </>
+              
             ) : (
               <div className="mt-4 text-center text-white/50">No genre data available</div>
             )}
+            
           </SlideLayout>
         );
 
