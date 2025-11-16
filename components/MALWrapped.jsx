@@ -911,7 +911,7 @@ export default function MALWrapped() {
       <SlideLayout verticalText={verticalText}>
         {phase === 0 ? (
           <motion.div className="text-center relative overflow-hidden" {...fadeSlideUp} data-framer-motion>
-            <motion.h1 className="wrapped-title font-regular text-white" {...pulse} data-framer-motion>{type === 'anime' ? '🎬' : '📚'}</motion.h1>
+            <motion.h1 className="wrapped-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white relative z-10 mb-6" {...pulse} data-framer-motion>{type === 'anime' ? '🎬' : '📚'}</motion.h1>
             <h2 className="body-md font-regular text-white mt-4 text-container">{type === 'anime' ? 'But one show rose above everything' : 'But one manga kept you turning pages nonstop'}</h2>
           </motion.div>
         ) : phase === 1 && topItem ? (
@@ -2066,7 +2066,7 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="TRANSITION" bgColor="black">
             <motion.div className="text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-              <motion.h1 className="wrapped-title font-regular text-white mb-6" {...pulse} data-framer-motion>
+              <motion.h1 className="wrapped-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white relative z-10 mb-6" {...pulse} data-framer-motion>
                 📚
               </motion.h1>
               <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
