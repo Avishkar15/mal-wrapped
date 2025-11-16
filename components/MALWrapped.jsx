@@ -107,11 +107,17 @@ function AnimatedNumber({ value, duration = 1.5, className = '' }) {
   const numValue = Number(value) || 0;
   const motionValue = useMotionValue(0);
   const spring = useSpring(motionValue, {
-    damping: 30,
-    stiffness: 100,
-    duration: duration * 1000
+    damping: 20,
+    stiffness: 200,
+    mass: 0.5
   });
-  const display = useTransform(spring, (latest) => Math.floor(latest).toLocaleString());
+  const display = useTransform(spring, (latest) => {
+    // Ensure we reach the exact final value
+    if (Math.abs(latest - numValue) < 0.1) {
+      return Math.floor(numValue).toLocaleString();
+    }
+    return Math.floor(latest).toLocaleString();
+  });
 
   useEffect(() => {
     motionValue.set(numValue);
