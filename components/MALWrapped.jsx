@@ -134,6 +134,7 @@ export default function MALWrapped() {
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState('');
+  const [loadingProgressPercent, setLoadingProgressPercent] = useState(0);
   const [animeList, setAnimeList] = useState([]);
   const [mangaList, setMangaList] = useState([]);
   const [userData, setUserData] = useState(null);
@@ -206,6 +207,7 @@ export default function MALWrapped() {
     setIsLoading(true);
     setError('');
     setLoadingProgress('Connecting to MAL...');
+    setLoadingProgressPercent(10);
     
     try {
       const redirectUri = getRedirectUri();
@@ -238,6 +240,7 @@ export default function MALWrapped() {
   async function fetchUserData(accessToken) {
     setIsLoading(true);
     setLoadingProgress('Fetching your profile...');
+    setLoadingProgressPercent(20);
     
     try {
       const response = await fetch('/api/mal/user', {
@@ -264,6 +267,7 @@ export default function MALWrapped() {
 
   async function fetchAnimeList(accessToken) {
     setLoadingProgress('Loading your anime list...');
+    setLoadingProgressPercent(25);
     try {
       let allAnime = [];
       let offset = 0;
@@ -286,6 +290,16 @@ export default function MALWrapped() {
         
         allAnime = [...allAnime, ...data.data];
         
+        // Update progress: 25% to 60% for anime loading
+        if (data.paging?.next) {
+          // Estimate total based on current progress
+          const progressRatio = allAnime.length / (allAnime.length + limit);
+          const animeProgress = 25 + (35 * Math.min(progressRatio, 0.95));
+          setLoadingProgressPercent(Math.min(animeProgress, 60));
+        } else {
+          setLoadingProgressPercent(60);
+        }
+        
         if (!data.paging?.next) break;
         offset += limit;
         setLoadingProgress(`Loaded ${allAnime.length} anime...`);
@@ -305,6 +319,7 @@ export default function MALWrapped() {
 
   async function fetchMangaList(accessToken, animeData = []) {
     setLoadingProgress('Loading your manga list...');
+    setLoadingProgressPercent(65);
     try {
       let allManga = [];
       let offset = 0;
@@ -321,9 +336,21 @@ export default function MALWrapped() {
         if (!data.data || data.data.length === 0) break;
         allManga = [...allManga, ...data.data];
         
+        // Update progress: 65% to 95% for manga loading
+        if (data.paging?.next) {
+          const progressRatio = allManga.length / (allManga.length + limit);
+          const mangaProgress = 65 + (30 * Math.min(progressRatio, 0.95));
+          setLoadingProgressPercent(Math.min(mangaProgress, 95));
+        } else {
+          setLoadingProgressPercent(95);
+        }
+        
         if (!data.paging?.next) break;
         offset += limit;
+        setLoadingProgress(`Loaded ${allManga.length} manga...`);
       }
+      
+      setLoadingProgressPercent(100);
 
       setMangaList(allManga);
       // Recalculate stats with both anime and manga
@@ -2743,12 +2770,10 @@ export default function MALWrapped() {
                   <motion.div
                     className="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500"
                     initial={{ width: "0%" }}
-                    animate={{ width: "100%" }}
+                    animate={{ width: `${loadingProgressPercent}%` }}
                     transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      repeatType: "reverse"
+                      duration: 0.3,
+                      ease: "easeOut"
                     }}
                   />
                 </div>
