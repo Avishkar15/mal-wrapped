@@ -2715,7 +2715,7 @@ export default function MALWrapped() {
                     </h2>
                   </div>
                 </motion.div>
-                <motion.p className="mt-6 text-lg sm:text-xl text-white/80 max-w-sm mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
+                <motion.p className="mt-6 text-lg sm:text-xl text-white/80" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
               <motion.div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center" {...fadeIn} data-framer-motion>
                   <motion.button
                   onClick={handleBegin}
