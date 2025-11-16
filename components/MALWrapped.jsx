@@ -2369,7 +2369,7 @@ export default function MALWrapped() {
               {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} In Review
               </motion.h1>
             </div>
-            <motion.div className="mt-2 sm:mt-4 flex flex-col gap-1 sm:gap-1.5 text-white w-full max-h-full overflow-y-auto relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div className="mt-2 sm:mt-4 flex flex-col gap-1 sm:gap-1.5 text-white w-full max-h-full overflow-hidden relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-1.5">
                 <motion.div 
                   className="border-box-cyan rounded-xl flex flex-col shadow-lg" 
