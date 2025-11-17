@@ -3006,17 +3006,27 @@ export default function MALWrapped() {
                       </svg>
                     </div>
                   </div>
-                  <motion.button onClick={handleDownloadPNG} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all" title="Download Slide" 
-                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(16, 185, 129, 0.8)' }}
+                  <motion.button 
+                    onClick={handleDownloadPNG} 
+                    className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan" 
+                    title="Download Slide" 
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(16, 185, 129, 0.8)' }}
                     whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2 }}>
+                    transition={{ duration: 0.2 }}
+                  >
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                   </motion.button>
                 </div>
-                <motion.button onClick={handleLogout} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2" title="Logout"  
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(211, 68, 68, 0.8)' }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2 }}>
+                <motion.button 
+                  onClick={handleLogout} 
+                  className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2" 
+                  title="Logout"  
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(211, 68, 68, 0.8)' }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="text-xs sm:text-sm font-medium hidden sm:inline">Logout</span>
                 </motion.button>
@@ -3109,7 +3119,8 @@ export default function MALWrapped() {
                           setShowShareMenu(!showShareMenu);
                         }
                       }}
-                      className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2"
+                      className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
                       whileHover={{ scale: 1.1, backgroundColor: 'rgba(64, 101, 204, 0.8)' }}
                       whileTap={{ scale: 0.9 }}
                       transition={{ duration: 0.2 }}
