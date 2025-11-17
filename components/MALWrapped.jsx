@@ -762,8 +762,8 @@ export default function MALWrapped() {
     }
   }
 
-  async function handleDownloadPNG() {
-    if (!slideRef.current || typeof window === 'undefined') return;
+  async function generatePNG() {
+    if (!slideRef.current || typeof window === 'undefined') return null;
     
     try {
       const cardElement = slideRef.current;
@@ -839,15 +839,31 @@ export default function MALWrapped() {
       // Export as PNG
       const png = await out.toPng();
       
+      // Convert data URL to Blob, then to File
+      const response = await fetch(png.src);
+      const blob = await response.blob();
+      const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
+      
+      return { file, dataUrl: png.src };
+    } catch (err) {
+      console.error('Error generating PNG:', err);
+      throw err;
+    }
+  }
+
+  async function handleDownloadPNG() {
+    try {
+      const result = await generatePNG();
+      if (!result) return;
+      
       // Create download link
       const link = document.createElement('a');
       link.download = `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`;
-      link.href = png.src;
+      link.href = result.dataUrl;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      console.error('Error generating PNG:', err);
       alert('Failed to download image. Please try again.');
     }
   }
@@ -2917,15 +2933,15 @@ export default function MALWrapped() {
                       </svg>
                     </div>
                   </div>
-                  <motion.button onClick={handleDownloadPNG} className="hover:bg-emerald-700 p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all" title="Download Slide" 
-                  whileHover={{ scale: 1.1 }}
+                  <motion.button onClick={handleDownloadPNG} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all" title="Download Slide" 
+                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(16, 185, 129, 0.8)' }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}>
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                   </motion.button>
                 </div>
-                <motion.button onClick={handleLogout} className="hover:bg-red-700 p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2" title="Logout"  
-                whileHover={{ scale: 1.1}}
+                <motion.button onClick={handleLogout} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2" title="Logout"  
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(211, 68, 68, 0.8)' }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}>
                   <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -2972,29 +2988,54 @@ export default function MALWrapped() {
                   <motion.button
                     onClick={async () => {
                       try {
-                        // First download the image
-                        await handleDownloadPNG();
+                        // Generate the PNG image
+                        const result = await generatePNG();
+                        if (!result) {
+                          alert('Failed to generate image. Please try again.');
+                          return;
+                        }
                         
-                        // Then try to share using Web Share API
-                        if (navigator.share && navigator.canShare) {
+                        // Try to share using Web Share API with image file
+                        if (navigator.share) {
                           const shareData = {
+                            title: `My ${stats?.selectedYear || '2024'} MAL Wrapped`,
+                            text: `Check out my ${stats?.selectedYear || '2024'} MyAnimeList Wrapped!`,
+                            files: [result.file],
+                            url: window.location.href
+                          };
+                          
+                          // Check if we can share files (mobile/iOS)
+                          if (navigator.canShare && navigator.canShare(shareData)) {
+                            await navigator.share(shareData);
+                            return;
+                          }
+                          
+                          // Fallback: try sharing without files (for browsers that don't support file sharing)
+                          const fallbackShareData = {
                             title: `My ${stats?.selectedYear || '2024'} MAL Wrapped`,
                             text: `Check out my ${stats?.selectedYear || '2024'} MyAnimeList Wrapped! Check yours out at ${window.location.href}`,
                           };
                           
-                          if (navigator.canShare(shareData)) {
-                            await navigator.share(shareData);
+                          if (navigator.canShare(fallbackShareData)) {
+                            await navigator.share(fallbackShareData);
+                            // Still download the image
+                            await handleDownloadPNG();
+                            return;
                           }
                         }
+                        
+                        // If share API not available, just download
+                        await handleDownloadPNG();
                       } catch (error) {
-                        // If share fails, user cancelled, or isn't supported - download already happened
+                        // If share fails or user cancelled, download the image
                         if (error.name !== 'AbortError') {
-                          console.log('Share not available or failed');
+                          console.log('Share not available or failed, downloading instead');
+                          await handleDownloadPNG();
                         }
                       }
                     }}
-                    className="hover:bg-blue-700 p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2"
-                    whileHover={{ scale: 1.1}}
+                    className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2"
+                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(64, 101, 204, 0.8)' }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                   >
