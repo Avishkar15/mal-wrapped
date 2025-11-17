@@ -1347,7 +1347,7 @@ export default function MALWrapped() {
     };
 
     // Image Carousel Component - Always carousel on all screen sizes
-    const ImageCarousel = ({ items, maxItems = 20, showHover = true, showNames = false }) => {
+    const ImageCarousel = ({ items, maxItems = 10, showHover = true, showNames = false }) => {
       const [isHovered, setIsHovered] = useState(false);
       const [hoveredItem, setHoveredItem] = useState(null);
       const [scrollPosition, setScrollPosition] = useState(0);
@@ -1794,7 +1794,7 @@ export default function MALWrapped() {
               </p>
               
             </motion.div>
-            {animeCarouselItems.length > 0 && <div className="relative z-10"><ImageCarousel items={animeCarouselItems} maxItems={50} showHover={true} showNames={false} /></div>}
+            {animeCarouselItems.length > 0 && <div className="relative z-10"><ImageCarousel items={animeCarouselItems} maxItems={10} showHover={true} showNames={false} /></div>}
             <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             Now that's dedication
             </motion.h3>
@@ -1875,7 +1875,7 @@ export default function MALWrapped() {
                   <p className="heading-lg font-semibold text-white ">1. {topGenre}</p>
                   <p className="mono text-white/50 font-regular">{stats.topGenres[0][1]} shows</p>
                 </motion.div>
-                {genreAnime.length > 0 && <div className="relative z-10"><ImageCarousel items={genreAnime} maxItems={30} showHover={true} showNames={false} /></div>}
+                {genreAnime.length > 0 && <div className="relative z-10"><ImageCarousel items={genreAnime} maxItems={10} showHover={true} showNames={false} /></div>}
                 {otherGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherGenres.map(([genreName, count], idx) => (
@@ -1957,7 +1957,7 @@ export default function MALWrapped() {
                   <p className="mono text-white/50 font-regular">{stats.topStudios[0][1]} shows watched</p>
                 </motion.div>
                 {studioAnime.length > 0 && (
-                  <div className="relative z-10"><ImageCarousel items={studioAnime} maxItems={30} showHover={true} showNames={false} /></div>
+                  <div className="relative z-10"><ImageCarousel items={studioAnime} maxItems={10} showHover={true} showNames={false} /></div>
                 )}
                 {otherStudios.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
@@ -2072,7 +2072,7 @@ export default function MALWrapped() {
             </motion.h2>
             {gems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <GridImages items={gems} maxItems={5} />
+                <GridImages items={gems} maxItems={3} />
                 <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A true hidden-gem hunter
             </motion.h3>
               </motion.div>
@@ -2100,7 +2100,7 @@ export default function MALWrapped() {
             </motion.h2>
             {didntLand.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <GridImages items={didntLand} maxItems={5} />
+                <GridImages items={didntLand} maxItems={3} />
                 <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Better luck next season
             </motion.h3>
               </motion.div>
@@ -2124,7 +2124,7 @@ export default function MALWrapped() {
             </motion.h2>
             {plannedAnimeItems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <GridImages items={plannedAnimeItems} maxItems={5} />
+                <GridImages items={plannedAnimeItems} maxItems={3} />
                 <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>One day you’ll get to them… probably</motion.h3>
               </motion.div>
             ) : (
@@ -2214,7 +2214,7 @@ export default function MALWrapped() {
                 <AnimatedNumber value={stats.totalManga} /> manga
               </p>
             </motion.div>
-            {allMangaItems.length > 0 && <ImageCarousel items={allMangaItems} maxItems={50} showHover={true} showNames={false} />}
+            {allMangaItems.length > 0 && <ImageCarousel items={allMangaItems} maxItems={10} showHover={true} showNames={false} />}
             <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             That’s some serious reading energy
             </motion.h3>
@@ -2329,7 +2329,7 @@ export default function MALWrapped() {
                   <p className="heading-lg font-semibold text-white ">1. {topMangaGenre[0]}</p>
                   <p className="mono text-white/50 font-regular">{topMangaGenre[1]} manga</p>
                 </motion.div>
-                {mangaGenreItems.length > 0 && <div className="relative z-10"><ImageCarousel items={mangaGenreItems} maxItems={30} showHover={true} showNames={false} /></div>}
+                {mangaGenreItems.length > 0 && <div className="relative z-10"><ImageCarousel items={mangaGenreItems} maxItems={10} showHover={true} showNames={false} /></div>}
                 {otherMangaGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherMangaGenres.map(([genreName, count], idx) => (
@@ -2430,7 +2430,7 @@ export default function MALWrapped() {
                   <p className="mono text-white/50 font-regular">{stats.topAuthors[0][1]} manga</p>
                 </motion.div>
                 {authorManga.length > 0 && (
-                  <div className="relative z-10"><ImageCarousel items={authorManga} maxItems={30} showHover={true} showNames={false} /></div>
+                  <div className="relative z-10"><ImageCarousel items={authorManga} maxItems={10} showHover={true} showNames={false} /></div>
                 )}
                 {otherAuthors.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
@@ -2477,7 +2477,7 @@ export default function MALWrapped() {
             </motion.h2>
             {mangaGems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
-                <GridImages items={mangaGems} maxItems={5} />
+                <GridImages items={mangaGems} maxItems={3} />
                 <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Not everyone finds gems like these
             </motion.h3>
@@ -2505,7 +2505,7 @@ export default function MALWrapped() {
             </motion.h2>
             {mangaDidntLand.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
-                <GridImages items={mangaDidntLand} maxItems={5} />
+                <GridImages items={mangaDidntLand} maxItems={3} />
                 <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Happens to the best of us
             </motion.h3>
@@ -2531,7 +2531,7 @@ export default function MALWrapped() {
             </motion.h2>
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
-                <GridImages items={plannedMangaItems} maxItems={5} />
+                <GridImages items={plannedMangaItems} maxItems={3} />
                 <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 You better get reading after this Wrapped
             </motion.h3>
