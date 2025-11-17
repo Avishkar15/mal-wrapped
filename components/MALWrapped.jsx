@@ -2917,12 +2917,15 @@ export default function MALWrapped() {
                       </svg>
                     </div>
                   </div>
-                  <button onClick={handleDownloadPNG} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all" title="Download Slide">
+                  <motion.button onClick={handleDownloadPNG} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all" title="Download Slide" 
+                  whileHover={{ scale: 1.1, backgroundColor: '#00C080' }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ duration: 0.2 }}>
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                  </button>
+                  </motion.button>
                 </div>
                 <motion.button onClick={handleLogout} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2" title="Logout"  
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.1, backgroundColor: '#C04B4B' }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}>
                   <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -2991,7 +2994,7 @@ export default function MALWrapped() {
                       }
                     }}
                     className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2"
-                    whileHover={{ scale: 1.1 }}
+                    whileHover={{ scale: 1.1, backgroundColor: '#0591AF' }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                   >
