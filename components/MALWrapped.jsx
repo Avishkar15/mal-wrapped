@@ -1493,12 +1493,12 @@ export default function MALWrapped() {
               const content = (
                 <motion.div 
                   className="flex flex-col flex-shrink-0 items-center w-full"
-                  initial={false}
+                  initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  style={{
-                    opacity: 1,
-                    transform: 'scale(1)',
-                    willChange: 'auto'
+                  transition={{ 
+                    duration: 0.4,
+                    delay: (idx % visibleItems.length) * 0.05,
+                    ease: [0.22, 1, 0.36, 1]
                   }}
                 >
                   <motion.div 
@@ -1622,7 +1622,7 @@ export default function MALWrapped() {
                 >
                   <motion.div 
                     className="aspect-[2/3] bg-transparent border border-white/5 rounded-lg overflow-hidden relative" 
-                    style={{ maxHeight: '275px', width: '100%', boxSizing: 'border-box' }}
+                    style={{ maxHeight: '275px', maxWidth: '183px', height: '100%', boxSizing: 'border-box' }}
                     whileHover={{ borderColor: '#ffffff' }}
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                   >
