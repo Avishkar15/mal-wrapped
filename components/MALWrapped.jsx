@@ -2892,7 +2892,7 @@ export default function MALWrapped() {
                     className="h-full"
                     style={{
                       background: 'linear-gradient(90deg, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.3) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.3) 100%)'
-                    , filter: 'blur(120px)'
+                    , filter: 'blur(10px)'
                     }}
                     initial={{ width: "0%" }}
                     animate={{ width: `${loadingProgressPercent}%` }}
