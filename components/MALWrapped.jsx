@@ -2917,15 +2917,15 @@ export default function MALWrapped() {
                       </svg>
                     </div>
                   </div>
-                  <motion.button onClick={handleDownloadPNG} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all" title="Download Slide" 
-                  whileHover={{ scale: 1.1, backgroundColor: '#00C080' }}
+                  <motion.button onClick={handleDownloadPNG} className="hover:bg-emerald-700 p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all" title="Download Slide" 
+                  whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}>
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                   </motion.button>
                 </div>
-                <motion.button onClick={handleLogout} className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2" title="Logout"  
-                whileHover={{ scale: 1.1, backgroundColor: '#C04B4B' }}
+                <motion.button onClick={handleLogout} className="hover:bg-red-700 p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2" title="Logout"  
+                whileHover={{ scale: 1.1}}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}>
                   <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -2993,8 +2993,8 @@ export default function MALWrapped() {
                         }
                       }
                     }}
-                    className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2"
-                    whileHover={{ scale: 1.1, backgroundColor: '#0591AF' }}
+                    className="hover:bg-blue-700 p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2"
+                    whileHover={{ scale: 1.1}}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                   >
