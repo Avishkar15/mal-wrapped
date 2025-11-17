@@ -1018,6 +1018,94 @@ export default function MALWrapped() {
             {verticalText}
             </motion.p>
           )}
+          {/* Colorful abstract shapes background on all cards - animated */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+            {/* Large layered organic shape (left side) */}
+            <motion.div 
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60"
+              style={{
+                background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
+                clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
+                filter: 'blur(80px)',
+                willChange: 'transform, opacity'
+              }}
+              animate={{
+                transform: ['rotate(-15deg) translateY(-50%)', 'rotate(-10deg) translateY(-50%)', 'rotate(-20deg) translateY(-50%)', 'rotate(-15deg) translateY(-50%)'],
+                opacity: [0.6, 0.7, 0.5, 0.6]
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: smoothEase
+              }}
+              data-framer-motion
+              data-shape-blur
+            ></motion.div>
+            
+            {/* Rainbow gradient rectangle (top right) */}
+            <motion.div 
+              className="absolute top-0 right-0 w-96 h-64 opacity-50"
+              style={{
+                background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
+                clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
+                filter: 'blur(70px)',
+                willChange: 'transform, opacity'
+              }}
+              animate={{
+                transform: ['translateY(0%)', 'translateY(-5%)', 'translateY(0%)'],
+                opacity: [0.5, 0.6, 0.5]
+              }}
+              transition={{
+                duration: 7,
+                repeat: Infinity,
+                ease: smoothEase
+              }}
+              data-framer-motion
+              data-shape-blur
+            ></motion.div>
+            
+            {/* Purple glow (center) */}
+            <motion.div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40"
+              style={{
+                background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
+                filter: 'blur(100px)',
+                willChange: 'transform, opacity'
+              }}
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.4, 0.5, 0.4]
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: smoothEase
+              }}
+              data-framer-motion
+              data-shape-blur
+            ></motion.div>
+            
+            {/* Rainbow accent (bottom right) */}
+            <motion.div 
+              className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
+                filter: 'blur(70px)',
+                willChange: 'transform, opacity'
+              }}
+              animate={{
+                transform: ['rotate(0deg)', 'rotate(10deg)', 'rotate(-10deg)', 'rotate(0deg)'],
+                opacity: [0.5, 0.6, 0.5]
+              }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: smoothEase
+              }}
+              data-framer-motion
+              data-shape-blur
+            ></motion.div>
+          </div>
           <motion.div 
             className="w-full relative z-10"
             variants={staggerContainer}
@@ -1122,6 +1210,94 @@ export default function MALWrapped() {
               {verticalText}
             </motion.p>
           )}
+          {/* Colorful abstract shapes background on all cards - animated */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+            {/* Large layered organic shape (left side) */}
+            <motion.div 
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60"
+              style={{
+                background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
+                clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
+                filter: 'blur(80px)',
+                willChange: 'transform, opacity'
+              }}
+              animate={{
+                transform: ['rotate(-15deg) translateY(-50%)', 'rotate(-10deg) translateY(-50%)', 'rotate(-20deg) translateY(-50%)', 'rotate(-15deg) translateY(-50%)'],
+                opacity: [0.6, 0.7, 0.5, 0.6]
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: smoothEase
+              }}
+              data-framer-motion
+              data-shape-blur
+            ></motion.div>
+            
+            {/* Rainbow gradient rectangle (top right) */}
+            <motion.div 
+              className="absolute top-0 right-0 w-96 h-64 opacity-50"
+              style={{
+                background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
+                clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
+                filter: 'blur(70px)',
+                willChange: 'transform, opacity'
+              }}
+              animate={{
+                transform: ['translateY(0%)', 'translateY(-5%)', 'translateY(0%)'],
+                opacity: [0.5, 0.6, 0.5]
+              }}
+              transition={{
+                duration: 7,
+                repeat: Infinity,
+                ease: smoothEase
+              }}
+              data-framer-motion
+              data-shape-blur
+            ></motion.div>
+            
+            {/* Purple glow (center) */}
+            <motion.div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40"
+              style={{
+                background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
+                filter: 'blur(100px)',
+                willChange: 'transform, opacity'
+              }}
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.4, 0.5, 0.4]
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: smoothEase
+              }}
+              data-framer-motion
+              data-shape-blur
+            ></motion.div>
+            
+            {/* Rainbow accent (bottom right) */}
+            <motion.div 
+              className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
+                filter: 'blur(70px)',
+                willChange: 'transform, opacity'
+              }}
+              animate={{
+                transform: ['rotate(0deg)', 'rotate(10deg)', 'rotate(-10deg)', 'rotate(0deg)'],
+                opacity: [0.5, 0.6, 0.5]
+              }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: smoothEase
+              }}
+              data-framer-motion
+              data-shape-blur
+            ></motion.div>
+          </div>
           <motion.div 
             className="w-full relative z-10"
             variants={staggerContainer}
@@ -1343,7 +1519,7 @@ export default function MALWrapped() {
             </motion.p>
           )}
           {/* Colorful abstract shapes background on all cards - animated */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
+          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
             {/* Large layered organic shape (left side) */}
             <motion.div 
               className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60"
@@ -3069,27 +3245,40 @@ export default function MALWrapped() {
               
               {/* Slide Content */}
               <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
-                {/* Top gradient fade - inside content area, fades from top towards navigation */}
-                <div 
-                  className="absolute top-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
-                  style={{
-                    zIndex: 15,
-                    background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
-                  }}
-                />
-                
-                <div className="w-full h-full relative overflow-y-auto">
-                  <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} />
-                </div>
-                
-                {/* Bottom gradient fade - inside content area, fades from bottom towards navigation */}
-                <div 
-                  className="absolute bottom-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
-                  style={{
-                    zIndex: 15,
-                    background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
-                  }}
-                />
+                {(() => {
+                  const currentSlideId = slides[currentSlide]?.id;
+                  const isDrumrollOrTop5 = currentSlideId === 'drumroll_anime' || currentSlideId === 'drumroll_manga' || currentSlideId === 'top_5_anime' || currentSlideId === 'top_5_manga';
+                  
+                  return (
+                    <>
+                      {/* Top gradient fade - inside content area, fades from top towards navigation */}
+                      {!isDrumrollOrTop5 && (
+                        <div 
+                          className="absolute top-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+                          style={{
+                            zIndex: 15,
+                            background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+                          }}
+                        />
+                      )}
+                      
+                      <div className="w-full h-full relative overflow-y-auto">
+                        <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} />
+                      </div>
+                      
+                      {/* Bottom gradient fade - inside content area, fades from bottom towards navigation */}
+                      {!isDrumrollOrTop5 && (
+                        <div 
+                          className="absolute bottom-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+                          style={{
+                            zIndex: 15,
+                            background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+                          }}
+                        />
+                      )}
+                    </>
+                  );
+                })()}
               </div>
               
               {/* Bottom Controls */}
