@@ -2889,7 +2889,10 @@ export default function MALWrapped() {
                 {/* Progress bar */}
                 <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-cyan-400 to-cyan-500"
+                    className="h-full"
+                    style={{
+                      background: 'linear-gradient(90deg, rgba(138, 43, 226, 0.8) 0%, rgba(75, 0, 130, 0.8) 20%, rgba(0, 0, 255, 0.8) 40%, rgba(0, 255, 255, 0.8) 60%, rgba(0, 255, 0, 0.8) 80%, rgba(255, 255, 0, 0.8) 100%)'
+                    }}
                     initial={{ width: "0%" }}
                     animate={{ width: `${loadingProgressPercent}%` }}
                     transition={{
