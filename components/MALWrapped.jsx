@@ -995,7 +995,7 @@ export default function MALWrapped() {
                     {`${topItem.node.authors[0].node?.first_name || ''} ${topItem.node.authors[0].node?.last_name || ''}`.trim()}
                   </p>
                 )}
-                <div className="flex items-left justify-left mono text-yellow-300 font-bold mt-2">
+                <div className="flex items-left justify-left mono text-yellow-300 font-bold mt-1">
                   <span className="mr-2">★</span>
                   <span>{topItem.list_status?.score?.toFixed(1)}</span>
                 </div>
@@ -1065,7 +1065,7 @@ export default function MALWrapped() {
                     <motion.div 
                       className="bg-white/5 rounded-xl w-full h-full flex flex-row items-center"
                       whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-                      transition={{ duration: 0.3 }}
+                      transition={{ duration: 0.2, ease: smoothEase }}
                     >
                       <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-white text-black rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm md:text-base shadow-lg">1</div>
                       {(() => {
@@ -1104,7 +1104,7 @@ export default function MALWrapped() {
                       <h3 className="title-md mt-1.5 sm:mt-2 truncate font-semibold text-white text-left">{featured.title}</h3>
                       {featured.studio && <p className="body-sm text-white/50 truncate font-regular text-left">{featured.studio}</p>}
                       {featured.author && <p className="body-sm text-white/50 truncate font-medium text-left">{featured.author}</p>}
-                       <div className="flex items-left justify-left mono text-yellow-300 mt-2 font-semibold">
+                       <div className="flex items-left justify-left mono text-yellow-300 mt-1 font-semibold">
                           <span className="mr-0.5 sm:mr-1">★</span>
                           <span>{featured.userRating.toFixed(1)}</span>
                         </div>
@@ -1163,7 +1163,7 @@ export default function MALWrapped() {
                             </motion.div>
                             <div className="mt-2 text-center w-full min-w-0">
                               <h3 className="title-sm truncate font-semibold text-white">{item.title}</h3>
-                              <div className="flex items-center justify-center mono text-yellow-300 font-semibold mt-2">
+                              <div className="flex items-center justify-center mono text-yellow-300 font-semibold mt-1">
                                   <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
                                   <span>{item.userRating.toFixed(1)}</span>
                                 </div>
@@ -1480,7 +1480,7 @@ export default function MALWrapped() {
                       >
                         <p className="title-sm text-center">{item.title}</p>
                         {item.userRating && (
-                          <div className="absolute bottom-2 right-2 text-yellow-300 mono font-semibold mt-2">
+                          <div className="absolute bottom-2 right-2 text-yellow-300 mono font-semibold mt-1">
                             ★ {item.userRating.toFixed(1)}
                           </div>
                         )}
@@ -1491,7 +1491,7 @@ export default function MALWrapped() {
                     <div className="mt-2 text-center">
                       <p className="title-sm truncate">{item.title}</p>
                       {item.userRating && (
-                        <p className="mono font-semibold text-yellow-300">★ {item.userRating.toFixed(1)}</p>
+                        <p className="mono font-semibold text-yellow-300 mt-1">★ {item.userRating.toFixed(1)}</p>
                       )}
                     </div>
                   )}
@@ -1590,7 +1590,7 @@ export default function MALWrapped() {
                     <div className="mt-2 text-center w-full px-1">
                       <p className="title-sm truncate">{item.title}</p>
                     {item.userRating && (
-                      <p className="mono font-semibold text-yellow-300 mt-2">★ {item.userRating.toFixed(1)}</p>
+                      <p className="mono font-semibold text-yellow-300 mt-1">★ {item.userRating.toFixed(1)}</p>
                     )}
                   </div>
                 )}
@@ -1864,7 +1864,7 @@ export default function MALWrapped() {
                         <motion.div 
                           className="bg-white/5 rounded-xl p-2 h-full"
                           whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-                          transition={{ duration: 0.2 }}
+                          transition={{ duration: 0.2, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {genreName}</p>
                           <p className="mono text-white/50 font-regular">{count} shows</p>
@@ -1947,7 +1947,7 @@ export default function MALWrapped() {
                         <motion.div 
                           className="bg-white/5 rounded-xl p-2 h-full"
                           whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-                          transition={{ duration: 0.2 }}
+                          transition={{ duration: 0.2, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {studioName}</p>
                           <p className="mono text-white/50 font-regular">{count} shows watched</p>
@@ -2010,9 +2010,9 @@ export default function MALWrapped() {
                     animate="animate"
                   >
                     <motion.div 
-                      className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
+                      className="bg-white/5 rounded-xl p-2 h-full"
                       whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-                      transition={{ duration: 0.3, ease: smoothEase}}
+                      transition={{ duration: 0.2, ease: smoothEase }}
                     >
                       <h3 className="heading-md font-semibold text-white mb-1 sm:mb-2 text-sm sm:text-base">{season}{seasonYear}</h3>
                     {highlight && (
@@ -2037,9 +2037,9 @@ export default function MALWrapped() {
                             </motion.div>
                           <div className="flex-1 min-w-0">
                               <p className="title-md truncate font-semibold text-white text-xs sm:text-sm md:text-base">{highlight.node?.title}</p>
-                              <p className="body-md text-white truncate font-medium text-xs sm:text-sm">{highlight.node?.studios?.[0]?.name || ''}</p>
-                              <p className="mono text-yellow-300 mt-1 sm:mt-2 font-semibold mt-2">★ {highlight.list_status?.score || 'N/A'}</p>
-                              <p className="body-sm text-white/80 mt-1 sm:mt-2 font-semibold text-xs sm:text-sm">{seasonData.totalAnime} anime</p>
+                              <p className="body-md text-white/50 truncate font-medium text-xs sm:text-sm">{highlight.node?.studios?.[0]?.name || ''}</p>
+                              <p className="mono text-yellow-300 mt-1 sm:mt-2 font-semibold mt-1">★ {highlight.list_status?.score || 'N/A'}</p>
+                              <p className="body-sm text-white/50 truncate mt-1 sm:mt-2 font-regular text-xs sm:text-sm">{seasonData.totalAnime} anime watched</p>
                           </div>
                         </div>
                       </>
@@ -2333,10 +2333,10 @@ export default function MALWrapped() {
                         <motion.div 
                           className="bg-white/5 rounded-xl p-2 h-full"
                           whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-                          transition={{ duration: 0.2 }}
+                          transition={{ duration: 0.2, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {genreName}</p>
-                          <p className="mono text-white/50 font-regular">{count} manga</p>
+                          <p className="mono text-white/50 font-regular">{count} manga read</p>
                       </motion.div>
                       </motion.div>
                     ))}
@@ -2435,10 +2435,10 @@ export default function MALWrapped() {
                         <motion.div 
                           className="bg-white/5 rounded-xl p-2 h-full"
                           whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-                          transition={{ duration: 0.2 }}
+                          transition={{ duration: 0.2 , ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {authorName}</p>
-                          <p className="mono text-white/50 font-regular">{count} manga</p>
+                          <p className="mono text-white/50 font-regular">{count} manga read</p>
                       </motion.div>
                       </motion.div>
                       
@@ -2559,9 +2559,9 @@ export default function MALWrapped() {
                   transition={{ duration: 0.4 }}
                 >
                   <motion.div 
-                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 flex flex-col h-full"
-                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-                    transition={{ duration: 0.2 }}
+                    className="bg-white/5 rounded-xl p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                    transition={{ duration: 0.2, ease: smoothEase }}
                   >
                   <p className="body-sm text-white/50 mb-0.5 sm:mb-1 font-regular text-xs sm:text-sm">Top 5 Anime</p>
                   <div className="space-y-0 flex-grow">
@@ -2581,9 +2581,9 @@ export default function MALWrapped() {
                   transition={{ duration: 0.4 }}
                 >
                   <motion.div 
-                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 flex flex-col h-full"
-                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-                    transition={{ duration: 0.2 }}
+                    className="bg-white/5 rounded-xl p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                    transition={{ duration: 0.2, ease: smoothEase }}
                   >
                   <p className="body-sm text-white.50 mb-0.5 sm:mb-1 font-regular text-xs sm:text-sm">Top 5 Manga</p>
                   <div className="space-y-0 flex-grow">
@@ -2605,9 +2605,9 @@ export default function MALWrapped() {
                   transition={{ duration: 0.4 }}
                 >
                   <motion.div 
-                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
-                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-                    transition={{ duration: 0.2 }}
+                    className="bg-white/5 rounded-xl p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                    transition={{ duration: 0.2, ease: smoothEase }}
                   >
                   <p className="body-sm text-white/50 mb-0.5 sm:mb-1 font-regular text-xs sm:text-sm">Episodes Watched</p>
                   <p className="number-md text-white  text-lg sm:text-xl md:text-2xl">
@@ -2623,9 +2623,9 @@ export default function MALWrapped() {
                   transition={{ duration: 0.4 }}
                 >
                   <motion.div 
-                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
-                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-                    transition={{ duration: 0.2 }}
+                    className="bg-white/5 rounded-xl p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                    transition={{ duration: 0.2, ease: smoothEase }}
                   >
                   <p className="body-sm text-white/50 mb-0.5 sm:mb-1 font-regular text-xs sm:text-sm">Chapters Read</p>
                   <p className="number-md text-white  text-lg sm:text-xl md:text-2xl">
@@ -2642,9 +2642,9 @@ export default function MALWrapped() {
                 transition={{ duration: 0.4 }}
               >
                 <motion.div 
-                  className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
-                  whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-                  transition={{ duration: 0.2 }}
+                  className="bg-white/5 rounded-xl p-2 h-full"
+                  whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                  transition={{ duration: 0.2, ease: smoothEase }}
                 >
                 <p className="body-sm text-white/50 mb-0.5 sm:mb-1 font-regular text-xs sm:text-sm">Total Time Spent</p>
                 <p className="number-lg text-white  text-xl sm:text-2xl md:text-3xl">
@@ -2670,9 +2670,9 @@ export default function MALWrapped() {
                   transition={{ duration: 0.4 }}
                 >
                   <motion.div 
-                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
-                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-                    transition={{ duration: 0.2 }}
+                    className="bg-white/5 rounded-xl p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                    transition={{ duration: 0.2, ease: smoothEase }}
                   >
                   <p className="body-sm text-white/50 mb-0.5 sm:mb-1 font-regular text-xs sm:text-sm">Top Studio</p>
                   <p className="heading-md text-white truncate font-medium text-xs sm:text-sm md:text-base">{stats.topStudios?.[0]?.[0] || 'N/A'}</p>
@@ -2686,9 +2686,9 @@ export default function MALWrapped() {
                   transition={{ duration: 0.4 }}
                 >
                   <motion.div 
-                    className="bg-black/20 rounded-xl p-1.5 sm:p-2 h-full"
-                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-                    transition={{ duration: 0.2 }}
+                    className="bg-white/5 rounded-xl p-2 h-full"
+                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                    transition={{ duration: 0.2, ease: smoothEase }}
                   >
                   <p className="body-sm text-white/50 mb-0.5 sm:mb-1 font-regular text-xs sm:text-sm">Top Author</p>
                   <p className="heading-md text-white truncate font-medium text-xs sm:text-sm md:text-base">{stats.topAuthors?.[0]?.[0] || 'N/A'}</p>
