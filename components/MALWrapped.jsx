@@ -2891,7 +2891,8 @@ export default function MALWrapped() {
                   <motion.div
                     className="h-full"
                     style={{
-                      background: 'linear-gradient(90deg, rgba(138, 43, 226, 0.8) 0%, rgba(75, 0, 130, 0.8) 20%, rgba(0, 0, 255, 0.8) 40%, rgba(0, 255, 255, 0.8) 60%, rgba(0, 255, 0, 0.8) 80%, rgba(255, 255, 0, 0.8) 100%)'
+                      background: 'linear-gradient(90deg, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.3) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.3) 100%)'
+                    , filter: 'blur(120px)'
                     }}
                     initial={{ width: "0%" }}
                     animate={{ width: `${loadingProgressPercent}%` }}
