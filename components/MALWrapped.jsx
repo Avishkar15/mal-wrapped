@@ -109,9 +109,15 @@ function AnimatedNumber({ value, duration = 1.5, className = '' }) {
   const spring = useSpring(motionValue, {
     damping: 20,
     stiffness: 100,
-    mass: 1
+    mass: 2
   });
-  const display = useTransform(spring, (latest) => Math.floor(latest).toLocaleString());
+  const display = useTransform(spring, (latest) => {
+    // Ensure we reach the exact final value
+    if (Math.abs(latest - numValue) < 0.1) {
+      return Math.floor(numValue).toLocaleString();
+    }
+    return Math.floor(latest).toLocaleString();
+  });
 
 
   useEffect(() => {
