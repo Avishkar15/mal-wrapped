@@ -831,7 +831,7 @@ export default function MALWrapped() {
       const out = await snapdom(cardElement, {
         backgroundColor: '#0A0A0A',
         scale: 2,
-        exclude: ['.flex-shrink-0', 'button', 'select'],
+        
         plugins: [capturePlugin]
       });
       
