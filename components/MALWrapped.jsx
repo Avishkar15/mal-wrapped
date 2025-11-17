@@ -1074,7 +1074,8 @@ export default function MALWrapped() {
                           <motion.div 
                             className="border-box-cyan flex-shrink-0 rounded-xl overflow-hidden shadow-xl relative" 
                             style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '200px', padding: '2px' }}
-                            transition={{ duration: 0.3 }}
+                            whileHover={{ borderColor: '#ffffff' }}
+                            transition={{ duration: 0.3, ease: smoothEase}}
                           >
                             <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
                             {featured.coverImage && (
@@ -1146,7 +1147,8 @@ export default function MALWrapped() {
                             <motion.div 
                               className="border-box-cyan rounded-xl overflow-hidden aspect-[2/3] relative w-full shadow-lg" 
                               style={{ boxSizing: 'border-box', maxHeight: '275px', padding: '2px' }}
-                              transition={{ duration: 0.3 }}
+                              whileHover={{ borderColor: '#ffffff' }}
+                              transition={{ duration: 0.3, ease: smoothEase}}
                             >
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden relative">
                                 <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-white text-black rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm shadow-md">{index + 2}</div>
@@ -1577,8 +1579,6 @@ export default function MALWrapped() {
                     transition={{ duration: 0.3, ease: smoothEase}}
                   >
                     <div className="bg-transparent rounded-xl w-full h-full overflow-hidden relative">
-                                <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-white text-black rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm shadow-md">{idx + 1}</div>
-                                
                   {item.coverImage && (
                     <motion.img 
                       src={item.coverImage} 
