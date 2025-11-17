@@ -784,7 +784,7 @@ export default function MALWrapped() {
       // Dynamically import snapdom
       const { snapdom } = await import('@zumer/snapdom');
       
-      // Create a plugin to stop animations and hide navigation
+      // Create a plugin to stop animations and preserve styling
       const capturePlugin = {
         name: 'mal-wrapped-capture',
         async afterClone(context) {
@@ -817,46 +817,6 @@ export default function MALWrapped() {
             });
           }
           
-          // Hide all navigation and control bars in cloned document
-          const hideElement = (el) => {
-            el.style.display = 'none';
-            el.style.visibility = 'hidden';
-            el.style.opacity = '0';
-            el.style.height = '0';
-            el.style.padding = '0';
-            el.style.margin = '0';
-            el.style.overflow = 'hidden';
-          };
-          
-          // Hide top navigation bar (year selector and download button)
-          const topBars = clonedDoc.querySelectorAll('.flex-shrink-0');
-          topBars.forEach(bar => {
-            // Check if this is a control bar (has buttons, select, or progress indicators)
-            const hasControls = bar.querySelector('button') || 
-                               bar.querySelector('select') || 
-                               bar.querySelectorAll('div[class*="rounded-full"]').length > 0 ||
-                               bar.textContent.includes('/');
-            if (hasControls) {
-              hideElement(bar);
-            }
-          });
-          
-          // Also hide any navigation elements by class or structure
-          const navElements = clonedDoc.querySelectorAll('[class*="flex-shrink-0"]');
-          navElements.forEach(el => {
-            if (el.querySelector('button') || el.querySelector('select')) {
-              hideElement(el);
-            }
-          });
-          
-          // Hide progress bar specifically
-          const progressBars = clonedDoc.querySelectorAll('[class*="flex-shrink-0"]');
-          progressBars.forEach(bar => {
-            if (bar.textContent.includes('/') || bar.querySelectorAll('div[class*="rounded-full"]').length > 0) {
-              hideElement(bar);
-            }
-          });
-          
           // Ensure all images are properly displayed with correct sizing
           const clonedImages = clonedDoc.querySelectorAll('img');
           clonedImages.forEach(img => {
@@ -877,13 +837,48 @@ export default function MALWrapped() {
               }
             }
           });
+          
+          // Ensure fonts are loaded and applied for text elements, especially ratings
+          // Find rating elements and preserve their styling
+          const ratingElements = clonedDoc.querySelectorAll('.text-yellow-300, [class*="heading-sm"], [class*="body-sm"]');
+          ratingElements.forEach(el => {
+            // Check if this is a rating element
+            const isRating = el.textContent?.includes('★') || 
+                            el.textContent?.match(/\d+\.\d+\s*\/\s*10/) ||
+                            el.classList.contains('text-yellow-300');
+            
+            if (isRating) {
+              // Preserve font properties to prevent breaking
+              el.style.whiteSpace = 'nowrap';
+              el.style.display = 'inline-flex';
+              el.style.alignItems = 'center';
+              el.style.gap = '0.25rem';
+              // Ensure color is preserved
+              if (el.classList.contains('text-yellow-300')) {
+                el.style.color = '#fbbf24';
+              }
+            }
+          });
+          
+          // Also check all text nodes for rating patterns
+          const allTextElements = clonedDoc.querySelectorAll('*');
+          allTextElements.forEach(el => {
+            if (el.textContent && (el.textContent.includes('★') || el.textContent.match(/\d+\.\d+\s*\/\s*10/))) {
+              el.style.whiteSpace = 'nowrap';
+              if (!el.style.color && el.classList.contains('text-yellow-300')) {
+                el.style.color = '#fbbf24';
+              }
+            }
+          });
         }
       };
       
-      // Capture with snapdom
+      // Capture with snapdom - exclude navigation elements
       const out = await snapdom(cardElement, {
         backgroundColor: '#0A0A0A',
         scale: 2,
+        exclude: ['.flex-shrink-0', 'button', 'select'],
+        excludeMode: 'remove',
         plugins: [capturePlugin]
       });
       
