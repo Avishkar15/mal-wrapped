@@ -3067,30 +3067,30 @@ export default function MALWrapped() {
                 })}
               </div>
               
-              {/* Top gradient fade - overlaps with progress bar and fades into content */}
-              <div 
-                className="absolute top-0 left-0 right-0 h-40 sm:h-48 pointer-events-none"
-                style={{
-                  zIndex: 5,
-                  background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.99) 10%, rgba(0, 0, 0, 0.9) 25%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0) 100%)'
-                }}
-              />
-              
               {/* Slide Content */}
               <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
+                {/* Top gradient fade - inside content area, fades from top towards navigation */}
+                <div 
+                  className="absolute top-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+                  style={{
+                    zIndex: 15,
+                    background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+                  }}
+                />
+                
                 <div className="w-full h-full relative overflow-y-auto">
                   <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} />
                 </div>
+                
+                {/* Bottom gradient fade - inside content area, fades from bottom towards navigation */}
+                <div 
+                  className="absolute bottom-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+                  style={{
+                    zIndex: 15,
+                    background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+                  }}
+                />
               </div>
-              
-              {/* Bottom gradient fade - overlaps with bottom controls and fades into content */}
-              <div 
-                className="absolute bottom-0 left-0 right-0 h-40 sm:h-48 pointer-events-none"
-                style={{
-                  zIndex: 5,
-                  background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.99) 10%, rgba(0, 0, 0, 0.9) 25%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0) 100%)'
-                }}
-              />
               
               {/* Bottom Controls */}
               <div className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-10" data-exclude-from-screenshot>
