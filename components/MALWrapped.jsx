@@ -1010,7 +1010,7 @@ export default function MALWrapped() {
         >
         {verticalText && (
             <motion.p 
-              className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-white/30 font-medium tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none"
+              className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-white/30 font-medium tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-20 pointer-events-none"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -1100,18 +1100,39 @@ export default function MALWrapped() {
 
   // Top 5 Slide Component (shows the top 5 list)
   function Top5Slide({ type, top5Items, verticalText }) {
-    const SlideLayout = ({ children, verticalText }) => (
-      <div className="w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden">
-        {verticalText && (
-          <p className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-white/50 font-medium tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-10 pointer-events-none">
-            {verticalText}
-          </p>
-        )}
-        <div className="w-full relative z-10">
-          {children}
-          </div>
-      </div>
-    );
+    const SlideLayout = ({ children, verticalText }) => {
+      // Random abstract shape type for visual variety (like Spotify)
+      const shapeTypes = ['angular', 'pixelated', 'wavy'];
+      const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)] || 'angular';
+      
+      return (
+        <motion.div 
+          className={`w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden abstract-shapes abstract-shapes-${shapeType}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {verticalText && (
+            <motion.p 
+              className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-white/30 font-medium tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-20 pointer-events-none"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              {verticalText}
+            </motion.p>
+          )}
+          <motion.div 
+            className="w-full relative z-10"
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+          >
+            {children}
+          </motion.div>
+        </motion.div>
+      );
+    };
 
     const top5Formatted = top5Items.map(item => ({
       id: item.node.id,
@@ -2892,7 +2913,7 @@ export default function MALWrapped() {
                     className="h-full"
                     style={{
                       background: 'linear-gradient(90deg, rgba(138, 43, 226, 0.8) 0%, rgba(75, 0, 130, 0.8) 20%, rgba(0, 0, 255, 0.8) 40%, rgba(0, 255, 255, 0.8) 60%, rgba(0, 255, 0, 0.8) 80%, rgba(255, 255, 0, 0.8) 100%)'
-                    , filter: 'blur(2px)'
+                    , filter: 'blur(5px)'
                     }}
                     initial={{ width: "0%" }}
                     animate={{ width: `${loadingProgressPercent}%` }}
@@ -3031,7 +3052,7 @@ export default function MALWrapped() {
               </div>
               
               {/* Progress Bar */}
-              <div className="flex-shrink-0 mt-2 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2" data-exclude-from-screenshot>
+              <div className="flex-shrink-0 mt-2 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2 relative z-10" data-exclude-from-screenshot>
                 {slides.map((_, i) => {
                   const isCompleted = i < currentSlide;
                   const isActive = i === currentSlide;
@@ -3046,31 +3067,33 @@ export default function MALWrapped() {
                 })}
               </div>
               
-              {/* Top gradient fade */}
+              {/* Top gradient fade - overlaps with progress bar and fades into content */}
               <div 
-                className="absolute top-0 left-0 right-0 h-16 pointer-events-none z-20"
+                className="absolute top-0 left-0 right-0 h-40 sm:h-48 pointer-events-none"
                 style={{
-                  background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 30%, rgba(0, 0, 0, 0) 100%)'
+                  zIndex: 5,
+                  background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.99) 10%, rgba(0, 0, 0, 0.9) 25%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0) 100%)'
                 }}
               />
               
               {/* Slide Content */}
-              <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative">
+              <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
                 <div className="w-full h-full relative overflow-y-auto">
                   <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} />
                 </div>
               </div>
               
-              {/* Bottom gradient fade */}
+              {/* Bottom gradient fade - overlaps with bottom controls and fades into content */}
               <div 
-                className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-20"
+                className="absolute bottom-0 left-0 right-0 h-40 sm:h-48 pointer-events-none"
                 style={{
-                  background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 30%, rgba(0, 0, 0, 0) 100%)'
+                  zIndex: 5,
+                  background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.99) 10%, rgba(0, 0, 0, 0.9) 25%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0.4) 75%, rgba(0, 0, 0, 0) 100%)'
                 }}
               />
               
               {/* Bottom Controls */}
-              <div className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-30" data-exclude-from-screenshot>
+              <div className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-10" data-exclude-from-screenshot>
               <button
                 onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
                 disabled={currentSlide === 0}
