@@ -901,7 +901,7 @@ export default function MALWrapped() {
     const [phase, setPhase] = useState(0); // 0: drumroll, 1: reveal #1
     
     useEffect(() => {
-      const timer1 = setTimeout(() => setPhase(1), 3500);
+      const timer1 = setTimeout(() => setPhase(1), 2250);
       return () => {
         clearTimeout(timer1);
       };
@@ -968,7 +968,7 @@ export default function MALWrapped() {
                 style={{ boxSizing: 'border-box', border: '1px solid white' }}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.3, ease: smoothEase }}
+                transition={{ duration: 0.3, delay: 0.3, ease: smoothEase }}
               >
                 {topItem.node?.main_picture?.large && (
                   <motion.img 
@@ -990,7 +990,7 @@ export default function MALWrapped() {
                     {`${topItem.node.authors[0].node?.first_name || ''} ${topItem.node.authors[0].node?.last_name || ''}`.trim()}
                   </p>
                 )}
-                <div className="flex items-left justify-left heading-sm text-yellow-300 font-bold">
+                <div className="flex items-left justify-left mono text-yellow-300 font-bold">
                   <span className="mr-2">★</span>
                   <span>{topItem.list_status?.score?.toFixed(1)}</span>
                 </div>
@@ -1097,9 +1097,9 @@ export default function MALWrapped() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                       >
                       <h3 className="title-md mt-1.5 sm:mt-2 truncate font-semibold text-white text-left">{featured.title}</h3>
-                      {featured.studio && <p className="body-sm text-white truncate font-regular text-left">{featured.studio}</p>}
-                      {featured.author && <p className="body-md text-white truncate font-medium text-left">{featured.author}</p>}
-                      <div className="flex items-left justify-left body-md text-yellow-300 mt-2 font-semibold">
+                      {featured.studio && <p className="body-sm text-white/50 truncate font-regular text-left">{featured.studio}</p>}
+                      {featured.author && <p className="body-sm text-white/50 truncate font-medium text-left">{featured.author}</p>}
+                       <div className="flex items-left justify-left mono text-yellow-300 mt-2 font-semibold">
                           <span className="mr-0.5 sm:mr-1">★</span>
                           <span>{featured.userRating.toFixed(1)}</span>
                         </div>
@@ -1158,7 +1158,7 @@ export default function MALWrapped() {
                             </motion.div>
                             <div className="mt-2 text-center w-full min-w-0">
                               <h3 className="title-sm truncate font-semibold text-white">{item.title}</h3>
-                              <div className="flex items-center justify-center body-sm text-yellow-300 font-semibold">
+                              <div className="flex items-center justify-center mono text-yellow-300 font-semibold">
                                   <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
                                   <span>{item.userRating.toFixed(1)}</span>
                                 </div>
@@ -1475,7 +1475,7 @@ export default function MALWrapped() {
                       >
                         <p className="title-sm text-center">{item.title}</p>
                         {item.userRating && (
-                          <div className="absolute bottom-2 right-2 text-yellow-300 body-sm font-semibold">
+                          <div className="absolute bottom-2 right-2 text-yellow-300 mono font-semibold">
                             ★ {item.userRating.toFixed(1)}
                           </div>
                         )}
@@ -1486,7 +1486,7 @@ export default function MALWrapped() {
                     <div className="mt-2 text-center">
                       <p className="title-sm truncate">{item.title}</p>
                       {item.userRating && (
-                        <p className="body-sm font-semibold text-yellow-300">★ {item.userRating.toFixed(1)}</p>
+                        <p className="mono font-semibold text-yellow-300">★ {item.userRating.toFixed(1)}</p>
                       )}
                     </div>
                   )}
@@ -1585,7 +1585,7 @@ export default function MALWrapped() {
                     <div className="mt-2 text-center w-full px-1">
                       <p className="title-sm truncate">{item.title}</p>
                     {item.userRating && (
-                      <p className="body-md font-semibold text-yellow-300">★ {item.userRating.toFixed(1)}</p>
+                      <p className="mono font-semibold text-yellow-300">★ {item.userRating.toFixed(1)}</p>
                     )}
                   </div>
                 )}
@@ -1669,7 +1669,7 @@ export default function MALWrapped() {
         </motion.div>
         <div className="mt-2">
           <h3 className="title-md truncate">{item.title}</h3>
-          <div className="flex items-center body-md text-yellow-300">
+          <div className="flex items-center mono text-yellow-300">
             <span className="mr-1">★</span>
             <span>{item.userRating?.toFixed(1) || 'N/A'}</span>
           </div>
@@ -2018,7 +2018,7 @@ export default function MALWrapped() {
                           <div className="flex-1 min-w-0">
                               <p className="title-md truncate font-semibold text-white text-xs sm:text-sm md:text-base">{highlight.node?.title}</p>
                               <p className="body-md text-white truncate font-medium text-xs sm:text-sm">{highlight.node?.studios?.[0]?.name || ''}</p>
-                              <p className="body-md text-yellow-300 mt-1 sm:mt-2 font-semibold text-xs sm:text-sm">★ {highlight.list_status?.score || 'N/A'}</p>
+                              <p className="mono text-yellow-300 mt-1 sm:mt-2 font-semibold">★ {highlight.list_status?.score || 'N/A'}</p>
                               <p className="body-sm text-white/80 mt-1 sm:mt-2 font-semibold text-xs sm:text-sm">{seasonData.totalAnime} anime</p>
                           </div>
                         </div>
