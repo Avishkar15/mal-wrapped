@@ -1577,7 +1577,7 @@ export default function MALWrapped() {
                     transition={{ duration: 0.3, ease: smoothEase}}
                   >
                     <div className="bg-transparent rounded-xl w-full h-full overflow-hidden relative">
-                                <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-white text-black rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm shadow-md">{index + 2}</div>
+                                <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-white text-black rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm shadow-md">{idx + 1}</div>
                                 
                   {item.coverImage && (
                     <motion.img 
