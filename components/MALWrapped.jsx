@@ -3042,7 +3042,7 @@ export default function MALWrapped() {
                 })}
               </div>
               
-              {/* Slide Content */}
+              {/* Slide Conten */}
               <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4">
                 <div className="w-full h-full relative overflow-y-auto">
                   <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} />
