@@ -2878,38 +2878,18 @@ export default function MALWrapped() {
                 transition={{ duration: 0.6, ease: smoothEase }}
               >
                 <motion.h1 
-                  className="text-4xl md:text-5xl font-light text-white mb-8 tracking-tight"
+                  className="title-lg font-regular text-white mb-8 tracking-tight"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                 >
                   {loadingProgress || 'Generating your report...'}
                 </motion.h1>
-                
-                {/* Animated dots */}
-                <div className="flex items-center justify-center gap-2 mb-8">
-                  {[0, 1, 2].map((index) => (
-                    <motion.div
-                      key={index}
-                      className="w-2 h-2 rounded-full bg-white/60"
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.6, 1, 0.6],
-                      }}
-                      transition={{
-                        duration: 1.2,
-                        repeat: Infinity,
-                        delay: index * 0.2,
-                        ease: "smoothEase"
-                      }}
-                    />
-                  ))}
-                </div>
 
                 {/* Progress bar */}
-                <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500"
+                    className="h-full bg-gradient-to-r from-cyan-400 to-cyan-500"
                     initial={{ width: "0%" }}
                     animate={{ width: `${loadingProgressPercent}%` }}
                     transition={{
