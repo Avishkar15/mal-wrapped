@@ -103,26 +103,50 @@ const hoverImage = {
 };
 
 // Animated Number Component using Framer Motion
-function AnimatedNumber({ value, duration = 1.5, className = '' }) {
+function AnimatedNumber({ value, duration = 2, className = '' }) {
   const numValue = Number(value) || 0;
-  const motionValue = useMotionValue(0);
-  const spring = useSpring(motionValue, {
-    damping: 20,
-    stiffness: 100,
-    mass: 2
-  });
-  const display = useTransform(spring, (latest) => {
-    // Ensure we reach the exact final value
-    if (Math.abs(latest - numValue) < 0.1) {
-      return Math.floor(numValue).toLocaleString();
-    }
-    return Math.floor(latest).toLocaleString();
-  });
-
+  const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
-    motionValue.set(numValue);
-  }, [motionValue, numValue]);
+    // Reset to 0 when value changes
+    setDisplayValue(0);
+    
+    // Animate to the target value
+    const startTime = Date.now();
+    const startValue = 0;
+    const endValue = numValue;
+    let animationFrameId;
+    let cancelled = false;
+    
+    const animate = () => {
+      if (cancelled) return;
+      
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / (duration * 1000), 1);
+      
+      // Ease-out function: starts fast, slows down
+      const eased = 1 - Math.pow(1 - progress, 3);
+      
+      const currentValue = startValue + (endValue - startValue) * eased;
+      setDisplayValue(currentValue);
+      
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        // Ensure we end exactly at the target value
+        setDisplayValue(endValue);
+      }
+    };
+    
+    animationFrameId = requestAnimationFrame(animate);
+    
+    return () => {
+      cancelled = true;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [numValue, duration]);
 
   return (
     <motion.span 
@@ -131,7 +155,7 @@ function AnimatedNumber({ value, duration = 1.5, className = '' }) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
     >
-      {display}
+      {Math.floor(displayValue).toLocaleString()}
     </motion.span>
   );
 }
@@ -954,7 +978,7 @@ export default function MALWrapped() {
               data-framer-motion
             >
               <img 
-                src={type === 'anime' ? '/anime-character.png' : '/manga-character.png'} 
+                src={type === 'anime' ? '/anime-character.webp' : '/manga-character.webp'} 
                 alt={type === 'anime' ? 'Anime character' : 'Manga character'}
                 className="w-32 h-32 md:w-40 md:h-40 object-contain"
               />
