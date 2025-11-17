@@ -172,6 +172,8 @@ export default function MALWrapped() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState(null);
   const [selectedYear, setSelectedYear] = useState(2025);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
 
   const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
@@ -867,6 +869,77 @@ export default function MALWrapped() {
       alert('Failed to download image. Please try again.');
     }
   }
+
+  // Copy image to clipboard
+  async function copyImageToClipboard() {
+    try {
+      const result = await generatePNG();
+      if (!result) return;
+      
+      const response = await fetch(result.dataUrl);
+      const blob = await response.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+      alert('Image copied to clipboard!');
+      setShowShareMenu(false);
+    } catch (err) {
+      console.error('Failed to copy image:', err);
+      alert('Failed to copy image to clipboard. Please try downloading instead.');
+    }
+  }
+
+  // Share to social media
+  function shareToSocial(platform) {
+    const shareText = `Check out my ${stats?.selectedYear || '2024'} MyAnimeList Wrapped!`;
+    const shareUrl = window.location.href;
+    const encodedText = encodeURIComponent(shareText);
+    const encodedUrl = encodeURIComponent(shareUrl);
+    
+    let shareLink = '';
+    
+    switch (platform) {
+      case 'twitter':
+        shareLink = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+        break;
+      case 'facebook':
+        shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        break;
+      case 'reddit':
+        shareLink = `https://reddit.com/submit?title=${encodedText}&url=${encodedUrl}`;
+        break;
+      case 'linkedin':
+        shareLink = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+        break;
+      case 'whatsapp':
+        shareLink = `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+        break;
+      case 'telegram':
+        shareLink = `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
+        break;
+      default:
+        return;
+    }
+    
+    window.open(shareLink, '_blank', 'width=600,height=400');
+    setShowShareMenu(false);
+  }
+
+  // Close share menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target)) {
+        setShowShareMenu(false);
+      }
+    }
+
+    if (showShareMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showShareMenu]);
 
   // Recalculate stats when year changes
   useEffect(() => {
@@ -2985,63 +3058,132 @@ export default function MALWrapped() {
                 <p className="text-white/60 text-xs sm:text-sm md:text-base font-mono py-1.5 sm:py-2 px-2 sm:px-4 rounded-full border-box-cyan ">{String(currentSlide + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}</p>
 
                 {currentSlide === slides.length - 1 ? (
-                  <motion.button
-                    onClick={async () => {
-                      try {
-                        // Generate the PNG image
-                        const result = await generatePNG();
-                        if (!result) {
-                          alert('Failed to generate image. Please try again.');
-                          return;
-                        }
+                  <div className="relative" ref={shareMenuRef}>
+                    <motion.button
+                      onClick={async () => {
+                        // Check if mobile and Web Share API supports files
+                        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                         
-                        // Try to share using Web Share API with image file
-                        if (navigator.share) {
-                          const shareData = {
-                            title: `My ${stats?.selectedYear || '2024'} MAL Wrapped`,
-                            text: `Check out my ${stats?.selectedYear || '2024'} MyAnimeList Wrapped!`,
-                            files: [result.file],
-                            url: window.location.href
-                          };
-                          
-                          // Check if we can share files (mobile/iOS)
-                          if (navigator.canShare && navigator.canShare(shareData)) {
-                            await navigator.share(shareData);
-                            return;
+                        if (isMobile && navigator.share) {
+                          try {
+                            // Generate the PNG image
+                            const result = await generatePNG();
+                            if (!result) {
+                              alert('Failed to generate image. Please try again.');
+                              return;
+                            }
+                            
+                            // Try to share using Web Share API with image file
+                            const shareData = {
+                              title: `My ${stats?.selectedYear || '2024'} MAL Wrapped`,
+                              text: `Check out my ${stats?.selectedYear || '2024'} MyAnimeList Wrapped!`,
+                              files: [result.file],
+                              url: window.location.href
+                            };
+                            
+                            // Check if we can share files (mobile/iOS)
+                            if (navigator.canShare && navigator.canShare(shareData)) {
+                              await navigator.share(shareData);
+                              return;
+                            }
+                            
+                            // Fallback: try sharing without files
+                            const fallbackShareData = {
+                              title: `My ${stats?.selectedYear || '2024'} MAL Wrapped`,
+                              text: `Check out my ${stats?.selectedYear || '2024'} MyAnimeList Wrapped! Check yours out at ${window.location.href}`,
+                            };
+                            
+                            if (navigator.canShare(fallbackShareData)) {
+                              await navigator.share(fallbackShareData);
+                              await handleDownloadPNG();
+                              return;
+                            }
+                          } catch (error) {
+                            if (error.name !== 'AbortError') {
+                              console.log('Share not available or failed, downloading instead');
+                              await handleDownloadPNG();
+                            }
                           }
-                          
-                          // Fallback: try sharing without files (for browsers that don't support file sharing)
-                          const fallbackShareData = {
-                            title: `My ${stats?.selectedYear || '2024'} MAL Wrapped`,
-                            text: `Check out my ${stats?.selectedYear || '2024'} MyAnimeList Wrapped! Check yours out at ${window.location.href}`,
-                          };
-                          
-                          if (navigator.canShare(fallbackShareData)) {
-                            await navigator.share(fallbackShareData);
-                            // Still download the image
-                            await handleDownloadPNG();
-                            return;
-                          }
+                        } else {
+                          // Desktop: show share menu
+                          setShowShareMenu(!showShareMenu);
                         }
-                        
-                        // If share API not available, just download
-                        await handleDownloadPNG();
-                      } catch (error) {
-                        // If share fails or user cancelled, download the image
-                        if (error.name !== 'AbortError') {
-                          console.log('Share not available or failed, downloading instead');
-                          await handleDownloadPNG();
-                        }
-                      }
-                    }}
-                    className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2"
-                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(64, 101, 204, 0.8)' }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="text-xs sm:text-sm md:text-base font-medium">Share</span>
-                  </motion.button>
+                      }}
+                      className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan transition-all flex items-center gap-1.5 sm:gap-2"
+                      whileHover={{ scale: 1.1, backgroundColor: 'rgba(64, 101, 204, 0.8)' }}
+                      whileTap={{ scale: 0.9 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span className="text-xs sm:text-sm md:text-base font-medium">Share</span>
+                    </motion.button>
+                    
+                    {/* Share Menu for Desktop */}
+                    {showShareMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute bottom-full right-0 mb-2 bg-black/95 backdrop-blur-sm border border-white/10 rounded-xl p-3 shadow-xl z-50 min-w-[200px]"
+                      >
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => shareToSocial('twitter')}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                          >
+                            <span className="text-white font-medium">Twitter/X</span>
+                          </button>
+                          <button
+                            onClick={() => shareToSocial('facebook')}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                          >
+                            <span className="text-white font-medium">Facebook</span>
+                          </button>
+                          <button
+                            onClick={() => shareToSocial('reddit')}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                          >
+                            <span className="text-white font-medium">Reddit</span>
+                          </button>
+                          <button
+                            onClick={() => shareToSocial('linkedin')}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                          >
+                            <span className="text-white font-medium">LinkedIn</span>
+                          </button>
+                          <button
+                            onClick={() => shareToSocial('whatsapp')}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                          >
+                            <span className="text-white font-medium">WhatsApp</span>
+                          </button>
+                          <button
+                            onClick={() => shareToSocial('telegram')}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                          >
+                            <span className="text-white font-medium">Telegram</span>
+                          </button>
+                          <div className="border-t border-white/10 my-1"></div>
+                          <button
+                            onClick={copyImageToClipboard}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                          >
+                            <span className="text-white font-medium">Copy Image</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleDownloadPNG();
+                              setShowShareMenu(false);
+                            }}
+                            className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                          >
+                            <span className="text-white font-medium">Download</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
                 ) : (
                   <motion.button
                 onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
