@@ -3008,10 +3008,17 @@ export default function MALWrapped() {
                   </div>
                   <motion.button 
                     onClick={handleDownloadPNG} 
-                    className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan" 
+                    className="p-1.5 sm:p-2 text-white rounded-full" 
                     title="Download Slide" 
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-                    whileHover={{ scale: 1.1, backgroundColor: 'rgba(16, 185, 129, 0.8)' }}
+                    style={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}
+                    whileHover={{ 
+                      scale: 1.1, 
+                      backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                      borderColor: 'rgba(16, 185, 129, 0.8)'
+                    }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                   >
@@ -3020,10 +3027,17 @@ export default function MALWrapped() {
                 </div>
                 <motion.button 
                   onClick={handleLogout} 
-                  className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2" 
+                  className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2" 
                   title="Logout"  
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(211, 68, 68, 0.8)' }}
+                  style={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}
+                  whileHover={{ 
+                    scale: 1.1, 
+                    backgroundColor: 'rgba(211, 68, 68, 0.8)',
+                    borderColor: 'rgba(211, 68, 68, 0.8)'
+                  }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ duration: 0.2 }}
                 >
@@ -3033,7 +3047,7 @@ export default function MALWrapped() {
               </div>
               
               {/* Progress Bar */}
-              <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2" data-exclude-from-screenshot>
+              <div className="flex-shrink-0 mt-2 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2" data-exclude-from-screenshot>
                 {slides.map((_, i) => {
                   const isCompleted = i < currentSlide;
                   const isActive = i === currentSlide;
@@ -3119,9 +3133,16 @@ export default function MALWrapped() {
                           setShowShareMenu(!showShareMenu);
                         }
                       }}
-                      className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
-                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-                      whileHover={{ scale: 1.1, backgroundColor: 'rgba(64, 101, 204, 0.8)' }}
+                      className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)'
+                      }}
+                      whileHover={{ 
+                        scale: 1.1, 
+                        backgroundColor: 'rgba(64, 101, 204, 0.8)',
+                        borderColor: 'rgba(64, 101, 204, 0.8)'
+                      }}
                       whileTap={{ scale: 0.9 }}
                       transition={{ duration: 0.2 }}
                     >
