@@ -989,10 +989,6 @@ export default function MALWrapped() {
     if (!slide || !stats) return null;
 
     const SlideLayout = ({ children, verticalText, bgColor = 'black' }) => {
-      // Random abstract shape type for visual variety (like Spotify)
-      const shapeTypes = ['angular', 'pixelated', 'wavy'];
-      const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)] || 'angular';
-      
       // Spotify-like background colors with subtle tint (solid colors)
       const bgColorClasses = {
         black: 'bg-black',
@@ -1005,7 +1001,7 @@ export default function MALWrapped() {
       
       return (
         <motion.div 
-          className={`w-full h-full relative px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-3 md:py-4 lg:py-6 flex flex-col items-center justify-center slide-card overflow-hidden abstract-shapes abstract-shapes-${shapeType} ${bgColorClasses[bgColor] || 'bg-black'}`}
+          className={`w-full h-full relative px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-3 md:py-4 lg:py-6 flex flex-col items-center justify-center slide-card overflow-hidden abstract-shapes ${bgColorClasses[bgColor] || 'bg-black'}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
@@ -1684,7 +1680,6 @@ export default function MALWrapped() {
         const DrumrollContent = () => {
           const [phase, setPhase] = useState(0);
           const topItem = stats.topRated.length > 0 ? stats.topRated[0] : null;
-          const type = 'anime';
           const verticalText = 'DRUMROLL';
           
           useEffect(() => {
@@ -1694,123 +1689,10 @@ export default function MALWrapped() {
             };
           }, []);
 
-        const SlideLayout = ({ children, verticalText }) => {
-          const shapeTypes = ['angular', 'pixelated', 'wavy'];
-          const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)] || 'angular';
-          
           return (
-            <motion.div 
-              className={`w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden abstract-shapes abstract-shapes-${shapeType}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              {verticalText && (
-                <motion.p 
-                  className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-white/30 font-medium tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-20 pointer-events-none"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  {verticalText}
-                </motion.p>
-              )}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-                <motion.div 
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60"
-                  style={{
-                    background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
-                    clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
-                    filter: 'blur(80px)',
-                    willChange: 'transform, opacity'
-                  }}
-                  animate={{
-                    transform: ['rotate(-15deg) translateY(-50%)', 'rotate(-10deg) translateY(-50%)', 'rotate(-20deg) translateY(-50%)', 'rotate(-15deg) translateY(-50%)'],
-                    opacity: [0.6, 0.7, 0.5, 0.6]
-                  }}
-                  transition={{
-                    duration: 8,
-                    repeat: Infinity,
-                    ease: smoothEase
-                  }}
-                  data-framer-motion
-                  data-shape-blur
-                ></motion.div>
-                <motion.div 
-                  className="absolute top-0 right-0 w-96 h-64 opacity-50"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
-                    clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
-                    filter: 'blur(70px)',
-                    willChange: 'transform, opacity'
-                  }}
-                  animate={{
-                    transform: ['translateY(0%)', 'translateY(-5%)', 'translateY(0%)'],
-                    opacity: [0.5, 0.6, 0.5]
-                  }}
-                  transition={{
-                    duration: 7,
-                    repeat: Infinity,
-                    ease: smoothEase
-                  }}
-                  data-framer-motion
-                  data-shape-blur
-                ></motion.div>
-                <motion.div 
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
-                    filter: 'blur(100px)',
-                    willChange: 'transform, opacity'
-                  }}
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    opacity: [0.4, 0.5, 0.4]
-                  }}
-                  transition={{
-                    duration: 10,
-                    repeat: Infinity,
-                    ease: smoothEase
-                  }}
-                  data-framer-motion
-                  data-shape-blur
-                ></motion.div>
-                <motion.div 
-                  className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
-                    filter: 'blur(70px)',
-                    willChange: 'transform, opacity'
-                  }}
-                  animate={{
-                    transform: ['rotate(0deg)', 'rotate(10deg)', 'rotate(-10deg)', 'rotate(0deg)'],
-                    opacity: [0.5, 0.6, 0.5]
-                  }}
-                  transition={{
-                    duration: 12,
-                    repeat: Infinity,
-                    ease: smoothEase
-                  }}
-                  data-framer-motion
-                  data-shape-blur
-                ></motion.div>
-              </div>
-              <motion.div 
-                className="w-full relative z-10"
-                variants={staggerContainer}
-                initial="initial"
-                animate="animate"
-              >
-                {children}
-              </motion.div>
-            </motion.div>
-          );
-        };
-
-        return (
-          <SlideLayout verticalText={verticalText}>
+            <SlideLayout verticalText={verticalText}>
             {phase === 0 ? (
-              <motion.div className="text-center relative overflow-hidden" {...fadeSlideUp} data-framer-motion>
+              <motion.div className="text-center relative overflow-hidden z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.div 
                   className="relative z-10 mb-6 flex items-center justify-center"
                   {...pulse} 
@@ -1822,13 +1704,13 @@ export default function MALWrapped() {
                     className="w-32 h-32 md:w-40 md:h-40 object-contain"
                   />
                 </motion.div>
-                <h2 className="body-md font-regular text-white mt-4 text-container">But one show rose above everything</h2>
+                <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative">But one show rose above everything</h2>
               </motion.div>
             ) : phase === 1 && topItem ? (
-              <motion.div className="text-center relative overflow-hidden">
+              <motion.div className="text-center relative overflow-hidden z-10">
                 <div className="flex flex-col items-center justify-center gap-4">
                   <motion.div 
-                    className="w-32 md:w-48 aspect-[2/3] bg-transparent border-box-cyan rounded-lg overflow-hidden" 
+                    className="w-32 md:w-48 aspect-[2/3] bg-transparent border-box-cyan rounded-lg overflow-hidden relative z-10" 
                     style={{ boxSizing: 'border-box' }}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -1846,7 +1728,7 @@ export default function MALWrapped() {
                     )}
                   </motion.div>
                   <motion.div 
-                    className="text-left"
+                    className="text-left relative z-10"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.2, ease: smoothEase }}
@@ -1863,7 +1745,7 @@ export default function MALWrapped() {
                 </div>
               </motion.div>
             ) : (
-              <div className="body-md font-regular text-white/50">No favorite anime found</div>
+              <div className="body-md font-regular text-white/50 relative z-10">No favorite anime found</div>
             )}
           </SlideLayout>
           );
@@ -1877,119 +1759,6 @@ export default function MALWrapped() {
           const top5Items = stats.topRated.slice(0, 5);
           const verticalText = 'TOP-5';
           
-          const SlideLayout = ({ children, verticalText }) => {
-            const shapeTypes = ['angular', 'pixelated', 'wavy'];
-            const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)] || 'angular';
-            
-            return (
-              <motion.div 
-                className={`w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden abstract-shapes abstract-shapes-${shapeType}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                {verticalText && (
-                  <motion.p 
-                    className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-white/30 font-medium tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-20 pointer-events-none"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
-                    {verticalText}
-                  </motion.p>
-                )}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-                  <motion.div 
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60"
-                    style={{
-                      background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
-                      clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
-                      filter: 'blur(80px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      transform: ['rotate(-15deg) translateY(-50%)', 'rotate(-10deg) translateY(-50%)', 'rotate(-20deg) translateY(-50%)', 'rotate(-15deg) translateY(-50%)'],
-                      opacity: [0.6, 0.7, 0.5, 0.6]
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                  <motion.div 
-                    className="absolute top-0 right-0 w-96 h-64 opacity-50"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
-                      clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
-                      filter: 'blur(70px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      transform: ['translateY(0%)', 'translateY(-5%)', 'translateY(0%)'],
-                      opacity: [0.5, 0.6, 0.5]
-                    }}
-                    transition={{
-                      duration: 7,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                  <motion.div 
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
-                      filter: 'blur(100px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      opacity: [0.4, 0.5, 0.4]
-                    }}
-                    transition={{
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                  <motion.div 
-                    className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
-                      filter: 'blur(70px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      transform: ['rotate(0deg)', 'rotate(10deg)', 'rotate(-10deg)', 'rotate(0deg)'],
-                      opacity: [0.5, 0.6, 0.5]
-                    }}
-                    transition={{
-                      duration: 12,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                </div>
-                <motion.div 
-                  className="w-full relative z-10"
-                  variants={staggerContainer}
-                  initial="initial"
-                  animate="animate"
-                >
-                  {children}
-                </motion.div>
-              </motion.div>
-            );
-          };
-
           const top5Formatted = top5Items.map(item => ({
             id: item.node.id,
             title: item.node.title,
@@ -2005,31 +1774,31 @@ export default function MALWrapped() {
           if (top5Formatted.length === 0) {
             return (
               <SlideLayout verticalText={verticalText}>
-                <div className="text-white/50">No favorite {type} found</div>
+                <div className="text-white/50 relative z-10">No favorite {type} found</div>
               </SlideLayout>
             );
           }
 
           return (
             <SlideLayout verticalText={verticalText}>
-              <motion.div className="relative" {...fadeSlideUp} data-framer-motion>
+              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                   Including your top pick, these anime stole the spotlight
                 </motion.h2>
-                <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full">
+                <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
                   {(() => {
                     const [featured, ...others] = top5Formatted;
                     return (
                       <>
                         <motion.div 
-                          className="border-box-cyan rounded-xl overflow-hidden flex flex-row items-left relative w-full" 
+                          className="border-box-cyan rounded-xl overflow-hidden flex flex-row items-left relative w-full z-10" 
                           style={{ padding: '2px' }}
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
                           <motion.div 
-                            className="bg-white/5 rounded-xl w-full h-full flex flex-row items-center"
+                            className="bg-white/5 rounded-xl w-full h-full flex flex-row items-center relative z-10"
                             whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
                             transition={{ duration: 0.2, ease: smoothEase }}
                           >
@@ -2038,7 +1807,7 @@ export default function MALWrapped() {
                               const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                               const featuredImage = (
                                 <motion.div 
-                                  className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative" 
+                                  className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative z-10" 
                                   style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '200px' }}
                                   whileHover={{ borderColor: '#ffffff' }}
                                   transition={{ duration: 0.3, ease: smoothEase}}
@@ -2055,13 +1824,13 @@ export default function MALWrapped() {
                                 </motion.div>
                               );
                               return featuredUrl ? (
-                                <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
                                   {featuredImage}
                                 </a>
                               ) : featuredImage;
                             })()}
                             <motion.div 
-                              className="p-1.5 sm:p-2 flex flex-col justify-left flex-grow min-w-0 text-left"
+                              className="p-1.5 sm:p-2 flex flex-col justify-left flex-grow min-w-0 text-left relative z-10"
                               initial={{ opacity: 0, x: 20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
@@ -2094,7 +1863,7 @@ export default function MALWrapped() {
                         </motion.div>
                         {others.length > 0 && (
                           <motion.div 
-                            className="grid grid-cols-4 gap-2 w-full"
+                            className="grid grid-cols-4 gap-2 w-full relative z-10"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delayChildren: 0.4, staggerChildren: 0.1 }}
@@ -2103,13 +1872,13 @@ export default function MALWrapped() {
                               const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                               const itemContent = (
                                 <motion.div 
-                                  className="flex flex-col w-full min-w-0"
+                                  className="flex flex-col w-full min-w-0 relative z-10"
                                   initial={{ opacity: 0, y: 20 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ duration: 0.4 }}
                                 >
                                   <motion.div 
-                                    className="border-box-cyan bg-transparent rounded-xl overflow-hidden aspect-[2/3] relative w-full" 
+                                    className="border-box-cyan bg-transparent rounded-xl overflow-hidden aspect-[2/3] relative w-full z-10" 
                                     style={{ boxSizing: 'border-box', maxHeight: '275px' }}
                                     whileHover={{ borderColor: '#ffffff' }}
                                     transition={{ duration: 0.3, ease: smoothEase}}
@@ -2125,7 +1894,7 @@ export default function MALWrapped() {
                                       />
                                     )}
                                   </motion.div>
-                                  <div className="mt-2 text-center w-full min-w-0">
+                                  <div className="mt-2 text-center w-full min-w-0 relative z-10">
                                     <h3 className="title-sm truncate font-semibold text-white">{item.title}</h3>
                                     <div className="flex items-center justify-center mono text-yellow-300 font-semibold mt-1">
                                       <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
@@ -2135,7 +1904,7 @@ export default function MALWrapped() {
                                 </motion.div>
                               );
                               return (
-                                <motion.div key={item.id} className="w-full min-w-0">
+                                <motion.div key={item.id} className="w-full min-w-0 relative z-10">
                                   {malUrl ? (
                                     <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                       {itemContent}
@@ -2616,7 +2385,6 @@ export default function MALWrapped() {
         const DrumrollContent = () => {
           const [phase, setPhase] = useState(0);
           const topItem = stats.topManga.length > 0 ? stats.topManga[0] : null;
-          const type = 'manga';
           const verticalText = 'DRUMROLL';
           
           useEffect(() => {
@@ -2626,123 +2394,10 @@ export default function MALWrapped() {
             };
           }, []);
 
-          const SlideLayout = ({ children, verticalText }) => {
-            const shapeTypes = ['angular', 'pixelated', 'wavy'];
-            const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)] || 'angular';
-            
-            return (
-              <motion.div 
-                className={`w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden abstract-shapes abstract-shapes-${shapeType}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                {verticalText && (
-                  <motion.p 
-                    className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-white/30 font-medium tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-20 pointer-events-none"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
-                    {verticalText}
-                  </motion.p>
-                )}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-                  <motion.div 
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60"
-                    style={{
-                      background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
-                      clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
-                      filter: 'blur(80px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      transform: ['rotate(-15deg) translateY(-50%)', 'rotate(-10deg) translateY(-50%)', 'rotate(-20deg) translateY(-50%)', 'rotate(-15deg) translateY(-50%)'],
-                      opacity: [0.6, 0.7, 0.5, 0.6]
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                  <motion.div 
-                    className="absolute top-0 right-0 w-96 h-64 opacity-50"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
-                      clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
-                      filter: 'blur(70px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      transform: ['translateY(0%)', 'translateY(-5%)', 'translateY(0%)'],
-                      opacity: [0.5, 0.6, 0.5]
-                    }}
-                    transition={{
-                      duration: 7,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                  <motion.div 
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
-                      filter: 'blur(100px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      opacity: [0.4, 0.5, 0.4]
-                    }}
-                    transition={{
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                  <motion.div 
-                    className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
-                      filter: 'blur(70px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      transform: ['rotate(0deg)', 'rotate(10deg)', 'rotate(-10deg)', 'rotate(0deg)'],
-                      opacity: [0.5, 0.6, 0.5]
-                    }}
-                    transition={{
-                      duration: 12,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                </div>
-                <motion.div 
-                  className="w-full relative z-10"
-                  variants={staggerContainer}
-                  initial="initial"
-                  animate="animate"
-                >
-                  {children}
-                </motion.div>
-              </motion.div>
-            );
-          };
-
           return (
             <SlideLayout verticalText={verticalText}>
               {phase === 0 ? (
-                <motion.div className="text-center relative overflow-hidden" {...fadeSlideUp} data-framer-motion>
+                <motion.div className="text-center relative overflow-hidden z-10" {...fadeSlideUp} data-framer-motion>
                   <motion.div 
                     className="relative z-10 mb-6 flex items-center justify-center"
                     {...pulse} 
@@ -2754,13 +2409,13 @@ export default function MALWrapped() {
                       className="w-32 h-32 md:w-40 md:h-40 object-contain"
                     />
                   </motion.div>
-                  <h2 className="body-md font-regular text-white mt-4 text-container">But one manga kept you turning pages nonstop</h2>
+                  <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative">But one manga kept you turning pages nonstop</h2>
                 </motion.div>
               ) : phase === 1 && topItem ? (
-                <motion.div className="text-center relative overflow-hidden">
+                <motion.div className="text-center relative overflow-hidden z-10">
                   <div className="flex flex-col items-center justify-center gap-4">
                     <motion.div 
-                      className="w-32 md:w-48 aspect-[2/3] bg-transparent border-box-cyan rounded-lg overflow-hidden" 
+                      className="w-32 md:w-48 aspect-[2/3] bg-transparent border-box-cyan rounded-lg overflow-hidden relative z-10" 
                       style={{ boxSizing: 'border-box' }}
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -2778,7 +2433,7 @@ export default function MALWrapped() {
                       )}
                     </motion.div>
                     <motion.div 
-                      className="text-left"
+                      className="text-left relative z-10"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.2, ease: smoothEase }}
@@ -2797,7 +2452,7 @@ export default function MALWrapped() {
                   </div>
                 </motion.div>
               ) : (
-                <div className="body-md font-regular text-white/50">No favorite manga found</div>
+                <div className="body-md font-regular text-white/50 relative z-10">No favorite manga found</div>
               )}
             </SlideLayout>
           );
@@ -2811,119 +2466,6 @@ export default function MALWrapped() {
           const top5Items = stats.topManga.slice(0, 5);
           const verticalText = 'TOP-5';
           
-          const SlideLayout = ({ children, verticalText }) => {
-            const shapeTypes = ['angular', 'pixelated', 'wavy'];
-            const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)] || 'angular';
-            
-            return (
-              <motion.div 
-                className={`w-full h-full relative px-3 sm:px-4 md:p-6 lg:p-8 flex flex-col items-center justify-center slide-card overflow-hidden abstract-shapes abstract-shapes-${shapeType}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                {verticalText && (
-                  <motion.p 
-                    className="absolute top-1/2 -left-2 md:-left-2 -translate-y-1/2 text-white/30 font-medium tracking-[.3em] [writing-mode:vertical-lr] text-xs sm:text-sm md:text-base z-20 pointer-events-none"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
-                    {verticalText}
-                  </motion.p>
-                )}
-                <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
-                  <motion.div 
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60"
-                    style={{
-                      background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
-                      clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
-                      filter: 'blur(80px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      transform: ['rotate(-15deg) translateY(-50%)', 'rotate(-10deg) translateY(-50%)', 'rotate(-20deg) translateY(-50%)', 'rotate(-15deg) translateY(-50%)'],
-                      opacity: [0.6, 0.7, 0.5, 0.6]
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                  <motion.div 
-                    className="absolute top-0 right-0 w-96 h-64 opacity-50"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
-                      clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
-                      filter: 'blur(70px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      transform: ['translateY(0%)', 'translateY(-5%)', 'translateY(0%)'],
-                      opacity: [0.5, 0.6, 0.5]
-                    }}
-                    transition={{
-                      duration: 7,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                  <motion.div 
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
-                      filter: 'blur(100px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      opacity: [0.4, 0.5, 0.4]
-                    }}
-                    transition={{
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                  <motion.div 
-                    className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
-                      filter: 'blur(70px)',
-                      willChange: 'transform, opacity'
-                    }}
-                    animate={{
-                      transform: ['rotate(0deg)', 'rotate(10deg)', 'rotate(-10deg)', 'rotate(0deg)'],
-                      opacity: [0.5, 0.6, 0.5]
-                    }}
-                    transition={{
-                      duration: 12,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                    data-framer-motion
-                    data-shape-blur
-                  ></motion.div>
-                </div>
-                <motion.div 
-                  className="w-full relative z-10"
-                  variants={staggerContainer}
-                  initial="initial"
-                  animate="animate"
-                >
-                  {children}
-                </motion.div>
-              </motion.div>
-            );
-          };
-
           const top5Formatted = top5Items.map(item => ({
             id: item.node.id,
             title: item.node.title,
@@ -2939,31 +2481,31 @@ export default function MALWrapped() {
           if (top5Formatted.length === 0) {
             return (
               <SlideLayout verticalText={verticalText}>
-                <div className="text-white/50">No favorite {type} found</div>
+                <div className="text-white/50 relative z-10">No favorite {type} found</div>
               </SlideLayout>
             );
           }
 
           return (
             <SlideLayout verticalText={verticalText}>
-              <motion.div className="relative" {...fadeSlideUp} data-framer-motion>
+              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                   Including your top read, these manga ruled your shelves
                 </motion.h2>
-                <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full">
+                <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
                   {(() => {
                     const [featured, ...others] = top5Formatted;
                     return (
                       <>
                         <motion.div 
-                          className="border-box-cyan rounded-xl overflow-hidden flex flex-row items-left relative w-full" 
+                          className="border-box-cyan rounded-xl overflow-hidden flex flex-row items-left relative w-full z-10" 
                           style={{ padding: '2px' }}
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
                           <motion.div 
-                            className="bg-white/5 rounded-xl w-full h-full flex flex-row items-center"
+                            className="bg-white/5 rounded-xl w-full h-full flex flex-row items-center relative z-10"
                             whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
                             transition={{ duration: 0.2, ease: smoothEase }}
                           >
@@ -2972,7 +2514,7 @@ export default function MALWrapped() {
                               const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                               const featuredImage = (
                                 <motion.div 
-                                  className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative" 
+                                  className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative z-10" 
                                   style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '200px' }}
                                   whileHover={{ borderColor: '#ffffff' }}
                                   transition={{ duration: 0.3, ease: smoothEase}}
@@ -2989,13 +2531,13 @@ export default function MALWrapped() {
                                 </motion.div>
                               );
                               return featuredUrl ? (
-                                <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
                                   {featuredImage}
                                 </a>
                               ) : featuredImage;
                             })()}
                             <motion.div 
-                              className="p-1.5 sm:p-2 flex flex-col justify-left flex-grow min-w-0 text-left"
+                              className="p-1.5 sm:p-2 flex flex-col justify-left flex-grow min-w-0 text-left relative z-10"
                               initial={{ opacity: 0, x: 20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
@@ -3028,7 +2570,7 @@ export default function MALWrapped() {
                         </motion.div>
                         {others.length > 0 && (
                           <motion.div 
-                            className="grid grid-cols-4 gap-2 w-full"
+                            className="grid grid-cols-4 gap-2 w-full relative z-10"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delayChildren: 0.4, staggerChildren: 0.1 }}
@@ -3037,13 +2579,13 @@ export default function MALWrapped() {
                               const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                               const itemContent = (
                                 <motion.div 
-                                  className="flex flex-col w-full min-w-0"
+                                  className="flex flex-col w-full min-w-0 relative z-10"
                                   initial={{ opacity: 0, y: 20 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ duration: 0.4 }}
                                 >
                                   <motion.div 
-                                    className="border-box-cyan bg-transparent rounded-xl overflow-hidden aspect-[2/3] relative w-full" 
+                                    className="border-box-cyan bg-transparent rounded-xl overflow-hidden aspect-[2/3] relative w-full z-10" 
                                     style={{ boxSizing: 'border-box', maxHeight: '275px' }}
                                     whileHover={{ borderColor: '#ffffff' }}
                                     transition={{ duration: 0.3, ease: smoothEase}}
@@ -3059,7 +2601,7 @@ export default function MALWrapped() {
                                       />
                                     )}
                                   </motion.div>
-                                  <div className="mt-2 text-center w-full min-w-0">
+                                  <div className="mt-2 text-center w-full min-w-0 relative z-10">
                                     <h3 className="title-sm truncate font-semibold text-white">{item.title}</h3>
                                     <div className="flex items-center justify-center mono text-yellow-300 font-semibold mt-1">
                                       <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
@@ -3069,7 +2611,7 @@ export default function MALWrapped() {
                                 </motion.div>
                               );
                               return (
-                                <motion.div key={item.id} className="w-full min-w-0">
+                                <motion.div key={item.id} className="w-full min-w-0 relative z-10">
                                   {malUrl ? (
                                     <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                       {itemContent}
@@ -3297,39 +2839,39 @@ export default function MALWrapped() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.2, ease: smoothEase }}
                 >
-                  My {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} MyAnimeList Wrapped
-                </motion.h2>
+            My {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} MyAnimeList Wrapped
+            </motion.h2>
               </div>
 
               {/* Text Content Below - No Boxes */}
-              <motion.div 
+                <motion.div 
                 className="w-full max-w-2xl flex flex-col gap-4 sm:gap-6 text-white relative z-10"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
                 <div className="grid grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Anime</p>
                     <div className="space-y-0.5">
-                      {stats.topRated.slice(0, 5).map((a, i) => (
+                    {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white truncate">
                           <span className="title-md text-white font-medium ">{a.node.title}</span>
-                        </p>
-                      ))}
-                    </div>
+                      </p>
+                    ))}
+                  </div>
                   </div>
                   
                   <div>
                     <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Manga</p>
                     <div className="space-y-0.5">
-                      {stats.topManga.slice(0, 5).map((m, i) => (
+                    {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="text-white truncate">
                           <span className="title-md text-white font-medium truncate">{m.node.title}</span>
-                        </p>
-                      ))}
-                    </div>
+                      </p>
+                    ))}
                   </div>
+              </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 sm:gap-6">
@@ -3356,44 +2898,44 @@ export default function MALWrapped() {
                   <div>
                     <p className="body-sm text-white/50 mb-1 font-regular">Episodes Watched</p>
                     <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
-                      {stats.totalEpisodes || 0}
-                    </p>
+                    {stats.totalEpisodes || 0}
+                  </p>
                   </div>
                   <div>
                     <p className="body-sm text-white/50 mb-1 font-regular">Chapters Read</p>
                     <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
-                      {stats.totalChapters || 0}
-                    </p>
-                  </div>
+                    {stats.totalChapters || 0}
+                  </p>
+                </div>
                 </div>
 
                 <div className="text-left">
                   <p className="body-sm text-white/50 mb-1 font-regular">Total Time Spent</p>
                   <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
-                    {totalDays > 0 ? (
-                      <>
-                        {totalDays} Days
+                  {totalDays > 0 ? (
+                    <>
+                      {totalDays} Days
                         <span className="body-md text-white/50 ml-2 font-medium text-lg">or {totalTimeSpent} hours</span>
-                      </>
-                    ) : (
-                      <>
-                        {totalTimeSpent} Hours
-                      </>
-                    )}
-                  </p>
+                    </>
+                  ) : (
+                    <>
+                      {totalTimeSpent} Hours
+                    </>
+                  )}
+                </p>
                 </div>
-              </motion.div>
+                </motion.div>
 
               {/* Web Address - Bottom Right */}
-              <motion.div 
+                <motion.div 
                 className="absolute bottom-4 right-4 text-white/50 text-xs sm:text-sm font-regular relative z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
                 {typeof window !== 'undefined' && window.location.origin.replace(/^https?:\/\//, '')}
-              </motion.div>
-            </div>
+                </motion.div>
+                  </div>
           </SlideLayout>
         );
 
