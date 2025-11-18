@@ -2861,27 +2861,17 @@ export default function MALWrapped() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <h2 className="heading-lg font-semibold text-white text-center">
-            My {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} MyAnimeList Wrapped
-                </h2>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <p className="body-sm text-white/50 mb-2 font-regular">Top 5 Anime</p>
                     <div className="space-y-1">
                       {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white">
-                          <span className="title-sm font-medium text-white/50 w-4 inline-block">{i+1}.</span>
+                          <span className="title-sm font-medium text-white/75 w-4 inline-block">{i+1}.</span>
                           <span className="title-md text-white font-medium">{a.node.title}</span>
                         </p>
                       ))}
                     </div>
-                    {stats.topStudios?.[0]?.[0] && (
-                      <div className="mt-4">
-                        <p className="body-sm text-white/50 mb-1 font-regular">Top Studio</p>
-                        <p className="title-md text-white font-medium">{stats.topStudios[0][0]}</p>
-                      </div>
-                    )}
                   </div>
                   
                   <div>
@@ -2894,11 +2884,25 @@ export default function MALWrapped() {
                         </p>
                       ))}
                     </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                  <div>
+                    {stats.topStudios?.[0]?.[0] && (
+                      <>
+                        <p className="body-sm text-white/50 mb-1 font-regular">Top Studio</p>
+                        <p className="title-md text-white font-medium">{stats.topStudios[0][0]}</p>
+                      </>
+                    )}
+                  </div>
+                  
+                  <div>
                     {stats.topAuthors?.[0]?.[0] && (
-                      <div className="mt-4">
+                      <>
                         <p className="body-sm text-white/50 mb-1 font-regular">Top Author</p>
                         <p className="title-md text-white font-medium">{stats.topAuthors[0][0]}</p>
-                      </div>
+                      </>
                     )}
                   </div>
                 </div>
@@ -2933,6 +2937,16 @@ export default function MALWrapped() {
                     )}
                   </p>
                 </div>
+              </motion.div>
+
+              {/* Web Address - Bottom Right */}
+              <motion.div 
+                className="absolute bottom-4 right-4 text-white/50 text-xs sm:text-sm font-regular relative z-10"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                {typeof window !== 'undefined' && window.location.origin.replace(/^https?:\/\//, '')}
               </motion.div>
             </div>
           </SlideLayout>
