@@ -2872,14 +2872,14 @@ export default function MALWrapped() {
 
               {/* Text Content Below - No Boxes */}
                 <motion.div 
-                className="w-full max-w-3xl flex flex-col gap-4 sm:gap-6 text-white relative z-10"
+                className="w-full max-w-3xl flex flex-col gap-6 sm:gap-8 text-white relative z-10"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
-                <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Anime</p>
+                <div className="grid grid-cols-2 gap-6 sm:gap-8">
+                  <div className="space-y-2">
+                    <p className="body-sm text-white/50 font-regular">Top 5 Anime</p>
                     {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white truncate">
                           <span className="title-md text-white font-medium truncate mr-2">{String(i + 1)}</span>
@@ -2888,8 +2888,8 @@ export default function MALWrapped() {
                     ))}
                   </div>
                   
-                  <div>
-                    <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Manga</p>
+                  <div className="space-y-2">
+                    <p className="body-sm text-white/50 font-regular">Top 5 Manga</p>
                     
                     {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="text-white truncate">
@@ -2897,44 +2897,48 @@ export default function MALWrapped() {
                           <span className="title-md text-white font-medium truncate">{m.node.title}</span>
                       </p>
                     ))}
+                  </div>
               </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                  <div>
+                <div className="grid grid-cols-2 gap-6 sm:gap-8">
+                  <div className="space-y-2">
                     {finaleTopGenre && (
                       <>
-                        <p className="body-sm text-white/50 mb-1 font-regular">Favorite Genre</p>
+                        <p className="body-sm text-white/50 font-regular">Favorite Genre</p>
                         <p className="title-lg text-white font-medium">{finaleTopGenre[0]}</p>
                       </>
                     )}
                   </div>
                   
-                  <div>
+                  <div className="space-y-2">
                     {favoriteAuthor && (
                       <>
-                        <p className="body-sm text-white/50 mb-1 font-regular">Favorite Author</p>
+                        <p className="body-sm text-white/50 font-regular">Favorite Author</p>
                         <p className="title-lg text-white font-medium">{favoriteAuthor}</p>
                       </>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 sm:gap-6">
-                  <div>
-                    <p className="body-sm text-white/50 mb-1 font-regular">Anime Watched</p>
+                <div className="grid grid-cols-2 gap-6 sm:gap-8">
+                  <div className="space-y-2">
+                    <p className="body-sm text-white/50 font-regular">Anime Watched</p>
                     <p className="number-md text-white  font-medium">
                     {stats.totalAnime || 0}
                   </p>
                   </div>
-                  <div>
-                    <p className="body-sm text-white/50 mb-1 font-regular">Manga Read</p>
+                  <div className="space-y-2">
+                    <p className="body-sm text-white/50 font-regular">Manga Read</p>
                     <p className="number-md text-white font-medium">
                     {stats.totalManga || 0}
                   </p>
                 </div>
-                <div>
-                  <p className="body-sm text-white/50 mb-1 font-regular">Total Time Spent</p>
+                
+                
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="body-sm text-white/50 font-regular">Total Time Spent</p>
                   <p className="number-lg text-white font-medium">
                   {totalDays > 0 ? (
                     <>
@@ -2946,12 +2950,9 @@ export default function MALWrapped() {
                     </>
                   )}
                 </p>
-                </div>
+                  </div>
                 
-                </div>
-
-                
-                </motion.div>
+            </motion.div>
 
                   </div>
           </SlideLayout>
