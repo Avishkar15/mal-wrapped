@@ -2837,21 +2837,31 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="FINAL-REPORT" bgColor="blue">
             <div className="w-full h-full flex flex-col items-center justify-center relative">
-              {/* Central Image */}
-              <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 mb-6 sm:mb-8 flex items-center justify-center">
-                <motion.div
-                  className="relative z-10 w-full h-full rounded-xl overflow-hidden border-box-cyan"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, ease: smoothEase }}
+              {/* Image and Heading */}
+              <div className="flex items-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 flex items-center justify-center">
+                  <motion.div
+                    className="relative z-10 w-full h-full rounded-xl overflow-hidden border-box-cyan"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, ease: smoothEase }}
+                  >
+                    <img 
+                      src={userImage} 
+                      alt={username || 'User'} 
+                      className="w-full h-full object-cover"
+                      crossOrigin="anonymous"
+                    />
+                  </motion.div>
+                </div>
+                <motion.h2 
+                  className="heading-lg font-semibold text-white relative z-10"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2, ease: smoothEase }}
                 >
-                  <img 
-                    src={userImage} 
-                    alt={username || 'User'} 
-                    className="w-full h-full object-cover"
-                    crossOrigin="anonymous"
-                  />
-                </motion.div>
+                  My {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} MyAnimeList Wrapped
+                </motion.h2>
               </div>
 
               {/* Text Content Below - No Boxes */}
@@ -2863,11 +2873,11 @@ export default function MALWrapped() {
               >
                 <div className="grid grid-cols-2 gap-4 sm:gap-6">
                   <div>
-                    <p className="body-sm text-white/50 mb-2 font-regular">Top 5 Anime</p>
-                    <div className="space-y-1">
+                    <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Anime</p>
+                    <div className="space-y-0.5">
                       {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white">
-                          <span className="title-sm font-medium text-white/75 w-4 inline-block">{i+1}.</span>
+                          <span className="title-sm font-medium text-white/50 w-4 inline-block">{i+1}.</span>
                           <span className="title-md text-white font-medium">{a.node.title}</span>
                         </p>
                       ))}
@@ -2875,11 +2885,11 @@ export default function MALWrapped() {
                   </div>
                   
                   <div>
-                    <p className="body-sm text-white/50 mb-2 font-regular">Top 5 Manga</p>
-                    <div className="space-y-1">
+                    <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Manga</p>
+                    <div className="space-y-0.5">
                       {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="text-white">
-                          <span className="title-sm font-medium text-white/75 w-4 inline-block">{i+1}.</span>
+                          <span className="title-sm font-medium text-white/50 w-4 inline-block">{i+1}.</span>
                           <span className="title-md text-white font-medium">{m.node.title}</span>
                         </p>
                       ))}
@@ -2907,7 +2917,7 @@ export default function MALWrapped() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 sm:gap-6 mt-2">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <p className="body-sm text-white/50 mb-1 font-regular">Episodes Watched</p>
                     <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
@@ -2922,7 +2932,7 @@ export default function MALWrapped() {
                   </div>
                 </div>
 
-                <div className="text-left mt-2">
+                <div className="text-left">
                   <p className="body-sm text-white/50 mb-1 font-regular">Total Time Spent</p>
                   <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
                     {totalDays > 0 ? (
