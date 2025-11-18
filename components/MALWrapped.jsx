@@ -1106,6 +1106,25 @@ export default function MALWrapped() {
               data-shape-blur
             ></motion.div>
           </div>
+          
+          {/* Top gradient fade - above rainbow shapes, below content */}
+          <div 
+            className="absolute top-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+            style={{
+              zIndex: 15,
+              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+            }}
+          />
+          
+          {/* Bottom gradient fade - above rainbow shapes, below content */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+            style={{
+              zIndex: 15,
+              background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+            }}
+          />
+          
           <motion.div 
             className="w-full relative z-10"
             variants={staggerContainer}
@@ -1299,6 +1318,25 @@ export default function MALWrapped() {
               data-shape-blur
             ></motion.div>
           </div>
+          
+          {/* Top gradient fade - above rainbow shapes, below content */}
+          <div 
+            className="absolute top-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+            style={{
+              zIndex: 15,
+              background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+            }}
+          />
+          
+          {/* Bottom gradient fade - above rainbow shapes, below content */}
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+            style={{
+              zIndex: 15,
+              background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+            }}
+          />
+          
           <motion.div 
             className="w-full relative z-10"
             variants={staggerContainer}
