@@ -2,6 +2,18 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Download, LogOut, Share2, Github, Mail, Youtube, Linkedin, Instagram, Globe, ExternalLink, Copy } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
+// MyAnimeList Icon Component
+const MyAnimeListIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M7.5 4C7.5 3.17157 8.17157 2.5 9 2.5H15C15.8284 2.5 16.5 3.17157 16.5 4V20C16.5 20.8284 15.8284 21.5 15 21.5H9C8.17157 21.5 7.5 20.8284 7.5 20V4Z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+    <path d="M7.5 8H16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M7.5 12H16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <path d="M7.5 16H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <circle cx="10" cy="6" r="1" fill="currentColor"/>
+    <circle cx="14" cy="6" r="1" fill="currentColor"/>
+  </svg>
+);
+
 const smoothEase = [0.25, 0.1, 0.25, 1];
 
 
@@ -923,7 +935,11 @@ export default function MALWrapped() {
     }
   }
 
-  async function handleDownloadPNG() {
+  async function handleDownloadPNG(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     try {
       const result = await generatePNG();
       if (!result) return;
@@ -936,6 +952,7 @@ export default function MALWrapped() {
       link.click();
       document.body.removeChild(link);
     } catch (err) {
+      console.error('Download error:', err);
       alert('Failed to download image. Please try again.');
     }
   }
@@ -1600,96 +1617,29 @@ export default function MALWrapped() {
                   <p className="body-lg font-regular text-white mt-6 text-container">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
               </motion.div>
                 <motion.div className="mt-12 flex flex-col items-center gap-4 relative" {...fadeIn} data-framer-motion>
-                  <div className="flex items-center gap-3">
-                    <p className="text-sm text-white/60">made by X.Avishkar</p>
-                  </div>
-                  <div className="flex items-center gap-4">
+                  <p className="text-sm text-white/60">
+                    made by{' '}
                     <motion.a
-                      href="https://www.avishkarshinde.com/"
+                      href="https://www.avishkarshinde.com/about"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="Portfolio"
+                      className="text-white/60 hover:text-white transition-colors underline"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <Globe size={20} />
+                      X.Avishkar
                     </motion.a>
-                  <motion.a
-                    href="https://github.com/Avishkar15"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/60 hover:text-white transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    title="GitHub"
-                  >
-                    <Github size={20} />
-                  </motion.a>
-                  <motion.a
-                    href="https://www.linkedin.com/in/xavishkar/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/60 hover:text-white transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    title="LinkedIn"
-                  >
-                    <Linkedin size={20} />
-                  </motion.a>
-                  <motion.a
-                    href="https://www.youtube.com/@x.avishkar"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/60 hover:text-white transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    title="YouTube"
-                  >
-                    <Youtube size={20} />
-                  </motion.a>
-                  <motion.a
-                    href="https://www.instagram.com/x.avishkar"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/60 hover:text-white transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    title="Instagram"
-                  >
-                    <Instagram size={20} />
-                  </motion.a>
-                  <motion.a
-                    href="https://myanimelist.net/profile/XAvishkar"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-white/60 hover:text-white transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    title="MyAnimeList"
-                  >
-                    <ExternalLink size={20} />
-                  </motion.a>
-                  <motion.a
-                    href="mailto:avishkarshinde1501@gmail.com"
-                    className="text-white/60 hover:text-white transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    title="Email"
-                  >
-                    <Mail size={20} />
-                  </motion.a>
-                </div>
-                <motion.img
-                  src="/avatar.webp"
-                  alt="X.Avishkar"
-                  className="absolute -bottom-8 left-1/2 w-24 h-24 sm:w-32 sm:h-32 object-contain pointer-events-none z-10"
-                  style={{ transform: 'translateX(-50%)' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: smoothEase }}
-                />
-              </motion.div>
+                  </p>
+                </motion.div>
+              <motion.img
+                src="/avatar.webp"
+                alt="X.Avishkar"
+                className="absolute bottom-0 left-1/2 w-24 h-24 sm:w-32 sm:h-32 object-contain pointer-events-none z-10"
+                style={{ transform: 'translateX(-50%) translateY(40%)' }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: smoothEase }}
+              />
               </div>
             </div>
           </SlideLayout>
@@ -3291,97 +3241,30 @@ export default function MALWrapped() {
                   </motion.button>
                 </motion.div>
                 <motion.div className="mt-12 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
-                  <div className="flex items-center gap-3">
-                    <p className="text-sm text-white/60">made by X.Avishkar</p>
-                  </div>
-                  <div className="flex items-center gap-4">
+                  <p className="text-sm text-white/60">
+                    made by{' '}
                     <motion.a
-                      href="https://www.avishkarshinde.com/"
+                      href="https://www.avishkarshinde.com/about"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="Portfolio"
+                      className="text-white/60 hover:text-white transition-colors underline"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <Globe size={20} />
+                      X.Avishkar
                     </motion.a>
-                    <motion.a
-                      href="https://github.com/Avishkar15"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="GitHub"
-                    >
-                      <Github size={20} />
-                    </motion.a>
-                    <motion.a
-                      href="https://www.linkedin.com/in/xavishkar/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="LinkedIn"
-                    >
-                      <Linkedin size={20} />
-                    </motion.a>
-                    <motion.a
-                      href="https://www.youtube.com/@x.avishkar"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="YouTube"
-                    >
-                      <Youtube size={20} />
-                    </motion.a>
-                    <motion.a
-                      href="https://www.instagram.com/x.avishkar"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="Instagram"
-                    >
-                      <Instagram size={20} />
-                    </motion.a>
-                    <motion.a
-                      href="https://myanimelist.net/profile/XAvishkar"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="MyAnimeList"
-                    >
-                      <ExternalLink size={20} />
-                    </motion.a>
-                    <motion.a
-                      href="mailto:avishkarshinde1501@gmail.com"
-                      className="text-white/60 hover:text-white transition-colors"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="Email"
-                    >
-                      <Mail size={20} />
-                    </motion.a>
-                  </div>
+                  </p>
                 </motion.div>
-                <motion.img
-                  src="/avatar.webp"
-                  alt="X.Avishkar"
-                  className="fixed bottom-8 left-1/2 w-24 h-24 sm:w-32 sm:h-32 object-contain pointer-events-none z-10"
-                  style={{ transform: 'translateX(-50%)' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, ease: smoothEase }}
-                />
               </div>
+              <motion.img
+                src="/avatar.webp"
+                alt="X.Avishkar"
+                className="absolute bottom-0 left-1/2 w-24 h-24 sm:w-32 sm:h-32 object-contain pointer-events-none z-10"
+                style={{ transform: 'translateX(-50%) translateY(40%)' }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: smoothEase }}
+              />
             </div>
           )}
 
@@ -3412,7 +3295,12 @@ export default function MALWrapped() {
                     </div>
                   </div>
                   <motion.button 
-                    onClick={handleDownloadPNG} 
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDownloadPNG(e);
+                    }}
                     className="p-1.5 sm:p-2 text-white rounded-full" 
                     title="Download Slide" 
                     style={{ 
@@ -3511,7 +3399,10 @@ export default function MALWrapped() {
                 {currentSlide === slides.length - 1 ? (
                   <div className="relative" ref={shareMenuRef}>
                   <motion.button
-                    onClick={async () => {
+                    type="button"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                         // Check if mobile and Web Share API supports files
                         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
                         
@@ -3546,13 +3437,13 @@ export default function MALWrapped() {
                             
                             if (navigator.canShare(fallbackShareData)) {
                               await navigator.share(fallbackShareData);
-                              await handleDownloadPNG();
+                              await handleDownloadPNG(e);
                               return;
                         }
                       } catch (error) {
                         if (error.name !== 'AbortError') {
                               console.log('Share not available or failed, downloading instead');
-                              await handleDownloadPNG();
+                              await handleDownloadPNG(e);
                             }
                           }
                         } else {
@@ -3588,51 +3479,89 @@ export default function MALWrapped() {
                       >
                         <div className="flex flex-col gap-2">
                           <button
-                            onClick={() => shareToSocial('twitter')}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              shareToSocial('twitter');
+                            }}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
                           >
                             <span className="text-white font-medium">Twitter/X</span>
                           </button>
                           <button
-                            onClick={() => shareToSocial('facebook')}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              shareToSocial('facebook');
+                            }}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
                           >
                             <span className="text-white font-medium">Facebook</span>
                           </button>
                           <button
-                            onClick={() => shareToSocial('reddit')}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              shareToSocial('reddit');
+                            }}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
                           >
                             <span className="text-white font-medium">Reddit</span>
                           </button>
                           <button
-                            onClick={() => shareToSocial('linkedin')}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              shareToSocial('linkedin');
+                            }}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
                           >
                             <span className="text-white font-medium">LinkedIn</span>
                           </button>
                           <button
-                            onClick={() => shareToSocial('whatsapp')}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              shareToSocial('whatsapp');
+                            }}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
                           >
                             <span className="text-white font-medium">WhatsApp</span>
                           </button>
                           <button
-                            onClick={() => shareToSocial('telegram')}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              shareToSocial('telegram');
+                            }}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
                           >
                             <span className="text-white font-medium">Telegram</span>
                           </button>
                           <div className="border-t border-white/10 my-1"></div>
                           <button
-                            onClick={copyImageToClipboard}
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              copyImageToClipboard();
+                            }}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
                           >
                             <span className="text-white font-medium">Copy Image</span>
                           </button>
                           <button
-                            onClick={() => {
-                              handleDownloadPNG();
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleDownloadPNG(e);
                               setShowShareMenu(false);
                             }}
                             className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
@@ -3725,17 +3654,17 @@ export default function MALWrapped() {
               >
                 <Github size={20} />
               </motion.a>
-              <motion.a
-                href="https://myanimelist.net/profile/XAvishkar"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                title="MyAnimeList"
-              >
-                <ExternalLink size={20} />
-              </motion.a>
+                    <motion.a
+                      href="https://myanimelist.net/profile/XAvishkar"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="MyAnimeList"
+                    >
+                      <MyAnimeListIcon size={20} />
+                    </motion.a>
             </div>
           </div>
 
