@@ -3214,35 +3214,33 @@ export default function MALWrapped() {
               </div>
               
               {/* Slide Content */}
-              <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
-                <div className="w-full h-full relative overflow-y-auto" style={{ position: 'relative', isolation: 'isolate' }}>
+              <div key={currentSlide} className="w-full flex-grow flex items-center justify-center py-2 sm:py-4 relative overflow-hidden" style={{ zIndex: 0 }}>
+                <div className="w-full h-full relative overflow-y-auto" style={{ position: 'relative', zIndex: 0 }}>
                   {/* Content with rainbow shapes (zIndex 0) - rainbow shapes are at zIndex 0 inside SlideLayout */}
-                  <div style={{ position: 'relative', zIndex: 0, isolation: 'auto' }}>
+                  <div style={{ position: 'relative', zIndex: 0 }}>
                     <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} />
                   </div>
-                  
-                  {/* Top gradient fade - above rainbow shapes (zIndex 0), below content (zIndex 10+) */}
-                  <div 
-                    className="absolute top-0 left-0 right-0 h-40 sm:h-48 pointer-events-none"
-                    style={{
-                      zIndex: 5,
-                      background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.98) 15%, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.1) 85%, rgba(0, 0, 0, 0) 100%)',
-                      mixBlendMode: 'normal',
-                      willChange: 'opacity'
-                    }}
-                  />
-                  
-                  {/* Bottom gradient fade - above rainbow shapes (zIndex 0), below content (zIndex 10+) */}
-                  <div 
-                    className="absolute bottom-0 left-0 right-0 h-40 sm:h-48 pointer-events-none"
-                    style={{
-                      zIndex: 5,
-                      background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.98) 15%, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.1) 85%, rgba(0, 0, 0, 0) 100%)',
-                      mixBlendMode: 'normal',
-                      willChange: 'opacity'
-                    }}
-                  />
                 </div>
+                
+                {/* Top gradient fade - above rainbow shapes (zIndex 0), above content (zIndex 10+) to create fade effect */}
+                <div 
+                  className="absolute top-0 left-0 right-0 h-40 sm:h-48 pointer-events-none"
+                  style={{
+                    zIndex: 15,
+                    background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.98) 15%, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.1) 85%, rgba(0, 0, 0, 0) 100%)',
+                    mixBlendMode: 'normal'
+                  }}
+                />
+                
+                {/* Bottom gradient fade - above rainbow shapes (zIndex 0), above content (zIndex 10+) to create fade effect */}
+                <div 
+                  className="absolute bottom-0 left-0 right-0 h-40 sm:h-48 pointer-events-none"
+                  style={{
+                    zIndex: 15,
+                    background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.98) 15%, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.7) 50%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.1) 85%, rgba(0, 0, 0, 0) 100%)',
+                    mixBlendMode: 'normal'
+                  }}
+                />
               </div>
               
               {/* Bottom Controls */}
