@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Download, LogOut, Share2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, LogOut, Share2, Github, Mail, Youtube, Linkedin, Instagram, Globe } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 const smoothEase = [0.25, 0.1, 0.25, 1];
@@ -214,10 +214,10 @@ export default function MALWrapped() {
   const currentSlideId = slides[currentSlide]?.id;
   const isFinalSlide = currentSlideId === 'finale';
   const topGradientBackground = isFinalSlide
-    ? 'linear-gradient(to bottom, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 35%, rgba(0, 0, 0, 0.25) 70%, rgba(0, 0, 0, 0) 100%)'
+    ? 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.98) 20%, rgba(0, 0, 0, 0.9) 50%, rgba(0, 0, 0, 0.6) 80%, rgba(0, 0, 0, 0.2) 100%)'
     : 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)';
   const bottomGradientBackground = isFinalSlide
-    ? 'linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 35%, rgba(0, 0, 0, 0.25) 70%, rgba(0, 0, 0, 0) 100%)'
+    ? 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.98) 20%, rgba(0, 0, 0, 0.9) 50%, rgba(0, 0, 0, 0.6) 80%, rgba(0, 0, 0, 0.2) 100%)'
     : 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)';
 
   useEffect(() => {
@@ -1529,6 +1529,86 @@ export default function MALWrapped() {
                     </h2>
                   </div>
                   <p className="body-lg font-regular text-white mt-6 text-container">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
+              </motion.div>
+                <motion.div className="mt-12 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
+                  <div className="flex items-center gap-3">
+                    <motion.img
+                      src="/avatar.webp"
+                      alt="X.Avishkar"
+                      className="w-12 h-12 object-contain"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4, ease: smoothEase }}
+                      whileHover={{ scale: 1.1 }}
+                    />
+                    <p className="text-sm text-white/60">made by X.Avishkar</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <motion.a
+                      href="https://www.avishkarshinde.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/60 hover:text-white transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="Portfolio"
+                    >
+                      <Globe size={20} />
+                    </motion.a>
+                  <motion.a
+                    href="https://github.com/Avishkar15"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-white transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="GitHub"
+                  >
+                    <Github size={20} />
+                  </motion.a>
+                  <motion.a
+                    href="https://www.linkedin.com/in/xavishkar/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-white transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="LinkedIn"
+                  >
+                    <Linkedin size={20} />
+                  </motion.a>
+                  <motion.a
+                    href="https://www.youtube.com/@x.avishkar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-white transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="YouTube"
+                  >
+                    <Youtube size={20} />
+                  </motion.a>
+                  <motion.a
+                    href="https://www.instagram.com/x.avishkar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-white transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="Instagram"
+                  >
+                    <Instagram size={20} />
+                  </motion.a>
+                  <motion.a
+                    href="mailto:avishkarshinde1501@gmail.com"
+                    className="text-white/60 hover:text-white transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="Email"
+                  >
+                    <Mail size={20} />
+                  </motion.a>
+                </div>
               </motion.div>
               </div>
             </div>
@@ -3130,6 +3210,86 @@ export default function MALWrapped() {
                 >
               Connect with MAL
                   </motion.button>
+                </motion.div>
+                <motion.div className="mt-12 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
+                  <div className="flex items-center gap-3">
+                    <motion.img
+                      src="/avishkar-avatar.png"
+                      alt="X.Avishkar"
+                      className="w-12 h-12 object-contain"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4, ease: smoothEase }}
+                      whileHover={{ scale: 1.1 }}
+                    />
+                    <p className="text-sm text-white/60">made by X.Avishkar</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <motion.a
+                      href="https://www.avishkarshinde.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/60 hover:text-white transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="Portfolio"
+                    >
+                      <Globe size={20} />
+                    </motion.a>
+                    <motion.a
+                      href="https://github.com/Avishkar15"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/60 hover:text-white transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="GitHub"
+                    >
+                      <Github size={20} />
+                    </motion.a>
+                    <motion.a
+                      href="https://www.linkedin.com/in/xavishkar/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/60 hover:text-white transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="LinkedIn"
+                    >
+                      <Linkedin size={20} />
+                    </motion.a>
+                    <motion.a
+                      href="https://www.youtube.com/@x.avishkar"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/60 hover:text-white transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="YouTube"
+                    >
+                      <Youtube size={20} />
+                    </motion.a>
+                    <motion.a
+                      href="https://www.instagram.com/x.avishkar"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/60 hover:text-white transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="Instagram"
+                    >
+                      <Instagram size={20} />
+                    </motion.a>
+                    <motion.a
+                      href="mailto:avishkarshinde1501@gmail.com"
+                      className="text-white/60 hover:text-white transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="Email"
+                    >
+                      <Mail size={20} />
+                    </motion.a>
+                  </div>
                 </motion.div>
               </div>
             </div>
