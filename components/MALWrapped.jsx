@@ -2861,6 +2861,13 @@ export default function MALWrapped() {
                   transition={{ duration: 0.6, delay: 0.2, ease: smoothEase }}
                 >
                   My {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear}
+                </motion.h2>
+                <motion.h2 
+                  className="heading-lg font-semibold text-white relative z-10"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2, ease: smoothEase }}
+                >
                   MyAnimeList Wrapped
                 </motion.h2>
               </div>
@@ -2877,9 +2884,9 @@ export default function MALWrapped() {
                     <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Anime</p>
                     <div className="space-y-0.5">
                       {stats.topRated.slice(0, 5).map((a, i) => (
-                        <p key={a.node.id} className="text-white">
+                        <p key={a.node.id} className="text-white truncate">
                           <span className="title-sm font-medium text-white/50 w-4 inline-block">{i+1}.</span>
-                          <span className="title-md text-white font-medium truncate">{a.node.title}</span>
+                          <span className="title-md text-white font-medium ">{a.node.title}</span>
                         </p>
                       ))}
                     </div>
@@ -2889,9 +2896,9 @@ export default function MALWrapped() {
                     <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Manga</p>
                     <div className="space-y-0.5">
                       {stats.topManga.slice(0, 5).map((m, i) => (
-                        <p key={m.node.id} className="text-white">
+                        <p key={m.node.id} className="text-white truncate">
                           <span className="title-sm font-medium text-white/50 w-4 inline-block">{i+1}.</span>
-                          <span className="title-md text-white font-medium truncate">{m.node.title}</span>
+                          <span className="title-md text-white font-medium ">{m.node.title}</span>
                         </p>
                       ))}
                     </div>
