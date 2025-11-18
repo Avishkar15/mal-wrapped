@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Download, LogOut, Share2, Github, Mail, Youtube, Linkedin, Instagram, Globe } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, LogOut, Share2, Github, Mail, Youtube, Linkedin, Instagram, Globe, ExternalLink, Copy } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 const smoothEase = [0.25, 0.1, 0.25, 1];
@@ -173,6 +173,7 @@ export default function MALWrapped() {
   const [stats, setStats] = useState(null);
   const [selectedYear, setSelectedYear] = useState(2025);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
 
@@ -219,6 +220,11 @@ export default function MALWrapped() {
   const bottomGradientBackground = isFinalSlide
     ? 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.98) 20%, rgba(0, 0, 0, 0.9) 50%, rgba(0, 0, 0, 0.6) 80%, rgba(0, 0, 0, 0.2) 100%)'
     : 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)';
+  
+  // Get website URL for watermark
+  const websiteUrl = typeof window !== 'undefined' 
+    ? window.location.origin.replace(/^https?:\/\//, '').toUpperCase()
+    : 'MALWRAPPED.COM';
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -853,12 +859,64 @@ export default function MALWrapped() {
       // Export as PNG
       const png = await out.toPng();
       
-      // Convert data URL to Blob, then to File
-      const response = await fetch(png.src);
-      const blob = await response.blob();
-      const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
+      // Add watermark to the image
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
       
-      return { file, dataUrl: png.src };
+      return new Promise((resolve, reject) => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Set canvas dimensions
+          canvas.width = img.width;
+          canvas.height = img.height;
+          
+          // Draw the original image
+          ctx.drawImage(img, 0, 0);
+          
+          // Add watermark at the bottom
+          const watermarkText = websiteUrl;
+          
+          // Scale font size based on image width (responsive)
+          const baseFontSize = Math.max(20, Math.min(32, canvas.width / 30));
+          ctx.font = `bold ${baseFontSize}px Arial, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          
+          // Calculate position (bottom center with padding)
+          const padding = Math.max(15, canvas.height / 40);
+          const x = canvas.width / 2;
+          const y = canvas.height - padding;
+          
+          // Draw text with shadow for better visibility
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+          ctx.shadowBlur = 4;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.fillText(watermarkText, x, y);
+          
+          // Convert canvas to blob
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              reject(new Error('Failed to create blob'));
+              return;
+            }
+            
+            const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
+            const dataUrl = canvas.toDataURL('image/png');
+            
+            resolve({ file, dataUrl });
+          }, 'image/png');
+        };
+        
+        img.onerror = () => {
+          reject(new Error('Failed to load image for watermarking'));
+        };
+        
+        img.src = png.src;
+      });
     } catch (err) {
       console.error('Error generating PNG:', err);
       throw err;
@@ -898,6 +956,17 @@ export default function MALWrapped() {
     } catch (err) {
       console.error('Failed to copy image:', err);
       alert('Failed to copy image to clipboard. Please try downloading instead.');
+    }
+  }
+
+  // Copy email to clipboard
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText('avishkarshinde1501@gmail.com');
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy email:', err);
     }
   }
 
@@ -1530,17 +1599,8 @@ export default function MALWrapped() {
                   </div>
                   <p className="body-lg font-regular text-white mt-6 text-container">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
               </motion.div>
-                <motion.div className="mt-12 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
+                <motion.div className="mt-12 flex flex-col items-center gap-4 relative" {...fadeIn} data-framer-motion>
                   <div className="flex items-center gap-3">
-                    <motion.img
-                      src="/avatar.webp"
-                      alt="X.Avishkar"
-                      className="w-12 h-12 object-contain"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.4, ease: smoothEase }}
-                      whileHover={{ scale: 1.1 }}
-                    />
                     <p className="text-sm text-white/60">made by X.Avishkar</p>
                   </div>
                   <div className="flex items-center gap-4">
@@ -1600,6 +1660,17 @@ export default function MALWrapped() {
                     <Instagram size={20} />
                   </motion.a>
                   <motion.a
+                    href="https://myanimelist.net/profile/XAvishkar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/60 hover:text-white transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    title="MyAnimeList"
+                  >
+                    <ExternalLink size={20} />
+                  </motion.a>
+                  <motion.a
                     href="mailto:avishkarshinde1501@gmail.com"
                     className="text-white/60 hover:text-white transition-colors"
                     whileHover={{ scale: 1.1 }}
@@ -1609,6 +1680,15 @@ export default function MALWrapped() {
                     <Mail size={20} />
                   </motion.a>
                 </div>
+                <motion.img
+                  src="/avatar.webp"
+                  alt="X.Avishkar"
+                  className="absolute -bottom-8 left-1/2 w-24 h-24 sm:w-32 sm:h-32 object-contain pointer-events-none z-10"
+                  style={{ transform: 'translateX(-50%)' }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: smoothEase }}
+                />
               </motion.div>
               </div>
             </div>
@@ -3051,9 +3131,9 @@ export default function MALWrapped() {
 
   return (
     <motion.main 
-      className="bg-black text-white w-screen flex items-center justify-center p-2 selection:bg-white selection:text-black relative overflow-hidden" 
+      className="bg-black text-white w-screen flex flex-col items-center justify-center p-2 selection:bg-white selection:text-black relative overflow-hidden min-h-screen" 
       style={{ 
-        height: '100dvh',
+        minHeight: '100dvh',
         backgroundColor: '#000000',
         backgroundImage: `
           linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
@@ -3211,17 +3291,8 @@ export default function MALWrapped() {
               Connect with MAL
                   </motion.button>
                 </motion.div>
-                <motion.div className="mt-12 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
+                <motion.div className="mt-12 flex flex-col items-center gap-4 relative" {...fadeIn} data-framer-motion>
                   <div className="flex items-center gap-3">
-                    <motion.img
-                      src="/avishkar-avatar.png"
-                      alt="X.Avishkar"
-                      className="w-12 h-12 object-contain"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.4, ease: smoothEase }}
-                      whileHover={{ scale: 1.1 }}
-                    />
                     <p className="text-sm text-white/60">made by X.Avishkar</p>
                   </div>
                   <div className="flex items-center gap-4">
@@ -3281,6 +3352,17 @@ export default function MALWrapped() {
                       <Instagram size={20} />
                     </motion.a>
                     <motion.a
+                      href="https://myanimelist.net/profile/XAvishkar"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-white/60 hover:text-white transition-colors"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="MyAnimeList"
+                    >
+                      <ExternalLink size={20} />
+                    </motion.a>
+                    <motion.a
                       href="mailto:avishkarshinde1501@gmail.com"
                       className="text-white/60 hover:text-white transition-colors"
                       whileHover={{ scale: 1.1 }}
@@ -3290,6 +3372,15 @@ export default function MALWrapped() {
                       <Mail size={20} />
                     </motion.a>
                   </div>
+                  <motion.img
+                    src="/avatar.webp"
+                    alt="X.Avishkar"
+                    className="absolute -bottom-8 left-1/2 w-24 h-24 sm:w-32 sm:h-32 object-contain pointer-events-none z-10"
+                    style={{ transform: 'translateX(-50%)' }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: smoothEase }}
+                  />
                 </motion.div>
               </div>
             </div>
@@ -3381,7 +3472,7 @@ export default function MALWrapped() {
               <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
                 {/* Top gradient fade - above rainbow shapes, below content */}
                 <div 
-                  className="absolute top-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+                  className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
                   style={{
                     zIndex: 15,
                     background: topGradientBackground
@@ -3394,7 +3485,7 @@ export default function MALWrapped() {
                 
                 {/* Bottom gradient fade - above rainbow shapes, below content */}
                 <div 
-                  className="absolute bottom-0 left-0 right-0 h-32 sm:h-40 pointer-events-none"
+                  className={`absolute bottom-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
                   style={{
                     zIndex: 15,
                     background: bottomGradientBackground
@@ -3569,6 +3660,151 @@ export default function MALWrapped() {
         )}
       </div>
     </div>
+    
+    {/* Footer */}
+    <footer className="w-full bg-black border-t border-white/10 mt-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+          {/* Left Column - Thanks For Stopping By */}
+          <div className="space-y-4">
+            <h3 className="text-xl sm:text-2xl font-bold text-white">Thanks For Stopping By!</h3>
+            <p className="text-white/80 text-sm sm:text-base">Want to see more? Send me an email, or have a snoop of more work below.</p>
+            <div className="flex items-center gap-3">
+              <span className="text-white text-sm sm:text-base">avishkarshinde1501@gmail.com</span>
+              <motion.button
+                onClick={copyEmail}
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white text-sm flex items-center gap-2 transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Copy size={16} />
+                <span>{emailCopied ? 'Copied' : 'Copy Mail'}</span>
+              </motion.button>
+            </div>
+            <div className="flex items-center gap-4 pt-2">
+              <motion.a
+                href="https://www.linkedin.com/in/xavishkar/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                title="LinkedIn"
+              >
+                <Linkedin size={20} />
+              </motion.a>
+              <motion.a
+                href="https://www.youtube.com/@x.avishkar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                title="YouTube"
+              >
+                <Youtube size={20} />
+              </motion.a>
+              <motion.a
+                href="https://www.instagram.com/x.avishkar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                title="Instagram"
+              >
+                <Instagram size={20} />
+              </motion.a>
+            </div>
+            <p className="text-white/60 text-xs pt-4">© 2025 Designed by <span className="font-semibold">Avishkar</span></p>
+          </div>
+
+          {/* Middle Column - PAGES */}
+          <div className="space-y-4">
+            <h4 className="text-white/60 text-sm font-medium uppercase tracking-wider">PAGES</h4>
+            <div className="space-y-2">
+              <motion.a
+                href="https://www.avishkarshinde.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                whileHover={{ x: 4 }}
+              >
+                <span>Portfolio</span>
+                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.a>
+              <motion.a
+                href="https://www.avishkarshinde.com/about"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                whileHover={{ x: 4 }}
+              >
+                <span>About Me</span>
+                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.a>
+              <motion.a
+                href="https://www.avishkarshinde.com/resume"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                whileHover={{ x: 4 }}
+              >
+                <span>Resume</span>
+                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.a>
+            </div>
+          </div>
+
+          {/* Right Column - WORK */}
+          <div className="space-y-4">
+            <h4 className="text-white/60 text-sm font-medium uppercase tracking-wider">WORK</h4>
+            <div className="space-y-2">
+              <motion.a
+                href="https://www.avishkarshinde.com/work/spotify"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                whileHover={{ x: 4 }}
+              >
+                <span>Spotify</span>
+                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.a>
+              <motion.a
+                href="https://www.avishkarshinde.com/work/toyota"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                whileHover={{ x: 4 }}
+              >
+                <span>Toyota</span>
+                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.a>
+              <motion.a
+                href="https://www.avishkarshinde.com/work/solarhive"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                whileHover={{ x: 4 }}
+              >
+                <span>SolarHive</span>
+                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.a>
+              <motion.a
+                href="https://www.avishkarshinde.com/work/indiana-university"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                whileHover={{ x: 4 }}
+              >
+                <span>Indiana University</span>
+                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+              </motion.a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
     </motion.main>
   );
 }
