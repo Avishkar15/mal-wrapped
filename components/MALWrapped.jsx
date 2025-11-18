@@ -1389,7 +1389,7 @@ export default function MALWrapped() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                       >
                       <h3 className="title-md mt-1.5 sm:mt-2 truncate font-semibold text-white text-left">{featured.title}</h3>
-                      {featured.studio && <p className="body-sm text-white/50 truncate font-regular text-left">{featured.studio}</p>}
+                      {featured.studio && <p className="body-sm text-white/50 truncate font-medium text-left">{featured.studio}</p>}
                       {featured.author && <p className="body-sm text-white/50 truncate font-medium text-left">{featured.author}</p>}
                        <div className="flex items-left justify-left mono text-yellow-300 mt-1 font-semibold">
                           <span className="mr-0.5 sm:mr-1">★</span>
@@ -2308,9 +2308,9 @@ export default function MALWrapped() {
                       <>
                           <div className="flex gap-1.5 sm:gap-2">
                             <motion.div 
-                              className="border-box-cyan aspect-[2/3] rounded-xl overflow-hidden flex-shrink-0 relative w-12 sm:w-16 md:w-20" 
-                              style={{ boxSizing: 'border-box', padding: '2px' }}
-                              transition={{ duration: 0.3 }}
+                              className="bg-transparent border-box-cyan aspect-[2/3] rounded-lg overflow-hidden relative w-12 sm:w-16 md:w-20" 
+                              style={{ boxSizing: 'border-box' }}
+                              transition={{ duration: 0.3, ease: smoothEase }}
                             >
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
                             {highlight.node?.main_picture?.large && (
@@ -2325,10 +2325,10 @@ export default function MALWrapped() {
                               </div>
                             </motion.div>
                           <div className="flex-1 min-w-0">
-                              <p className="title-md truncate font-semibold text-white text-xs sm:text-sm md:text-base">{highlight.node?.title}</p>
-                              <p className="body-md text-white/50 truncate font-medium text-xs sm:text-sm">{highlight.node?.studios?.[0]?.name || ''}</p>
+                              <p className="title-md truncate font-semibold text-white">{highlight.node?.title}</p>
+                              <p className="body-sm text-white/50 truncate font-medium">{highlight.node?.studios?.[0]?.name || ''}</p>
                               <p className="mono text-yellow-300 mt-1 sm:mt-2 font-semibold mt-1">★ {highlight.list_status?.score ? Math.round(highlight.list_status.score) : 'Not Rated'}</p>
-                              <p className="body-sm text-white/50 truncate mt-1 sm:mt-2 font-regular text-xs sm:text-sm">{seasonData.totalAnime} entries</p>
+                              <p className="body-sm text-white/50 truncate mt-1 sm:mt-2 font-regular >{seasonData.totalAnime} entries</p>
                           </div>
                         </div>
                       </>
