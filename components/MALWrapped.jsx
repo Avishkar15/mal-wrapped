@@ -2841,62 +2841,6 @@ export default function MALWrapped() {
             <div className="w-full h-full flex flex-col items-center justify-center relative">
               {/* Central Image with Abstract Shapes */}
               <div className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 mb-6 sm:mb-8 flex items-center justify-center">
-                {/* Abstract flowing shapes around image */}
-                <div className="absolute inset-0 pointer-events-none overflow-visible" style={{ zIndex: 0 }}>
-                  <motion.div 
-                    className="absolute -top-8 -left-8 w-32 h-32 sm:w-40 sm:h-40 opacity-60"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(255, 107, 157, 0.8) 0%, rgba(196, 69, 105, 0.5) 40%, transparent 70%)',
-                      filter: 'blur(40px)',
-                      borderRadius: '50%'
-                    }}
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      x: [-10, 10, -10],
-                      y: [-10, 10, -10]
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                  />
-                  <motion.div 
-                    className="absolute -bottom-8 -right-8 w-32 h-32 sm:w-40 sm:h-40 opacity-60"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(138, 43, 226, 0.8) 0%, rgba(75, 0, 130, 0.5) 40%, transparent 70%)',
-                      filter: 'blur(40px)',
-                      borderRadius: '50%'
-                    }}
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      x: [10, -10, 10],
-                      y: [10, -10, 10]
-                    }}
-                    transition={{
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: smoothEase
-                    }}
-                  />
-                  <motion.div 
-                    className="absolute top-1/2 -right-12 w-24 h-24 sm:w-32 sm:h-32 opacity-50"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(0, 255, 255, 0.6) 0%, rgba(0, 255, 0, 0.4) 100%)',
-                      filter: 'blur(30px)',
-                      borderRadius: '50%'
-                    }}
-                    animate={{
-                      rotate: [0, 360],
-                      scale: [1, 1.3, 1]
-                    }}
-                    transition={{
-                      duration: 12,
-                      repeat: Infinity,
-                      ease: 'linear'
-                    }}
-                  />
-                </div>
                 
                 {/* Central Image */}
                 <motion.div
@@ -2925,14 +2869,14 @@ export default function MALWrapped() {
             My {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} MyAnimeList Wrapped
                 </h2>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <p className="body-sm text-white/50 mb-2 font-regular">Top 5 Anime</p>
                     <div className="space-y-1">
                       {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white">
-                          <span className="font-medium text-white/60 w-6 inline-block">{i+1}.</span>
-                          <span className="heading-md text-white font-medium">{a.node.title}</span>
+                          <span className="title-sm font-medium text-white/75 w- inline-block">{i+1}.</span>
+                          <span className="title-md text-white font-medium">{a.node.title}</span>
                         </p>
                       ))}
                     </div>
@@ -2943,8 +2887,8 @@ export default function MALWrapped() {
                     <div className="space-y-1">
                       {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="text-white">
-                          <span className="font-medium text-white/60 w-6 inline-block">{i+1}.</span>
-                          <span className="heading-md text-white font-medium">{m.node.title}</span>
+                          <span className="title-sm font-medium text-white/75 w-4 inline-block">{i+1}.</span>
+                          <span className="title-md text-white font-medium">{m.node.title}</span>
                         </p>
                       ))}
                     </div>
@@ -2954,25 +2898,25 @@ export default function MALWrapped() {
                 <div className="grid grid-cols-2 gap-4 sm:gap-6 mt-2">
                   <div>
                     <p className="body-sm text-white/50 mb-1 font-regular">Episodes Watched</p>
-                    <p className="number-lg text-white text-2xl sm:text-3xl font-bold">
+                    <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
                       {stats.totalEpisodes || 0}
                     </p>
                   </div>
                   <div>
                     <p className="body-sm text-white/50 mb-1 font-regular">Chapters Read</p>
-                    <p className="number-lg text-white text-2xl sm:text-3xl font-bold">
+                    <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
                       {stats.totalChapters || 0}
                     </p>
                   </div>
                 </div>
 
-                <div className="text-center mt-2">
+                <div className="text-left mt-2">
                   <p className="body-sm text-white/50 mb-1 font-regular">Total Time Spent</p>
-                  <p className="number-lg text-white text-3xl sm:text-4xl font-bold">
+                  <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
                     {totalDays > 0 ? (
                       <>
                         {totalDays} Days
-                        <span className="body-md text-white/50 ml-2 font-semibold text-lg">or {totalTimeSpent} hours</span>
+                        <span className="body-md text-white/50 ml-2 font-medium text-lg">or {totalTimeSpent} hours</span>
                       </>
                     ) : (
                       <>
