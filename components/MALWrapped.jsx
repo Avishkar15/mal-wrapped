@@ -2852,7 +2852,7 @@ export default function MALWrapped() {
           <SlideLayout verticalText="FINAL-REPORT" bgColor="blue">
             <div className="w-full h-full flex flex-col items-center justify-center relative">
               {/* Image */}
-              <div className="w-full max-w-3xl flex items-center justify-center gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-6 mb-6 sm:mb-6">
                 <div className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 flex items-center justify-center">
                 <motion.div 
                     className="relative z-10 w-full h-full rounded-xl overflow-hidden border-box-cyan"
@@ -2880,26 +2880,23 @@ export default function MALWrapped() {
                 <div className="grid grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Anime</p>
-                    <div className="space-y-0.5">
                     {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white truncate">
-                          <span className="body-sm text-white/50 font-medium truncate mr-2">{String(i + 1).padStart(2, '0')}.</span>
+                          <span className="title-md text-white font-medium truncate mr-2">{String(i + 1)}</span>
                           <span className="title-md text-white font-medium truncate">{a.node.title}</span>
                       </p>
                     ))}
                   </div>
-                  </div>
                   
                   <div>
                     <p className="body-sm text-white/50 mb-1 font-regular">Top 5 Manga</p>
-                    <div className="space-y-0.5">
+                    
                     {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="text-white truncate">
-                          <span className="body-sm text-white/50 font-medium truncate mr-2">{String(i + 1).padStart(2, '0')}.</span>
+                          <span className="title-md text-white font-medium truncate mr-2">{String(i + 1)}</span>
                           <span className="title-md text-white font-medium truncate">{m.node.title}</span>
                       </p>
                     ))}
-                  </div>
               </div>
                 </div>
 
@@ -2908,7 +2905,7 @@ export default function MALWrapped() {
                     {finaleTopGenre && (
                       <>
                         <p className="body-sm text-white/50 mb-1 font-regular">Favorite Genre</p>
-                        <p className="title-md text-white font-medium">{finaleTopGenre[0]}</p>
+                        <p className="title-lg text-white font-medium">{finaleTopGenre[0]}</p>
                       </>
                     )}
                   </div>
@@ -2917,30 +2914,28 @@ export default function MALWrapped() {
                     {favoriteAuthor && (
                       <>
                         <p className="body-sm text-white/50 mb-1 font-regular">Favorite Author</p>
-                        <p className="title-md text-white font-medium">{favoriteAuthor}</p>
+                        <p className="title-lg text-white font-medium">{favoriteAuthor}</p>
                       </>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-3 gap-4 sm:gap-6">
                   <div>
-                    <p className="body-sm text-white/50 mb-1 font-regular">Anime</p>
-                    <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
+                    <p className="body-sm text-white/50 mb-1 font-regular">Anime Watched</p>
+                    <p className="number-md text-white  font-medium">
                     {stats.totalAnime || 0}
                   </p>
                   </div>
                   <div>
-                    <p className="body-sm text-white/50 mb-1 font-regular">Manga</p>
-                    <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
+                    <p className="body-sm text-white/50 mb-1 font-regular">Manga Read</p>
+                    <p className="number-md text-white font-medium">
                     {stats.totalManga || 0}
                   </p>
                 </div>
-                </div>
-
-                <div className="text-left">
+                <div>
                   <p className="body-sm text-white/50 mb-1 font-regular">Total Time Spent</p>
-                  <p className="number-lg text-white text-2xl sm:text-3xl font-semibold">
+                  <p className="number-lg text-white font-medium">
                   {totalDays > 0 ? (
                     <>
                       {totalDays} Days
@@ -2952,17 +2947,12 @@ export default function MALWrapped() {
                   )}
                 </p>
                 </div>
+                
+                </div>
+
+                
                 </motion.div>
 
-              {/* Web Address - Bottom Right */}
-                <motion.div 
-                className="absolute bottom-4 right-4 text-white/50 text-xs sm:text-sm font-regular relative z-10"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                {siteName}
-                </motion.div>
                   </div>
           </SlideLayout>
         );
