@@ -2865,13 +2865,13 @@ export default function MALWrapped() {
             My {stats.selectedYear === 'all' ? 'All Time' : stats.selectedYear} MyAnimeList Wrapped
                 </h2>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div>
                     <p className="body-sm text-white/50 mb-2 font-regular">Top 5 Anime</p>
                     <div className="space-y-1">
                       {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white">
-                          <span className="title-sm font-medium text-white/75 w-4 inline-block">{i+1}.</span>
+                          <span className="title-sm font-medium text-white/50 w-4 inline-block">{i+1}.</span>
                           <span className="title-md text-white font-medium">{a.node.title}</span>
                         </p>
                       ))}
