@@ -792,8 +792,13 @@ export default function MALWrapped() {
   async function generatePNG() {
     if (!slideRef.current || typeof window === 'undefined') return null;
     
+    const cardElement = slideRef.current;
+    const previousScrollTop = cardElement ? cardElement.scrollTop : 0;
+    
     try {
-      const cardElement = slideRef.current;
+      if (cardElement) {
+        cardElement.scrollTop = 0;
+      }
       
       // Dynamically import snapdom
       const { snapdom } = await import('@zumer/snapdom');
@@ -982,6 +987,10 @@ export default function MALWrapped() {
     } catch (err) {
       console.error('Error generating PNG:', err);
       throw err;
+    } finally {
+      if (cardElement) {
+        cardElement.scrollTop = previousScrollTop;
+      }
     }
   }
 
