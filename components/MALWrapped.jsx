@@ -885,21 +885,17 @@ export default function MALWrapped() {
           // Add watermark at the bottom
           const watermarkText = websiteUrl;
           
-          // Use fixed large font size for better visibility on all devices
+          // Simple fixed font size
           ctx.font = 'bold 40px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif';
           ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
+          ctx.textBaseline = 'bottom';
           
-          // Position at bottom center, more centered vertically (8% from bottom)
+          // Position at bottom center
           const x = canvas.width / 2;
-          const y = canvas.height - (canvas.height * 0.08);
+          const y = canvas.height - 20;
           
-          // Draw text with shadow for better visibility
-          ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-          ctx.shadowBlur = 6;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          // Simple text without effects
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
           ctx.fillText(watermarkText, x, y);
           
           // Convert canvas to blob
@@ -1296,7 +1292,7 @@ export default function MALWrapped() {
 
       return (
         <div 
-          className="mt-2 sm:mt-3 overflow-visible relative flex justify-center"
+          className="mt-2 sm:mt-3 overflow-hidden relative flex justify-center"
           style={{ 
             maskImage: shouldScroll ? 'none' : 'linear-gradient(to right, black 0%, black 100%)',
             WebkitMaskImage: shouldScroll ? 'none' : 'linear-gradient(to right, black 0%, black 100%)'
