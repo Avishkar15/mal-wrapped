@@ -3501,13 +3501,15 @@ export default function MALWrapped() {
                             
                             if (navigator.canShare(fallbackShareData)) {
                               await navigator.share(fallbackShareData);
-                              await handleDownloadPNG(e);
+                              // Use the same download function as the download button
+                              handleDownloadPNG(e);
                               return;
                         }
                       } catch (error) {
                         if (error.name !== 'AbortError') {
                               console.log('Share not available or failed, downloading instead');
-                              await handleDownloadPNG(e);
+                              // Use the same download function as the download button
+                              handleDownloadPNG(e);
                             }
                           }
                         } else {
