@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Download, LogOut, Github, Mail, Youtube, Linkedin, Instagram, Globe, ExternalLink, Copy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, LogOut, Share2, Github, Mail, Youtube, Linkedin, Instagram, Globe, ExternalLink, Copy } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 // MyAnimeList Icon Component
