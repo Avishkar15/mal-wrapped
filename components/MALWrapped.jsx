@@ -3424,14 +3424,13 @@ export default function MALWrapped() {
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span className="text-xs sm:text-sm font-medium hidden sm:inline">Download</span>
                   </motion.button>
-                  {currentSlide === slides.length - 1 && (
                     <div className="relative" ref={shareMenuRef}>
                       <motion.button
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          setShowShareMenu(!showShareMenu);
+                          setShowShareMenu((prev) => !prev);
                         }}
                         className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2"
                         style={{ 
@@ -3515,7 +3514,6 @@ export default function MALWrapped() {
                         </motion.div>
                       )}
                     </div>
-                  )}
                 </div>
                 <motion.button 
                   onClick={handleLogout} 
