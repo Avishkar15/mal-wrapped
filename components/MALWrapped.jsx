@@ -3,14 +3,9 @@ import { ChevronLeft, ChevronRight, Download, LogOut, Share2, Github, Mail, Yout
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 // MyAnimeList Icon Component
-const MyAnimeListIcon = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7.5 4C7.5 3.17157 8.17157 2.5 9 2.5H15C15.8284 2.5 16.5 3.17157 16.5 4V20C16.5 20.8284 15.8284 21.5 15 21.5H9C8.17157 21.5 7.5 20.8284 7.5 20V4Z" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-    <path d="M7.5 8H16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M7.5 12H16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <path d="M7.5 16H12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    <circle cx="10" cy="6" r="1" fill="currentColor"/>
-    <circle cx="14" cy="6" r="1" fill="currentColor"/>
+const MyAnimeListIcon = ({ size = 20, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path fill="currentColor" d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404l-1.989-2.458l-.02 5.285H.001L0 7.247h2.203l1.865 2.545l2.015-2.546l2.19.001zm8.628 2.069l.025 6.335h-2.365l-.008-2.871h-2.8c.07.499.21 1.266.417 1.779c.155.381.298.751.583 1.128l-1.705 1.125c-.349-.636-.622-1.337-.878-2.082a9.296 9.296 0 0 1-.507-2.179c-.085-.75-.097-1.471.107-2.212a3.908 3.908 0 0 1 1.161-1.866c.313-.293.749-.5 1.1-.687c.351-.187.743-.264 1.107-.359a7.405 7.405 0 0 1 1.191-.183c.398-.034 1.107-.066 2.39-.028l.545 1.749H14.51c-.593.008-.878.001-1.341.209a2.236 2.236 0 0 0-1.278 1.92l2.663.033l.038-1.81h2.309zm3.992-2.099v6.627l3.107.032l-.43 1.775h-4.807V7.187l2.13.03z"/>
   </svg>
 );
 
@@ -890,14 +885,14 @@ export default function MALWrapped() {
           // Add watermark at the bottom
           const watermarkText = websiteUrl;
           
-          // Scale font size based on image width (responsive)
-          const baseFontSize = Math.max(20, Math.min(32, canvas.width / 30));
-          ctx.font = `bold ${baseFontSize}px Arial, sans-serif`;
+          // Use fixed font size matching CSS styles (body-sm equivalent, but larger for visibility)
+          // body-sm is 0.95rem (15.2px) on mobile, 1.125rem (18px) on sm - using 24px for better visibility
+          ctx.font = 'bold 24px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif';
           ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
+          ctx.textBaseline = 'middle';
           
-          // Calculate position (bottom center with padding)
-          const padding = Math.max(15, canvas.height / 40);
+          // Calculate position (bottom center, slightly more centered)
+          const padding = 30;
           const x = canvas.width / 2;
           const y = canvas.height - padding;
           
@@ -1616,7 +1611,7 @@ export default function MALWrapped() {
                   </div>
                   <p className="body-lg font-regular text-white mt-6 text-container">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
               </motion.div>
-                <motion.div className="mt-12 flex flex-col items-center gap-4 relative" {...fadeIn} data-framer-motion>
+                <motion.div className="mt-12 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
                   <p className="text-sm text-white/60">
                     made by{' '}
                     <motion.a
@@ -1630,16 +1625,15 @@ export default function MALWrapped() {
                       X.Avishkar
                     </motion.a>
                   </p>
+                  <motion.img
+                    src="/avatar.webp"
+                    alt="X.Avishkar"
+                    className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-contain pointer-events-none z-10 mt-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: smoothEase }}
+                  />
                 </motion.div>
-              <motion.img
-                src="/avatar.webp"
-                alt="X.Avishkar"
-                className="absolute bottom-0 left-1/2 w-24 h-24 sm:w-32 sm:h-32 object-contain pointer-events-none z-10"
-                style={{ transform: 'translateX(-50%) translateY(40%)' }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: smoothEase }}
-              />
               </div>
             </div>
           </SlideLayout>
@@ -2996,7 +2990,7 @@ export default function MALWrapped() {
               >
                 <div className="grid grid-cols-2 gap-6 sm:gap-8">
                   <div className="space-y-1">
-                    <p className="body-sm text-white/50 font-medium mb-2">Top Anime</p>
+                    <p className="body-sm text-white/50 font-medium mb-1">Top Anime</p>
                     {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white truncate">
                           <span className="title-sm text-white font-medium truncate mr-2">{String(i + 1)}</span>
@@ -3006,7 +3000,7 @@ export default function MALWrapped() {
                   </div>
                   
                   <div className="space-y-1">
-                    <p className="body-sm text-white/50 font-medium mb-2">Top Manga</p>
+                    <p className="body-sm text-white/50 font-medium mb-1">Top Manga</p>
                     
                     {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="text-white truncate">
@@ -3021,7 +3015,7 @@ export default function MALWrapped() {
                   <div className="space-y-1">
                     {finaleTopGenre && (
                       <>
-                        <p className="body-sm text-white/50 font-medium mb-2">Favorite Genre</p>
+                        <p className="body-sm text-white/50 font-medium mb-1">Favorite Genre</p>
                         <p className="title-md text-white font-medium">{finaleTopGenre[0]}</p>
                       </>
                     )}
@@ -3030,7 +3024,7 @@ export default function MALWrapped() {
                   <div className="space-y-1">
                     {favoriteAuthor && (
                       <>
-                        <p className="body-sm text-white/50 font-medium mb-2">Favorite Author</p>
+                        <p className="body-sm text-white/50 font-medium mb-1">Favorite Author</p>
                         <p className="title-md text-white font-medium">{favoriteAuthor}</p>
                       </>
                     )}
@@ -3039,19 +3033,19 @@ export default function MALWrapped() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8">
                   <div className="space-y-1">
-                    <p className="body-sm text-white/50 font-medium mb-2">Watched</p>
+                    <p className="body-sm text-white/50 font-medium mb-1">Watched</p>
                     <p className="title-md text-white  font-medium">
                     {stats.totalAnime || 0} Anime
                   </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="body-sm text-white/50 font-medium mb-2">Read</p>
+                    <p className="body-sm text-white/50 font-medium mb-1">Read</p>
                     <p className="title-md text-white font-medium">
                     {stats.totalManga || 0} Manga
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="body-sm text-white/50 font-medium mb-2">Spent</p>
+                  <p className="body-sm text-white/50 font-medium mb-1">Spent</p>
                   <p className="title-lg text-white font-medium">
                   {totalDays > 0 ? (
                     <>
@@ -3080,7 +3074,7 @@ export default function MALWrapped() {
 
   return (
     <motion.main 
-      className="bg-black text-white w-screen flex flex-col items-center justify-center p-2 selection:bg-white selection:text-black relative overflow-hidden min-h-screen" 
+      className="bg-black text-white w-full flex flex-col items-center justify-center p-2 selection:bg-white selection:text-black relative overflow-hidden min-h-screen" 
       style={{ 
         minHeight: '100dvh',
         backgroundColor: '#000000',
@@ -3244,7 +3238,7 @@ export default function MALWrapped() {
                   <p className="text-sm text-white/60">
                     made by{' '}
                     <motion.a
-                      href="https://www.avishkarshinde.com/about"
+                      href="https://www.avishkarshinde.com/aboutme"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-white/60 hover:text-white transition-colors underline"
@@ -3254,17 +3248,16 @@ export default function MALWrapped() {
                       X.Avishkar
                     </motion.a>
                   </p>
+                  <motion.img
+                    src="/avatar.webp"
+                    alt="X.Avishkar"
+                    className="relative w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 object-contain pointer-events-none z-10 mt-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: smoothEase }}
+                  />
                 </motion.div>
               </div>
-              <motion.img
-                src="/avatar.webp"
-                alt="X.Avishkar"
-                className="absolute bottom-0 left-1/2 w-24 h-24 sm:w-32 sm:h-32 object-contain pointer-events-none z-10"
-                style={{ transform: 'translateX(-50%) translateY(40%)' }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: smoothEase }}
-              />
             </div>
           )}
 
@@ -3386,6 +3379,9 @@ export default function MALWrapped() {
                 onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
                 disabled={currentSlide === 0}
                   className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30 transition-all"
+                  whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
               >
                   <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6"/>
               </button>
@@ -3601,7 +3597,7 @@ export default function MALWrapped() {
               <span className="text-white text-sm sm:text-base">avishkarshinde1501@gmail.com</span>
               <motion.button
                 onClick={copyEmail}
-                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white text-sm flex items-center gap-2 transition-colors"
+                className="px-3 py-1.5 border-box-cyan rounded-lg text-white text-sm flex items-center gap-2 transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
@@ -3614,56 +3610,56 @@ export default function MALWrapped() {
                 href="https://www.linkedin.com/in/xavishkar/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
-                whileHover={{ scale: 1.1 }}
+                className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
+                whileHover={{ scale: 1.1, borderColor: '#0077b5', backgroundColor: 'rgba(0, 119, 181, 0.1)' }}
                 whileTap={{ scale: 0.9 }}
                 title="LinkedIn"
               >
-                <Linkedin size={20} />
+                <Linkedin size={20} className="group-hover:text-[#0077b5] transition-colors" />
               </motion.a>
               <motion.a
                 href="https://www.youtube.com/@x.avishkar"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
-                whileHover={{ scale: 1.1 }}
+                className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
+                whileHover={{ scale: 1.1, borderColor: '#FF0000', backgroundColor: 'rgba(255, 0, 0, 0.1)' }}
                 whileTap={{ scale: 0.9 }}
                 title="YouTube"
               >
-                <Youtube size={20} />
+                <Youtube size={20} className="group-hover:text-[#FF0000] transition-colors" />
               </motion.a>
               <motion.a
                 href="https://www.instagram.com/x.avishkar"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
-                whileHover={{ scale: 1.1 }}
+                className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
+                whileHover={{ scale: 1.1, borderColor: '#E4405F', backgroundColor: 'rgba(228, 64, 95, 0.1)' }}
                 whileTap={{ scale: 0.9 }}
                 title="Instagram"
               >
-                <Instagram size={20} />
+                <Instagram size={20} className="group-hover:text-[#E4405F] transition-colors" />
               </motion.a>
               <motion.a
                 href="https://github.com/Avishkar15"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
-                whileHover={{ scale: 1.1 }}
+                className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
+                whileHover={{ scale: 1.1, borderColor: '#ffffff', backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                 whileTap={{ scale: 0.9 }}
                 title="GitHub"
               >
-                <Github size={20} />
+                <Github size={20} className="group-hover:text-white transition-colors" />
               </motion.a>
                     <motion.a
                       href="https://myanimelist.net/profile/XAvishkar"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center text-white hover:border-white transition-colors"
-                      whileHover={{ scale: 1.1 }}
+                      className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
+                      whileHover={{ scale: 1.1, borderColor: '#2E51A2', backgroundColor: 'rgba(46, 81, 162, 0.1)' }}
                       whileTap={{ scale: 0.9 }}
                       title="MyAnimeList"
                     >
-                      <MyAnimeListIcon size={20} />
+                      <MyAnimeListIcon size={20} className="group-hover:text-[#2E51A2] transition-colors" />
                     </motion.a>
             </div>
           </div>
@@ -3683,7 +3679,7 @@ export default function MALWrapped() {
                 <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.a>
               <motion.a
-                href="https://www.avishkarshinde.com/about"
+                href="https://www.avishkarshinde.com/aboutme"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
@@ -3693,7 +3689,7 @@ export default function MALWrapped() {
                 <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.a>
               <motion.a
-                href="https://www.avishkarshinde.com/resume"
+                href="https://drive.google.com/file/d/1ta3SF0s3Iy7ryy6ON1FKWl1p9iu32iH2/view?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
@@ -3707,10 +3703,10 @@ export default function MALWrapped() {
 
           {/* Right Column - WORK */}
           <div className="space-y-4">
-            <h4 className="text-white/60 text-sm font-medium uppercase tracking-wider">WORK</h4>
+            <h4 className="text-white/60 text-sm font-medium uppercase tracking-wider">UX WORK</h4>
             <div className="space-y-2">
               <motion.a
-                href="https://www.avishkarshinde.com/work/spotify"
+                href="https://www.avishkarshinde.com/spotify"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
@@ -3720,7 +3716,7 @@ export default function MALWrapped() {
                 <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.a>
               <motion.a
-                href="https://www.avishkarshinde.com/work/toyota"
+                href="https://www.avishkarshinde.com/toyota-mobility-foundation"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
@@ -3730,7 +3726,7 @@ export default function MALWrapped() {
                 <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.a>
               <motion.a
-                href="https://www.avishkarshinde.com/work/solarhive"
+                href="https://www.avishkarshinde.com/solarhive"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
@@ -3740,7 +3736,7 @@ export default function MALWrapped() {
                 <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.a>
               <motion.a
-                href="https://www.avishkarshinde.com/work/indiana-university"
+                href="https://www.avishkarshinde.com/motion-design"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
@@ -3753,7 +3749,7 @@ export default function MALWrapped() {
           </div>
         </div>
         <div className="mt-8 pt-6 border-t border-white/10">
-          <p className="text-white/60 text-xs text-center">© 2025 Designed by <span className="font-semibold">Avishkar</span></p>
+          <p className="text-white/60 text-sm text-center">© 2025 Designed by <span className="font-semibold">Avishkar Shinde</span></p>
         </div>
       </div>
     </footer>
