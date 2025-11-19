@@ -2991,7 +2991,7 @@ export default function MALWrapped() {
             <motion.div 
               className="w-full h-full flex flex-col items-center justify-center relative z-20"
               variants={staggerContainer}
-              initial={false}
+              initial="initial"
               animate="animate"
             >
               {/* Image with Heading */}
@@ -3420,19 +3420,19 @@ export default function MALWrapped() {
               </div>
               
               {/* Slide Content */}
-              <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
-                {/* Top gradient fade - above rainbow shapes, below content */}
-                <div 
-                  className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
-                  style={{
-                    zIndex: 15,
-                    background: topGradientBackground
-                  }}
-                />
-                
-                <div className="w-full h-full relative overflow-y-auto">
-                  <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} siteName={siteName} />
-                </div>
+<div className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
+  {/* Top gradient fade - above rainbow shapes, below content */}
+  <div 
+    className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
+    style={{
+      zIndex: 15,
+      background: topGradientBackground
+    }}
+  />
+  
+  <div key={currentSlide} className="w-full h-full relative overflow-y-auto">
+    <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} siteName={siteName} />
+  </div>
                 
                 {/* Bottom gradient fade - above rainbow shapes, below content */}
                 <div 
