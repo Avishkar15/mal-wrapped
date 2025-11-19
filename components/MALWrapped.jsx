@@ -1605,11 +1605,11 @@ export default function MALWrapped() {
                   </div>
                   <p className="body-lg font-regular text-white mt-6 text-container">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
               </motion.div>
-                <motion.div className="mt-12 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
+                <motion.div className="mt-20 sm:mt-24 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
                   <p className="text-sm text-white/60">
-                    made by{' '}
+                    Made by{' '}
                     <motion.a
-                      href="https://www.avishkarshinde.com/about"
+                      href="https://www.avishkarshinde.com/aboutme"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-white/60 hover:text-white transition-colors underline"
@@ -2956,19 +2956,19 @@ export default function MALWrapped() {
         return (
           <SlideLayout verticalText="FINAL-REPORT" bgColor="blue">
             <motion.div 
-              className="w-full h-full flex flex-col items-center justify-center relative"
+              className="w-full h-full flex flex-col items-center justify-center relative z-20"
               variants={staggerContainer}
               initial="initial"
               animate="animate"
             >
               {/* Image with Heading */}
               <motion.div 
-                className="w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8"
+                className="w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
                 variants={staggerItem}
               >
-                <div className="relative w-40 h-40 flex items-center justify-center flex-shrink-0">
+                <div className="relative w-40 h-40 flex items-center justify-center flex-shrink-0 z-20">
                   <motion.div 
-                    className="relative z-10 w-full h-full rounded-xl overflow-hidden border-box-cyan"
+                    className="relative z-20 w-full h-full rounded-xl overflow-hidden border-box-cyan"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
@@ -2981,9 +2981,9 @@ export default function MALWrapped() {
                     />
                   </motion.div>
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 relative z-20">
                   <motion.h2 
-                    className="title-lg sm:text-2xl md:text-3xl text-white font-medium"
+                    className="heading-lg text-white font-medium relative z-20"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
@@ -2994,9 +2994,9 @@ export default function MALWrapped() {
               </motion.div>
 
               {/* Text Content Below - All sections in one flex container with consistent gap */}
-              <div className="w-full max-w-3xl flex flex-col gap-8 sm:gap-10 text-white relative z-10">
+              <div className="w-full max-w-3xl flex flex-col gap-8 sm:gap-10 text-white relative z-20">
                 <motion.div 
-                  className="grid grid-cols-2 gap-6 sm:gap-8"
+                  className="grid grid-cols-2 gap-6 sm:gap-8 relative z-20"
                   variants={staggerItem}
                 >
                   <div className="space-y-1">
@@ -3022,7 +3022,7 @@ export default function MALWrapped() {
                 </motion.div>
 
                 <motion.div 
-                  className="grid grid-cols-2 gap-6 sm:gap-8"
+                  className="grid grid-cols-2 gap-6 sm:gap-8 relative z-20"
                   variants={staggerItem}
                 >
                   <div className="space-y-1">
@@ -3045,7 +3045,7 @@ export default function MALWrapped() {
                 </motion.div>
 
                 <motion.div 
-                  className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8"
+                  className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 relative z-20"
                   variants={staggerItem}
                 >
                   <div className="space-y-1">
@@ -3061,7 +3061,7 @@ export default function MALWrapped() {
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="body-sm text-white/50 font-medium mb-1">Spent</p>
+                  <p className="body-sm text-white/50 font-medium mb-1">Time Spent</p>
                   <p className="title-lg text-white font-medium">
                   {totalDays > 0 ? (
                     <>
@@ -3225,7 +3225,25 @@ export default function MALWrapped() {
                 }}></div>
               </div>
               
-              <div className="relative z-10">
+              {/* Top gradient fade */}
+              <div 
+                className="absolute top-0 left-0 right-0 pointer-events-none h-32 sm:h-40"
+                style={{
+                  zIndex: 15,
+                  background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+                }}
+              />
+              
+              {/* Bottom gradient fade */}
+              <div 
+                className="absolute bottom-0 left-0 right-0 pointer-events-none h-32 sm:h-40"
+                style={{
+                  zIndex: 15,
+                  background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.95) 20%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.4) 80%, rgba(0, 0, 0, 0) 100%)'
+                }}
+              />
+              
+              <div className="relative z-20">
                 <motion.div {...fadeIn100} data-framer-motion>
                   <div className="relative inline-block">
                     <h1 className="wrapped-brand text-white/60 mb-0 relative z-10">
@@ -3249,9 +3267,9 @@ export default function MALWrapped() {
               Connect with MAL
                   </motion.button>
                 </motion.div>
-                <motion.div className="mt-12 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
+                <motion.div className="mt-20 sm:mt-24 flex flex-col items-center gap-4" {...fadeIn} data-framer-motion>
                   <p className="text-sm text-white/60">
-                    made by{' '}
+                    Made by{' '}
                     <motion.a
                       href="https://www.avishkarshinde.com/aboutme"
                       target="_blank"
