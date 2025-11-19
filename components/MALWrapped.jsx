@@ -871,52 +871,110 @@ export default function MALWrapped() {
       img.crossOrigin = 'anonymous';
       
       return new Promise((resolve, reject) => {
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+        // Set timeout to handle image loading issues
+        const timeout = setTimeout(() => {
+          reject(new Error('Image loading timeout'));
+        }, 10000);
+        
+        let blobUrl = null;
+        
+        // Define onload handler
+        const handleImageLoad = () => {
+          clearTimeout(timeout);
           
-          // Set canvas dimensions
-          canvas.width = img.width;
-          canvas.height = img.height;
-          
-          // Draw the original image
-          ctx.drawImage(img, 0, 0);
-          
-          // Add watermark at the bottom
-          const watermarkText = websiteUrl;
-          
-          // Simple fixed font size
-          ctx.font = 'bold 40px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          
-          // Position at bottom center
-          const x = canvas.width / 2;
-          const y = canvas.height - 20;
-          
-          // Simple text without effects
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-          ctx.fillText(watermarkText, x, y);
-          
-          // Convert canvas to blob
-          canvas.toBlob((blob) => {
-            if (!blob) {
-              reject(new Error('Failed to create blob'));
-              return;
+          try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions
+            canvas.width = img.width;
+            canvas.height = img.height;
+            
+            // Draw the original image
+            ctx.drawImage(img, 0, 0);
+            
+            // Add watermark at the bottom
+            const watermarkText = websiteUrl;
+            
+            // Simple fixed font size
+            ctx.font = 'bold 40px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            
+            // Position at bottom center
+            const x = canvas.width / 2;
+            const y = canvas.height - 20;
+            
+            // Simple text without effects
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillText(watermarkText, x, y);
+            
+            // Clean up blob URL if it was created
+            if (blobUrl) {
+              URL.revokeObjectURL(blobUrl);
             }
             
-            const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
-            const dataUrl = canvas.toDataURL('image/png');
-            
-            resolve({ file, dataUrl });
-          }, 'image/png');
+            // Convert canvas to blob
+            canvas.toBlob((blob) => {
+              if (!blob) {
+                reject(new Error('Failed to create blob'));
+                return;
+              }
+              
+              const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
+              const dataUrl = canvas.toDataURL('image/png');
+              
+              resolve({ file, dataUrl });
+            }, 'image/png');
+          } catch (error) {
+            if (blobUrl) {
+              URL.revokeObjectURL(blobUrl);
+            }
+            clearTimeout(timeout);
+            reject(error);
+          }
         };
         
-        img.onerror = () => {
-          reject(new Error('Failed to load image for watermarking'));
+        // Define error handler
+        const handleImageError = (error) => {
+          clearTimeout(timeout);
+          if (blobUrl) {
+            URL.revokeObjectURL(blobUrl);
+          }
+          console.error('Image load error:', error);
+          // If image fails to load, try to use the PNG data directly
+          // Convert data URL to blob if needed
+          if (png.src && png.src.startsWith('data:')) {
+            fetch(png.src)
+              .then(res => res.blob())
+              .then(blob => {
+                const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
+                resolve({ file, dataUrl: png.src });
+              })
+              .catch(err => {
+                console.error('Failed to convert data URL to blob:', err);
+                reject(new Error('Failed to process image'));
+              });
+          } else {
+            reject(new Error('Failed to load image for watermarking'));
+          }
         };
         
-        img.src = png.src;
+        // Set handlers before setting src
+        img.onload = handleImageLoad;
+        img.onerror = handleImageError;
+        
+        // Use the PNG src directly (snapdom returns a data URL)
+        if (png.src) {
+          img.src = png.src;
+        } else if (png.blob) {
+          // If blob is available, create object URL
+          blobUrl = URL.createObjectURL(png.blob);
+          img.src = blobUrl;
+        } else {
+          clearTimeout(timeout);
+          reject(new Error('No valid image data from snapdom'));
+        }
       });
     } catch (err) {
       console.error('Error generating PNG:', err);
@@ -2148,7 +2206,7 @@ export default function MALWrapped() {
                               <p className="title-md truncate font-semibold text-white">{highlight.node?.title}</p>
                               <p className="body-sm text-white/50 truncate font-medium">{highlight.node?.studios?.[0]?.name || ''}</p>
                               <p className="mono text-yellow-300 mt-1 sm:mt-2 font-semibold mt-1">★ {highlight.list_status?.score ? Math.round(highlight.list_status.score) : 'Not Rated'}</p>
-                              <p className="body-sm text-white/50 truncate mt-1 sm:mt-2 font-regular">{seasonData.totalAnime} anime watched this season</p>
+                              <p className="mono text-white/50 truncate mt-1 sm:mt-2 font-regular">{seasonData.totalAnime} anime watched this season</p>
                           </div>
                         </div>
                       </>
@@ -2939,11 +2997,16 @@ export default function MALWrapped() {
                 variants={staggerItem}
               >
                 <div className="relative w-40 h-40 flex items-center justify-center flex-shrink-0 z-20">
-                  <motion.div 
-                    className="relative z-20 w-full h-full rounded-xl overflow-hidden border-box-cyan"
+                  <motion.a
+                    href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative z-20 w-full h-full rounded-xl overflow-hidden border-box-cyan block"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     <img 
                       src={userImage} 
@@ -2951,7 +3014,7 @@ export default function MALWrapped() {
                       className="w-full h-full object-cover"
                       crossOrigin="anonymous"
                     />
-                  </motion.div>
+                  </motion.a>
                 </div>
                 <div className="flex-1 relative z-20">
                   <motion.h2 
@@ -3215,8 +3278,8 @@ export default function MALWrapped() {
                 }}
               />
               
-              <div className="relative z-20 w-full flex flex-col items-center justify-center">
-                <motion.div {...fadeIn100} data-framer-motion className="w-full flex flex-col items-center">
+              <div className="mt-20 relative z-20 w-full flex flex-col items-center justify-center">
+                <motion.div {...fadeIn100} data-framer-motion className="mt-16 w-full flex flex-col items-center">
                   <div className="relative inline-block text-center">
                     <h1 className="wrapped-brand text-white/60 mb-0 relative z-10 text-center">
                       MyAnimeList
@@ -3250,7 +3313,7 @@ export default function MALWrapped() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      X.Avishkar
+                      XAvishkar
                     </motion.a>
                   </p>
                   <motion.img
