@@ -1565,8 +1565,8 @@ export default function MALWrapped() {
             <div className="text-center relative w-full h-full flex flex-col items-center justify-center">
               {/* Colorful abstract shapes background */}
               
-              <div className="relative z-20 w-full flex flex-col items-center justify-center">
-              <motion.div {...fadeIn} data-framer-motion className="w-full flex flex-col items-center">
+              <div className="mt-20 relative z-20 w-full flex flex-col items-center justify-center">
+              <motion.div {...fadeIn} data-framer-motion className="mt-16 w-full flex flex-col items-center">
                   <div className="relative inline-block text-center">
                     <h1 className="wrapped-brand text-white/50 relative z-10 text-center">
                       {stats.selectedYear === 'all' ? 'MyAnimeList' : 'MyAnimeList ' + stats.selectedYear}
@@ -1575,9 +1575,9 @@ export default function MALWrapped() {
                       Wrapped
                     </h2>
                   </div>
-                  <p className="body-lg font-regular text-white mt-6 text-center text-container max-w-2xl mx-auto">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
+                  <p className="body-lg font-regular text-white mt-4 text-center text-container max-w-2xl mx-auto">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
               </motion.div>
-                <motion.div className="mt-20 sm:mt-24 flex flex-col items-center gap-4 w-full" {...fadeIn} data-framer-motion>
+                <motion.div className="mt-8 flex flex-col items-center w-full" {...fadeIn} data-framer-motion>
                   <p className="text-sm text-white/60 text-center">
                     Made by{' '}
                     <motion.a
@@ -1588,13 +1588,13 @@ export default function MALWrapped() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      X.Avishkar
+                      XAvishkar
                     </motion.a>
                   </p>
                   <motion.img
                     src="/avatar.webp"
-                    alt="X.Avishkar"
-                    className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain pointer-events-none z-10 mt-4 mx-auto"
+                    alt="XAvishkar"
+                    className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain pointer-events-none z-10 mt-1 mx-auto"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: smoothEase }}
@@ -3226,8 +3226,8 @@ export default function MALWrapped() {
                     </h2>
                   </div>
                 </motion.div>
-                <motion.p className="mt-6 text-lg sm:text-xl text-white/80 text-center text-container max-w-2xl mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
-              <motion.div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center w-full" {...fadeIn} data-framer-motion>
+                <motion.p className="mt-4 text-lg sm:text-xl text-white/80 text-center text-container max-w-2xl mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
+              <motion.div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center w-full" {...fadeIn} data-framer-motion>
                   <motion.button
                   onClick={handleBegin}
                     className="bg-white text-black font-medium text-lg px-8 py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
@@ -3239,7 +3239,7 @@ export default function MALWrapped() {
               Connect with MAL
                   </motion.button>
                 </motion.div>
-                <motion.div className="mt-20 sm:mt-24 flex flex-col items-center gap-4 w-full" {...fadeIn} data-framer-motion>
+                <motion.div className="mt-8 flex flex-col items-center w-full" {...fadeIn} data-framer-motion>
                   <p className="text-sm text-white/60 text-center">
                     Made by{' '}
                     <motion.a
@@ -3255,8 +3255,8 @@ export default function MALWrapped() {
                   </p>
                   <motion.img
                     src="/avatar.webp"
-                    alt="X.Avishkar"
-                    className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain pointer-events-none z-10 mt-4 mx-auto"
+                    alt="XAvishkar"
+                    className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain pointer-events-none z-10 mt-1 mx-auto"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: smoothEase }}
