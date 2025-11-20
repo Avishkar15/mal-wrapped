@@ -231,7 +231,7 @@ export default function MALWrapped() {
   // Get website URL for watermark
   const websiteUrl = typeof window !== 'undefined' 
     ? window.location.origin.replace(/^https?:\/\//, '').toUpperCase()
-    : 'MALWRAPPED.COM';
+    : 'MAL-WRAPPED.VERCEL.APP';
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -898,15 +898,14 @@ export default function MALWrapped() {
             
             // Fixed font size - no scaling, always the same pixel size
             // Since snapdom uses scale: 2, we need to double the font size to account for the scale
-            const fontSize = 80; // Fixed 80px (will appear as 40px visually due to scale: 2)
-            ctx.font = `bold ${fontSize}px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
+            const fontSize = Math.round(canvas.width * 0.04);
+            ctx.font = `medium ${fontSize}px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
             
-            // Fixed padding - no scaling
-            const padding = 20; // Fixed 20px
+            // Fixed padding - no scalingc;
             const x = canvas.width / 2;
-            const y = canvas.height - padding;
+            const y = canvas.height - (canvas.height * 0.04);
             
             // Simple text without effects
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
@@ -3142,16 +3141,6 @@ export default function MALWrapped() {
                   </div>
                 </motion.div>
                 </div>
-                
-                {/* Watermark */}
-                <motion.div 
-                  className="mt-8 sm:mt-10 relative z-20"
-                  variants={staggerItem}
-                >
-                  <p className="text-white/60 text-base sm:text-lg font-medium text-center">
-                    {websiteUrl}
-                  </p>
-                </motion.div>
                 
             </motion.div>
           </SlideLayout>
