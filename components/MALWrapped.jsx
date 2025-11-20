@@ -812,45 +812,14 @@ export default function MALWrapped() {
             clonedElement.style.transition = 'none';
             clonedElement.style.animationPlayState = 'paused';
             
-            const allElements = clonedElement.querySelectorAll('*');
-            allElements.forEach(el => {
-              // Stop CSS animations and transitions, but preserve all filter styles
+            // Only process elements that need animation stopped
+            const animatedElements = clonedElement.querySelectorAll('[style*="animation"], [style*="transition"]');
+            animatedElements.forEach(el => {
               el.style.animation = 'none';
               el.style.transition = 'none';
               el.style.animationPlayState = 'paused';
-              
-              // Ensure visibility for non-filter elements
-              if (!el.getAttribute('style')?.includes('filter')) {
-                el.style.visibility = el.style.visibility || 'visible';
-                
-                // Ensure colors are visible
-                if (el.classList.contains('text-white')) {
-                  el.style.color = '#ffffff';
-                }
-              }
             });
           }
-          
-          // Ensure all images are properly displayed with correct sizing
-          const clonedImages = clonedDoc.querySelectorAll('img');
-          clonedImages.forEach(img => {
-            img.style.opacity = '1';
-            img.style.visibility = 'visible';
-            img.style.display = '';
-            img.style.transform = 'none'; // Remove any transforms on images
-            // Ensure images maintain their aspect ratio
-            if (!img.style.width && !img.style.height) {
-              const originalImg = Array.from(document.querySelectorAll('img')).find(
-                origImg => origImg.src === img.src && origImg.alt === img.alt
-              );
-              if (originalImg) {
-                const computedStyle = window.getComputedStyle(originalImg);
-                img.style.width = computedStyle.width;
-                img.style.height = computedStyle.height;
-                img.style.objectFit = 'cover';
-              }
-            }
-          });
         }
       };
       
@@ -859,34 +828,21 @@ export default function MALWrapped() {
         backgroundColor: '#0A0A0A',
         scale: 2,
         exclude: ['[data-exclude-from-screenshot]'],
-        embedFonts: true,
+        embedFonts: false,
         plugins: [capturePlugin]
       });
       
       // Export as PNG
       const png = await out.toPng();
       
-      // Add watermark to the image
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      
+      // Add watermark directly using data URL without reloading image
       return new Promise((resolve, reject) => {
-        // Set timeout to handle image loading issues
-        const timeout = setTimeout(() => {
-          reject(new Error('Image loading timeout'));
-        }, 10000);
-        
-        let blobUrl = null;
-        
-        // Define onload handler
-        const handleImageLoad = () => {
-          clearTimeout(timeout);
-          
-          try {
+        try {
+          const img = new Image();
+          img.onload = () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas dimensions
             canvas.width = img.width;
             canvas.height = img.height;
             
@@ -895,26 +851,16 @@ export default function MALWrapped() {
             
             // Add watermark at the bottom
             const watermarkText = websiteUrl;
-            
-            // Fixed font size - no scaling, always the same pixel size
-            // Since snapdom uses scale: 2, we need to double the font size to account for the scale
-            const fontSize = Math.round(canvas.width * 6);
+            const fontSize = 80;
             ctx.font = `medium ${fontSize}px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
             
-            // Fixed padding - no scalingc;
             const x = canvas.width / 2;
             const y = canvas.height - (canvas.height * 0.02);
             
-            // Simple text without effects
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.fillText(watermarkText, x, y);
-            
-            // Clean up blob URL if it was created
-            if (blobUrl) {
-              URL.revokeObjectURL(blobUrl);
-            }
             
             // Convert canvas to blob
             canvas.toBlob((blob) => {
@@ -923,59 +869,32 @@ export default function MALWrapped() {
                 return;
               }
               
-      const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
+              const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
               const dataUrl = canvas.toDataURL('image/png');
               
               resolve({ file, dataUrl });
             }, 'image/png');
-          } catch (error) {
-            if (blobUrl) {
-              URL.revokeObjectURL(blobUrl);
+          };
+          
+          img.onerror = () => {
+            // Fallback: return PNG without watermark if image load fails
+            if (png.src && png.src.startsWith('data:')) {
+              fetch(png.src)
+                .then(res => res.blob())
+                .then(blob => {
+                  const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
+                  resolve({ file, dataUrl: png.src });
+                })
+                .catch(() => reject(new Error('Failed to process image')));
+            } else {
+              reject(new Error('Failed to load image'));
             }
-            clearTimeout(timeout);
-            reject(error);
-          }
-        };
-        
-        // Define error handler
-        const handleImageError = (error) => {
-          clearTimeout(timeout);
-          if (blobUrl) {
-            URL.revokeObjectURL(blobUrl);
-          }
-          console.error('Image load error:', error);
-          // If image fails to load, try to use the PNG data directly
-          // Convert data URL to blob if needed
-          if (png.src && png.src.startsWith('data:')) {
-            fetch(png.src)
-              .then(res => res.blob())
-              .then(blob => {
-                const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
-                resolve({ file, dataUrl: png.src });
-              })
-              .catch(err => {
-                console.error('Failed to convert data URL to blob:', err);
-                reject(new Error('Failed to process image'));
-              });
-          } else {
-            reject(new Error('Failed to load image for watermarking'));
-          }
-        };
-        
-        // Set handlers before setting src
-        img.onload = handleImageLoad;
-        img.onerror = handleImageError;
-        
-        // Use the PNG src directly (snapdom returns a data URL)
-        if (png.src) {
-          img.src = png.src;
-        } else if (png.blob) {
-          // If blob is available, create object URL
-          blobUrl = URL.createObjectURL(png.blob);
-          img.src = blobUrl;
-        } else {
-          clearTimeout(timeout);
-          reject(new Error('No valid image data from snapdom'));
+          };
+          
+          // Use the PNG src directly (snapdom returns a data URL)
+          img.src = png.src || (png.blob ? URL.createObjectURL(png.blob) : '');
+        } catch (error) {
+          reject(error);
         }
       });
     } catch (err) {
