@@ -3389,8 +3389,9 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
               <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
                 {/* Top gradient fade - above rainbow shapes, below content */}
                 <div 
-                  className={`absolute top-0 left-0 right-0 pointer-events-none z-5 ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
+                  className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
                   style={{
+                    zIndex: 15,
                     background: topGradientBackground
                   }}
                 />
@@ -3401,8 +3402,9 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 
                 {/* Bottom gradient fade - above rainbow shapes, below content */}
                 <div 
-                  className={`absolute bottom-0 left-0 right-0 pointer-events-none z-5 ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
+                  className={`absolute bottom-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
                   style={{
+                    zIndex: 15,
                     background: bottomGradientBackground
                   }}
                 />
