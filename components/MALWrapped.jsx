@@ -795,30 +795,25 @@ export default function MALWrapped() {
     try {
       const cardElement = slideRef.current;
       
+      // Detect mobile device for optimization
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+      const scale = isMobile ? 1 : 2; // Lower scale on mobile for better performance
+      
       // Dynamically import snapdom
       const { snapdom } = await import('@zumer/snapdom');
       
-      // Create a plugin to stop animations
+      // Simplified plugin - only stop animations on the main element
       const capturePlugin = {
         name: 'mal-wrapped-capture',
         async afterClone(context) {
           const clonedDoc = context.clonedDocument;
           if (!clonedDoc) return;
           
-          // Stop animations without touching filters
           const clonedElement = clonedDoc.querySelector('.slide-card') || clonedDoc.body;
           if (clonedElement) {
             clonedElement.style.animation = 'none';
             clonedElement.style.transition = 'none';
             clonedElement.style.animationPlayState = 'paused';
-            
-            // Only process elements that need animation stopped
-            const animatedElements = clonedElement.querySelectorAll('[style*="animation"], [style*="transition"]');
-            animatedElements.forEach(el => {
-              el.style.animation = 'none';
-              el.style.transition = 'none';
-              el.style.animationPlayState = 'paused';
-            });
           }
         }
       };
@@ -826,7 +821,7 @@ export default function MALWrapped() {
       // Capture with snapdom - exclude only navigation containers using data attribute
       const out = await snapdom(cardElement, {
         backgroundColor: '#0A0A0A',
-        scale: 2,
+        scale: scale,
         exclude: ['[data-exclude-from-screenshot]'],
         embedFonts: false,
         plugins: [capturePlugin]
@@ -849,10 +844,10 @@ export default function MALWrapped() {
             // Draw the original image
             ctx.drawImage(img, 0, 0);
             
-            // Add watermark at the bottom
+            // Add watermark at the bottom - adjust font size based on scale
             const watermarkText = websiteUrl;
-            const fontSize = 80;
-            ctx.font = `medium 80px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
+            const fontSize = scale === 2 ? 80 : 40; // Smaller font on mobile
+            ctx.font = `medium ${fontSize}px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
             
