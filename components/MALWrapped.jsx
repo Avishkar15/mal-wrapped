@@ -1918,7 +1918,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                               const featuredImage = (
                                 <motion.div 
                                   className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative z-10" 
-                                  style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '200px' }}
+                                  style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '250px' }}
                                   whileHover={{ borderColor: '#ffffff' }}
                                   transition={{ duration: 0.3, ease: smoothEase}}
                                 >
@@ -1989,7 +1989,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                                 >
                                   <motion.div 
                                     className="border-box-cyan bg-transparent rounded-xl overflow-hidden aspect-[2/3] relative w-full z-10" 
-                                    style={{ boxSizing: 'border-box', maxHeight: '275px' }}
+                                    style={{ boxSizing: 'border-box', maxHeight: '150px' }}
                                     whileHover={{ borderColor: '#ffffff' }}
                                     transition={{ duration: 0.3, ease: smoothEase}}
                                   >
@@ -2622,7 +2622,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                               const featuredImage = (
                                 <motion.div 
                                   className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative z-10" 
-                                  style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '200px' }}
+                                  style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '250px' }}
                                   whileHover={{ borderColor: '#ffffff' }}
                                   transition={{ duration: 0.3, ease: smoothEase}}
                                 >
@@ -2693,7 +2693,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                                 >
                                   <motion.div 
                                     className="border-box-cyan bg-transparent rounded-xl overflow-hidden aspect-[2/3] relative w-full z-10" 
-                                    style={{ boxSizing: 'border-box', maxHeight: '275px' }}
+                                    style={{ boxSizing: 'border-box', maxHeight: '150px' }}
                                     whileHover={{ borderColor: '#ffffff' }}
                                     transition={{ duration: 0.3, ease: smoothEase}}
                                   >
@@ -3397,7 +3397,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 />
                 
                 <div className="w-full h-full relative overflow-y-auto"
-                style={{ zIndex: 10 }}>
+                style={{ zIndex: 15 }}>
                   <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} siteName={siteName} />
                 </div>
                 
