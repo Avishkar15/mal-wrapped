@@ -3299,26 +3299,8 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
 
           {isAuthenticated && stats && slides.length > 0 && (
             <div className="w-full h-full flex flex-col overflow-hidden relative">
-              {/* Top gradient fade - covers entire card including nav bars */}
-              <div 
-                className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-20 sm:h-24'}`}
-                style={{
-                  zIndex: 15,
-                  background: topGradientBackground
-                }}
-              />
-              
-              {/* Bottom gradient fade - covers entire card including nav bars */}
-              <div 
-                className={`absolute bottom-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-20 sm:h-24'}`}
-                style={{
-                  zIndex: 15,
-                  background: bottomGradientBackground
-                }}
-              />
-              
               {/* Top Bar - Year Selector, Download, Share, Logout */}
-              <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 pt-3 pb-2 flex items-center justify-between gap-2 sm:gap-3 bg-black relative z-10" data-exclude-from-screenshot>
+              <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 pt-3 pb-2 flex items-center justify-between gap-2 sm:gap-3" data-exclude-from-screenshot>
                 <div className="flex items-center gap-2 sm:gap-3">
                   <div className="relative min-w-[120px] sm:min-w-[140px]">
                   <select
@@ -3388,7 +3370,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
               </div>
               
               {/* Progress Bar */}
-              <div className="flex-shrink-0 mt-2 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2 relative z-10 bg-black" data-exclude-from-screenshot>
+              <div className="flex-shrink-0 mt-2 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2 relative z-10" data-exclude-from-screenshot>
                 {slides.map((_, i) => {
                   const isCompleted = i < currentSlide;
                   const isActive = i === currentSlide;
@@ -3405,14 +3387,31 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
               
               {/* Slide Content */}
               <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
-                <div className="w-full h-full relative overflow-y-auto"
-                style={{ zIndex: 20 }}>
+                {/* Top gradient fade - above rainbow shapes, below content */}
+                <div 
+                  className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-20 sm:h-24'}`}
+                  style={{
+                    zIndex: 1,
+                    background: topGradientBackground
+                  }}
+                />
+                
+                <div className="w-full h-full relative overflow-y-auto">
                   <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} siteName={siteName} />
                 </div>
+                
+                {/* Bottom gradient fade - above rainbow shapes, below content */}
+                <div 
+                  className={`absolute bottom-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-20 sm:h-24'}`}
+                  style={{
+                    zIndex: 1,
+                    background: bottomGradientBackground
+                  }}
+                />
               </div>
               
               {/* Bottom Controls */}
-              <div className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-10 bg-black" data-exclude-from-screenshot>
+              <div className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-10" data-exclude-from-screenshot>
                 <motion.button
                 onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
                 disabled={currentSlide === 0}
