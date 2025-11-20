@@ -847,7 +847,7 @@ export default function MALWrapped() {
             // Add watermark at the bottom - adjust font size based on scale
             const watermarkText = websiteUrl;
             const fontSize = scale === 2 ? 800 : 400; // Smaller font on mobile
-            ctx.font = `medium ${fontSize}px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.font = `bold ${fontSize}px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
             
