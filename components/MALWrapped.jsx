@@ -846,13 +846,13 @@ export default function MALWrapped() {
             
             // Add watermark at the bottom - adjust font size based on scale
             const watermarkText = websiteUrl;
-            const fontSize = scale === 2 ? 60 : 30; // Smaller font on mobile
+            const fontSize = 40; // Smaller font on mobile
             ctx.font = `bold ${fontSize}px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
             
             const x = canvas.width / 2;
-            const y = canvas.height - (canvas.height * 0.02);
+            const y = canvas.height - (canvas.height * 0.015);
             
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.fillText(watermarkText, x, y);
@@ -3321,8 +3321,91 @@ export default function MALWrapped() {
                     transition={{ duration: 0.2 }}
                   >
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="text-xs sm:text-sm font-medium hidden sm:inline">Download</span>
+                    <span className="text-xs sm:text-sm font-medium">Download</span>
                   </motion.button>
+                </div>
+                <motion.button 
+                  onClick={handleLogout} 
+                  className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2" 
+                  title="Logout"  
+                  style={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}
+                  whileHover={{ 
+                    scale: 1.1, 
+                    backgroundColor: 'rgba(211, 68, 68, 0.8)',
+                    borderColor: 'rgba(211, 68, 68, 0.8)'
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="text-xs sm:text-sm font-medium">Log Out</span>
+                </motion.button>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="flex-shrink-0 mt-2 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2 relative z-10" data-exclude-from-screenshot>
+                {slides.map((_, i) => {
+                  const isCompleted = i < currentSlide;
+                  const isActive = i === currentSlide;
+                  return (
+                    <div key={i} className="flex-1 h-1 sm:h-1.5 rounded-full bg-white/10 overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 ease-out ${isActive ? 'bg-white' : 'bg-white/30'}`} 
+                        style={{ width: (isCompleted || isActive) ? '100%' : '0%' }} 
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Slide Content */}
+              <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
+                {/* Top gradient fade - above rainbow shapes, below content */}
+                <div 
+                  className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
+                  style={{
+                    zIndex: 5,
+                    background: topGradientBackground
+                  }}
+                />
+                
+                <div className="w-full h-full relative overflow-y-auto">
+                  <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} siteName={siteName} />
+                </div>
+                
+                {/* Bottom gradient fade - above rainbow shapes, below content */}
+                <div 
+                  className={`absolute bottom-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
+                  style={{
+                    zIndex: 5,
+                    background: bottomGradientBackground
+                  }}
+                />
+              </div>
+              
+              {/* Bottom Controls */}
+              <div className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-10" data-exclude-from-screenshot>
+                <motion.button
+                onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
+                disabled={currentSlide === 0}
+                  className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30 transition-all"
+                  whileHover={{ scale: currentSlide === 0 ? 1 : 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+              >
+                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                </motion.button>
+                
+                <p className="text-white/60 text-xs sm:text-sm md:text-base font-mono py-1.5 sm:py-2 px-2 sm:px-4 rounded-full border-box-cyan ">
+                  {currentSlide === slides.length - 1
+                    ? siteName
+                    : `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`}
+                </p>
+
+                <div className="flex items-center gap-2">
                   {currentSlide === slides.length - 1 && (
                     <div className="relative" ref={shareMenuRef}>
                       <motion.button
@@ -3332,11 +3415,7 @@ export default function MALWrapped() {
                           e.stopPropagation();
                           setShowShareMenu((prev) => !prev);
                         }}
-                        className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2"
-                        style={{ 
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)'
-                        }}
+                        className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan"
                         whileHover={{ 
                           scale: 1.1, 
                           backgroundColor: 'rgba(64, 101, 204, 0.8)',
@@ -3345,8 +3424,7 @@ export default function MALWrapped() {
                         whileTap={{ scale: 0.9 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span className="text-xs sm:text-sm font-medium hidden sm:inline">Share</span>
+                        <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
                       </motion.button>
 
                       {showShareMenu && (
@@ -3355,7 +3433,7 @@ export default function MALWrapped() {
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -10, scale: 0.95 }}
                           transition={{ duration: 0.2 }}
-                          className="absolute top-full right-0 mt-2 bg-black/95 backdrop-blur-sm border border-white/10 rounded-xl p-3 z-50 min-w-[200px]"
+                          className="absolute bottom-full right-0 mb-2 bg-black/95 backdrop-blur-sm border border-white/10 rounded-xl p-3 z-50 min-w-[200px]"
                         >
                           <div className="flex flex-col gap-2">
                             <button
@@ -3398,104 +3476,11 @@ export default function MALWrapped() {
                             >
                               <span className="text-white font-medium">Copy Image</span>
                             </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleDownloadPNG(e);
-                                setShowShareMenu(false);
-                              }}
-                              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
-                            >
-                              <span className="text-white font-medium">Download</span>
-                            </button>
                           </div>
                         </motion.div>
                       )}
                     </div>
                   )}
-                </div>
-                <motion.button 
-                  onClick={handleLogout} 
-                  className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2" 
-                  title="Logout"  
-                  style={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
-                  }}
-                  whileHover={{ 
-                    scale: 1.1, 
-                    backgroundColor: 'rgba(211, 68, 68, 0.8)',
-                    borderColor: 'rgba(211, 68, 68, 0.8)'
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm font-medium hidden sm:inline">Log Out</span>
-                </motion.button>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="flex-shrink-0 mt-2 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2 relative z-10" data-exclude-from-screenshot>
-                {slides.map((_, i) => {
-                  const isCompleted = i < currentSlide;
-                  const isActive = i === currentSlide;
-                  return (
-                    <div key={i} className="flex-1 h-1 sm:h-1.5 rounded-full bg-white/10 overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-500 ease-out ${isActive ? 'bg-white' : 'bg-white/30'}`} 
-                        style={{ width: (isCompleted || isActive) ? '100%' : '0%' }} 
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* Slide Content */}
-              <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
-                {/* Top gradient fade - above rainbow shapes, below content */}
-                <div 
-                  className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
-                  style={{
-                    zIndex: 15,
-                    background: topGradientBackground
-                  }}
-                />
-                
-                <div className="w-full h-full relative overflow-y-auto">
-                  <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} siteName={siteName} />
-                </div>
-                
-                {/* Bottom gradient fade - above rainbow shapes, below content */}
-                <div 
-                  className={`absolute bottom-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
-                  style={{
-                    zIndex: 15,
-                    background: bottomGradientBackground
-                  }}
-                />
-              </div>
-              
-              {/* Bottom Controls */}
-              <div className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-10" data-exclude-from-screenshot>
-                <motion.button
-                onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
-                disabled={currentSlide === 0}
-                  className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30 transition-all"
-                  whileHover={{ scale: currentSlide === 0 ? 1 : 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
-              >
-                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-                </motion.button>
-                
-                <p className="text-white/60 text-xs sm:text-sm md:text-base font-mono py-1.5 sm:py-2 px-2 sm:px-4 rounded-full border-box-cyan ">
-                  {currentSlide === slides.length - 1
-                    ? siteName
-                    : `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`}
-                </p>
 
                   <motion.button
                   onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
@@ -3507,6 +3492,7 @@ export default function MALWrapped() {
                   >
                   <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                   </motion.button>
+                </div>
               </div>
             </div>
         )}
