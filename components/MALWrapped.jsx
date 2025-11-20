@@ -3365,9 +3365,8 @@ export default function MALWrapped() {
               <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
                 {/* Top gradient fade - above rainbow shapes, below content */}
                 <div 
-                  className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
+                  className={`absolute top-0 left-0 right-0 pointer-events-none z-5 ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
                   style={{
-                    zIndex: 5,
                     background: topGradientBackground
                   }}
                 />
@@ -3378,9 +3377,8 @@ export default function MALWrapped() {
                 
                 {/* Bottom gradient fade - above rainbow shapes, below content */}
                 <div 
-                  className={`absolute bottom-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
+                  className={`absolute bottom-0 left-0 right-0 pointer-events-none z-5 ${isFinalSlide ? 'h-full' : 'h-32 sm:h-40'}`}
                   style={{
-                    zIndex: 5,
                     background: bottomGradientBackground
                   }}
                 />
@@ -3415,7 +3413,7 @@ export default function MALWrapped() {
                           e.stopPropagation();
                           setShowShareMenu((prev) => !prev);
                         }}
-                        className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan"
+                        className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
                         whileHover={{ 
                           scale: 1.1, 
                           backgroundColor: 'rgba(64, 101, 204, 0.8)',
@@ -3425,6 +3423,7 @@ export default function MALWrapped() {
                         transition={{ duration: 0.2 }}
                       >
                         <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                        <span className="text-xs sm:text-sm font-medium">Share</span>
                       </motion.button>
 
                       {showShareMenu && (
