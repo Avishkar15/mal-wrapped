@@ -1118,12 +1118,12 @@ export default function MALWrapped() {
     const SlideLayout = ({ children, bgColor = 'black' }) => {
       // Spotify-like background colors with subtle tint (solid colors)
       const bgColorClasses = {
-        black: 'bg-black',
-        pink: 'bg-black',
-        yellow: 'bg-black',
-        blue: 'bg-black',
-        green: 'bg-black',
-        red: 'bg-black'
+        black: 'bg-gradient-to-br from-purple-800 via-indigo-900 to-black',
+pink: 'bg-gradient-to-br from-pink-700 via-fuchsia-800 to-purple-950',
+yellow: 'bg-gradient-to-br from-amber-700 via-orange-800 to-rose-900',
+blue: 'bg-gradient-to-br from-cyan-700 via-blue-800 to-indigo-950',
+green: 'bg-gradient-to-br from-emerald-700 via-teal-800 to-blue-950',
+red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
       };
       
       return (
