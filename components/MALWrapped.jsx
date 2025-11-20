@@ -226,7 +226,7 @@ export default function MALWrapped() {
   : 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 30%, rgba(0, 0, 0, 0.5) 60%, rgba(0, 0, 0, 0) 100%)';
 
 const bottomGradientBackground = isFinalSlide
-  ? 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.5) 50%, rgba(0, 0, 0, 1) 100%)'
+  ? 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 1) 100%)'
   : 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 30%, rgba(0, 0, 0, 0.5) 60%, rgba(0, 0, 0, 0) 100%)';
   // Get website URL for watermark
   const websiteUrl = typeof window !== 'undefined' 
@@ -1595,7 +1595,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
             <div className="text-center relative w-full h-full flex flex-col items-center justify-center">
               {/* Colorful abstract shapes background */}
               
-              <div className="mt-20 relative z-20 w-full flex flex-col items-center justify-center">
+              <div className="relative z-20 w-full flex flex-col items-center justify-center">
               <motion.div {...fadeIn} data-framer-motion className="mt-16 w-full flex flex-col items-center">
                   <div className="relative inline-block text-center">
                     <h1 className="wrapped-brand text-white/50 relative z-10 text-center">
@@ -1605,30 +1605,32 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                       Wrapped
                     </h2>
                   </div>
-                  <p className="body-lg font-regular text-white mt-4 text-center text-container max-w-2xl mx-auto">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
+                  <p className="body-md font-regular text-white mt-4 text-center text-container max-w-2xl mx-auto">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
               </motion.div>
-                <motion.div className="mt-8 flex flex-col items-center w-full" {...fadeIn} data-framer-motion>
-                  <p className="text-sm text-white/60 text-center">
-                    Made by{' '}
-                    <motion.a
-                      href="https://www.avishkarshinde.com/aboutme"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors underline"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      XAvishkar
-                    </motion.a>
-                  </p>
-                  <motion.img
-                    src="/avatar.webp"
-                    alt="XAvishkar"
-                    className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain pointer-events-none z-10 mt-1 mx-auto"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, ease: smoothEase }}
-                  />
+              <motion.div 
+                className="mt-20 w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
+                variants={staggerItem}
+              >
+                <div className="relative w-40 h-40 flex items-center justify-center flex-shrink-0 z-20">
+                  <motion.a
+                    href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative z-20 w-full h-full rounded-xl overflow-hidden border-box-cyan block"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.6, ease: smoothEase }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <img 
+                      src={userImage} 
+                      alt={username || 'User'} 
+                      className="w-full h-full object-cover"
+                      crossOrigin="anonymous"
+                    />
+                  </motion.a>
+                </div>
               </motion.div>
               </div>
             </div>
@@ -3230,7 +3232,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
               
               {/* Top gradient fade - static, no animation */}
               <div 
-                className="absolute top-0 left-0 right-0 pointer-events-none h-32 sm:h-40"
+                className="absolute top-0 left-0 right-0 pointer-events-none h-24 sm:h-28"
                 style={{
                   zIndex: 1,
                   background: topGradientBackground
@@ -3239,7 +3241,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
 
               {/* Bottom gradient fade - static, no animation */}
               <div 
-                className="absolute bottom-0 left-0 right-0 pointer-events-none h-32 sm:h-40"
+                className="absolute bottom-0 left-0 right-0 pointer-events-none h-24 sm:h-28"
                 style={{
                   zIndex: 1,
                   background: bottomGradientBackground
@@ -3249,7 +3251,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
               <div className="mt-20 relative z-20 w-full flex flex-col items-center justify-center">
                 <motion.div {...fadeIn100} data-framer-motion className="mt-16 w-full flex flex-col items-center">
                   <div className="relative inline-block text-center">
-                    <h1 className="wrapped-brand text-white/60 mb-0 relative z-10 text-center">
+                    <h1 className="wrapped-brand text-white/60 mb-1 relative z-10 text-center">
                       MyAnimeList
                     </h1>
                     <h2 className="wrapped-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white relative z-10 text-center">
@@ -3257,7 +3259,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                     </h2>
                   </div>
                 </motion.div>
-                <motion.p className="mt-4 text-lg sm:text-xl text-white/80 text-center text-container max-w-2xl mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
+                <motion.p className="mt-4 body-md text-white/80 text-center text-container max-w-2xl mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
               <motion.div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center w-full" {...fadeIn} data-framer-motion>
                   <motion.button
                   onClick={handleBegin}
@@ -3270,8 +3272,18 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
               Connect with MAL
                   </motion.button>
                 </motion.div>
-                <motion.div className="mt-8 flex flex-col items-center w-full" {...fadeIn} data-framer-motion>
-                  <p className="text-sm text-white/60 text-center">
+                <motion.div className="mt-16 flex flex-col items-center w-full" {...fadeIn} data-framer-motion>
+                  
+                  <motion.img
+                    src="/avatar.webp"
+                    alt="XAvishkar"
+                    className="relative w-48 h-48 object-contain pointer-events-none z-10 mt-1 mx-auto"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: smoothEase }}
+                  />
+                </motion.div>
+                <p className="text-sm text-white/60 text-center">
                     Made by{' '}
                     <motion.a
                       href="https://www.avishkarshinde.com/aboutme"
@@ -3284,15 +3296,6 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                       XAvishkar
                     </motion.a>
                   </p>
-                  <motion.img
-                    src="/avatar.webp"
-                    alt="XAvishkar"
-                    className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain pointer-events-none z-10 mt-1 mx-auto"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, ease: smoothEase }}
-                  />
-                </motion.div>
               </div>
             </div>
           )}
@@ -3389,7 +3392,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
               <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
                 {/* Top gradient fade - above rainbow shapes, below content */}
                 <div 
-                  className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-20 sm:h-24'}`}
+                  className={`absolute top-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-24 sm:h-28'}`}
                   style={{
                     zIndex: 1,
                     background: topGradientBackground
@@ -3402,7 +3405,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 
                 {/* Bottom gradient fade - above rainbow shapes, below content */}
                 <div 
-                  className={`absolute bottom-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-20 sm:h-24'}`}
+                  className={`absolute bottom-0 left-0 right-0 pointer-events-none ${isFinalSlide ? 'h-full' : 'h-24 sm:h-28'}`}
                   style={{
                     zIndex: 1,
                     background: bottomGradientBackground
