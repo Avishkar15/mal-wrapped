@@ -216,10 +216,6 @@ export default function MALWrapped() {
     { id: 'finale' },
   ] : [];
 
-  const siteName = typeof window !== 'undefined'
-    ? window.location.origin.replace(/^https?:\/\//, '')
-    : 'myanimelist.net';
-  const currentSlideId = slides[currentSlide]?.id;
   
 const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 1) 100%)';
   // Get website URL for watermark
@@ -1106,7 +1102,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     }
   }
 
-  function SlideContent({ slide, mangaListData, siteName }) {
+  function SlideContent({ slide, mangaListData, websiteUrl }) {
     if (!slide || !stats) return null;
     
     // Define userImage for use across all slides
@@ -3383,7 +3379,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                
                 
                 <div className="w-full h-full relative overflow-y-auto">
-                  <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} siteName={siteName} />
+                  <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} websiteUrl={websiteUrl} />
                 </div>
                 
                 {/* Bottom gradient fade - above rainbow shapes, below content */}
@@ -3411,7 +3407,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 
                 <p className="text-white/60 text-xs sm:text-sm md:text-base font-mono py-1.5 sm:py-2 px-2 sm:px-4 rounded-full border-box-cyan ">
                   {currentSlide === slides.length - 1
-                    ? siteName
+                    ? null
                     : `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`}
                 </p>
 
