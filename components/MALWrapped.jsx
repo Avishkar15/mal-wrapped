@@ -217,7 +217,7 @@ export default function MALWrapped() {
   ] : [];
 
   
-const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 1) 100%)';
+const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0) 100%)';
   // Get website URL for watermark
   const websiteUrl = typeof window !== 'undefined' 
     ? window.location.origin.replace(/^https?:\/\//, '').toUpperCase()
@@ -3406,9 +3406,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 </motion.button>
                 
                 <p className="text-white/60 text-xs sm:text-sm md:text-base font-mono py-1.5 sm:py-2 px-2 sm:px-4 rounded-full border-box-cyan ">
-                  {currentSlide === slides.length - 1
-                    ? null
-                    : `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`}
+                    {`${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`}
                 </p>
 
                 <div className="flex items-center gap-2">
