@@ -2962,7 +2962,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 className="w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
                 variants={staggerItem}
               >
-                <div className="relative w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 flex items-center justify-center flex-shrink-0 z-20">
+                <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 flex items-center justify-center flex-shrink-0 z-20">
                   <motion.a
                     href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
                     target="_blank"
@@ -2995,9 +2995,9 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
               </motion.div>
 
               {/* Text Content Below - All sections in one flex container with consistent gap */}
-              <div className="w-full max-w-3xl flex flex-col gap-8 sm:gap-10 text-white relative z-20">
+              <div className="w-full max-w-3xl flex flex-col gap-6 md:gap-8 text-white relative z-20">
                 <motion.div 
-                  className="grid grid-cols-2 gap-6 sm:gap-8 relative z-20"
+                  className="grid grid-cols-2 gap-4 md:gap-6 relative z-20"
                   variants={staggerItem}
                 >
                   <div className="space-y-1">
@@ -3023,7 +3023,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 </motion.div>
 
                 <motion.div 
-                  className="grid grid-cols-2 gap-6 sm:gap-8 relative z-20"
+                  className="grid grid-cols-2 gap-4 md:gap-6 relative z-20"
                   variants={staggerItem}
                 >
                   <div className="space-y-1">
@@ -3046,7 +3046,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 </motion.div>
 
                 <motion.div 
-                  className="grid grid-cols-2 sm:grid-cols-3 gap-6 sm:gap-8 relative z-20"
+                  className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6 relative z-20"
                   variants={staggerItem}
                 >
                   <div className="space-y-1">
