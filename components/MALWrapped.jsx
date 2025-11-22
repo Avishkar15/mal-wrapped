@@ -1114,6 +1114,9 @@ const bottomGradientBackground = isFinalSlide
 
   function SlideContent({ slide, mangaListData, siteName }) {
     if (!slide || !stats) return null;
+    
+    // Define userImage for use across all slides
+    const userImage = userData?.picture || '/anime-character.webp';
 
     const SlideLayout = ({ children, bgColor = 'black' }) => {
       // Spotify-like background colors with subtle tint (solid colors)
@@ -2921,7 +2924,6 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
       case 'finale': {
         const totalTimeSpent = stats.totalTimeSpent || 0;
         const totalDays = Math.floor(totalTimeSpent / 24);
-        const userImage = userData?.picture || '/anime-character.webp';
         
         // Calculate top manga genres for finale
         const finaleMangaGenres = {};
