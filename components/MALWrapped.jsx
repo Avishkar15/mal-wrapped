@@ -1217,6 +1217,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
         </div>
           <motion.div 
             className="w-full relative z-20"
+            style={{ zIndex: 20 }}
             variants={staggerContainer}
             initial="initial"
             animate="animate"
@@ -3378,14 +3379,14 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 {/* Top gradient fade - above rainbow shapes, below content */}
                
                 
-                <div className="w-full h-full relative overflow-y-auto" style={{ zIndex: 10 }}>
+                <div className="w-full h-full relative overflow-y-auto" style={{ zIndex: 10, isolation: 'isolate' }}>
                   <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} websiteUrl={websiteUrl} />
                   
                   {/* Bottom gradient fade - above rainbow shapes, below content */}
                   <div 
                     className={`absolute bottom-0 left-0 right-0 pointer-events-none h-full`}
                     style={{
-                      zIndex: 5,
+                      zIndex: 1,
                       background: bottomGradientBackground
                     }}
                   />
