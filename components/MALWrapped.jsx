@@ -3503,9 +3503,9 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
     {/* Footer */}
     <footer className="w-full bg-black border-t border-white/10 mt-auto py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 justify-items-start">
+        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
           {/* Left Column - Thanks For Stopping By */}
-          <div className="space-y-4">
+          <div className="space-y-4 flex-1 md:flex-none md:w-auto">
             <h3 className="text-xl sm:text-2xl font-bold text-white">Thanks For Stopping By!</h3>
             <p className="text-white/80 text-sm sm:text-base">Want to see more? Send me an email, or have a snoop of more work below.</p>
             <div className="flex items-center gap-3">
@@ -3580,7 +3580,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
           </div>
 
           {/* Middle Column - PAGES */}
-          <div className="space-y-2 md:space-y-4">
+          <div className="space-y-2 md:space-y-4 flex-shrink-0">
             <h4 className="text-white/60 text-xs md:text-sm font-medium uppercase tracking-wider">PAGES</h4>
             <div className="space-y-1.5 md:space-y-2">
               <motion.a
@@ -3617,7 +3617,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                   </div>
 
           {/* Right Column - WORK */}
-          <div className="space-y-2 md:space-y-4">
+          <div className="space-y-2 md:space-y-4 flex-shrink-0">
             <h4 className="text-white/60 text-xs md:text-sm font-medium uppercase tracking-wider">UX WORK</h4>
             <div className="space-y-1.5 md:space-y-2">
               <motion.a
