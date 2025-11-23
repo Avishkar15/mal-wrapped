@@ -217,7 +217,7 @@ export default function MALWrapped() {
   ] : [];
 
   
-const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0) 100%)';
+const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, .35) 50%, rgba(0, 0, 0, 1) 100%)';
   // Get website URL for watermark
   const websiteUrl = typeof window !== 'undefined' 
     ? window.location.origin.replace(/^https?:\/\//, '').toUpperCase()
@@ -3228,7 +3228,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
               <div 
                 className="absolute bottom-0 left-0 right-0 pointer-events-none h-full"
                 style={{
-                  zIndex: 1,
+                  zIndex: 5,
                   background: bottomGradientBackground
                 }}
               />
@@ -3378,7 +3378,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 {/* Top gradient fade - above rainbow shapes, below content */}
                
                 
-                <div className="w-full h-full relative overflow-y-auto">
+                <div className="w-full h-full relative overflow-y-auto" style={{ zIndex: 10 }}>
                   <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} websiteUrl={websiteUrl} />
                 </div>
                 
@@ -3386,7 +3386,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 <div 
                   className={`absolute bottom-0 left-0 right-0 pointer-events-none h-full`}
                   style={{
-                    zIndex: 1,
+                    zIndex: 5,
                     background: bottomGradientBackground
                   }}
                 />
