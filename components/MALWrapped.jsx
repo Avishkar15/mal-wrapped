@@ -3525,58 +3525,98 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 href="https://www.linkedin.com/in/xavishkar/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
-                style={{ backgroundColor: 'transparent' }}
-                whileHover={{ scale: 1.1, borderColor: '#0077b5', backgroundColor: 'rgba(0, 119, 181, 0.3)' }}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
+                whileHover={{ 
+                  scale: 1.1, 
+                  backgroundColor: 'rgba(0, 119, 181, 0.8)',
+                  borderColor: 'rgba(0, 119, 181, 0.8)'
+                }}
                 whileTap={{ scale: 0.9 }}
+                transition={{ duration: 0.2 }}
                 title="LinkedIn"
-                          >
+              >
                 <Linkedin size={20} className="text-white" />
               </motion.a>
               <motion.a
                 href="https://www.youtube.com/@x.avishkar"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
-                style={{ backgroundColor: 'transparent' }}
-                whileHover={{ scale: 1.1, borderColor: '#FF0000', backgroundColor: 'rgba(255, 0, 0, 0.3)' }}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
+                whileHover={{ 
+                  scale: 1.1, 
+                  backgroundColor: 'rgba(255, 0, 0, 0.8)',
+                  borderColor: 'rgba(255, 0, 0, 0.8)'
+                }}
                 whileTap={{ scale: 0.9 }}
+                transition={{ duration: 0.2 }}
                 title="YouTube"
-                          >
+              >
                 <Youtube size={20} className="text-white" />
               </motion.a>
               <motion.a
                 href="https://www.instagram.com/x.avishkar"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
-                style={{ backgroundColor: 'transparent' }}
-                whileHover={{ scale: 1.1, borderColor: '#E4405F', backgroundColor: 'rgba(228, 64, 95, 0.3)' }}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
+                whileHover={{ 
+                  scale: 1.1, 
+                  backgroundColor: 'rgba(228, 64, 95, 0.8)',
+                  borderColor: 'rgba(228, 64, 95, 0.8)'
+                }}
                 whileTap={{ scale: 0.9 }}
+                transition={{ duration: 0.2 }}
                 title="Instagram"
-                          >
+              >
                 <Instagram size={20} className="text-white" />
               </motion.a>
               <motion.a
                 href="https://github.com/Avishkar15"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
-                style={{ backgroundColor: 'transparent' }}
-                whileHover={{ scale: 1.1, borderColor: '#ffffff', backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
+                whileHover={{ 
+                  scale: 1.1, 
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  borderColor: 'rgba(255, 255, 255, 0.8)'
+                }}
                 whileTap={{ scale: 0.9 }}
+                transition={{ duration: 0.2 }}
                 title="GitHub"
-                          >
+              >
                 <Github size={20} className="text-white" />
               </motion.a>
                     <motion.a
                       href="https://myanimelist.net/profile/XAvishkar"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full border-box-cyan flex items-center justify-center text-white transition-all group"
-                      style={{ backgroundColor: 'transparent' }}
-                      whileHover={{ scale: 1.1, borderColor: '#2E51A2', backgroundColor: 'rgba(46, 81, 162, 0.3)' }}
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                      style={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)'
+                      }}
+                      whileHover={{ 
+                        scale: 1.1, 
+                        backgroundColor: 'rgba(46, 81, 162, 0.8)',
+                        borderColor: 'rgba(46, 81, 162, 0.8)'
+                      }}
                       whileTap={{ scale: 0.9 }}
+                      transition={{ duration: 0.2 }}
                       title="MyAnimeList"
                     >
                       <MyAnimeListIcon size={20} className="text-white" />
