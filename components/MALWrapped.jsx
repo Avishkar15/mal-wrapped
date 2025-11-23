@@ -3503,7 +3503,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
     {/* Footer */}
     <footer className="w-full bg-black border-t border-white/10 mt-auto py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-5xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 justify-items-center md:justify-items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 justify-items-start">
           {/* Left Column - Thanks For Stopping By */}
           <div className="space-y-4">
             <h3 className="text-xl sm:text-2xl font-bold text-white">Thanks For Stopping By!</h3>
@@ -3580,14 +3580,14 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
           </div>
 
           {/* Middle Column - PAGES */}
-          <div className="space-y-4">
-            <h4 className="text-white/60 text-sm font-medium uppercase tracking-wider">PAGES</h4>
-            <div className="space-y-2">
+          <div className="space-y-2 md:space-y-4">
+            <h4 className="text-white/60 text-xs md:text-sm font-medium uppercase tracking-wider">PAGES</h4>
+            <div className="space-y-1.5 md:space-y-2">
               <motion.a
                 href="https://www.avishkarshinde.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
                           >
                 <span>Portfolio</span>
@@ -3597,7 +3597,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 href="https://www.avishkarshinde.com/aboutme"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
                           >
                 <span>About Me</span>
@@ -3607,7 +3607,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 href="https://drive.google.com/file/d/1ta3SF0s3Iy7ryy6ON1FKWl1p9iu32iH2/view?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
                           >
                 <span>Resume</span>
@@ -3617,14 +3617,14 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                   </div>
 
           {/* Right Column - WORK */}
-          <div className="space-y-4">
-            <h4 className="text-white/60 text-sm font-medium uppercase tracking-wider">UX WORK</h4>
-            <div className="space-y-2">
+          <div className="space-y-2 md:space-y-4">
+            <h4 className="text-white/60 text-xs md:text-sm font-medium uppercase tracking-wider">UX WORK</h4>
+            <div className="space-y-1.5 md:space-y-2">
               <motion.a
                 href="https://www.avishkarshinde.com/spotify"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
               >
                 <span>Spotify</span>
@@ -3634,7 +3634,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 href="https://www.avishkarshinde.com/toyota-mobility-foundation"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
               >
                 <span>Toyota</span>
@@ -3644,7 +3644,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 href="https://www.avishkarshinde.com/solarhive"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
               >
                 <span>SolarHive</span>
@@ -3654,7 +3654,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
                 href="https://www.avishkarshinde.com/motion-design"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-white hover:text-white/80 transition-colors group"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
               >
                 <span>Indiana University</span>
