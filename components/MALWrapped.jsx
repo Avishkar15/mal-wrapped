@@ -330,11 +330,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         if (!data.data || data.data.length === 0) break;
         
-        // Log first item structure for debugging
-        if (allAnime.length === 0 && data.data.length > 0) {
-          console.log('Sample anime item structure:', JSON.stringify(data.data[0], null, 2));
-        }
-        
         allAnime = [...allAnime, ...data.data];
         setLoadingProgress(`Loaded ${allAnime.length} anime...`);
         
@@ -353,7 +348,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         offset += limit;
       }
 
-      console.log(`Total anime loaded: ${allAnime.length}`);
       setAnimeList(allAnime);
       // Set initial stats with just anime (manga will be added later)
       calculateStats(allAnime, []);
@@ -416,12 +410,17 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
   function calculateStats(anime, manga) {
     const currentYear = selectedYear;
     
-    console.log('Calculating stats for:', {
-      animeCount: anime.length,
-      mangaCount: manga.length,
-      selectedYear: currentYear,
-      sampleAnime: anime.length > 0 ? anime[0] : null
-    });
+    // Helper function to deduplicate items by title
+    const deduplicateByTitle = (items) => {
+      const map = new Map();
+      items.forEach(item => {
+        const title = item.node?.title || '';
+        if (title && !map.has(title)) {
+          map.set(title, item);
+        }
+      });
+      return Array.from(map.values());
+    };
     
     // Filter anime based on selected year
     // Use finish_date if available, otherwise use start_date or updated_at
@@ -458,11 +457,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       return status === 'completed' && score && score > 0;
     });
     
-    console.log('Filtered anime:', {
-      thisYearCount: thisYearAnime.length,
-      completedCount: completedAnime.length
-    });
-
     // Calculate genres (from filtered anime)
     const genreCounts = {};
     thisYearAnime.forEach(item => {
@@ -493,29 +487,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       .slice(0, 5);
     
     // Lowest rated shows (completed only, with ratings 6 or below) - deduplicate by title
-    const lowestRatedRaw = completedAnime
-      .filter(item => item.list_status.score > 0 && item.list_status.score <= 6)
-      .sort((a, b) => a.list_status.score - b.list_status.score);
-    const lowestRatedMap = new Map();
-    lowestRatedRaw.forEach(item => {
-      const title = item.node?.title || '';
-      if (title && !lowestRatedMap.has(title)) {
-        lowestRatedMap.set(title, item);
-      }
-    });
-    const lowestRated = Array.from(lowestRatedMap.values()).slice(0, 5);
+    const lowestRated = deduplicateByTitle(
+      completedAnime
+        .filter(item => item.list_status.score > 0 && item.list_status.score <= 6)
+        .sort((a, b) => a.list_status.score - b.list_status.score)
+    ).slice(0, 5);
     
     // Planned to watch (status: plan_to_watch) - deduplicate by title
-    const plannedAnimeRaw = thisYearAnime
-      .filter(item => item.list_status?.status === 'plan_to_watch');
-    const plannedAnimeMap = new Map();
-    plannedAnimeRaw.forEach(item => {
-      const title = item.node?.title || '';
-      if (title && !plannedAnimeMap.has(title)) {
-        plannedAnimeMap.set(title, item);
-      }
-    });
-    const plannedAnime = Array.from(plannedAnimeMap.values()).slice(0, 5);
+    const plannedAnime = deduplicateByTitle(
+      thisYearAnime.filter(item => item.list_status?.status === 'plan_to_watch')
+    ).slice(0, 5);
 
     // Hidden gems (high rating, low popularity) - 3 items, deduplicate by title
     const hiddenGemsRaw = completedAnime
@@ -532,14 +513,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const popularityB = b.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
         return popularityA - popularityB;
       });
-    const hiddenGemsMap = new Map();
-    hiddenGemsRaw.forEach(item => {
-      const title = item.node?.title || '';
-      if (title && !hiddenGemsMap.has(title)) {
-        hiddenGemsMap.set(title, item);
-      }
-    });
-    const hiddenGems = Array.from(hiddenGemsMap.values()).slice(0, 3);
+    const hiddenGems = deduplicateByTitle(hiddenGemsRaw).slice(0, 3);
 
     // Watch time calculation (from filtered anime)
     const totalEpisodes = thisYearAnime.reduce((sum, item) => 
@@ -636,17 +610,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       .slice(0, 5);
     
     // Lowest rated manga (6 or below)
-    const lowestRatedMangaRaw = completedManga
-      .filter(item => item.list_status.score > 0 && item.list_status.score <= 6)
-      .sort((a, b) => a.list_status.score - b.list_status.score);
-    const lowestRatedMangaMap = new Map();
-    lowestRatedMangaRaw.forEach(item => {
-      const title = item.node?.title || '';
-      if (title && !lowestRatedMangaMap.has(title)) {
-        lowestRatedMangaMap.set(title, item);
-      }
-    });
-    const lowestRatedManga = Array.from(lowestRatedMangaMap.values()).slice(0, 5);
+    const lowestRatedManga = deduplicateByTitle(
+      completedManga
+        .filter(item => item.list_status.score > 0 && item.list_status.score <= 6)
+        .sort((a, b) => a.list_status.score - b.list_status.score)
+    ).slice(0, 5);
     
     // Hidden gems manga (high rating, low popularity) - 3 items, deduplicate by title
     const hiddenGemsMangaRaw = completedManga
@@ -663,26 +631,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const popularityB = b.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
         return popularityA - popularityB;
       });
-    const hiddenGemsMangaMap = new Map();
-    hiddenGemsMangaRaw.forEach(item => {
-      const title = item.node?.title || '';
-      if (title && !hiddenGemsMangaMap.has(title)) {
-        hiddenGemsMangaMap.set(title, item);
-      }
-    });
-    const hiddenGemsManga = Array.from(hiddenGemsMangaMap.values()).slice(0, 3);
+    const hiddenGemsManga = deduplicateByTitle(hiddenGemsMangaRaw).slice(0, 3);
     
     // Planned to read - deduplicate by title
-    const plannedMangaRaw = filteredManga
-      .filter(item => item.list_status?.status === 'plan_to_read');
-    const plannedMangaMap = new Map();
-    plannedMangaRaw.forEach(item => {
-      const title = item.node?.title || '';
-      if (title && !plannedMangaMap.has(title)) {
-        plannedMangaMap.set(title, item);
-      }
-    });
-    const plannedManga = Array.from(plannedMangaMap.values()).slice(0, 5);
+    const plannedManga = deduplicateByTitle(
+      filteredManga.filter(item => item.list_status?.status === 'plan_to_read')
+    ).slice(0, 5);
     
     // Calculate manga chapters/volumes and time
     const totalChapters = filteredManga.reduce((sum, item) => 
@@ -747,15 +701,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       totalSeasons: totalSeasons,
       totalTimeSpent: totalHours + mangaHours, // Combined time in hours
     };
-    
-    console.log('Calculated stats:', {
-      totalAnime: statsData.totalAnime,
-      topRatedCount: statsData.topRated.length,
-      topGenresCount: statsData.topGenres.length,
-      topStudiosCount: statsData.topStudios.length,
-      hiddenGemsCount: statsData.hiddenGems.length,
-      sampleAnime: statsData.topRated.length > 0 ? statsData.topRated[0] : null
-    });
     
     setStats(statsData);
   }
@@ -1112,6 +1057,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
   function SlideContent({ slide, mangaListData, websiteUrl }) {
     if (!slide || !stats) return null;
+    
+    // Helper function to deduplicate items by title
+    const deduplicateByTitle = (items) => {
+      const map = new Map();
+      items.forEach(item => {
+        const title = item.node?.title || '';
+        if (title && !map.has(title)) {
+          map.set(title, item);
+        }
+      });
+      return Array.from(map.values());
+    };
     
     // Define userImage for use across all slides
     const userImage = userData?.picture || '/anime-character.webp';
@@ -1530,74 +1487,6 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
       );
     };
 
-    const RankedListItem = ({ item, rank }) => {
-      const isTop = rank === 1;
-      return (
-        <motion.div 
-          className={`flex items-center p-3 border-b ${isTop ? 'border-white/60 bg-white/5' : 'border-white/5'}`}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ 
-            duration: 0.4,
-            delay: rank * 0.05,
-            ease: smoothEase
-          }}
-          whileHover={{ 
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            x: 5,
-            transition: { duration: 0.2 }
-          }}
-        >
-          <div className={`heading-md font-medium w-12 shrink-0 ${isTop ? 'text-white' : 'text-white/60'}`}>#{rank}</div>
-          <div className="flex-grow flex items-center gap-2 min-w-0">
-            <div className="flex-grow min-w-0">
-              <p className="title-lg truncate">{item.name}</p>
-              <p className="body-md text-white/50">{item.count} entries</p>
-            </div>
-          </div>
-          {isTop && <span className="text-yellow-300 heading-md ml-3 shrink-0 mt-2">★</span>}
-        </motion.div>
-      );
-    };
-
-    const MediaCard = ({ item, rank }) => (
-      <motion.div 
-        className="flex flex-col"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, delay: rank * 0.05 }}
-      >
-        <motion.div 
-          className="bg-transparent border-box-cyan rounded-lg overflow-hidden aspect-[2/3] relative" 
-          style={{ boxSizing: 'border-box' }}
-          whileHover={{ borderColor: '#ffffff' }}
-          transition={{ duration: 0.3, ease: smoothEase}}
-        >
-          {rank && (
-            <div className="absolute top-2 right-2 z-10 w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-medium text-lg">
-              {rank}
-            </div>
-          )}
-          {item.coverImage && (
-            <motion.img 
-              src={item.coverImage} 
-              alt={item.title} 
-              crossOrigin="anonymous" 
-              className="w-full h-full object-cover"
-              whileHover={hoverImage}
-            />
-          )}
-        </motion.div>
-        <div className="mt-2">
-          <h3 className="title-md truncate">{item.title}</h3>
-          <div className="flex items-center mono text-yellow-300">
-            <span className="mr-1">★</span>
-            <span>{item.userRating ? Math.round(item.userRating) : 'N/A'}</span>
-          </div>
-        </div>
-      </motion.div>
-    );
-
     switch (slide.id) {
       case 'welcome':
         return (
@@ -1740,18 +1629,11 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
 
       case 'top_genre':
         const topGenre = stats.topGenres && stats.topGenres.length > 0 ? stats.topGenres[0][0] : null;
-        const topGenreAnimeRaw = topGenre ? stats.thisYearAnime.filter(item => 
-          item.node?.genres?.some(g => g.name === topGenre)
+        const topGenreAnime = topGenre ? deduplicateByTitle(
+          stats.thisYearAnime.filter(item => 
+            item.node?.genres?.some(g => g.name === topGenre)
+          )
         ) : [];
-        // Deduplicate by title
-        const topGenreAnimeMap = new Map();
-        topGenreAnimeRaw.forEach(item => {
-          const title = item.node?.title || '';
-          if (title && !topGenreAnimeMap.has(title)) {
-            topGenreAnimeMap.set(title, item);
-          }
-        });
-        const topGenreAnime = Array.from(topGenreAnimeMap.values());
         const genreAnime = topGenreAnime.map(item => ({
           title: item.node?.title || '',
           coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
@@ -2053,19 +1935,11 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
 
       case 'top_studio':
         const topStudio = stats.topStudios && stats.topStudios.length > 0 ? stats.topStudios[0][0] : null;
-        const topStudioAnimeRaw = topStudio ? stats.thisYearAnime.filter(item => 
-          item.node?.studios?.some(s => s.name === topStudio)
+        const topStudioAnime = topStudio ? deduplicateByTitle(
+          stats.thisYearAnime.filter(item => 
+            item.node?.studios?.some(s => s.name === topStudio)
+          )
         ) : [];
-        
-        // Deduplicate anime by title to avoid showing the same work multiple times
-        const topStudioAnimeMap = new Map();
-        topStudioAnimeRaw.forEach(item => {
-          const title = item.node?.title || '';
-          if (title && !topStudioAnimeMap.has(title)) {
-            topStudioAnimeMap.set(title, item);
-          }
-        });
-        const topStudioAnime = Array.from(topStudioAnimeMap.values());
         
         const studioAnime = topStudioAnime.map(item => ({
           title: item.node?.title || '',
