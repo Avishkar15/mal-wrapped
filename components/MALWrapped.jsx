@@ -195,7 +195,7 @@ export default function MALWrapped() {
       { id: 'top_genre' },
       { id: 'drumroll_anime' },
       { id: 'top_5_anime' },
-      { id: 'top_studio' },
+      // { id: 'top_studio' },
       { id: 'seasonal_highlights' },
       { id: 'hidden_gems_anime' },
       { id: 'didnt_land_anime' },
@@ -522,7 +522,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       .filter(item => {
         const score = item.list_status.score;
         const popularity = item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
-        return score >= 7 && popularity < 100000;
+        return score >= 8 && popularity < 70000;
       })
       .sort((a, b) => {
         if (b.list_status.score !== a.list_status.score) {
@@ -653,7 +653,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       .filter(item => {
         const score = item.list_status.score;
         const popularity = item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
-        return score >= 7 && popularity < 100000;
+        return score >= 8 && popularity < 40000;
       })
       .sort((a, b) => {
         if (b.list_status.score !== a.list_status.score) {
@@ -994,9 +994,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       e.stopPropagation();
     }
 
-    // Check if native share is available (works on both mobile and desktop)
-    if (navigator.share) {
-      // Use native share with image on both mobile and desktop
+    // Detect if we're on a mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                     (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+
+    // On desktop, always show the menu. On mobile, try native share first
+    if (isMobile && navigator.share) {
+      // Use native share with image on mobile
       try {
         await handleShareImageClick(e);
       } catch (error) {
@@ -1006,7 +1010,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }
       }
     } else {
-      // Show menu if native share not available
+      // Show menu on desktop or if native share not available
       setShowShareMenu((prev) => !prev);
     }
   }
@@ -3171,7 +3175,7 @@ red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950'
           )}
 
           {isLoading && (
-            <div className="text-center w-full max-w-2xl mx-auto px-4">
+            <div className="text-center w-full max-w-2xl mx-auto px-2">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
