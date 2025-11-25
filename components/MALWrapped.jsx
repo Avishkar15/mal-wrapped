@@ -931,7 +931,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const previousYearAnimeCount = previousYearAnime.length;
       
       // Get previous year manga
-      const previousYearManga = (mangaListData || []).filter(item => {
+      const previousYearManga = (manga || []).filter(item => {
         const finishDate = item.list_status?.finish_date;
         const startDate = item.list_status?.start_date;
         const updatedAt = item.list_status?.updated_at;
@@ -1166,7 +1166,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     // Manga comparison (estimate average MAL user reads ~300 chapters per year, 2500 all-time)
     const averageChaptersPerYear = 300;
     const averageChaptersAllTime = 2500;
-    const allTimeChapters = (mangaListData || []).reduce((sum, item) => 
+    const allTimeChapters = (manga || []).reduce((sum, item) => 
       sum + (item.list_status?.num_chapters_read || 0), 0
     );
     
