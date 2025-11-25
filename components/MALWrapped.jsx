@@ -896,38 +896,148 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       }
     }
 
-    // 6. Character Twin Suggestion (combined anime/manga)
-    // Based on top genres and preferences - suggest a character from top anime/manga
-    // Store animeId for fetching character data later
-    let characterTwin = null;
-    let characterAnimeId = null;
+    // 6. Character Twin Suggestion - Match user's genres with popular characters
+    // Character database with genres
+    const characterDatabase = [
+      { name: 'Goku', series: 'Dragon Ball', genres: ['Action', 'Adventure', 'Supernatural', 'Shounen'] },
+      { name: 'Monkey D. Luffy', series: 'One Piece', genres: ['Fantasy', 'Comedy', 'Drama', 'Adventure', 'Shounen'] },
+      { name: 'Spike Spiegel', series: 'Cowboy Bebop', genres: ['Sci-Fi', 'Drama', 'Action', 'Space'] },
+      { name: 'Lelouch vi Britannia', series: 'Code Geass', genres: ['Mecha', 'Military', 'Thriller', 'Super Power'] },
+      { name: 'Edward Elric', series: 'Fullmetal Alchemist', genres: ['Adventure', 'Fantasy', 'Drama', 'Shounen'] },
+      { name: 'Light Yagami', series: 'Death Note', genres: ['Psychological', 'Thriller', 'Supernatural', 'Mystery'] },
+      { name: 'Levi Ackerman', series: 'Attack on Titan', genres: ['Suspense', 'Military', 'Action', 'Drama'] },
+      { name: 'Guts', series: 'Berserk', genres: ['Horror', 'Dark Fantasy', 'Gore', 'Drama', 'Seinen'] },
+      { name: 'L', series: 'Death Note', genres: ['Mystery', 'Psychological', 'Thriller', 'Supernatural'] },
+      { name: 'Shinji Ikari', series: 'Neon Genesis Evangelion', genres: ['Mecha', 'Psychological', 'Drama', 'Sci-Fi'] },
+      { name: 'Saitama', series: 'One Punch Man', genres: ['Comedy', 'Parody', 'Supernatural', 'Action'] },
+      { name: 'Naruto Uzumaki', series: 'Naruto', genres: ['Martial Arts', 'Shounen', 'Adventure', 'Action'] },
+      { name: 'Johan Liebert', series: 'Monster', genres: ['Mystery', 'Drama', 'Seinen', 'Psychological'] },
+      { name: 'Vegeta', series: 'Dragon Ball', genres: ['Supernatural', 'Shounen', 'Comedy', 'Action'] },
+      { name: 'Roronoa Zoro', series: 'One Piece', genres: ['Action', 'Shounen', 'Adventure', 'Comedy'] },
+      { name: 'Ichigo Kurosaki', series: 'Bleach', genres: ['Supernatural', 'Action', 'Shounen', 'Comedy'] },
+      { name: 'Thorfinn', series: 'Vinland Saga', genres: ['Historical', 'Adventure', 'Drama', 'Seinen'] },
+      { name: 'Mob', series: 'Mob Psycho 100', genres: ['Supernatural', 'Comedy', 'Slice of Life', 'Action'] },
+      { name: 'Ken Kaneki', series: 'Tokyo Ghoul', genres: ['Horror', 'Psychological', 'Seinen', 'Supernatural'] },
+      { name: 'Haruhi Suzumiya', series: 'The Melancholy of Haruhi Suzumiya', genres: ['Sci-Fi', 'Comedy', 'Mystery', 'School'] }
+    ];
     
-    // Prefer anime twin, fallback to manga
-    if (topRated.length > 0) {
-      const topItem = topRated[0];
-      const topGenresList = topItem.node?.genres?.map(g => g.name) || [];
-      const topGenreName = topGenresList[0] || (topGenres.length > 0 ? topGenres[0][0] : 'anime');
-      characterAnimeId = topItem.node?.id;
+    // Normalize genre names for matching (handle MAL genre variations)
+    const normalizeGenre = (genre) => {
+      if (!genre) return '';
+      const genreLower = genre.toLowerCase().trim();
       
-      characterTwin = {
-        title: topItem.node?.title || 'Your Top Pick',
-        genre: topGenreName,
-        reason: `Based on your love for ${topGenreName}, this character from "${topItem.node?.title}" matches your vibes`,
-        coverImage: topItem.node?.main_picture?.large || topItem.node?.main_picture?.medium || '/anime-character.webp',
-        type: 'anime',
-        animeId: characterAnimeId
+      // Map common MAL genre variations to standard names
+      const genreMap = {
+        'shounen': 'Shounen',
+        'shonen': 'Shounen',
+        'seinen': 'Seinen',
+        'action': 'Action',
+        'adventure': 'Adventure',
+        'comedy': 'Comedy',
+        'drama': 'Drama',
+        'fantasy': 'Fantasy',
+        'sci-fi': 'Sci-Fi',
+        'science fiction': 'Sci-Fi',
+        'mecha': 'Mecha',
+        'mystery': 'Mystery',
+        'psychological': 'Psychological',
+        'thriller': 'Thriller',
+        'supernatural': 'Supernatural',
+        'horror': 'Horror',
+        'military': 'Military',
+        'suspense': 'Suspense',
+        'historical': 'Historical',
+        'slice of life': 'Slice of Life',
+        'martial arts': 'Martial Arts',
+        'parody': 'Parody',
+        'dark fantasy': 'Dark Fantasy',
+        'gore': 'Gore',
+        'space': 'Space',
+        'super power': 'Super Power',
+        'school': 'School',
+        'romance': 'Romance',
+        'sports': 'Sports',
+        'music': 'Music',
+        'ecchi': 'Ecchi',
+        'harem': 'Harem',
+        'isekai': 'Isekai'
       };
-    } else if (topManga.length > 0) {
-      const topMangaItem = topManga[0];
-      const topMangaGenres = topMangaItem.node?.genres?.map(g => g.name) || [];
-      const topGenreName = topMangaGenres[0] || 'manga';
+      
+      return genreMap[genreLower] || genre;
+    };
+    
+    // Get user's top genres (normalized, take top 3)
+    const userTopGenres = topGenres.slice(0, 3).map(([genre]) => normalizeGenre(genre));
+    
+    // Find best matching character based on genre overlap
+    let bestMatch = null;
+    let bestScore = 0;
+    
+    characterDatabase.forEach(character => {
+      const characterGenres = character.genres.map(normalizeGenre);
+      
+      // Calculate overlap score - check if any user genre matches any character genre
+      const matchingGenres = userTopGenres.filter(userGenre => {
+        const userNorm = normalizeGenre(userGenre).toLowerCase();
+        return characterGenres.some(charGenre => {
+          const charNorm = normalizeGenre(charGenre).toLowerCase();
+          return userNorm === charNorm || 
+                 userNorm.includes(charNorm) || 
+                 charNorm.includes(userNorm);
+        });
+      });
+      
+      const score = matchingGenres.length;
+      
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = character;
+      }
+    });
+    
+    // If no match found, use top genre to find closest match
+    if (!bestMatch && topGenres.length > 0) {
+      const topGenre = normalizeGenre(topGenres[0][0]);
+      bestMatch = characterDatabase.find(char => 
+        char.genres.some(g => {
+          const charNorm = normalizeGenre(g).toLowerCase();
+          const topNorm = topGenre.toLowerCase();
+          return charNorm === topNorm || charNorm.includes(topNorm) || topNorm.includes(charNorm);
+        })
+      ) || characterDatabase[0]; // Fallback to first character
+    }
+    
+    let characterTwin = null;
+    if (bestMatch) {
+      const matchedGenres = bestMatch.genres.filter(charGenre => 
+        userTopGenres.some(userGenre => {
+          const charNorm = normalizeGenre(charGenre).toLowerCase();
+          const userNorm = normalizeGenre(userGenre).toLowerCase();
+          return charNorm === userNorm || 
+                 userNorm.includes(charNorm) || 
+                 charNorm.includes(userNorm);
+        })
+      );
+      const genreText = matchedGenres.length > 0 ? matchedGenres[0] : (topGenres[0]?.[0] || bestMatch.genres[0] || 'anime');
+      const topGenreName = topGenres[0]?.[0] || 'anime';
       
       characterTwin = {
-        title: topMangaItem.node?.title || 'Your Top Pick',
-        genre: topGenreName,
-        reason: `Based on your love for ${topGenreName}, this character from "${topMangaItem.node?.title}" matches your vibes`,
-        coverImage: topMangaItem.node?.main_picture?.large || topMangaItem.node?.main_picture?.medium || '/manga-character.webp',
-        type: 'manga'
+        title: bestMatch.name,
+        series: bestMatch.series,
+        genre: genreText,
+        reason: `Based on your love for ${topGenreName}, ${bestMatch.name} from "${bestMatch.series}" matches your vibes`,
+        coverImage: '/anime-character.webp',
+        type: 'character'
+      };
+    } else if (topGenres.length === 0) {
+      // Fallback if no genres available
+      characterTwin = {
+        title: characterDatabase[0].name,
+        series: characterDatabase[0].series,
+        genre: 'anime',
+        reason: `${characterDatabase[0].name} from "${characterDatabase[0].series}" matches your anime journey`,
+        coverImage: '/anime-character.webp',
+        type: 'character'
       };
     }
 
@@ -996,53 +1106,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     };
     
     setStats(statsData);
-    
-    // Fetch character data if we have an anime ID
-    if (characterAnimeId) {
-      fetchCharacterForTwin(characterAnimeId, statsData);
-    }
-  }
-
-  async function fetchCharacterForTwin(animeId, currentStats) {
-    try {
-      const accessToken = localStorage.getItem('mal_access_token');
-      if (!accessToken) return;
-      
-      const response = await fetch(`/api/mal/characters?animeId=${animeId}`, {
-        headers: { 'Authorization': `Bearer ${accessToken}` },
-      });
-      
-      if (!response.ok) {
-        console.error('Failed to fetch characters');
-        return;
-      }
-      
-      const data = await response.json();
-      const characters = data.data || [];
-      
-      // Find a main character
-      const mainCharacter = characters.find(c => c.role === 'Main') || characters[0];
-      
-      if (mainCharacter && currentStats.characterTwin) {
-        const characterNode = mainCharacter.node;
-        const characterName = `${characterNode?.first_name || ''} ${characterNode?.last_name || ''}`.trim() || 
-                             characterNode?.alternative_name?.split(',')[0] || 
-                             'Character';
-        
-        // Update stats with character data
-        setStats(prevStats => ({
-          ...prevStats,
-          characterTwin: {
-            ...prevStats.characterTwin,
-            title: characterName,
-            characterImage: characterNode?.main_picture?.medium || characterNode?.main_picture?.large || prevStats.characterTwin.coverImage,
-            reason: `Based on your love for ${prevStats.characterTwin.genre}, ${characterName} from "${prevStats.characterTwin.title}" matches your vibes`
-          }
-        }));
-      }
-    } catch (err) {
-      console.error('Error fetching character:', err);
-    }
   }
 
 
@@ -3405,8 +3468,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
       case 'character_twin':
         if (!stats.characterTwin) return null;
-        // Use character image if available, otherwise fall back to anime/manga cover
-        const characterImage = stats.characterTwin.characterImage || stats.characterTwin.coverImage || (stats.characterTwin.type === 'manga' ? '/manga-character.webp' : '/anime-character.webp');
+        // Use character image - fallback to default
+        const characterImage = stats.characterTwin.coverImage || '/anime-character.webp';
         return (
           <SlideLayout bgColor="pink">
             <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -3422,7 +3485,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               >
                 <motion.img
                   src={characterImage}
-                  alt="Character"
+                  alt={stats.characterTwin.title}
                   className="w-full h-full object-cover rounded-full"
                   crossOrigin="anonymous"
                   whileHover={{ scale: 1.05 }}
@@ -3430,6 +3493,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 />
               </motion.div>
               <p className="heading-lg text-white font-semibold text-center">{stats.characterTwin.title}</p>
+              {stats.characterTwin.series && (
+                <p className="body-sm text-white/60 mt-2 text-center">{stats.characterTwin.series}</p>
+              )}
               <p className="body-md text-white/70 mt-4 text-container text-center">
                 {stats.characterTwin.reason}
               </p>
