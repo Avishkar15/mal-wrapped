@@ -2397,8 +2397,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     {otherGenres.map(([genreName, count], idx) => (
                       <motion.div key={idx} className="border-box-cyan text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
-                          className="bg-white/5 rounded-xl p-2 h-full"
-                          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                          className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                          whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.2, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {genreName}</p>
@@ -2542,8 +2542,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
                           <motion.div 
-                            className="bg-white/5 rounded-xl w-full h-full flex flex-row items-center relative z-10"
-                            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                            className="bg-black/70 border border-white/10 rounded-xl w-full h-full flex flex-row items-center relative z-10"
+                            whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                             transition={{ duration: 0.2, ease: smoothEase }}
                           >
                             <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-white text-black rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm md:text-base">1</div>
@@ -2708,8 +2708,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     {otherStudios.map(([studioName, count], idx) => (
                       <motion.div key={idx} className="border-box-cyan text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
-                          className="bg-white/5 rounded-xl p-2 h-full"
-                          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                          className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                          whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.2, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {studioName}</p>
@@ -2773,8 +2773,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     animate="animate"
                   >
                     <motion.div 
-                      className="bg-white/5 rounded-xl p-2 h-full"
-                      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                      className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                      whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                       transition={{ duration: 0.2, ease: smoothEase }}
                     >
                       <h3 className="heading-md font-semibold text-white mb-1 sm:mb-2 text-sm sm:text-base">{season}{seasonYear}</h3>
@@ -2850,8 +2850,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
                   <motion.div
-                    className="bg-white/5 rounded-xl p-4 flex items-center gap-4"
-                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                    className="bg-black/70 border border-white/10 rounded-xl p-4 flex items-center gap-4"
+                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                     transition={{ duration: 0.2, ease: smoothEase }}
                   >
                     {item.coverImage && (
@@ -3166,8 +3166,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     {otherMangaGenres.map(([genreName, count], idx) => (
                       <motion.div key={idx} className="border-box-cyan text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
-                          className="bg-white/5 rounded-xl p-2 h-full"
-                          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                          className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                          whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.2, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {genreName}</p>
@@ -3311,8 +3311,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
                           <motion.div 
-                            className="bg-white/5 rounded-xl w-full h-full flex flex-row items-center relative z-10"
-                            whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                            className="bg-black/70 border border-white/10 rounded-xl w-full h-full flex flex-row items-center relative z-10"
+                            whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                             transition={{ duration: 0.2, ease: smoothEase }}
                           >
                             <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-white text-black rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm md:text-base">1</div>
@@ -3507,8 +3507,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     {otherAuthors.map(([authorName, count], idx) => (
                       <motion.div key={idx} className="border-box-cyan text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
-                          className="bg-white/5 rounded-xl p-2 h-full"
-                          whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                          className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                          whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.2 , ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {authorName}</p>
@@ -3566,8 +3566,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
                   <motion.div
-                    className="bg-white/5 rounded-xl p-4 flex items-center gap-4"
-                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                    className="bg-black/70 border border-white/10 rounded-xl p-4 flex items-center gap-4"
+                    whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                     transition={{ duration: 0.2, ease: smoothEase }}
                   >
                     {item.coverImage && (
