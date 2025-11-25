@@ -806,89 +806,99 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     });
     longestStreak = Math.max(longestStreak, currentStreak);
 
-    // 4. Badge System - More exclusive and special badges, only top 2
+    // 4. Badge System - New badge definitions, only top 2
     const badgeCandidates = [];
     
-    // Genre Master - if top genre has >50% of entries (very exclusive)
+    // The Hunter - Hidden gems (rare anime/manga)
+    if (hiddenGemsCount >= 10) {
+      badgeCandidates.push({ 
+        type: 'the_hunter', 
+        name: 'The Hunter',
+        description: "You're always chasing after hidden gems—finding and completing rare manga and anime that most fans overlook.",
+        score: hiddenGemsCount * 10
+      });
+    }
+    
+    // The Explorer - Many genres/seasons explored
+    const uniqueGenres = new Set();
+    thisYearAnime.forEach(item => {
+      item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
+    });
+    if (uniqueGenres.size >= 15) {
+      badgeCandidates.push({ 
+        type: 'the_explorer', 
+        name: 'The Explorer',
+        description: 'You journeyed across seasons and genres, always seeking new worlds and stories in both anime and manga.',
+        score: uniqueGenres.size
+      });
+    }
+    
+    // The Archivist - 100+ completed anime and manga combined
+    const totalCompleted = completedAnime.length + completedManga.length;
+    if (totalCompleted >= 100) {
+      badgeCandidates.push({ 
+        type: 'the_archivist', 
+        name: 'The Archivist',
+        description: 'Your completed shelf keeps growing—100+ finished anime and manga mark you as a true collector of stories.',
+        score: totalCompleted
+      });
+    }
+    
+    // The Strategist - Large plan to watch/read list
+    const totalPlanned = plannedAnime.length + plannedManga.length;
+    if (totalPlanned >= 50) {
+      badgeCandidates.push({ 
+        type: 'the_strategist', 
+        name: 'The Strategist',
+        description: 'Your Plan to Watch/Read list is legendary. Your next great adventure is always planned out and waiting.',
+        score: totalPlanned
+      });
+    }
+    
+    // The Binge Warrior - Watched/read a lot (1000+ episodes or equivalent)
+    if (totalEpisodes >= 1000 || totalChapters >= 2000) {
+      badgeCandidates.push({ 
+        type: 'the_binge_warrior', 
+        name: 'The Binge Warrior',
+        description: 'You blazed through entire series or long arcs in one sitting—whether manga marathon or anime binge, your energy knows no bounds.',
+        score: totalEpisodes + (totalChapters / 2)
+      });
+    }
+    
+    // The Loyalist - Favorite studios/authors (top studio/author has significant entries)
+    const topStudioCount = topStudios.length > 0 ? topStudios[0][1] : 0;
+    const topAuthorCount = topAuthors.length > 0 ? topAuthors[0][1] : 0;
+    if (topStudioCount >= 10 || topAuthorCount >= 10) {
+      badgeCandidates.push({ 
+        type: 'the_loyalist', 
+        name: 'The Loyalist',
+        description: 'Whether studio, author, your favorite creators are always at the top of your list. Devotion pays off!',
+        score: Math.max(topStudioCount, topAuthorCount)
+      });
+    }
+    
+    // The Genre Master - Dedicated to one genre (>40% of entries)
     if (topGenres.length > 0 && thisYearAnime.length > 0) {
       const topGenreCount = topGenres[0][1];
       const genrePercentage = (topGenreCount / thisYearAnime.length) * 100;
-      if (genrePercentage > 50) {
+      if (genrePercentage > 40) {
         badgeCandidates.push({ 
-          type: 'genre_master', 
-          name: `${topGenres[0][0]} Master`,
-          description: `An incredible ${Math.round(genrePercentage)}% of your anime were ${topGenres[0][0]} - true dedication!`,
+          type: 'the_genre_master', 
+          name: 'The Genre Master',
+          description: `You mastered a genre a lot, dedicating most of your year to exploring its depths in both manga and anime.`,
           score: genrePercentage
         });
       }
     }
     
-    // Genre Explorer - if user has many different genres (20+ is very rare)
-    const uniqueGenres = new Set();
-    thisYearAnime.forEach(item => {
-      item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
-    });
-    if (uniqueGenres.size >= 20) {
+    // The Rookie - New user (very few completed items, <20 total)
+    if (totalCompleted < 20 && thisYearAnime.length < 30) {
       badgeCandidates.push({ 
-        type: 'genre_explorer', 
-        name: 'Genre Explorer',
-        description: `You explored ${uniqueGenres.size} different genres - a true connoisseur!`,
-        score: uniqueGenres.size
+        type: 'the_rookie', 
+        name: 'The Rookie',
+        description: 'A new journey begins! You started reading manga or watching anime this year—welcome to an endless world of adventure.',
+        score: 1000 // High score to prioritize if they qualify
       });
-    }
-    
-    // Binge Legend - if user watched a LOT of episodes (1000+ is exceptional)
-    if (totalEpisodes >= 1000) {
-      badgeCandidates.push({ 
-        type: 'binge_legend', 
-        name: 'Binge Legend',
-        description: `You watched ${totalEpisodes.toLocaleString()} episodes - that's legendary dedication!`,
-        score: totalEpisodes
-      });
-    }
-    
-    // Hidden Gem Hunter - if user has many hidden gems (15+ is rare)
-    if (hiddenGemsCount >= 15) {
-      badgeCandidates.push({ 
-        type: 'hidden_gem_hunter', 
-        name: 'Hidden Gem Hunter',
-        description: `You discovered ${hiddenGemsCount} rare anime - you have impeccable taste!`,
-        score: hiddenGemsCount * 10
-      });
-    }
-    
-    // Streak Master - if user has very long streak (60+ days is exceptional)
-    if (longestStreak >= 60) {
-      badgeCandidates.push({ 
-        type: 'streak_master', 
-        name: 'Streak Master',
-        description: `You watched anime ${longestStreak} days in a row - unmatched consistency!`,
-        score: longestStreak
-      });
-    }
-    
-    // Completion Champion - if user completed many anime (100+ is impressive)
-    if (completedAnime.length >= 100) {
-      badgeCandidates.push({ 
-        type: 'completion_champion', 
-        name: 'Completion Champion',
-        description: `You completed ${completedAnime.length} anime - a true completionist!`,
-        score: completedAnime.length
-      });
-    }
-    
-    // Rating Perfectionist - if average rating is very high (8.5+ is exceptional)
-    const ratedAnimeForBadge = thisYearAnime.filter(item => item.list_status?.score > 0);
-    if (ratedAnimeForBadge.length >= 20) {
-      const avgRating = ratedAnimeForBadge.reduce((sum, item) => sum + (item.list_status?.score || 0), 0) / ratedAnimeForBadge.length;
-      if (avgRating >= 8.5) {
-        badgeCandidates.push({ 
-          type: 'rating_perfectionist', 
-          name: 'Rating Perfectionist',
-          description: `Your average rating is ${avgRating.toFixed(1)}/10 - you only watch the best!`,
-          score: avgRating * 100
-        });
-      }
     }
     
     // Sort badges by score (most impressive first) and take only top 2
@@ -918,15 +928,49 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const previousYearEpisodes = previousYearAnime.reduce((sum, item) => 
         sum + (item.list_status?.num_episodes_watched || 0), 0
       );
+      const previousYearAnimeCount = previousYearAnime.length;
       
-      if (previousYearEpisodes > 0) {
-        const growth = ((totalEpisodes - previousYearEpisodes) / previousYearEpisodes) * 100;
+      // Get previous year manga
+      const previousYearManga = (mangaListData || []).filter(item => {
+        const finishDate = item.list_status?.finish_date;
+        const startDate = item.list_status?.start_date;
+        const updatedAt = item.list_status?.updated_at;
+        let dateToCheck = finishDate || startDate || updatedAt;
+        if (!dateToCheck) return false;
+        try {
+          const year = new Date(dateToCheck).getFullYear();
+          return year === previousYear;
+        } catch (e) {
+          return false;
+        }
+      });
+      const previousYearMangaCount = previousYearManga.length;
+      
+      if (previousYearEpisodes > 0 || previousYearAnimeCount > 0) {
+        const growth = previousYearEpisodes > 0 
+          ? ((totalEpisodes - previousYearEpisodes) / previousYearEpisodes) * 100
+          : 0;
+        const animeCountGrowth = previousYearAnimeCount > 0
+          ? thisYearAnime.length - previousYearAnimeCount
+          : 0;
+        const mangaCountGrowth = previousYearMangaCount > 0
+          ? filteredManga.length - previousYearMangaCount
+          : 0;
+        
         yearComparison = {
           previousYear,
           previousEpisodes: previousYearEpisodes,
           currentEpisodes: totalEpisodes,
           growth: Math.round(growth),
-          isGrowth: growth > 0
+          isGrowth: growth > 0,
+          previousAnimeCount: previousYearAnimeCount,
+          currentAnimeCount: thisYearAnime.length,
+          animeCountGrowth: animeCountGrowth,
+          isAnimeGrowth: animeCountGrowth > 0,
+          previousMangaCount: previousYearMangaCount,
+          currentMangaCount: filteredManga.length,
+          mangaCountGrowth: mangaCountGrowth,
+          isMangaGrowth: mangaCountGrowth > 0
         };
       }
     }
@@ -1119,6 +1163,24 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       isAboveAverageAllTime: allTimeEpisodes > averageEpisodesAllTime
     };
 
+    // Manga comparison (estimate average MAL user reads ~300 chapters per year, 2500 all-time)
+    const averageChaptersPerYear = 300;
+    const averageChaptersAllTime = 2500;
+    const allTimeChapters = (mangaListData || []).reduce((sum, item) => 
+      sum + (item.list_status?.num_chapters_read || 0), 0
+    );
+    
+    const mangaComparison = {
+      userChapters: totalChapters,
+      averageChapters: averageChaptersPerYear,
+      percentage: Math.round((totalChapters / averageChaptersPerYear) * 100),
+      isAboveAverage: totalChapters > averageChaptersPerYear,
+      allTimeChapters: allTimeChapters,
+      averageAllTime: averageChaptersAllTime,
+      allTimePercentage: Math.round((allTimeChapters / averageChaptersAllTime) * 100),
+      isAboveAverageAllTime: allTimeChapters > averageChaptersAllTime
+    };
+
     // Removed obscure studios calculation
 
     const statsData = {
@@ -1159,6 +1221,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       yearComparison: yearComparison,
       characterTwin: characterTwin, // Combined twin
       episodeComparison: episodeComparison,
+      mangaComparison: mangaComparison,
       totalCompletedAnime: totalCompletedAnime,
     };
     
@@ -2103,16 +2166,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               
             </motion.div>
             {animeCarouselItems.length > 0 && <div className="relative z-10"><ImageCarousel items={animeCarouselItems} maxItems={10} showHover={true} showNames={false} /></div>}
-            {stats.yearComparison && (
+            {stats.yearComparison && stats.yearComparison.previousAnimeCount > 0 && (
               <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                {stats.yearComparison.isGrowth ? (
-                  <>You watched <span className="text-white font-semibold">{Math.abs(stats.yearComparison.growth)}%</span> more episodes than last year!</>
+                {stats.yearComparison.isAnimeGrowth ? (
+                  <>You watched <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> more anime than last year. Nice going!</>
                 ) : (
-                  <>You watched <span className="text-white font-semibold">{Math.abs(stats.yearComparison.growth)}%</span> fewer episodes than last year.</>
+                  <>You watched <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> fewer anime than last year. Watch more!</>
                 )}
               </motion.h3>
             )}
-            {!stats.yearComparison && (
+            {(!stats.yearComparison || !stats.yearComparison.previousAnimeCount) && (
               <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Now that's dedication
               </motion.h3>
@@ -2121,11 +2184,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         );
 
       case 'anime_time':
-        // Get average episodes for comparison
+        // Get percentage for comparison
         const animeComparison = stats.episodeComparison;
-        const avgEpisodesForDisplay = animeComparison 
-          ? (stats.selectedYear === 'all' ? animeComparison.averageAllTime : animeComparison.averageEpisodes)
-          : (stats.selectedYear === 'all' ? 5497 : 650);
+        const animeDisplayPercentage = animeComparison 
+          ? (stats.selectedYear === 'all' ? animeComparison.allTimePercentage : animeComparison.percentage)
+          : 0;
         
         return (
           <SlideLayout bgColor="green">
@@ -2159,11 +2222,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </>
                 )}
               </div>
-              <div className="text-center mt-4">
-                <p className="body-sm text-white/60 font-regular">
-                  Average MAL user: {avgEpisodesForDisplay.toLocaleString()} episodes
-                </p>
-              </div>
+              {animeComparison && animeDisplayPercentage > 0 && (
+                <div className="text-center mt-4 w-full max-w-md">
+                  <p className="body-sm text-white/70 font-regular">
+                    You watched <span className="text-white font-semibold">{animeDisplayPercentage}%</span> of the average MAL user's episodes.
+                  </p>
+                  <p className="body-sm text-white/50 mt-2 font-regular">
+                    Keep watching to beat the average!
+                  </p>
+                </div>
+              )}
             </motion.div>
           </SlideLayout>
         );
@@ -2826,16 +2894,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </p>
             </motion.div>
             {allMangaItems.length > 0 && <ImageCarousel items={allMangaItems} maxItems={10} showHover={true} showNames={false} />}
-            {stats.yearComparison && (
+            {stats.yearComparison && stats.yearComparison.previousMangaCount > 0 && (
               <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                {stats.yearComparison.isGrowth ? (
-                  <>You read <span className="text-white font-semibold">{Math.abs(stats.yearComparison.growth)}%</span> more manga than last year!</>
+                {stats.yearComparison.isMangaGrowth ? (
+                  <>You read <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> more manga than last year. Nice going!</>
                 ) : (
-                  <>You read <span className="text-white font-semibold">{Math.abs(stats.yearComparison.growth)}%</span> fewer manga than last year.</>
+                  <>You read <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> fewer manga than last year. Watch more!</>
                 )}
               </motion.h3>
             )}
-            {!stats.yearComparison && (
+            {(!stats.yearComparison || !stats.yearComparison.previousMangaCount) && (
               <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 That's some serious reading energy
               </motion.h3>
@@ -2844,6 +2912,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         );
 
       case 'manga_time':
+        // Get percentage for comparison
+        const mangaComparison = stats.mangaComparison;
+        const mangaDisplayPercentage = mangaComparison 
+          ? (stats.selectedYear === 'all' ? mangaComparison.allTimePercentage : mangaComparison.percentage)
+          : 0;
+        
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -2872,6 +2946,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </p>
                   <p className="heading-md text-white font-medium">hours</p>
                   <p className="body-sm text-white/50 mt-2 font-regular">spent flipping pages</p>
+                </div>
+              )}
+              {mangaComparison && mangaDisplayPercentage > 0 && (
+                <div className="text-center mt-4 w-full max-w-md">
+                  <p className="body-sm text-white/70 font-regular">
+                    You read <span className="text-white font-semibold">{mangaDisplayPercentage}%</span> of the average MAL user's chapters.
+                  </p>
+                  <p className="body-sm text-white/50 mt-2 font-regular">
+                    Keep reading to beat the average!
+                  </p>
                 </div>
               )}
             </motion.div>
@@ -3476,13 +3560,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         // Icon mapping for different badge types
         const badgeIcons = {
-          'genre_master': '🎯',
-          'genre_explorer': '🌍',
-          'binge_legend': '⚡',
-          'hidden_gem_hunter': '💎',
-          'streak_master': '🔥',
-          'completion_champion': '✅',
-          'rating_perfectionist': '⭐'
+          'the_hunter': '🎯',
+          'the_explorer': '🌍',
+          'the_archivist': '📚',
+          'the_strategist': '🗺️',
+          'the_binge_warrior': '⚡',
+          'the_loyalist': '❤️',
+          'the_genre_master': '👑',
+          'the_rookie': '🌱'
         };
         
         return (
