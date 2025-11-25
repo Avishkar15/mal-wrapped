@@ -2393,7 +2393,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </motion.div>
                 {genreAnime.length > 0 && <div className="relative z-10"><ImageCarousel items={genreAnime} maxItems={10} showHover={true} showNames={false} /></div>}
                 {otherGenres.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-1.5 md:gap-2 relative z-10">
                     {otherGenres.map(([genreName, count], idx) => (
                       <motion.div key={idx} className="border-box-cyan text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
@@ -2473,7 +2473,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     )}
                   </motion.div>
                   <motion.div 
-                    className="text-left relative z-10"
+                    className="text-center relative z-10"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 0.2, ease: smoothEase }}
@@ -2482,7 +2482,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     {topItem.node?.studios?.[0]?.name && (
                       <p className="body-sm text-white/50  font-regular">{topItem.node.studios[0].name}</p>
                     )}
-                    <div className="flex items-left justify-left mono text-yellow-300 font-bold mt-1">
+                    <div className="flex items-center justify-center body-md text-yellow-300 font-bold mt-1">
                       <span className="mr-2">★</span>
                       <span>{topItem.list_status?.score ? Math.round(topItem.list_status.score) : 'N/A'}</span>
                     </div>
@@ -2550,9 +2550,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                             {(() => {
                               const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                               const featuredImage = (
-                                <motion.div 
-                                  className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative z-10" 
-                                  style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '225px' }}
+                            <motion.div 
+                              className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative z-10 aspect-[2/3] max-h-[225px]" 
+                              style={{ boxSizing: 'border-box' }}
                                   whileHover={{ borderColor: '#ffffff' }}
                                   transition={{ duration: 0.3, ease: smoothEase}}
                                 >
@@ -2587,7 +2587,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 <span>{Math.round(featured.userRating)}</span>
                               </div>
                               {featured.genres.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-2 justify-left items-left">
+                                <div className="mt-2 flex flex-wrap gap-1.5 justify-left items-left">
                                   {featured.genres.slice(0, 2).map(g => (
                                     <motion.span 
                                       key={g} 
@@ -2621,9 +2621,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ duration: 0.4 }}
                                 >
-                                  <motion.div 
-                                    className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative w-full z-10" 
-                                    style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '175px' }}
+                                <motion.div 
+                                  className="border-box-cyan bg-transparent rounded-xl overflow-hidden relative w-full z-10 aspect-[2/3] max-h-[175px]" 
+                                  style={{ boxSizing: 'border-box' }}
                                     whileHover={{ borderColor: '#ffffff' }}
                                     transition={{ duration: 0.3, ease: smoothEase}}
                                   >
@@ -3559,7 +3559,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {rareMangaItems.map((item, idx) => (
                 <motion.div
                   key={idx}
-                  className="mb-4 border-box-cyan rounded-xl overflow-hidden"
+                  className="mb-2 border-box-cyan rounded-xl overflow-hidden"
                   style={{ padding: '2px' }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -3709,7 +3709,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               You earned some impressive badges
             </motion.h2>
-            <motion.div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-2 max-w-3xl mx-auto relative z-10" {...fadeSlideUp} data-framer-motion>
               {stats.badges.map((badge, idx) => (
                 <motion.div
                   key={badge.type}
@@ -3720,13 +3720,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   transition={{ duration: 0.4, delay: idx * 0.1, ease: smoothEase }}
                 >
                   <motion.div
-                    className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-4 h-full"
+                    className="bg-black/60 border border-white/10 rounded-xl p-4 h-full"
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.12)' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     <div className="flex items-center gap-3">
                       <motion.div
-                        className="w-16 h-16 flex-shrink-0 rounded-full overflow-hidden"
+                        className="w-20 md:w-24 h-20 md:h-24 flex-shrink-0 rounded-full overflow-hidden"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ duration: 0.4, delay: idx * 0.1 + 0.2, type: "spring", stiffness: 200 }}
