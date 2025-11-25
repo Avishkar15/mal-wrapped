@@ -1122,29 +1122,86 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     }
 
     // 6. Character Twin Suggestion - Match user's genres with popular characters
-    // Character database with genres and MAL anime IDs
-    const characterDatabase = [
-      { name: 'Goku', series: 'Dragon Ball Z', malId: 813, genres: ['Action', 'Adventure', 'Supernatural', 'Shounen'] },
-      { name: 'Monkey D. Luffy', series: 'One Piece', malId: 21, genres: ['Fantasy', 'Comedy', 'Drama', 'Adventure', 'Shounen'] },
-      { name: 'Spike Spiegel', series: 'Cowboy Bebop', malId: 1, genres: ['Sci-Fi', 'Drama', 'Action', 'Space'] },
-      { name: 'Lelouch vi Britannia', series: 'Code Geass', malId: 1575, genres: ['Mecha', 'Military', 'Thriller', 'Super Power'] },
-      { name: 'Edward Elric', series: 'Fullmetal Alchemist: Brotherhood', malId: 5114, genres: ['Adventure', 'Fantasy', 'Drama', 'Shounen'] },
-      { name: 'Light Yagami', series: 'Death Note', malId: 1535, genres: ['Psychological', 'Thriller', 'Supernatural', 'Mystery'] },
-      { name: 'Levi Ackerman', series: 'Attack on Titan', malId: 16498, genres: ['Suspense', 'Military', 'Action', 'Drama'] },
-      { name: 'Guts', series: 'Berserk', malId: 33, genres: ['Horror', 'Dark Fantasy', 'Gore', 'Drama', 'Seinen'] },
-      { name: 'L', series: 'Death Note', malId: 1535, genres: ['Mystery', 'Psychological', 'Thriller', 'Supernatural'] },
-      { name: 'Shinji Ikari', series: 'Neon Genesis Evangelion', malId: 30, genres: ['Mecha', 'Psychological', 'Drama', 'Sci-Fi'] },
-      { name: 'Saitama', series: 'One Punch Man', malId: 30276, genres: ['Comedy', 'Parody', 'Supernatural', 'Action'] },
-      { name: 'Naruto Uzumaki', series: 'Naruto', malId: 20, genres: ['Martial Arts', 'Shounen', 'Adventure', 'Action'] },
-      { name: 'Johan Liebert', series: 'Monster', malId: 19, genres: ['Mystery', 'Drama', 'Seinen', 'Psychological'] },
-      { name: 'Vegeta', series: 'Dragon Ball Z', malId: 813, genres: ['Supernatural', 'Shounen', 'Comedy', 'Action'] },
-      { name: 'Roronoa Zoro', series: 'One Piece', malId: 21, genres: ['Action', 'Shounen', 'Adventure', 'Comedy'] },
-      { name: 'Ichigo Kurosaki', series: 'Bleach', malId: 269, genres: ['Supernatural', 'Action', 'Shounen', 'Comedy'] },
-      { name: 'Thorfinn', series: 'Vinland Saga', malId: 37521, genres: ['Historical', 'Adventure', 'Drama', 'Seinen'] },
-      { name: 'Mob', series: 'Mob Psycho 100', malId: 32182, genres: ['Supernatural', 'Comedy', 'Slice of Life', 'Action'] },
-      { name: 'Ken Kaneki', series: 'Tokyo Ghoul', malId: 22319, genres: ['Horror', 'Psychological', 'Seinen', 'Supernatural'] },
-      { name: 'Haruhi Suzumiya', series: 'The Melancholy of Haruhi Suzumiya', malId: 849, genres: ['Sci-Fi', 'Comedy', 'Mystery', 'School'] }
+    // Male character database with genres and MAL anime IDs
+    const maleCharacterDatabase = [
+      { name: 'Spike Spiegel', series: 'Cowboy Bebop', malId: 1, genres: ['Sci-Fi', 'Action', 'Drama'] },
+      { name: 'Lelouch vi Britannia', series: 'Code Geass', malId: 1575, genres: ['Mecha', 'Military', 'Drama'] },
+      { name: 'Light Yagami', series: 'Death Note', malId: 1535, genres: ['Supernatural', 'Thriller', 'Mystery'] },
+      { name: 'Edward Elric', series: 'Fullmetal Alchemist: Brotherhood', malId: 5114, genres: ['Action', 'Adventure', 'Drama'] },
+      { name: 'Guts', series: 'Berserk', malId: 33, genres: ['Action', 'Adventure', 'Horror'] },
+      { name: 'Shinji Ikari', series: 'Neon Genesis Evangelion', malId: 30, genres: ['Drama', 'Mecha', 'Sci-Fi'] },
+      { name: 'Johan Liebert', series: 'Monster', malId: 19, genres: ['Drama', 'Mystery', 'Psychological'] },
+      { name: 'Thorfinn', series: 'Vinland Saga', malId: 37521, genres: ['Action', 'Drama', 'Historical'] },
+      { name: 'Saitama', series: 'One Punch Man', malId: 30276, genres: ['Action', 'Comedy', 'Supernatural'] },
+      { name: 'Monkey D. Luffy', series: 'One Piece', malId: 21, genres: ['Action', 'Adventure', 'Fantasy'] },
+      { name: 'Goku', series: 'Dragon Ball Z', malId: 813, genres: ['Action', 'Adventure', 'Comedy'] },
+      { name: 'Satoru Gojo', series: 'Jujutsu Kaisen', malId: 40748, genres: ['Action', 'Fantasy', 'Supernatural'] },
+      { name: 'Denji', series: 'Chainsaw Man', malId: 44511, genres: ['Action', 'Supernatural', 'Gore'] },
+      { name: 'Loid Forger', series: 'Spy x Family', malId: 50265, genres: ['Action', 'Comedy', 'Slice of Life'] },
+      { name: 'Tanjiro Kamado', series: 'Demon Slayer', malId: 38000, genres: ['Action', 'Fantasy', 'Supernatural'] },
+      { name: 'Senku Ishigami', series: 'Dr. Stone', malId: 38691, genres: ['Adventure', 'Comedy', 'Sci-Fi'] },
+      { name: 'Mob', series: 'Mob Psycho 100', malId: 32182, genres: ['Action', 'Comedy', 'Supernatural'] },
+      { name: 'Naruto Uzumaki', series: 'Naruto', malId: 20, genres: ['Action', 'Adventure', 'Fantasy'] },
+      { name: 'Levi Ackerman', series: 'Attack on Titan', malId: 16498, genres: ['Action', 'Drama', 'Suspense'] },
+      { name: 'L', series: 'Death Note', malId: 1535, genres: ['Mystery', 'Supernatural', 'Thriller'] },
+      { name: 'Okabe Rintarou', series: 'Steins;Gate', malId: 9253, genres: ['Drama', 'Sci-Fi', 'Thriller'] },
+      { name: 'Gon Freecss', series: 'Hunter x Hunter', malId: 11061, genres: ['Action', 'Adventure', 'Fantasy'] },
+      { name: 'Yusuke Urameshi', series: 'Yu Yu Hakusho', malId: 392, genres: ['Action', 'Adventure', 'Supernatural'] },
+      { name: 'Ken Kaneki', series: 'Tokyo Ghoul', malId: 22319, genres: ['Action', 'Drama', 'Horror'] },
+      { name: 'Kamina', series: 'Gurren Lagann', malId: 2001, genres: ['Action', 'Mecha', 'Sci-Fi'] },
+      { name: 'Ichigo Kurosaki', series: 'Bleach', malId: 269, genres: ['Action', 'Adventure', 'Supernatural'] },
+      { name: 'Eren Yeager', series: 'Attack on Titan', malId: 16498, genres: ['Action', 'Drama', 'Mystery'] },
+      { name: 'Kakashi Hatake', series: 'Naruto', malId: 20, genres: ['Action', 'Adventure', 'Fantasy'] },
+      { name: 'Roy Mustang', series: 'Fullmetal Alchemist: Brotherhood', malId: 5114, genres: ['Action', 'Drama', 'Fantasy'] },
+      { name: 'Vegeta', series: 'Dragon Ball Z', malId: 813, genres: ['Action', 'Adventure', 'Fantasy'] }
     ];
+    
+    // Female character database with genres and MAL anime IDs
+    const femaleCharacterDatabase = [
+      { name: 'Mikasa Ackerman', series: 'Attack on Titan', malId: 16498, genres: ['Action', 'Drama', 'Suspense'] },
+      { name: 'Asuka Langley Soryu', series: 'Neon Genesis Evangelion', malId: 30, genres: ['Drama', 'Mecha', 'Sci-Fi'] },
+      { name: 'Motoko Kusanagi', series: 'Ghost in the Shell: Stand Alone Complex', malId: 467, genres: ['Action', 'Sci-Fi', 'Mystery'] },
+      { name: 'Homura Akemi', series: 'Madoka Magica', malId: 9756, genres: ['Drama', 'Psychological', 'Thriller'] },
+      { name: 'Revy', series: 'Black Lagoon', malId: 889, genres: ['Action', 'Drama', 'Thriller'] },
+      { name: 'Saber', series: 'Fate/Zero', malId: 10087, genres: ['Action', 'Fantasy', 'Supernatural'] },
+      { name: 'Violet Evergarden', series: 'Violet Evergarden', malId: 33352, genres: ['Drama', 'Fantasy', 'Slice of Life'] },
+      { name: 'Faye Valentine', series: 'Cowboy Bebop', malId: 1, genres: ['Action', 'Drama', 'Sci-Fi'] },
+      { name: 'Kagura', series: 'Gintama', malId: 918, genres: ['Action', 'Comedy', 'Sci-Fi'] },
+      { name: 'Erza Scarlet', series: 'Fairy Tail', malId: 6702, genres: ['Action', 'Adventure', 'Fantasy'] },
+      { name: 'Nami', series: 'One Piece', malId: 21, genres: ['Action', 'Adventure', 'Fantasy'] },
+      { name: 'Rukia Kuchiki', series: 'Bleach', malId: 269, genres: ['Action', 'Adventure', 'Supernatural'] },
+      { name: 'Yor Forger', series: 'Spy x Family', malId: 50265, genres: ['Action', 'Comedy', 'Slice of Life'] },
+      { name: 'Marin Kitagawa', series: 'My Dress-Up Darling', malId: 48736, genres: ['Comedy', 'Romance', 'Slice of Life'] },
+      { name: 'Power', series: 'Chainsaw Man', malId: 44511, genres: ['Action', 'Comedy', 'Supernatural'] },
+      { name: 'Nico Robin', series: 'One Piece', malId: 21, genres: ['Action', 'Adventure', 'Mystery'] },
+      { name: 'Shiki Ryougi', series: 'Kara no Kyoukai', malId: 2593, genres: ['Action', 'Mystery', 'Supernatural'] },
+      { name: 'Holo', series: 'Spice and Wolf', malId: 2966, genres: ['Adventure', 'Fantasy', 'Romance'] },
+      { name: 'Nobara Kugisaki', series: 'Jujutsu Kaisen', malId: 40748, genres: ['Action', 'Fantasy', 'Supernatural'] },
+      { name: 'Shouko Nishimiya', series: 'A Silent Voice', malId: 28851, genres: ['Drama', 'Romance', 'Slice of Life'] },
+      { name: 'Tsunade', series: 'Naruto', malId: 20, genres: ['Action', 'Adventure', 'Fantasy'] },
+      { name: 'Riza Hawkeye', series: 'Fullmetal Alchemist: Brotherhood', malId: 5114, genres: ['Action', 'Drama', 'Fantasy'] },
+      { name: 'Winry Rockbell', series: 'Fullmetal Alchemist: Brotherhood', malId: 5114, genres: ['Adventure', 'Drama', 'Romance'] },
+      { name: 'Bulma', series: 'Dragon Ball Z', malId: 813, genres: ['Action', 'Adventure', 'Comedy'] },
+      { name: 'Makise Kurisu', series: 'Steins;Gate', malId: 9253, genres: ['Drama', 'Sci-Fi', 'Thriller'] },
+      { name: 'Nezuko Kamado', series: 'Demon Slayer', malId: 38000, genres: ['Action', 'Fantasy', 'Supernatural'] },
+      { name: 'Hinata Hyuga', series: 'Naruto', malId: 20, genres: ['Action', 'Drama', 'Romance'] },
+      { name: 'Ryuko Matoi', series: 'Kill la Kill', malId: 18679, genres: ['Action', 'Comedy', 'Fantasy'] },
+      { name: 'Ochaco Uraraka', series: 'My Hero Academia', malId: 31964, genres: ['Action', 'Comedy', 'Fantasy'] },
+      { name: 'Yoruichi Shihouin', series: 'Bleach', malId: 269, genres: ['Action', 'Adventure', 'Supernatural'] }
+    ];
+    
+    // Select character database based on user gender
+    // Check userData.gender or userData.sex (MAL API might use either)
+    const userGender = userData?.gender || userData?.sex;
+    let characterDatabase;
+    if (userGender === 'Female' || userGender === 'female' || userGender === 'F' || userGender === 'f') {
+      characterDatabase = femaleCharacterDatabase;
+    } else if (userGender === 'Male' || userGender === 'male' || userGender === 'M' || userGender === 'm') {
+      characterDatabase = maleCharacterDatabase;
+    } else {
+      // If no gender specified, use either (default to male)
+      characterDatabase = maleCharacterDatabase;
+    }
     
     // Normalize genre names for matching (handle MAL genre variations)
     const normalizeGenre = (genre) => {
@@ -3770,7 +3827,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="pink">
             <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Your anime/manga character twin
+              Your Twin
             </motion.h2>
             <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 mb-4">
