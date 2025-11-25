@@ -861,7 +861,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_explorer', 
         name: 'The Explorer',
-        description: `${descText}, always seeking new worlds and stories.`,
+        description: `${descText}`,
         score: uniqueGenres.size + uniqueAuthors.size
       });
     }
@@ -872,7 +872,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_archivist', 
         name: 'The Archivist',
-        description: `Myne’s love of stories is endless, and yours is too. You’ve finished ${totalCompleted} anime and manga. A  true collector`,
+        description: `Myne’s love of stories is endless, and yours is too. You’ve finished ${totalCompleted} titles`,
         score: totalCompleted
       });
     }
@@ -883,12 +883,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_strategist', 
         name: 'The Strategist',
-        description: `Light always has a plan. Your next move? ${totalPlanned} titles lined up in your planned list. Always two steps ahead.`,
+        description: `Like Light, you plan every move. With ${totalPlanned} titles in your queue, you’re already two steps ahead`,
         score: totalPlanned
       });
     }
     
-    // The Binge Warrior - Completed a title within 1-3 days
+    // The Sprinter - Completed a title within 1-3 days
     if (totalEpisodes >= 1000 || totalChapters >= 2000) {
       const bingeThresholdDays = 3;
       const bingeAnimeCandidates = thisYearAnime
@@ -951,11 +951,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       
       if (bingeEntry) {
         const titlePreview = bingeEntry.title.substring(0, 30) + (bingeEntry.title.length > 30 ? '...' : '');
-        const bingeDesc = `Naruto never gives up, and neither did you! You blitzed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}. That's ${bingeEntry.amount} ${bingeEntry.unit} of pure focus.`;
+        const bingeDesc = `Naruto never gives up, and neither did you! You blitzed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}`;
         
         badgeCandidates.push({ 
-          type: 'the_binge_warrior', 
-          name: 'The Binge Warrior',
+          type: 'the_sprinter', 
+          name: 'The Sprinter',
           description: bingeDesc,
           score: bingeEntry.amount + (3 - bingeEntry.days) * 50
         });
@@ -975,20 +975,20 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_loyalist', 
         name: 'The Loyalist',
-        description: `Rem is loyal to the end. With ${loyalistCount} works from ${loyalistName}, your favorite ${loyalistType}, you’re just as devoted.`,
+        description: `Rem is loyal to the end. With ${loyalistCount} works from ${loyalistName}, you’re just as devoted`,
         score: loyalistCount
       });
     }
     
-    // The Genre Master - 40+ anime same genre
+    // The Specialist - 40+ anime same genre
     if (topGenres.length > 0 && thisYearAnime.length > 0) {
       const topGenreCount = topGenres[0][1];
       const genrePercentage = (topGenreCount / thisYearAnime.length) * 100;
       if (topGenreCount >= 40 || genrePercentage > 40) {
         badgeCandidates.push({ 
-          type: 'the_genre_master', 
-          name: 'The Genre Master',
-          description: `${topGenreCount} ${topGenres[0][0]} anime—dedicated to exploring its depths.`,
+          type: 'the_specialist', 
+          name: 'The Specialist',
+          description: `Like Sailor Moon, you shined brightest in ${topGenres[0][0]}, completing ${topGenreCount} titles`,
           score: genrePercentage
         });
       }
@@ -1029,10 +1029,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       });
     }
     
-    // Sort badges by score (most impressive first) and take only top 3
+    // Sort badges by score (most impressive first) and take only top 4
     const badges = badgeCandidates
       .sort((a, b) => b.score - a.score)
-      .slice(0, 3)
+      .slice(0, 4)
       .map(({ score, ...badge }) => badge); // Remove score from final badge object
 
     // 5. Year-on-Year Comparison (if not 'all' year)
@@ -3698,9 +3698,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           'the_explorer': '/badges/the-explorer.webp', // Monkey D. Luffy
           'the_archivist': '/badges/the-archivist.webp', // Girl reading book
           'the_strategist': '/badges/the-strategist.webp', // Boy with green hair and lightning
-          'the_binge_warrior': '/badges/the-binge-warrior.webp', // Naruto eating ramen
+          'the_sprinter': '/badges/the-binge-warrior.webp', // Naruto eating ramen
           'the_loyalist': '/badges/the-loyalist.webp', // Sailor Moon
-          'the_genre_master': '/badges/the-genre-master.webp', // Gon Freecss
+          'the_specialist': '/badges/the-genre-master.webp', // Gon Freecss
           'the_rookie': '/badges/the-rookie.webp' // Rem
         };
         
