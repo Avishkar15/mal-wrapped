@@ -172,8 +172,8 @@ function getComparisonCopy(percentage, nounPlural) {
   return {
     prefix: isAboveAverage ? "That's " : "That's only ",
     suffix: isAboveAverage
-      ? ` more ${nounPlural} compared to an average MAL user.`
-      : ` ${nounPlural} compared to an average MAL user.`
+      ? ` ${nounPlural} more compared to other MAL users.`
+      : ` ${nounPlural} compared to other MAL users.`
   };
 }
 
@@ -784,6 +784,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       return popularity <= HIDDEN_GEM_THRESHOLD;
     }).length;
 
+    const hiddenGemsAnimeCount = [...completedAnime].filter(item => {
+      const popularity = item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
+      return popularity <= HIDDEN_GEM_THRESHOLD;
+    }).length;
+
+    const hiddenGemsMangaCount = [ ...completedManga].filter(item => {
+      const popularity = item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
+      return popularity <= HIDDEN_GEM_THRESHOLD;
+    }).length;
+
+
+
     // 3. Streak Calculation (consecutive days watching)
     const watchDates = new Set();
     thisYearAnime.forEach(item => {
@@ -836,7 +848,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_hunter', 
         name: 'The Hunter',
-        description: `Gon seeks the rarest finds, and so do you. You’ve uncovered ${hiddenGemsCount} hidden gems most fans miss`,
+        description: `Gon seeks the rarest finds, and so do you. You’ve uncovered ${hiddenGemsCount} hidden gems that most fans missed. Keep hunting!`,
         score: hiddenGemsCount * 10
       });
     }
@@ -844,6 +856,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     // The Explorer - 20+ genres and authors
     const uniqueGenres = new Set();
     thisYearAnime.forEach(item => {
+      item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
+    });
+    // Add manga genres to the same set to avoid duplication
+    filteredManga.forEach(item => {
       item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
     });
     const uniqueAuthors = new Set();
@@ -863,7 +879,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_explorer', 
         name: 'The Explorer',
-        description: `${descText}`,
+        description: `${descText}. Your Grand Line awaits!`,
         score: uniqueGenres.size + uniqueAuthors.size
       });
     }
@@ -874,7 +890,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_archivist', 
         name: 'The Archivist',
-        description: `Myne’s love of stories is endless, and yours is too. You’ve finished ${totalCompleted} titles`,
+        description: `Myne’s love of stories is endless, and yours is too. You’ve finished ${totalCompleted} titles. Collect them all!`,
         score: totalCompleted
       });
     }
@@ -885,7 +901,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_strategist', 
         name: 'The Strategist',
-        description: `Like Light, you plan every move. With ${totalPlanned} titles in your queue, you’re already two steps ahead`,
+        description: `Like Light, you plan every move. With ${totalPlanned} titles in your queue, you’re already two steps ahead.`,
         score: totalPlanned
       });
     }
@@ -953,7 +969,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       
       if (bingeEntry) {
         const titlePreview = bingeEntry.title.substring(0, 30) + (bingeEntry.title.length > 30 ? '...' : '');
-        const bingeDesc = `Naruto never gives up, and neither did you! You blitzed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}`;
+        const bingeDesc = `Naruto never gives up, and neither did you! You blitzed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}.`;
         
         badgeCandidates.push({ 
           type: 'the_sprinter', 
@@ -977,7 +993,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_loyalist', 
         name: 'The Loyalist',
-        description: `Rem is loyal to the end. With ${loyalistCount} works from ${loyalistName}, you’re just as devoted`,
+        description: `Rem is loyal to the end. With ${loyalistCount} works from ${loyalistName}, you’re just as devoted.`,
         score: loyalistCount
       });
     }
@@ -990,7 +1006,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         badgeCandidates.push({ 
           type: 'the_specialist', 
           name: 'The Specialist',
-          description: `Like Sailor Moon, you shined brightest in ${topGenres[0][0]}, completing ${topGenreCount} titles`,
+          description: `Like Sailor Moon, you shined brightest in ${topGenres[0][0]}, completing ${topGenreCount} titles. Shine bright!`,
           score: genrePercentage
         });
       }
@@ -1026,7 +1042,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_rookie', 
         name: 'The Rookie',
-        description: `Deku’s story might be complete, but yours is just beginning! Welcome to MAL, your journey begins now`,
+        description: `Deku’s story might be complete, but yours is just beginning! Welcome to MyAnimeList. Plus ULtra!`,
         score: 1000 // High score to prioritize if they qualify
       });
     }
@@ -2299,9 +2315,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             {stats.yearComparison && stats.yearComparison.previousAnimeCount > 0 && (
               <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 {stats.yearComparison.isAnimeGrowth ? (
-                  <>You watched <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> more anime than last year. Nice going!</>
+                  <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> more than last year. You’re leveling up!</>
                 ) : (
-                  <>You watched <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> fewer anime than last year. Watch more!</>
+                  <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> less than last year. Don’t stop now!</>
                 )}
               </motion.h3>
             )}
@@ -2887,13 +2903,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </motion.div>
               ))}
             </motion.div>
-            {stats.hiddenGemsCount > 0 && (
-              <motion.p className="body-sm text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                You watched <span className="text-white font-semibold">{stats.hiddenGemsCount}</span> hidden gem anime—rarer than 90% of MAL users!
-              </motion.p>
-            )}
             <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              A true hidden-gem hunter
+            You found <span className="text-white font-semibold">{stats.hiddenGemsAnimeCount}</span> such anime. A true hidden-gem hunter
             </motion.h3>
           </SlideLayout>
         );
@@ -3029,9 +3040,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             {stats.yearComparison && stats.yearComparison.previousMangaCount > 0 && (
               <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 {stats.yearComparison.isMangaGrowth ? (
-                  <>You read <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> more manga than last year. Nice going!</>
+                  <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> more than last year. Your library is growing!</>
                 ) : (
-                  <>You read <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> fewer manga than last year. Watch more!</>
+                  <>You read <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> less than last year. There’s always another chapter!!</>
                 )}
               </motion.h3>
             )}
@@ -3559,7 +3570,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {rareMangaItems.map((item, idx) => (
                 <motion.div
                   key={idx}
-                  className="mb-2 rounded-xl overflow-hidden"
+                  className="mb-2 rounded-xl overflow-visible"
                   style={{ padding: '2px' }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -3603,7 +3614,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               ))}
             </motion.div>
             <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Not everyone finds gems like these
+            You found <span className="text-white font-semibold">{stats.hiddenGemsMangaCount}</span> such titles. Not everyone finds gems like these
             </motion.h3>
           </SlideLayout>
         );
