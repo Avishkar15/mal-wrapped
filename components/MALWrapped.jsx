@@ -2043,7 +2043,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   }}
                 >
                   <motion.div 
-                className="aspect-[2/3] w-full bg-transparent rounded-lg relative border border-white/20" 
+                className="aspect-[2/3] w-full bg-transparent rounded-lg relative" 
                     style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}
                     whileHover={{ borderColor: '#ffffff' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
@@ -2158,7 +2158,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   }}
                 >
                   <motion.div 
-                className="aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative w-full border border-white/20" 
+                className="aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative w-full" 
                     style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}
                     whileHover={{ borderColor: '#ffffff' }}
                     transition={{ duration: 0.3, ease: smoothEase}}
@@ -2231,7 +2231,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                className="relative z-20 w-full h-full rounded-xl overflow-hidden border border-white/20 block"
+                className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
@@ -2395,9 +2395,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {otherGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-1.5 md:gap-2 relative z-10">
                     {otherGenres.map(([genreName, count], idx) => (
-                      <motion.div key={idx} className="text-center rounded-xl border border-white/15" style={{ padding: '2px' }} variants={staggerItem}>
+                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
-                          className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                          className="bg-black/70 rounded-xl p-2 h-full"
                           whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
@@ -2455,7 +2455,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <motion.div className="text-center relative overflow-hidden z-10">
                 <div className="flex flex-col items-center justify-center gap-4">
                   <motion.div 
-                    className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative z-10 border border-white/20" 
+                    className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative z-10" 
                     style={{ boxSizing: 'border-box' }}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -2535,14 +2535,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     return (
                       <>
                         <motion.div 
-                          className="rounded-xl overflow-hidden flex flex-row items-left relative w-full z-10 border border-white/15" 
+                          className="rounded-xl overflow-hidden flex flex-row items-left relative w-full z-10" 
                           style={{ padding: '2px' }}
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
                           <motion.div 
-                            className="bg-black/70 border border-white/10 rounded-xl w-full h-full flex flex-row items-center relative z-10"
+                            className="bg-black/70 rounded-xl w-full h-full flex flex-row items-center relative z-10"
                             whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                             transition={{ duration: 0.3, ease: smoothEase }}
                           >
@@ -2550,8 +2550,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                             {(() => {
                               const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                               const featuredImage = (
-                            <motion.div 
-                              className="bg-transparent rounded-xl overflow-hidden relative z-10 aspect-[2/3] max-h-[225px] border border-white/20"
+                                <motion.div 
+                                  className="bg-transparent rounded-xl overflow-hidden relative z-10 aspect-[2/3] max-h-[225px]" 
                               style={{ boxSizing: 'border-box' }}
                                   whileHover={{ borderColor: '#ffffff' }}
                                   transition={{ duration: 0.3, ease: smoothEase}}
@@ -2591,7 +2591,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   {featured.genres.slice(0, 2).map(g => (
                                     <motion.span 
                                       key={g} 
-                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular border border-white/20" 
+                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular" 
                                       initial={{ opacity: 0, scale: 0.8 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ duration: 0.3, delay: 0.3 }}
@@ -2621,7 +2621,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   transition={{ duration: 0.4 }}
                                 >
                                 <motion.div 
-                                  className="bg-transparent rounded-xl overflow-hidden relative w-full z-10 aspect-[2/3] max-h-[175px] border border-white/20" 
+                                  className="bg-transparent rounded-xl overflow-hidden relative w-full z-10 aspect-[2/3] max-h-[175px]" 
                                   style={{ boxSizing: 'border-box' }}
                                     whileHover={{ borderColor: '#ffffff' }}
                                     transition={{ duration: 0.3, ease: smoothEase}}
@@ -2705,9 +2705,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {otherStudios.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherStudios.map(([studioName, count], idx) => (
-                      <motion.div key={idx} className="text-center rounded-xl border border-white/15" style={{ padding: '2px' }} variants={staggerItem}>
+                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
-                          className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                          className="bg-black/70 rounded-xl p-2 h-full"
                           whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
@@ -2765,14 +2765,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 return (
                   <motion.div 
                     key={season} 
-                    className="rounded-xl border border-white/15" 
+                    className="rounded-xl" 
                     style={{ padding: '2px' }}
                     variants={staggerItem}
                     initial="initial"
                     animate="animate"
                   >
                     <motion.div 
-                      className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                      className="bg-black/70 rounded-xl p-2 h-full"
                       whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                       transition={{ duration: 0.3, ease: smoothEase }}
                     >
@@ -2781,7 +2781,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <>
                           <div className="flex gap-1.5 sm:gap-2">
                             <motion.div 
-                              className="bg-transparent aspect-[2/3] rounded-lg overflow-hidden relative w-12 sm:w-16 md:w-20 border border-white/20" 
+                              className="bg-transparent aspect-[2/3] rounded-lg overflow-hidden relative w-12 sm:w-16 md:w-20" 
                               style={{ boxSizing: 'border-box' }}
                               transition={{ duration: 0.3, ease: smoothEase }}
                             >
@@ -2842,14 +2842,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {rareAnimeItems.map((item, idx) => (
                 <motion.div
                   key={idx}
-                  className="mb-4 rounded-xl overflow-hidden border border-white/15"
+                  className="mb-4 rounded-xl overflow-hidden"
                   style={{ padding: '2px' }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
                   <motion.div
-                    className="bg-black/70 border border-white/10 rounded-xl p-4 flex items-center gap-4"
+                    className="bg-black/70 rounded-xl p-4 flex items-center gap-4"
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
@@ -3163,9 +3163,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {otherMangaGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherMangaGenres.map(([genreName, count], idx) => (
-                      <motion.div key={idx} className="text-center rounded-xl border border-white/15" style={{ padding: '2px' }} variants={staggerItem}>
+                  <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
-                          className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                      className="bg-black/70 rounded-xl p-2 h-full"
                           whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
@@ -3221,7 +3221,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 <motion.div className="text-center relative overflow-hidden z-10">
                   <div className="flex flex-col items-center justify-center gap-4">
                     <motion.div 
-                      className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative z-10 border border-white/20" 
+                      className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative z-10" 
                       style={{ boxSizing: 'border-box' }}
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -3303,14 +3303,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     return (
                       <>
                         <motion.div 
-                          className="rounded-xl overflow-hidden flex flex-row items-left relative w-full z-10 border border-white/15" 
+                          className="rounded-xl overflow-hidden flex flex-row items-left relative w-full z-10" 
                           style={{ padding: '2px' }}
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
                           <motion.div 
-                            className="bg-black/70 border border-white/10 rounded-xl w-full h-full flex flex-row items-center relative z-10"
+                            className="bg-black/70 rounded-xl w-full h-full flex flex-row items-center relative z-10"
                             whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                             transition={{ duration: 0.3, ease: smoothEase }}
                           >
@@ -3319,8 +3319,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                               const featuredImage = (
                                 <motion.div 
-                              className="bg-transparent rounded-xl overflow-hidden relative z-10 border border-white/20" 
-                              style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '225px' }}
+                                  className="bg-transparent rounded-xl overflow-hidden relative z-10" 
+                                  style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '225px' }}
                                   whileHover={{ borderColor: '#ffffff' }}
                                   transition={{ duration: 0.3, ease: smoothEase}}
                                 >
@@ -3359,7 +3359,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   {featured.genres.slice(0, 2).map(g => (
                                     <motion.span 
                                       key={g} 
-                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular border border-white/20" 
+                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular" 
                                       initial={{ opacity: 0, scale: 0.8 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ duration: 0.3, delay: 0.3 }}
@@ -3389,7 +3389,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   transition={{ duration: 0.4 }}
                                 >
                                 <motion.div 
-                                  className="bg-transparent rounded-xl overflow-hidden relative w-full z-10 border border-white/20" 
+                                  className="bg-transparent rounded-xl overflow-hidden relative w-full z-10" 
                                   style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '175px' }}
                                     whileHover={{ borderColor: '#ffffff' }}
                                     transition={{ duration: 0.3, ease: smoothEase}}
@@ -3503,9 +3503,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {otherAuthors.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherAuthors.map(([authorName, count], idx) => (
-                      <motion.div key={idx} className="text-center rounded-xl border border-white/15" style={{ padding: '2px' }} variants={staggerItem}>
+                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
-                          className="bg-black/70 border border-white/10 rounded-xl p-2 h-full"
+                          className="bg-black/70 rounded-xl p-2 h-full"
                           whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3 , ease: smoothEase }}
                         >
@@ -3557,14 +3557,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {rareMangaItems.map((item, idx) => (
                 <motion.div
                   key={idx}
-                  className="mb-2 rounded-xl overflow-hidden border border-white/15"
+                  className="mb-2 rounded-xl overflow-hidden"
                   style={{ padding: '2px' }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
                   <motion.div
-                    className="bg-black/70 border border-white/10 rounded-xl p-4 flex items-center gap-4"
+                    className="bg-black/70 rounded-xl p-4 flex items-center gap-4"
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
@@ -3711,14 +3711,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {stats.badges.map((badge, idx) => (
                 <motion.div
                   key={badge.type}
-                  className="rounded-xl overflow-hidden border border-white/15"
+                  className="rounded-xl overflow-hidden"
                   style={{ padding: '2px' }}
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.1, ease: smoothEase }}
                 >
                   <motion.div
-                    className="bg-black/60 border border-white/10 rounded-xl p-4 h-full"
+                    className="bg-black/60 rounded-xl p-4 h-full"
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)'}}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
@@ -3766,7 +3766,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 mb-4">
                 <motion.div
-                  className="relative z-20 w-full h-full rounded-xl overflow-hidden border border-white/20 block"
+                  className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, ease: smoothEase }}
@@ -3848,7 +3848,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative z-20 w-full h-full rounded-xl overflow-hidden border border-white/20 block"
+                    className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
@@ -4310,7 +4310,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: -10, scale: 0.95 }}
                           transition={{ duration: 0.2 }}
-                          className="absolute bottom-full right-0 mb-2 bg-black/95 backdrop-blur-sm border border-white/10 rounded-xl p-3 z-50 min-w-[200px]"
+                        className="absolute bottom-full right-0 mb-2 bg-black/95 backdrop-blur-sm rounded-xl p-3 z-50 min-w-[200px]"
                         >
                           <div className="flex flex-col gap-2">
                             <button
