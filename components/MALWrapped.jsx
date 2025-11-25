@@ -806,61 +806,96 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     });
     longestStreak = Math.max(longestStreak, currentStreak);
 
-    // 4. Badge System
-    const badges = [];
+    // 4. Badge System - More exclusive and special badges, only top 2
+    const badgeCandidates = [];
     
-    // Genre Specialist - if top genre has >30% of entries
-    if (topGenres.length > 0) {
+    // Genre Master - if top genre has >50% of entries (very exclusive)
+    if (topGenres.length > 0 && thisYearAnime.length > 0) {
       const topGenreCount = topGenres[0][1];
       const genrePercentage = (topGenreCount / thisYearAnime.length) * 100;
-      if (genrePercentage > 30) {
-        badges.push({ 
-          type: 'genre_specialist', 
-          name: `${topGenres[0][0]} Specialist`,
-          description: `${Math.round(genrePercentage)}% of your anime were ${topGenres[0][0]}`
+      if (genrePercentage > 50) {
+        badgeCandidates.push({ 
+          type: 'genre_master', 
+          name: `${topGenres[0][0]} Master`,
+          description: `An incredible ${Math.round(genrePercentage)}% of your anime were ${topGenres[0][0]} - true dedication!`,
+          score: genrePercentage
         });
       }
     }
     
-    // Genre Explorer - if user has many different genres
+    // Genre Explorer - if user has many different genres (20+ is very rare)
     const uniqueGenres = new Set();
     thisYearAnime.forEach(item => {
       item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
     });
-    if (uniqueGenres.size >= 15) {
-      badges.push({ 
+    if (uniqueGenres.size >= 20) {
+      badgeCandidates.push({ 
         type: 'genre_explorer', 
         name: 'Genre Explorer',
-        description: `You explored ${uniqueGenres.size} different genres`
+        description: `You explored ${uniqueGenres.size} different genres - a true connoisseur!`,
+        score: uniqueGenres.size
       });
     }
     
-    // Binge King - if user watched a lot of episodes
-    if (totalEpisodes >= 500) {
-      badges.push({ 
-        type: 'binge_king', 
-        name: 'Binge King',
-        description: `You watched ${totalEpisodes} episodes this year`
+    // Binge Legend - if user watched a LOT of episodes (1000+ is exceptional)
+    if (totalEpisodes >= 1000) {
+      badgeCandidates.push({ 
+        type: 'binge_legend', 
+        name: 'Binge Legend',
+        description: `You watched ${totalEpisodes.toLocaleString()} episodes - that's legendary dedication!`,
+        score: totalEpisodes
       });
     }
     
-    // Hidden Gem Hunter - if user has many hidden gems
-    if (hiddenGemsCount >= 10) {
-      badges.push({ 
+    // Hidden Gem Hunter - if user has many hidden gems (15+ is rare)
+    if (hiddenGemsCount >= 15) {
+      badgeCandidates.push({ 
         type: 'hidden_gem_hunter', 
         name: 'Hidden Gem Hunter',
-        description: `You discovered ${hiddenGemsCount} rare anime`
+        description: `You discovered ${hiddenGemsCount} rare anime - you have impeccable taste!`,
+        score: hiddenGemsCount * 10
       });
     }
     
-    // Streak Master - if user has long streak
-    if (longestStreak >= 30) {
-      badges.push({ 
+    // Streak Master - if user has very long streak (60+ days is exceptional)
+    if (longestStreak >= 60) {
+      badgeCandidates.push({ 
         type: 'streak_master', 
         name: 'Streak Master',
-        description: `You watched anime ${longestStreak} days in a row`
+        description: `You watched anime ${longestStreak} days in a row - unmatched consistency!`,
+        score: longestStreak
       });
     }
+    
+    // Completion Champion - if user completed many anime (100+ is impressive)
+    if (completedAnime.length >= 100) {
+      badgeCandidates.push({ 
+        type: 'completion_champion', 
+        name: 'Completion Champion',
+        description: `You completed ${completedAnime.length} anime - a true completionist!`,
+        score: completedAnime.length
+      });
+    }
+    
+    // Rating Perfectionist - if average rating is very high (8.5+ is exceptional)
+    const ratedAnimeForBadge = thisYearAnime.filter(item => item.list_status?.score > 0);
+    if (ratedAnimeForBadge.length >= 20) {
+      const avgRating = ratedAnimeForBadge.reduce((sum, item) => sum + (item.list_status?.score || 0), 0) / ratedAnimeForBadge.length;
+      if (avgRating >= 8.5) {
+        badgeCandidates.push({ 
+          type: 'rating_perfectionist', 
+          name: 'Rating Perfectionist',
+          description: `Your average rating is ${avgRating.toFixed(1)}/10 - you only watch the best!`,
+          score: avgRating * 100
+        });
+      }
+    }
+    
+    // Sort badges by score (most impressive first) and take only top 2
+    const badges = badgeCandidates
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 2)
+      .map(({ score, ...badge }) => badge); // Remove score from final badge object
 
     // 5. Year-on-Year Comparison (if not 'all' year)
     let yearComparison = null;
@@ -3459,28 +3494,36 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               You earned some impressive badges
             </motion.h2>
-            <motion.div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div className="mt-8 flex flex-col items-center gap-6 relative z-10" {...fadeSlideUp} data-framer-motion>
               {stats.badges.map((badge, idx) => (
                 <motion.div
                   key={badge.type}
-                  className="border-box-cyan rounded-xl overflow-hidden"
+                  className="border-box-cyan rounded-xl overflow-hidden w-full max-w-md"
                   style={{ padding: '2px' }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: idx * 0.1 }}
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: idx * 0.2, ease: smoothEase }}
                 >
                   <motion.div
-                    className="bg-white/5 rounded-xl p-4 h-full"
-                    whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
-                    transition={{ duration: 0.2, ease: smoothEase }}
+                    className="bg-gradient-to-br from-white/10 to-white/5 rounded-xl p-6 h-full text-center"
+                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.12)' }}
+                    transition={{ duration: 0.3, ease: smoothEase }}
                   >
-                    <p className="heading-md font-semibold text-white">{badge.name}</p>
-                    <p className="body-sm text-white/70 mt-2 font-regular">{badge.description}</p>
+                    <motion.div
+                      className="text-4xl mb-3"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.4, delay: idx * 0.2 + 0.3, type: "spring", stiffness: 200 }}
+                    >
+                      🏆
+                    </motion.div>
+                    <p className="heading-lg font-bold text-white mb-3">{badge.name}</p>
+                    <p className="body-md text-white/80 mt-2 font-regular leading-relaxed">{badge.description}</p>
                   </motion.div>
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/50 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/50 mt-8 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               Your dedication shows!
             </motion.h3>
           </SlideLayout>
