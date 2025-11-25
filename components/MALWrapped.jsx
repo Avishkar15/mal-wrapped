@@ -2290,7 +2290,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <div className="relative z-20 w-full flex flex-col items-center justify-center">
               <motion.div {...fadeIn} data-framer-motion className="mt-16 w-full flex flex-col items-center">
                   <div className="relative inline-block text-center">
-                    <h1 className="wrapped-brand text-white/50 relative z-10 text-center">
+                    <h1 className="wrapped-brand text-white/70 relative z-10 text-center">
                       {stats.selectedYear === 'all' ? 'MyAnimeList' : 'MyAnimeList ' + stats.selectedYear}
                     </h1>
                     <h2 className="wrapped-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white relative z-10 text-center">
@@ -2372,7 +2372,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             </motion.div>
             {animeCarouselItems.length > 0 && <div className="relative z-10"><ImageCarousel items={animeCarouselItems} maxItems={10} showHover={true} showNames={false} /></div>}
             {stats.yearComparison && stats.yearComparison.previousAnimeCount > 0 && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 {stats.yearComparison.isAnimeGrowth ? (
                   <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> more than last year. You’re leveling up!</>
                 ) : (
@@ -2381,7 +2381,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </motion.h3>
             )}
             {(!stats.yearComparison || !stats.yearComparison.previousAnimeCount) && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Now that's dedication
               </motion.h3>
             )}
@@ -2407,7 +2407,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <AnimatedNumber value={stats.totalEpisodes || 0} />
                 </p>
                 <p className="body-md text-white font-medium">episodes</p>
-                <p className="body-sm text-white/50 mt-2 font-regular">and</p>
+                <p className="body-sm text-white/70 mt-2 font-regular">and</p>
               </div>
               <div className="text-center">
                 {stats.watchDays > 0 ? (
@@ -2416,7 +2416,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <AnimatedNumber value={stats.watchDays} />
                     </p>
                     <p className="body-md text-white font-medium">days</p>
-                    <p className="body-sm text-white/50 mt-2 font-regular">of nonstop binge</p>
+                    <p className="body-sm text-white/70 mt-2 font-regular">of nonstop binge</p>
                   </>
                 ) : (
                   <>
@@ -2424,13 +2424,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <AnimatedNumber value={stats.watchTime} />
                     </p>
                     <p className="heading-md text-white font-medium">hours</p>
-                    <p className="body-sm text-white/50 mt-2 font-regular">of nonstop binge</p>
+                    <p className="body-sm text-white/70 mt-2 font-regular">of nonstop binge</p>
                   </>
                 )}
               </div>
               {animeComparison && animeDisplayPercentage > 0 && animeComparisonCopy && (
                 <div className="text-center mt-4 w-full">
-                  <p className="body-sm text-white/50 font-regular">
+                  <p className="body-sm text-white/70 font-regular text-container">
                     {animeComparisonCopy.prefix}
                     <span className="text-white font-semibold">{animeDisplayPercentage}%</span>
                     {animeComparisonCopy.suffix}
@@ -2462,8 +2462,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             {topGenre ? (
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-                  <p className="heading-lg font-semibold text-white ">1. {topGenre}</p>
-                  <p className="mono text-white/50 font-regular">{stats.topGenres[0][1]} entries</p>
+                  <p className="heading-lg font-semibold text-white "><span className="heading-md font-regular text-white/70">1.</span> {topGenre}</p>
+                  <p className="body-sm text-white/70 font-regular">{stats.topGenres[0][1]} series</p>
                 </motion.div>
                 {genreAnime.length > 0 && <div className="relative z-10"><ImageCarousel items={genreAnime} maxItems={10} showHover={true} showNames={false} /></div>}
                 {otherGenres.length > 0 && (
@@ -2475,8 +2475,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
-                          <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {genreName}</p>
-                          <p className="mono text-white/50 font-regular">{count} entries</p>
+                          <p className="heading-sm font-semibold text-white truncate"><span className="heading-xs font-regular text-white/70">{idx + 2}.</span> {genreName}</p>
+                          <p className="mono text-white/70 font-regular">{count} series</p>
                       </motion.div>
                       </motion.div>
                     ))}
@@ -2484,12 +2484,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                   
                 )}
-                <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You know what you love
+                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You know what you love
             </motion.h3>
               </>
               
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>No genres topped your list
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>No genres topped your list
             </motion.h3>
             )}
             
@@ -2554,7 +2554,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   >
                     <h3 className="title-lg text-white font-semibold">{topItem.node?.title}</h3>
                     {topItem.node?.studios?.[0]?.name && (
-                      <p className="body-sm text-white/50  font-regular">{topItem.node.studios[0].name}</p>
+                      <p className="body-sm text-white/70  font-regular">{topItem.node.studios[0].name}</p>
                     )}
                     <div className="flex items-center justify-center body-md text-yellow-300 font-bold mt-1">
                       <span className="mr-2">★</span>
@@ -2564,7 +2564,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </div>
               </motion.div>
             ) : (
-              <div className="body-md font-regular text-white/50 relative z-10">No favorite anime found</div>
+              <div className="body-md font-regular text-white/70 relative z-10">No favorite anime found</div>
             )}
           </SlideLayout>
           );
@@ -2592,7 +2592,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           if (top5Formatted.length === 0) {
             return (
               <SlideLayout>
-                <div className="text-white/50 relative z-10">No favorite {type} found</div>
+                <div className="text-white/70 relative z-10">No favorite {type} found</div>
               </SlideLayout>
             );
           }
@@ -2654,8 +2654,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               transition={{ duration: 0.5, delay: 0.2 }}
                             >
                               <h3 className="title-md mt-1.5 sm:mt-2 truncate font-semibold text-white text-left">{featured.title}</h3>
-                              {featured.studio && <p className="body-sm text-white/50 truncate font-medium text-left">{featured.studio}</p>}
-                              {featured.author && <p className="body-sm text-white/50 truncate font-medium text-left">{featured.author}</p>}
+                              {featured.studio && <p className="body-sm text-white/70 truncate font-medium text-left">{featured.studio}</p>}
+                              {featured.author && <p className="body-sm text-white/70 truncate font-medium text-left">{featured.author}</p>}
                               <div className="flex items-left justify-left mono text-yellow-300 mt-1 font-semibold">
                                 <span className="mr-0.5 sm:mr-1">★</span>
                                 <span>{Math.round(featured.userRating)}</span>
@@ -2738,7 +2738,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     );
                   })()}
                 </div>
-                <motion.h2 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h2>
+                <motion.h2 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h2>
               </motion.div>
             </SlideLayout>
           );
@@ -2770,8 +2770,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             {topStudio ? (
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-                  <p className="heading-lg font-semibold text-white ">1. {topStudio}</p>
-                  <p className="mono text-white/50 font-regular">{stats.topStudios[0][1]} entries</p>
+                  <p className="heading-lg font-semibold text-white "><span className="heading-md font-regular text-white/70">1.</span> {topStudio}</p>
+                  <p className="body-sm text-white/70 font-regular">{stats.topStudios[0][1]} series</p>
                 </motion.div>
                 {studioAnime.length > 0 && (
                   <div className="relative z-10"><ImageCarousel items={studioAnime} maxItems={10} showHover={true} showNames={false} /></div>
@@ -2785,20 +2785,20 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
-                          <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {studioName}</p>
-                          <p className="mono text-white/50 font-regular">{count} entries</p>
+                          <p className="heading-sm font-semibold text-white truncate"><span className="heading-xs font-regular text-white/70">{idx + 2}.</span> {studioName}</p>
+                          <p className="mono text-white/70 font-regular">{count} series</p>
                       </motion.div>
                       </motion.div>
                     ))}
                   </div>
                   
                 )}
-                <motion.h3 className="body-sm font-regular text-white/50 text-center text-container mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
                 You know who gets the job done
             </motion.h3>
               </>
             ) : (
-              <motion.h3 className="body-md font-regular text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-md font-regular text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             No studios showed up enough to be counted
             </motion.h3>
             )}
@@ -2812,7 +2812,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         if (!hasAnySeasonalData) {
           return (
             <SlideLayout bgColor="pink">
-              <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 You didn't follow any seasonal anime this time
               </motion.h3>
             </SlideLayout>
@@ -2855,7 +2855,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <>
                           <div className="flex gap-1.5 sm:gap-2">
                             <motion.div 
-                              className="bg-transparent aspect-[2/3] rounded-lg overflow-hidden relative w-12 sm:w-16 md:w-20" 
+                              className="bg-transparent aspect-[2/3] rounded-lg overflow-hidden relative w-14 sm:w-18 md:w-22" 
                               style={{ boxSizing: 'border-box' }}
                               transition={{ duration: 0.3, ease: smoothEase }}
                             >
@@ -2873,9 +2873,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                             </motion.div>
                           <div className="flex-1 min-w-0">
                               <p className="title-md truncate font-semibold text-white">{highlight.node?.title}</p>
-                              <p className="body-sm text-white/50 truncate font-medium">{highlight.node?.studios?.[0]?.name || ''}</p>
-                              <p className="mono text-yellow-300 mt-1 sm:mt-2 font-semibold mt-1">★ {highlight.list_status?.score ? Math.round(highlight.list_status.score) : 'Not Rated'}</p>
-                              <p className="mono text-white/50 truncate mt-1 sm:mt-2 font-regular">{seasonData.totalAnime} anime this season</p>
+                              <p className="body-sm text-white/70 truncate font-medium">{highlight.node?.studios?.[0]?.name || ''}<span className="mono text-yellow-300 mt-1 sm:mt-2 font-semibold mt-1">★ {highlight.list_status?.score ? Math.round(highlight.list_status.score) : 'Not Rated'}</span></p>
+                              <p className="mono text-white/70 truncate mt-1 sm:mt-2 font-regular">{seasonData.totalAnime} anime this season</p>
                           </div>
                         </div>
                       </>
@@ -2885,7 +2884,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 );
               })}
             </div>
-            <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You caught every wave right on time
+            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You caught every wave right on time
             </motion.h3>
           </SlideLayout>
         );
@@ -2894,7 +2893,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         if (!stats.rareAnimeGems || stats.rareAnimeGems.length === 0) {
           return (
             <SlideLayout bgColor="blue">
-              <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 No hidden gems discovered this time
               </motion.h3>
             </SlideLayout>
@@ -2916,14 +2915,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {rareAnimeItems.map((item, idx) => (
                 <motion.div
                   key={idx}
-                  className="mb-4 rounded-xl overflow-visible"
+                  className="mb-2 rounded-xl overflow-visible"
                   style={{ padding: '2px' }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
                   <motion.div
-                    className="bg-black/70 rounded-xl p-4 flex items-center gap-4"
+                    className="bg-black/70 rounded-xl p-2 md:p-4 flex items-center gap-4"
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
@@ -2937,7 +2936,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         <motion.img
                           src={item.coverImage}
                           alt={item.title}
-                          className="w-20 h-28 object-cover rounded-lg cursor-pointer"
+                          className="w-16 md:w-20 h-24 md:h-28 object-cover rounded-lg cursor-pointer"
                           crossOrigin="anonymous"
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.2, ease: smoothEase }}
@@ -2946,20 +2945,21 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     )}
                     <div className="flex-1">
                       <h3 className="title-md font-semibold text-white">{item.title}</h3>
-                      <p className="body-sm text-white/70 mt-1 font-regular">
-                        Only {item.popularity.toLocaleString()} people completed this on MAL!
-                      </p>
+                      
                       {item.userRating && (
                         <div className="flex items-center gap-2 mt-1">
                           <span className="mono text-yellow-300 font-semibold">★ {Math.round(item.userRating)}</span>
                         </div>
                       )}
+                      <p className="body-sm text-white/70 mt-1 font-regular">
+                        Only {item.popularity.toLocaleString()} people watched this!
+                      </p>
                     </div>
                   </motion.div>
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You found <span className="text-white font-semibold">{stats.hiddenGemsAnimeCount ?? 0}</span> such anime. A true hidden-gem hunter
             </motion.h3>
           </SlideLayout>
@@ -2980,11 +2980,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             {didntLand.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={didntLand} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Better luck next season
+                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Better luck next season
             </motion.h3>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Nothing rated low, because nothing was rated at all</motion.h3>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Nothing rated low, because nothing was rated at all</motion.h3>
             )}
             
           </SlideLayout>
@@ -3004,10 +3004,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             {plannedAnimeItems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedAnimeItems} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>One day you’ll get to them… probably</motion.h3>
+                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>One day you’ll get to them… probably</motion.h3>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You didn’t add anything to your plan-to-watch list</motion.h3>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You didn’t add anything to your plan-to-watch list</motion.h3>
             )}
           </SlideLayout>
         );
@@ -3029,7 +3029,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Now let's see what you've been reading
               </motion.h2>
-              <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 From screens to pages
               </motion.h3>
             </motion.div>
@@ -3094,7 +3094,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             </motion.div>
             {allMangaItems.length > 0 && <ImageCarousel items={allMangaItems} maxItems={10} showHover={true} showNames={false} />}
             {stats.yearComparison && stats.yearComparison.previousMangaCount > 0 && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 {stats.yearComparison.isMangaGrowth ? (
                   <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> more than last year. Your library is growing!</>
                 ) : (
@@ -3103,7 +3103,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </motion.h3>
             )}
             {(!stats.yearComparison || !stats.yearComparison.previousMangaCount) && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/50 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 That's some serious reading energy
               </motion.h3>
             )}
@@ -3129,7 +3129,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <AnimatedNumber value={stats.totalChapters || 0} />
                 </p>
                 <p className="body-md text-white font-regular">chapters</p>
-                <p className="body-sm text-white/50 mt-2 font-regular">and</p>
+                <p className="body-sm text-white/70 mt-2 font-regular">and</p>
               </div>
               {stats.mangaDays > 0 ? (
                 <div className="text-center">
@@ -3137,7 +3137,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     <AnimatedNumber value={stats.mangaDays} />
                   </p>
                   <p className="body-md text-white font-regular">days</p>
-                  <p className="body-sm text-white/50 mt-2 font-regular">spent flipping pages</p>
+                  <p className="body-sm text-white/70 mt-2 font-regular">spent flipping pages</p>
                 </div>
               ) : (
                 <div className="text-center">
@@ -3145,12 +3145,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     <AnimatedNumber value={stats.mangaHours || 0} />
                   </p>
                   <p className="heading-md text-white font-medium">hours</p>
-                  <p className="body-sm text-white/50 mt-2 font-regular">spent flipping pages</p>
+                  <p className="body-sm text-white/70 mt-2 font-regular">spent flipping pages</p>
                 </div>
               )}
               {mangaComparison && mangaDisplayPercentage > 0 && mangaComparisonCopy && (
-                <div className="text-center mt-4 w-full max-w-md">
-                  <p className="body-sm text-white/50 font-regular">
+                <div className="text-center mt-4 w-full">
+                  <p className="body-sm text-white/70 font-regular text-container">
                     {mangaComparisonCopy.prefix}
                     <span className="text-white font-semibold">{mangaDisplayPercentage}%</span>
                     {mangaComparisonCopy.suffix}
@@ -3217,13 +3217,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout  bgColor="yellow">
           <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-          These genres kept you hooked the most
+          These genres kept you hooked
             </motion.h2>
             {topMangaGenre ? (
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-                  <p className="heading-lg font-semibold text-white ">1. {topMangaGenre[0]}</p>
-                  <p className="mono text-white/50 font-regular">{topMangaGenre[1]} entries</p>
+                  <p className="heading-lg font-semibold text-white "><span className="heading-md font-regular text-white/70">1.</span> {topMangaGenre[0]}</p>
+                  <p className="body-sm text-white/70 font-regular">{topMangaGenre[1]} manga</p>
                 </motion.div>
                 {mangaGenreItems.length > 0 && <div className="relative z-10"><ImageCarousel items={mangaGenreItems} maxItems={10} showHover={true} showNames={false} /></div>}
                 {otherMangaGenres.length > 0 && (
@@ -3235,20 +3235,20 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
-                          <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {genreName}</p>
-                          <p className="mono text-white/50 font-regular">{count} entries</p>
+                          <p className="heading-sm font-semibold text-white truncate"><span className="heading-xs font-regular text-white/70">{idx + 2}.</span> {genreName}</p>
+                          <p className="mono text-white/70 font-regular">{count} manga</p>
                       </motion.div>
                       </motion.div>
                     ))}
                   </div>
                 )}
-                <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Clearly, you have a type
             </motion.h3>
               </>
               
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 No genres rose to the top
             </motion.h3>)}
           </SlideLayout>
@@ -3305,18 +3305,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       )}
                     </motion.div>
                     <motion.div 
-                      className="text-left relative z-10"
+                      className="text-center relative z-10"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.2, ease: smoothEase }}
                     >
                       <h3 className="title-lg text-white font-semibold">{topItem.node?.title}</h3>
                       {topItem.node?.authors?.[0] && (
-                        <p className="body-sm text-white/50  font-regular">
+                        <p className="body-sm text-white/70  font-regular">
                           {`${topItem.node.authors[0].node?.first_name || ''} ${topItem.node.authors[0].node?.last_name || ''}`.trim()}
                         </p>
                       )}
-                      <div className="flex items-left justify-left mono text-yellow-300 font-bold mt-1">
+                      <div className="flex items-center justify-center body-md text-yellow-300 font-bold mt-1">
                         <span className="mr-2">★</span>
                         <span>{topItem.list_status?.score ? Math.round(topItem.list_status.score) : 'N/A'}</span>
                       </div>
@@ -3324,7 +3324,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                 </motion.div>
               ) : (
-                <div className="body-md font-regular text-white/50 relative z-10">No favorite manga found</div>
+                <div className="body-md font-regular text-white/70 relative z-10">No favorite manga found</div>
               )}
             </SlideLayout>
           );
@@ -3352,7 +3352,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           if (top5Formatted.length === 0) {
             return (
               <SlideLayout>
-                <div className="text-white/50 relative z-10">No favorite {type} found</div>
+                <div className="text-white/70 relative z-10">No favorite {type} found</div>
               </SlideLayout>
             );
           }
@@ -3361,7 +3361,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             <SlideLayout>
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  Including your top read, these manga ruled your shelves
+                  These manga ruled your shelves
                 </motion.h2>
                 <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
                   {(() => {
@@ -3414,8 +3414,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               transition={{ duration: 0.5, delay: 0.2 }}
                             >
                               <h3 className="title-md mt-1.5 sm:mt-2 truncate font-semibold text-white text-left">{featured.title}</h3>
-                              {featured.studio && <p className="body-sm text-white/50 truncate font-medium text-left">{featured.studio}</p>}
-                              {featured.author && <p className="body-sm text-white/50 truncate font-medium text-left">{featured.author}</p>}
+                              {featured.studio && <p className="body-sm text-white/70 truncate font-medium text-left">{featured.studio}</p>}
+                              {featured.author && <p className="body-sm text-white/70 truncate font-medium text-left">{featured.author}</p>}
                               <div className="flex items-left justify-left mono text-yellow-300 mt-1 font-semibold">
                                 <span className="mr-0.5 sm:mr-1">★</span>
                                 <span>{Math.round(featured.userRating)}</span>
@@ -3498,7 +3498,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     );
                   })()}
                 </div>
-                <motion.h2 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h2>
+                <motion.h2 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h2>
               </motion.div>
             </SlideLayout>
           );
@@ -3560,8 +3560,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             {topAuthor ? (
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-                  <p className="heading-lg font-semibold text-white ">1. {topAuthor}</p>
-                  <p className="mono text-white/50 font-regular">{stats.topAuthors[0][1]} entries</p>
+                  <p className="heading-lg font-semibold text-white "><span className="heading-md font-regular text-white/70">1.</span> {topAuthor}</p>
+                  <p className="body-sm text-white/70 font-regular">{stats.topAuthors[0][1]} titles</p>
                 </motion.div>
                 {authorManga.length > 0 && (
                   <div className="relative z-10"><ImageCarousel items={authorManga} maxItems={10} showHover={true} showNames={false} /></div>
@@ -3575,8 +3575,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3 , ease: smoothEase }}
                         >
-                          <p className="heading-sm font-semibold text-white truncate">{idx + 2}. {authorName}</p>
-                          <p className="mono text-white/50 font-regular">{count} entries</p>
+                          <p className="heading-sm font-semibold text-white truncate"><span className="heading-xs font-regular text-white/70">{idx + 2}.</span> {authorName}</p>
+                          <p className="mono text-white/70 font-regular">{count} titles</p>
                       </motion.div>
                       </motion.div>
                       
@@ -3584,13 +3584,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                   
                 )}
-                <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 You know who delivers good writing
             </motion.h3>
               </>
               
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 No author took the spotlight
             </motion.h3>
             )}
@@ -3601,7 +3601,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         if (!stats.rareMangaGems || stats.rareMangaGems.length === 0) {
           return (
             <SlideLayout bgColor="blue">
-              <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 No hidden gems found yet
               </motion.h3>
             </SlideLayout>
@@ -3630,7 +3630,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
                   <motion.div
-                    className="bg-black/70 rounded-xl p-4 flex items-center gap-4"
+                    className="bg-black/70 rounded-xl p-2 md:p-4 flex items-center gap-4"
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
@@ -3644,7 +3644,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         <motion.img
                           src={item.coverImage}
                           alt={item.title}
-                          className="w-20 h-28 object-cover rounded-lg cursor-pointer"
+                          className="w-16 md:w-20 h-24 md:h-28 object-cover rounded-lg cursor-pointer"
                           crossOrigin="anonymous"
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.2, ease: smoothEase }}
@@ -3653,20 +3653,21 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     )}
                     <div className="flex-1">
                       <h3 className="title-md font-semibold text-white">{item.title}</h3>
-                      <p className="body-sm text-white/70 mt-1 font-regular">
-                        Only {item.popularity.toLocaleString()} people completed this on MAL!
-                      </p>
+                      
                       {item.userRating && (
                         <div className="flex items-center gap-2 mt-1">
                           <span className="mono text-yellow-300 font-semibold">★ {Math.round(item.userRating)}</span>
                         </div>
                       )}
+                      <p className="body-sm text-white/70 mt-1 font-regular">
+                        Only {item.popularity.toLocaleString()} people read this!
+                      </p>
                     </div>
                   </motion.div>
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/50 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You found <span className="text-white font-semibold">{stats.hiddenGemsMangaCount ?? 0}</span> such titles. Not everyone finds gems like these
             </motion.h3>
           </SlideLayout>
@@ -3682,17 +3683,17 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout  bgColor="red">
           <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-          But even great readers hit a few misses
+          Manga you rated the lowest
             </motion.h2>
             {mangaDidntLand.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={mangaDidntLand} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                Happens to the best of us
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
+                Even great readers hit a few misses
             </motion.h3>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Nothing rated low, rather nothing rated at all
             </motion.h3>
             )}
@@ -3708,17 +3709,17 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout  bgColor="green">
             <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            Your reading backlog continued to grow
+            You planned to read these manga, but haven't yet
             </motion.h2>
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedMangaItems} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                You better get reading after this Wrapped
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
+                The backlog continues to grow...
             </motion.h3>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/50 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 No manga added to your plan-to-read list
             </motion.h3>
             )}
@@ -3747,7 +3748,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 That's a milestone shared by only the top {milestonePercent}% of MAL users!
               </p>
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/50 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               Keep the momentum going!
             </motion.h3>
           </SlideLayout>
@@ -3814,7 +3815,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/50 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               Your dedication shows!
             </motion.h3>
           </SlideLayout>
@@ -3856,7 +3857,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               )}
              
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/50 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             {stats.characterTwin.reason}
             </motion.h3>
           </SlideLayout>
@@ -3948,7 +3949,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   variants={staggerItem}
                 >
                   <div className="space-y-1">
-                    <p className="body-sm text-white/50 font-medium mb-1">Top Anime</p>
+                    <p className="body-sm text-white/70 font-medium mb-1">Top Anime</p>
                     {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white truncate">
                           <span className="title-sm text-white font-medium truncate mr-2">{String(i + 1)}</span>
@@ -3958,7 +3959,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                   
                   <div className="space-y-1">
-                    <p className="body-sm text-white/50 font-medium mb-1">Top Manga</p>
+                    <p className="body-sm text-white/70 font-medium mb-1">Top Manga</p>
                     
                     {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="text-white truncate">
@@ -3976,7 +3977,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <div className="space-y-1">
                     {finaleTopGenre && (
                       <>
-                        <p className="body-sm text-white/50 font-medium mb-1">Favorite Genre</p>
+                        <p className="body-sm text-white/70 font-medium mb-1">Favorite Genre</p>
                         <p className="title-md text-white font-medium">{finaleTopGenre[0]}</p>
                       </>
                     )}
@@ -3985,7 +3986,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <div className="space-y-1">
                     {favoriteAuthor && (
                       <>
-                        <p className="body-sm text-white/50 font-medium mb-1">Favorite Author</p>
+                        <p className="body-sm text-white/70 font-medium mb-1">Favorite Author</p>
                         <p className="title-md text-white font-medium">{favoriteAuthor}</p>
                       </>
                     )}
@@ -3997,19 +3998,19 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   variants={staggerItem}
                 >
                   <div className="space-y-1">
-                    <p className="body-sm text-white/50 font-medium mb-1">Watched</p>
+                    <p className="body-sm text-white/70 font-medium mb-1">Watched</p>
                     <p className="title-md text-white  font-medium">
                     {stats.totalAnime || 0} Anime
                   </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="body-sm text-white/50 font-medium mb-1">Read</p>
+                    <p className="body-sm text-white/70 font-medium mb-1">Read</p>
                     <p className="title-md text-white font-medium">
                     {stats.totalManga || 0} Manga
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="body-sm text-white/50 font-medium mb-1">Time Spent</p>
+                  <p className="body-sm text-white/70 font-medium mb-1">Time Spent</p>
                   <p className="title-lg text-white font-medium">
                   {totalDays > 0 ? (
                     <>
