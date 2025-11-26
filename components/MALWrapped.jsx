@@ -30,22 +30,18 @@ function pkceChallenge(verifier) {
 const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
 const AUTH_URL = 'https://myanimelist.net/v1/oauth2/authorize';
 
-// Framer Motion Animation Variants - mobile optimized
-const getFadeSlideUp = (isMobile = false) => ({
-  initial: isMobile ? { opacity: 0 } : { opacity: 0, y: 20 },
-  animate: isMobile ? { opacity: 1 } : { opacity: 1, y: 0 },
-  transition: { duration: isMobile ? 0.3 : 0.6, ease: smoothEase }
-});
+// Framer Motion Animation Variants
+const fadeSlideUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: smoothEase }
+};
 
-const fadeSlideUp = getFadeSlideUp(false);
-
-const getFadeIn = (isMobile = false) => ({
+const fadeIn = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
-  transition: { duration: isMobile ? 0.3 : 0.6, ease: smoothEase }
-});
-
-const fadeIn = getFadeIn(false);
+  transition: { duration: 0.6, ease: smoothEase }
+};
 
 const fadeIn100 = {
   initial: { opacity: 0 },
@@ -81,33 +77,29 @@ const float = {
   }
 };
 
-// Stagger container variants - optimized for mobile
-const getStaggerContainer = (isMobile) => ({
+// Stagger container variants
+const staggerContainer = {
   initial: { opacity: 0 },
   animate: {
     opacity: 1,
     transition: {
-      staggerChildren: isMobile ? 0.05 : 0.1,
-      delayChildren: isMobile ? 0 : 0.1
+      staggerChildren: 0.1,
+      delayChildren: 0.1
     }
   }
-});
+};
 
-const getStaggerItem = (isMobile) => ({
-  initial: isMobile ? { opacity: 0 } : { opacity: 0, y: 20 },
+const staggerItem = {
+  initial: { opacity: 0, y: 20 },
   animate: {
     opacity: 1,
-    ...(isMobile ? {} : { y: 0 }),
+    y: 0,
     transition: {
-      duration: isMobile ? 0.3 : 0.5,
+      duration: 0.5,
       ease: smoothEase
     }
   }
-});
-
-// Default for backward compatibility
-const staggerContainer = getStaggerContainer(false);
-const staggerItem = getStaggerItem(false);
+};
 
 
 const hoverImage = {
@@ -115,18 +107,12 @@ const hoverImage = {
   transition: { duration: 0.3, ease: smoothEase }
 };
 
-// Animated Number Component using Framer Motion - optimized for mobile
-function AnimatedNumber({ value, duration = 1.5, className = '', isMobile = false }) {
+// Animated Number Component using Framer Motion
+function AnimatedNumber({ value, duration = 1.5, className = '' }) {
   const numValue = Number(value) || 0;
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
-    // On mobile, show value immediately for better performance
-    if (isMobile) {
-      setDisplayValue(numValue);
-      return;
-    }
-    
     // Reset to 0 when value changes
     setDisplayValue(0);
     
@@ -166,7 +152,7 @@ function AnimatedNumber({ value, duration = 1.5, className = '', isMobile = fals
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [numValue, duration, isMobile]);
+  }, [numValue, duration]);
 
   return (
     <motion.span 
@@ -218,20 +204,6 @@ export default function MALWrapped() {
   const [emailCopied, setEmailCopied] = useState(false);
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
-  
-  // Mobile detection for performance optimizations
-  const [isMobile, setIsMobile] = useState(() => 
-    typeof window !== 'undefined' && window.innerWidth < 768
-  );
-  
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
   const hasManga = stats && mangaList && mangaList.length > 0;
@@ -1947,7 +1919,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         </div>
           <motion.div 
             className="w-full relative z-20"
-            variants={getStaggerContainer(isMobile)}
+            variants={staggerContainer}
             initial="initial"
             animate="animate"
           >
@@ -1966,17 +1938,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       );
     };
 
-    // Image Carousel Component - Optimized for mobile
+    // Image Carousel Component - Always carousel on all screen sizes
     const ImageCarousel = ({ items, maxItems = 10, showHover = true, showNames = false }) => {
       const [isHovered, setIsHovered] = useState(false);
       const [hoveredItem, setHoveredItem] = useState(null);
       const [scrollPosition, setScrollPosition] = useState(0);
       const [gapSize, setGapSize] = useState('2px');
       const [itemsPerView, setItemsPerView] = useState(3);
-      
-      // Disable hover and reduce items on mobile for performance
-      const effectiveShowHover = showHover && !isMobile;
-      const effectiveMaxItems = isMobile ? Math.min(maxItems, 5) : maxItems;
       
       // Deduplicate items by title AND ID to prevent repeats
       const uniqueItemsMap = new Map();
@@ -1989,7 +1957,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }
       });
       const uniqueItems = Array.from(uniqueItemsMap.values());
-      const visibleItems = uniqueItems.slice(0, effectiveMaxItems);
+      const visibleItems = uniqueItems.slice(0, maxItems);
       
       // Update gap size and items per view based on screen width
       useEffect(() => {
@@ -2020,36 +1988,29 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const shouldCenter = !shouldScroll && visibleItems.length < itemsPerView;
       
       useEffect(() => {
-        // Disable auto-scroll on mobile for performance
-        if (isMobile || visibleItems.length <= itemsPerView || isHovered) {
+        // Only animate if we have more items than viewport and not hovered
+        if (visibleItems.length <= itemsPerView || isHovered) {
           return;
         }
         
         const scrollSpeed = 0.15;
         let animationFrame;
-        let lastTime = performance.now();
         
-        const animate = (currentTime) => {
-          const delta = currentTime - lastTime;
-          lastTime = currentTime;
-          
-          // Throttle to ~60fps
-          if (delta >= 16) {
-            setScrollPosition((prev) => {
-              const maxScroll = (visibleItems.length * itemWidth);
-              const next = prev + scrollSpeed;
-              if (next >= maxScroll) {
-                return 0;
-              }
-              return next;
-            });
-          }
+        const animate = () => {
+          setScrollPosition((prev) => {
+            const maxScroll = (visibleItems.length * itemWidth);
+            const next = prev + scrollSpeed;
+            if (next >= maxScroll) {
+              return 0;
+            }
+            return next;
+          });
           animationFrame = requestAnimationFrame(animate);
         };
         
         animationFrame = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(animationFrame);
-      }, [visibleItems.length, itemsPerView, isHovered, itemWidth, isMobile]);
+      }, [visibleItems.length, itemsPerView, isHovered, itemWidth]);
 
       const getMALUrl = (item) => {
         if (item.malId) {
@@ -2070,17 +2031,17 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             maskImage: shouldScroll ? 'none' : 'linear-gradient(to right, black 0%, black 100%)',
             WebkitMaskImage: shouldScroll ? 'none' : 'linear-gradient(to right, black 0%, black 100%)'
           }}
-          onMouseEnter={() => effectiveShowHover && setIsHovered(true)}
+          onMouseEnter={() => showHover && setIsHovered(true)}
           onMouseLeave={() => {
-            effectiveShowHover && setIsHovered(false);
+            showHover && setIsHovered(false);
             setHoveredItem(null);
           }}
         >
           <div 
             className="flex"
-              style={{ 
+            style={{ 
               transform: shouldScroll ? `translateX(-${scrollPosition}%)` : 'translateX(0)',
-              willChange: (shouldScroll && !isMobile) ? 'transform' : 'auto',
+              willChange: shouldScroll ? 'transform' : 'auto',
               gap: gapSize,
               justifyContent: shouldCenter ? 'center' : 'flex-start',
               width: shouldCenter ? 'auto' : '100%',
@@ -2094,19 +2055,19 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               const content = (
                 <motion.div 
                   className="flex flex-col flex-shrink-0 items-center w-full"
-                  initial={isMobile ? false : { opacity: 0, scale: 0.9 }}
-                  animate={isMobile ? false : { opacity: 1, scale: 1 }}
-                  transition={isMobile ? {} : { 
-                    duration: 0.3,
-                    delay: (idx % visibleItems.length) * 0.02,
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ 
+                    duration: 0.4,
+                    delay: (idx % visibleItems.length) * 0.05,
                     ease: smoothEase
                   }}
                 >
                   <motion.div 
                 className="aspect-[2/3] w-full bg-transparent rounded-lg relative" 
                     style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}
-                    whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
-                    transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
+                    whileHover={{ borderColor: '#ffffff' }}
+                    transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     {item.coverImage && (
                       <motion.img 
@@ -2114,11 +2075,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         alt={item.title || ''} 
                         crossOrigin="anonymous" 
                         className="w-full h-full object-cover rounded-lg"
-                        whileHover={isMobile ? {} : hoverImage}
-                        loading="lazy"
+                        whileHover={hoverImage}
                       />
                     )}
-                    {effectiveShowHover && hoveredItem === actualIndex && item.title && (
+                    {showHover && hoveredItem === actualIndex && item.title && (
                       <motion.div 
                         className="absolute inset-0 bg-black/80 flex items-center justify-center p-2 z-10 rounded-lg pointer-events-none"
                         initial={{ opacity: 0 }}
@@ -2155,8 +2115,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     minWidth: shouldCenter ? '120px' : 'auto',
                     maxWidth: shouldCenter ? '183px' : 'none'
                   }}
-                  onMouseEnter={() => effectiveShowHover && setHoveredItem(actualIndex)}
-                  onMouseLeave={() => effectiveShowHover && setHoveredItem(null)}
+                  onMouseEnter={() => showHover && setHoveredItem(actualIndex)}
+                  onMouseLeave={() => showHover && setHoveredItem(null)}
                 >
                   {malUrl ? (
                     <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="w-full">
@@ -2173,10 +2133,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       );
     };
 
-    // Grid Image Component for hidden gems, didn't land, and planned sections - optimized for mobile
+    // Grid Image Component for hidden gems, didn't land, and planned sections
     const GridImages = ({ items, maxItems = 5 }) => {
-      const effectiveMaxItems = isMobile ? Math.min(maxItems, 3) : maxItems;
-      const visibleItems = items.slice(0, effectiveMaxItems);
+      const visibleItems = items.slice(0, maxItems);
       const itemCount = visibleItems.length;
       
       // Dynamically set columns based on number of items
@@ -2211,19 +2170,19 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             const itemContent = (
                 <motion.div 
                   className="flex flex-col items-center w-full"
-                  initial={isMobile ? false : { opacity: 0, y: 20 }}
-                  animate={isMobile ? false : { opacity: 1, y: 0 }}
-                  transition={isMobile ? {} : { 
-                    duration: 0.3,
-                    delay: idx * 0.02,
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.5,
+                    delay: idx * 0.08,
                     ease: smoothEase
                   }}
                 >
                   <motion.div 
                 className="aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative w-full" 
                     style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}
-                    whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
-                    transition={isMobile ? {} : { duration: 0.3, ease: smoothEase}}
+                    whileHover={{ borderColor: '#ffffff' }}
+                    transition={{ duration: 0.3, ease: smoothEase}}
                   >
                   
                   {item.coverImage && (
@@ -2232,8 +2191,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       alt={item.title || ''} 
                       crossOrigin="anonymous" 
                       className="w-full h-full object-cover rounded-lg"
-                      whileHover={isMobile ? {} : hoverImage}
-                      loading="lazy"
+                      whileHover={hoverImage}
                     />
                   )}
                   
@@ -2274,7 +2232,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {/* Colorful abstract shapes background */}
               
               <div className="relative z-20 w-full flex flex-col items-center justify-center">
-              <motion.div {...getFadeIn(isMobile)} data-framer-motion className="mt-16 w-full flex flex-col items-center">
+              <motion.div {...fadeIn} data-framer-motion className="mt-16 w-full flex flex-col items-center">
                   <div className="relative inline-block text-center">
                     <h1 className="wrapped-brand text-white/70 relative z-10 text-center">
                       {stats.selectedYear === 'all' ? 'MyAnimeList' : 'MyAnimeList ' + stats.selectedYear}
@@ -2285,10 +2243,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                   <p className="body-md font-regular text-white mt-8 text-center text-container max-w-2xl mx-auto">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
               </motion.div>
-                <motion.div 
-                  className="mt-4 w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
-                  variants={getStaggerItem(isMobile)}
-                >
+              <motion.div 
+                className="mt-4 w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
+                variants={staggerItem}
+              >
                 <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 z-20">
                   <motion.a
                     href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
@@ -2298,7 +2256,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
-                    whileHover={isMobile ? {} : { scale: 1.05 }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <img 
@@ -2319,7 +2277,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         if (stats.thisYearAnime.length === 0) {
           return (
             <SlideLayout bgColor="blue">
-              <motion.div className="text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.div className="text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                 <h2 className="heading-md text-white mb-4 text-container">
                   You didn't watch any anime {stats.selectedYear === 'all' ? '' : 'in ' + stats.selectedYear}.
                 </h2>
@@ -2331,7 +2289,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block bg-white text-black font-medium text-lg px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
-                  whileHover={isMobile ? {} : { scale: 1.05 }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Log Anime on MAL
@@ -2347,18 +2305,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             {stats.selectedYear === 'all' ? 'Overall' : 'In ' + stats.selectedYear}, you binged through
             </motion.h2>
-            <motion.div className="mt-4 text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
-                <p className="number-xl text-white ">
-                  <AnimatedNumber value={stats.thisYearAnime.length} isMobile={isMobile} /> anime
+            <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+              <p className="number-xl text-white ">
+                <AnimatedNumber value={stats.thisYearAnime.length} /> anime
               </p>
               
             </motion.div>
             {animeCarouselItems.length > 0 && <div className="relative z-10"><ImageCarousel items={animeCarouselItems} maxItems={10} showHover={true} showNames={false} /></div>}
             {stats.yearComparison && stats.yearComparison.previousAnimeCount > 0 && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 {stats.yearComparison.isAnimeGrowth ? (
                   <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> more than last year. You’re leveling up!</>
                 ) : (
@@ -2367,7 +2325,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </motion.h3>
             )}
             {(!stats.yearComparison || !stats.yearComparison.previousAnimeCount) && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Now that's dedication
               </motion.h3>
             )}
@@ -2384,13 +2342,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         return (
           <SlideLayout bgColor="green">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             That adds up to
             </motion.h2>
-            <motion.div className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.div className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center" {...fadeSlideUp} data-framer-motion>
               <div className="text-center">
-                  <p className="number-lg text-white ">
-                    <AnimatedNumber value={stats.totalEpisodes || 0} isMobile={isMobile} />
+                <p className="number-lg text-white ">
+                  <AnimatedNumber value={stats.totalEpisodes || 0} />
                 </p>
                 <p className="body-md text-white font-medium">episodes</p>
                 <p className="body-sm text-white/70 mt-2 font-regular">and</p>
@@ -2399,7 +2357,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {stats.watchDays > 0 ? (
                   <>
                     <p className="number-lg text-white ">
-                      <AnimatedNumber value={stats.watchDays} isMobile={isMobile} />
+                      <AnimatedNumber value={stats.watchDays} />
                     </p>
                     <p className="body-md text-white font-medium">days</p>
                     <p className="body-sm text-white/70 mt-2 font-regular">of nonstop binge</p>
@@ -2407,7 +2365,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 ) : (
                   <>
                     <p className="number-lg text-white ">
-                      <AnimatedNumber value={stats.watchTime} isMobile={isMobile} />
+                      <AnimatedNumber value={stats.watchTime} />
                     </p>
                     <p className="heading-md text-white font-medium">hours</p>
                     <p className="body-sm text-white/70 mt-2 font-regular">of nonstop binge</p>
@@ -2442,12 +2400,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const otherGenres = stats.topGenres?.slice(1, 5) || [];
         return (
           <SlideLayout  bgColor="yellow">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You kept coming back to the same genres
             </motion.h2>
             {topGenre ? (
               <>
-                <motion.div className="mt-4 text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                   <p className="heading-lg font-semibold text-white "><span className="body-xs font-regular text-white/70">1.</span> {topGenre}</p>
                   <p className="body-xs text-white/70 font-regular">{stats.topGenres[0][1]} series</p>
                 </motion.div>
@@ -2455,10 +2413,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {otherGenres.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-1.5 md:gap-2 relative z-10">
                     {otherGenres.map(([genreName, count], idx) => (
-                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={getStaggerItem(isMobile)}>
+                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
                           className="bg-black/70 rounded-xl p-2 h-full"
-                          whileHover={isMobile ? {} : { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                          whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate"><span className="body-xs font-regular text-white/70">{idx + 2}.</span> {genreName}</p>
@@ -2470,12 +2428,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                   
                 )}
-                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>You know what you love
+                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You know what you love
             </motion.h3>
               </>
               
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>No genres topped your list
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>No genres topped your list
             </motion.h3>
             )}
             
@@ -2497,7 +2455,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           return (
             <SlideLayout>
             {phase === 0 ? (
-              <motion.div className="text-center relative overflow-hidden z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.div className="text-center relative overflow-hidden z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.div 
                   className="relative z-10 mb-6 flex items-center justify-center"
                   {...pulse} 
@@ -2520,7 +2478,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: 0, ease: smoothEase }}
-                    whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
+                    whileHover={{ borderColor: '#ffffff' }}
                   >
                     {topItem.node?.main_picture?.large && (
                       <motion.img 
@@ -2528,8 +2486,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         alt={topItem.node.title} 
                         crossOrigin="anonymous" 
                         className="w-full h-full object-cover rounded-lg"
-                        whileHover={isMobile ? {} : hoverImage}
-                        loading="lazy"
+                        whileHover={hoverImage}
                       />
                     )}
                   </motion.div>
@@ -2586,8 +2543,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
           return (
             <SlideLayout>
-              <motion.div className="relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
-                <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
+                <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                   Including your top pick, these anime stole the spotlight
                 </motion.h2>
                 <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
@@ -2604,7 +2561,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         >
                           <motion.div 
                             className="bg-black/70 rounded-xl w-full h-full flex flex-row items-center relative z-10"
-                            whileHover={isMobile ? {} : { backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                            whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                             transition={{ duration: 0.3, ease: smoothEase }}
                           >
                             <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm md:text-base">1</div>
@@ -2614,8 +2571,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative z-10 aspect-[2/3] max-h-[225px]" 
                               style={{ boxSizing: 'border-box' }}
-                                  whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
-                                  transition={isMobile ? {} : { duration: 0.3, ease: smoothEase}}
+                                  whileHover={{ borderColor: '#ffffff' }}
+                                  transition={{ duration: 0.3, ease: smoothEase}}
                                 >
                                   {featured.coverImage && (
                                     <motion.img 
@@ -2623,8 +2580,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                       crossOrigin="anonymous" 
                                       alt={featured.title} 
                                       className="w-full h-full object-cover rounded-xl"
-                                      whileHover={isMobile ? {} : hoverImage}
-                                      loading="lazy"
+                                      whileHover={hoverImage}
                                     />
                                   )}
                                 </motion.div>
@@ -2685,8 +2641,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative w-full z-10 aspect-[2/3] max-h-[175px]" 
                                   style={{ boxSizing: 'border-box' }}
-                                    whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
-                                    transition={isMobile ? {} : { duration: 0.3, ease: smoothEase}}
+                                    whileHover={{ borderColor: '#ffffff' }}
+                                    transition={{ duration: 0.3, ease: smoothEase}}
                                   >
                                     <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm">{index + 2}</div>
                                     {item.coverImage && (
@@ -2695,8 +2651,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                         alt={item.title} 
                                         crossOrigin="anonymous" 
                                         className="w-full h-full object-cover rounded-xl"
-                                        whileHover={isMobile ? {} : hoverImage}
-                                        loading="lazy"
+                                        whileHover={hoverImage}
                                       />
                                     )}
                                   </motion.div>
@@ -2727,7 +2682,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     );
                   })()}
                 </div>
-                <motion.h2 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>A lineup worth bragging about</motion.h2>
+                <motion.h2 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h2>
               </motion.div>
             </SlideLayout>
           );
@@ -2752,13 +2707,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="red">
             <div className="text-center relative">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             These studios defined your watchlist
             </motion.h2>
             </div>
             {topStudio ? (
               <>
-                <motion.div className="mt-4 text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                   <p className="heading-lg font-semibold text-white "><span className="heading-md font-regular text-white/70">1.</span> {topStudio}</p>
                   <p className="body-sm text-white/70 font-regular">{stats.topStudios[0][1]} series</p>
                 </motion.div>
@@ -2768,10 +2723,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {otherStudios.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherStudios.map(([studioName, count], idx) => (
-                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={getStaggerItem(isMobile)}>
+                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
                           className="bg-black/70 rounded-xl p-2 h-full"
-                          whileHover={isMobile ? {} : { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                          whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate"><span className="heading-xs font-regular text-white/70">{idx + 2}.</span> {studioName}</p>
@@ -2782,12 +2737,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                   
                 )}
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container mt-4 relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
                 You know who gets the job done
             </motion.h3>
               </>
             ) : (
-              <motion.h3 className="body-md font-regular text-white/70 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-md font-regular text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             No studios showed up enough to be counted
             </motion.h3>
             )}
@@ -2801,7 +2756,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         if (!hasAnySeasonalData) {
           return (
             <SlideLayout bgColor="pink">
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 You didn't follow any seasonal anime this time
               </motion.h3>
             </SlideLayout>
@@ -2811,7 +2766,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="pink">
             <div className="text-center relative">
-              <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               Each season dropped something special
             </motion.h2>
             </div>
@@ -2830,13 +2785,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     key={season} 
                     className="rounded-xl" 
                     style={{ padding: '2px' }}
-                    variants={getStaggerItem(isMobile)}
+                    variants={staggerItem}
                     initial="initial"
                     animate="animate"
                   >
                     <motion.div 
                       className="bg-black/70 rounded-xl p-2 h-full"
-                      whileHover={isMobile ? {} : { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                      whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                       transition={{ duration: 0.3, ease: smoothEase }}
                     >
                       <h3 className="heading-md font-semibold text-white mb-1 sm:mb-2 text-sm sm:text-base">{season}{seasonYear}</h3>
@@ -2855,8 +2810,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                     alt={highlight.node.title} 
                                     crossOrigin="anonymous" 
                                     className="w-full h-full object-cover rounded-xl"
-                                    whileHover={isMobile ? {} : hoverImage}
-                                    loading="lazy"
+                                    whileHover={hoverImage}
                                   />
                             )}
                               </div>  
@@ -2875,7 +2829,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 );
               })}
             </div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>You caught every wave right on time
+            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You caught every wave right on time
             </motion.h3>
           </SlideLayout>
         );
@@ -2884,7 +2838,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         if (!stats.rareAnimeGems || stats.rareAnimeGems.length === 0) {
           return (
             <SlideLayout bgColor="blue">
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 No hidden gems discovered this time
               </motion.h3>
             </SlideLayout>
@@ -2899,10 +2853,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               You spotted quality where few were looking
             </motion.h2>
-            <motion.div className="mt-4 relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.div className="mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
               {rareAnimeItems.map((item, idx) => (
                 <motion.div
                   key={idx}
@@ -2914,7 +2868,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 >
                   <motion.div
                     className="bg-black/70 rounded-xl p-2 md:p-4 flex items-center gap-4"
-                    whileHover={isMobile ? {} : { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     {item.coverImage && (
@@ -2929,7 +2883,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           alt={item.title}
                           className="w-16 md:w-20 h-24 md:h-28 object-cover rounded-lg cursor-pointer"
                           crossOrigin="anonymous"
-                          whileHover={isMobile ? {} : { scale: 1.05 }}
+                          whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.2, ease: smoothEase }}
                         />
                       </a>
@@ -2950,7 +2904,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You found <span className="text-white font-semibold">{stats.hiddenGemsAnimeCount ?? 0}</span> such anime. A true hidden-gem hunter
             </motion.h3>
           </SlideLayout>
@@ -2965,17 +2919,17 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout  bgColor="red">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You rated these anime the lowest
             </motion.h2>
             {didntLand.length > 0 ? (
-              <motion.div className="relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={didntLand} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>Not everything hit the way you hoped
+                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Not everything hit the way you hoped
             </motion.h3>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>Nothing rated low, because nothing was rated at all</motion.h3>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Nothing rated low, because nothing was rated at all</motion.h3>
             )}
             
           </SlideLayout>
@@ -2989,16 +2943,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout  bgColor="green">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You planned to watch these anime
             </motion.h2>
             {plannedAnimeItems.length > 0 ? (
-              <motion.div className="relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedAnimeItems} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>One day you’ll get to them… probably</motion.h3>
+                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>One day you’ll get to them… probably</motion.h3>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>You didn’t add anything to your plan-to-watch list</motion.h3>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You didn’t add anything to your plan-to-watch list</motion.h3>
             )}
           </SlideLayout>
         );
@@ -3006,7 +2960,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       case 'anime_to_manga_transition':
         return (
           <SlideLayout bgColor="black">
-            <motion.div className="text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.div className="text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <motion.div 
                 className="relative z-10 mb-6 flex items-center justify-center"
                 data-framer-motion
@@ -3017,10 +2971,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain"
                 />
               </motion.div>
-              <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Now let's see what you've been reading
               </motion.h2>
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 From screens to pages
               </motion.h3>
             </motion.div>
@@ -3051,7 +3005,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         if (allMangaItems.length === 0) {
           return (
             <SlideLayout bgColor="yellow">
-              <motion.div className="text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.div className="text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                 <h2 className="heading-md text-white mb-4 text-container">
                   You didn't read any manga {stats.selectedYear === 'all' ? '' : 'in ' + stats.selectedYear}.
                 </h2>
@@ -3063,7 +3017,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block bg-white text-black font-medium text-lg px-8 py-3 rounded-full hover:bg-gray-100 transition-colors"
-                  whileHover={isMobile ? {} : { scale: 1.05 }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Log Manga on MAL
@@ -3075,17 +3029,17 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         return (
           <SlideLayout bgColor="yellow">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             {stats.selectedYear === 'all' ? 'Till now' : 'In ' + stats.selectedYear}, you read through
             </motion.h2>
-            <motion.div className="mt-4 text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
-                <p className="number-xl text-white ">
-                  <AnimatedNumber value={stats.totalManga} isMobile={isMobile} /> manga
+            <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+              <p className="number-xl text-white ">
+                <AnimatedNumber value={stats.totalManga} /> manga
               </p>
             </motion.div>
             {allMangaItems.length > 0 && <ImageCarousel items={allMangaItems} maxItems={10} showHover={true} showNames={false} />}
             {stats.yearComparison && stats.yearComparison.previousMangaCount > 0 && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 {stats.yearComparison.isMangaGrowth ? (
                   <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> more than last year. Your library is growing!</>
                 ) : (
@@ -3094,7 +3048,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </motion.h3>
             )}
             {(!stats.yearComparison || !stats.yearComparison.previousMangaCount) && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 That's some serious reading energy
               </motion.h3>
             )}
@@ -3111,13 +3065,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             That's
             </motion.h2>
-            <motion.div className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.div className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center" {...fadeSlideUp} data-framer-motion>
               <div className="text-center">
-                  <p className="number-lg text-white ">
-                    <AnimatedNumber value={stats.totalChapters || 0} isMobile={isMobile} />
+                <p className="number-lg text-white ">
+                  <AnimatedNumber value={stats.totalChapters || 0} />
                 </p>
                 <p className="body-md text-white font-regular">chapters</p>
                 <p className="body-sm text-white/70 mt-2 font-regular">and</p>
@@ -3125,7 +3079,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {stats.mangaDays > 0 ? (
                 <div className="text-center">
                   <p className="number-lg text-white ">
-                    <AnimatedNumber value={stats.mangaDays} isMobile={isMobile} />
+                    <AnimatedNumber value={stats.mangaDays} />
                   </p>
                   <p className="body-md text-white font-regular">days</p>
                   <p className="body-sm text-white/70 mt-2 font-regular">spent flipping pages</p>
@@ -3133,7 +3087,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               ) : (
                 <div className="text-center">
                   <p className="number-lg text-white ">
-                    <AnimatedNumber value={stats.mangaHours || 0} isMobile={isMobile} />
+                    <AnimatedNumber value={stats.mangaHours || 0} />
                   </p>
                   <p className="heading-md text-white font-medium">hours</p>
                   <p className="body-sm text-white/70 mt-2 font-regular">spent flipping pages</p>
@@ -3207,12 +3161,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const otherMangaGenres = topMangaGenreList.slice(1, 5);
         return (
           <SlideLayout  bgColor="yellow">
-          <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+          <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
           These genres kept you hooked
             </motion.h2>
             {topMangaGenre ? (
               <>
-                <motion.div className="mt-4 text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                   <p className="heading-lg font-semibold text-white "><span className="body-xs font-regular text-white/70">1.</span> {topMangaGenre[0]}</p>
                   <p className="body-xs text-white/70 font-regular">{topMangaGenre[1]} manga</p>
                 </motion.div>
@@ -3223,7 +3177,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
                       className="bg-black/70 rounded-xl p-2 h-full"
-                          whileHover={isMobile ? {} : { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                          whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate"><span className="body-xs font-regular text-white/70">{idx + 2}.</span> {genreName}</p>
@@ -3233,13 +3187,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     ))}
                   </div>
                 )}
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Clearly, you have a type
             </motion.h3>
               </>
               
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 No genres rose to the top
             </motion.h3>)}
           </SlideLayout>
@@ -3260,7 +3214,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           return (
             <SlideLayout>
               {phase === 0 ? (
-                <motion.div className="text-center relative overflow-hidden z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.div className="text-center relative overflow-hidden z-10" {...fadeSlideUp} data-framer-motion>
                   <motion.div 
                     className="relative z-10 mb-6 flex items-center justify-center"
                     {...pulse} 
@@ -3283,7 +3237,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3, delay: 0, ease: smoothEase }}
-                      whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
+                      whileHover={{ borderColor: '#ffffff' }}
                     >
                       {topItem.node?.main_picture?.large && (
                         <motion.img 
@@ -3291,8 +3245,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           alt={topItem.node.title} 
                           crossOrigin="anonymous" 
                           className="w-full h-full object-cover rounded-lg"
-                          whileHover={isMobile ? {} : hoverImage}
-                          loading="lazy"
+                          whileHover={hoverImage}
                         />
                       )}
                     </motion.div>
@@ -3351,8 +3304,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
           return (
             <SlideLayout>
-              <motion.div className="relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
-                <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
+                <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                   These manga ruled your shelves
                 </motion.h2>
                 <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
@@ -3369,7 +3322,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         >
                           <motion.div 
                             className="bg-black/70 rounded-xl w-full h-full flex flex-row items-center relative z-10"
-                            whileHover={isMobile ? {} : { backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                            whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                             transition={{ duration: 0.3, ease: smoothEase }}
                           >
                             <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm md:text-base">1</div>
@@ -3379,8 +3332,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative z-10" 
                                   style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '225px' }}
-                                  whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
-                                  transition={isMobile ? {} : { duration: 0.3, ease: smoothEase}}
+                                  whileHover={{ borderColor: '#ffffff' }}
+                                  transition={{ duration: 0.3, ease: smoothEase}}
                                 >
                                   {featured.coverImage && (
                                     <motion.img 
@@ -3388,8 +3341,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                       crossOrigin="anonymous" 
                                       alt={featured.title} 
                                       className="w-full h-full object-cover rounded-xl"
-                                      whileHover={isMobile ? {} : hoverImage}
-                                      loading="lazy"
+                                      whileHover={hoverImage}
                                     />
                                   )}
                                 </motion.div>
@@ -3450,8 +3402,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative w-full z-10" 
                                   style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '175px' }}
-                                    whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
-                                    transition={isMobile ? {} : { duration: 0.3, ease: smoothEase}}
+                                    whileHover={{ borderColor: '#ffffff' }}
+                                    transition={{ duration: 0.3, ease: smoothEase}}
                                   >
                                     <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm">{index + 2}</div>
                                     {item.coverImage && (
@@ -3460,8 +3412,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                         alt={item.title} 
                                         crossOrigin="anonymous" 
                                         className="w-full h-full object-cover rounded-xl"
-                                        whileHover={isMobile ? {} : hoverImage}
-                                        loading="lazy"
+                                        whileHover={hoverImage}
                                       />
                                     )}
                                   </motion.div>
@@ -3492,7 +3443,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     );
                   })()}
                 </div>
-                <motion.h2 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>A lineup worth bragging about</motion.h2>
+                <motion.h2 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h2>
               </motion.div>
             </SlideLayout>
           );
@@ -3548,12 +3499,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const otherAuthors = stats.topAuthors?.slice(1, 5) || [];
         return (
           <SlideLayout  bgColor="pink">
-          <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+          <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
           These authors kept appearing across your reads
             </motion.h2>
             {topAuthor ? (
               <>
-                <motion.div className="mt-4 text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                   <p className="heading-lg font-semibold text-white "><span className="body-xs font-regular text-white/70">1.</span> {topAuthor}</p>
                   <p className="body-xs text-white/70 font-regular">{stats.topAuthors[0][1]} titles</p>
                 </motion.div>
@@ -3563,10 +3514,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {otherAuthors.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherAuthors.map(([authorName, count], idx) => (
-                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={getStaggerItem(isMobile)}>
+                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
                           className="bg-black/70 rounded-xl p-4 h-full"
-                          whileHover={isMobile ? {} : { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                          whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                           transition={{ duration: 0.3 , ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate"><span className="body-xs font-regular text-white/70">{idx + 2}.</span> {authorName}</p>
@@ -3578,13 +3529,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                   
                 )}
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 You know who delivers good writing
             </motion.h3>
               </>
               
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 No author took the spotlight
             </motion.h3>
             )}
@@ -3595,7 +3546,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         if (!stats.rareMangaGems || stats.rareMangaGems.length === 0) {
           return (
             <SlideLayout bgColor="blue">
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 No hidden gems found yet
               </motion.h3>
             </SlideLayout>
@@ -3610,10 +3561,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               These low-profile reads turned out surprisingly strong
             </motion.h2>
-            <motion.div className="mt-4 relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.div className="mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
               {rareMangaItems.map((item, idx) => (
                 <motion.div
                   key={idx}
@@ -3625,7 +3576,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 >
                   <motion.div
                     className="bg-black/70 rounded-xl p-2 md:p-4 flex items-center gap-4"
-                    whileHover={isMobile ? {} : { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     {item.coverImage && (
@@ -3640,7 +3591,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           alt={item.title}
                           className="w-16 md:w-20 h-24 md:h-28 object-cover rounded-lg cursor-pointer"
                           crossOrigin="anonymous"
-                          whileHover={isMobile ? {} : { scale: 1.05 }}
+                          whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.2, ease: smoothEase }}
                         />
                       </a>
@@ -3661,7 +3612,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You found <span className="text-white font-semibold">{stats.hiddenGemsMangaCount ?? 0}</span> such titles. Not everyone finds gems like these
             </motion.h3>
           </SlideLayout>
@@ -3676,18 +3627,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout  bgColor="red">
-          <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+          <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
           These manga weren't to your taste
             </motion.h2>
             {mangaDidntLand.length > 0 ? (
-              <motion.div {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={mangaDidntLand} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Even great readers hit a few misses
             </motion.h3>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Nothing rated low, rather nothing rated at all
             </motion.h3>
             )}
@@ -3702,18 +3653,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout  bgColor="green">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You planned to read these manga, but haven't yet
             </motion.h2>
             {plannedMangaItems.length > 0 ? (
-              <motion.div {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedMangaItems} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...getFadeSlideUp(isMobile)} data-framer-motion>
+                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 The backlog continues to grow...
             </motion.h3>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...getFadeSlideUp(isMobile)} data-framer-motion>
+              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 No manga added to your plan-to-read list
             </motion.h3>
             )}
@@ -3728,12 +3679,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const milestonePercent = Math.min(100, Math.max(1, Math.round((milestoneCount / 1000000) * 100))); // Rough estimate
         return (
           <SlideLayout bgColor="yellow">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               You hit a major milestone!
             </motion.h2>
-            <motion.div className="mt-4 text-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white">
-                <AnimatedNumber value={milestoneCount} isMobile={isMobile} />
+                <AnimatedNumber value={milestoneCount} />
               </p>
               <p className="heading-md text-white font-semibold mt-2">
                 completed anime
@@ -3742,7 +3693,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 That's a milestone shared by only the top {milestonePercent}% of MAL users!
               </p>
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               Keep the momentum going!
             </motion.h3>
           </SlideLayout>
@@ -3765,10 +3716,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         return (
           <SlideLayout bgColor="purple">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               You earned some impressive badges
             </motion.h2>
-            <motion.div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-2 max-w-3xl mx-auto relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-2 max-w-3xl mx-auto relative z-10" {...fadeSlideUp} data-framer-motion>
               {stats.badges.map((badge, idx) => (
                 <motion.div
                   key={badge.type}
@@ -3780,8 +3731,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 >
                   <motion.div
                     className="bg-black/60 rounded-xl p-2 md:p-4 h-full"
-                    whileHover={isMobile ? {} : { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)'}}
-                    transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
+                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)'}}
+                    transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     <div className="flex items-center gap-3">
                       <motion.div
@@ -3809,7 +3760,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               Your dedication shows!
             </motion.h3>
           </SlideLayout>
@@ -3821,17 +3772,17 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const characterImage = stats.characterTwin.characterImage || stats.characterTwin.coverImage || '/anime-character.webp';
         return (
           <SlideLayout bgColor="pink">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             Your anime doppelgänger
             </motion.h2>
-            <motion.div className="mt-6 flex flex-col items-center relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 mb-4">
                 <motion.div
                   className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.6, ease: smoothEase }}
-                  whileHover={isMobile ? {} : { scale: 1.05 }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <img
@@ -3851,7 +3802,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               )}
              
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...getFadeSlideUp(isMobile)} data-framer-motion>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             {(() => {
               const reason = stats.characterTwin.reason;
               const characterName = stats.characterTwin.title;
@@ -3971,7 +3922,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
-                    whileHover={isMobile ? {} : { scale: 1.05 }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <img 
@@ -4249,7 +4200,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                 </motion.div>
                 <motion.p className="mt-8 body-md text-white/70 text-center text-container max-w-2xl mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
-              <motion.div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center w-full" {...getFadeIn(isMobile)} data-framer-motion>
+              <motion.div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center w-full" {...fadeIn} data-framer-motion>
                   <motion.button
                   onClick={handleBegin}
                     className="bg-white text-black font-medium text-lg px-8 py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
@@ -4261,7 +4212,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               Connect with MAL
                   </motion.button>
                 </motion.div>
-                <motion.div className="mt-16 flex flex-col items-center w-full" {...getFadeIn(isMobile)} data-framer-motion>
+                <motion.div className="mt-16 flex flex-col items-center w-full" {...fadeIn} data-framer-motion>
                   
                   <motion.img
                     src="/avatar.webp"
@@ -4279,7 +4230,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-white/70 hover:text-white transition-colors underline"
-                      whileHover={isMobile ? {} : { scale: 1.05 }}
+                      whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
                       XAvishkar
