@@ -1336,7 +1336,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         series: bestMatch.series,
         genre: genreText,
         reason: matchingGenreNames !== 'anime'
-          ? `Based on your love for ${matchingGenreNames}, ${<span className="font-bold">{bestMatch.name}</span>} from '${<span className="font-bold">{bestMatch.series}</span>}' matches your vibes`
+          ? `Based on your love for ${matchingGenreNames}, ${bestMatch.name} from '${bestMatch.series}' matches your vibes`
           : `${bestMatch.name} from "${bestMatch.series}" matches your anime journey`,
         coverImage: '/anime-character.webp', // Will be updated with character image
         type: 'character',
