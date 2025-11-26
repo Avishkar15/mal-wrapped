@@ -2337,7 +2337,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 <h2 className="heading-md text-white mb-4 text-container">
                   You didn't watch any anime {stats.selectedYear === 'all' ? '' : 'in ' + stats.selectedYear}.
                 </h2>
-                <p className="body-md text-white/80 mb-6 text-container">
+                <p className="body-md text-white/70 mb-6 text-container">
                   Log your watched anime on MyAnimeList to see your personalized wrapped!
                 </p>
                 <motion.a
@@ -3065,7 +3065,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 <h2 className="heading-md text-white mb-4 text-container">
                   You didn't read any manga {stats.selectedYear === 'all' ? '' : 'in ' + stats.selectedYear}.
                 </h2>
-                <p className="body-md text-white/80 mb-6 text-container">
+                <p className="body-md text-white/70 mb-6 text-container">
                   Log your read manga on MyAnimeList to see your personalized wrapped!
                 </p>
                 <motion.a
@@ -3779,7 +3779,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {stats.badges.map((badge, idx) => (
                 <motion.div
                   key={badge.type}
-                  className="rounded-xl overflow-hidden"
+                  className={`rounded-xl overflow-hidden ${idx >= 3 ? 'hidden md:block' : ''}`}
                   style={{ padding: '2px' }}
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -3829,7 +3829,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="pink">
             <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            Your anime doppelgänger is…
+            Your anime doppelgänger
             </motion.h2>
             <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 mb-4">
@@ -3852,14 +3852,72 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   />
                 </motion.div>
               </div>
-              <p className="heading-lg text-white font-bold text-center">{stats.characterTwin.title}</p>
+              <p className="heading-lg text-white font-semibold text-center">{stats.characterTwin.title}</p>
               {stats.characterTwin.series && (
-                <p className="body-md text-white/60 font-bold text-center">{stats.characterTwin.series}</p>
+                <p className="body-md text-white/70 text-center">{stats.characterTwin.series}</p>
               )}
              
             </motion.div>
             <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {stats.characterTwin.reason}
+            {(() => {
+              const reason = stats.characterTwin.reason;
+              const characterName = stats.characterTwin.title;
+              const seriesName = stats.characterTwin.series;
+              
+              if (!characterName || !seriesName) {
+                return reason;
+              }
+              
+              if (reason.includes('Based on your love for')) {
+                // Format: "Based on your love for X, CharacterName from 'SeriesName' matches your vibes"
+                const loveForText = 'Based on your love for';
+                const loveForIndex = reason.indexOf(loveForText);
+                const nameIndex = reason.indexOf(characterName);
+                const seriesIndex = reason.indexOf(seriesName);
+                
+                if (loveForIndex !== -1 && nameIndex !== -1 && seriesIndex !== -1) {
+                  const beforeLoveFor = reason.substring(0, loveForIndex);
+                  const afterLoveFor = reason.substring(loveForIndex + loveForText.length, nameIndex);
+                  const afterName = reason.substring(nameIndex + characterName.length, seriesIndex);
+                  const afterSeries = reason.substring(seriesIndex + seriesName.length);
+                  
+                  return (
+                    <>
+                      {beforeLoveFor}
+                      <span className="font-bold">{loveForText}</span>
+                      {afterLoveFor}
+                      <span className="font-bold">{characterName}</span>
+                      {afterName}
+                      <span className="font-bold">{seriesName}</span>
+                      {afterSeries}
+                    </>
+                  );
+                }
+              } else {
+                // Format: "CharacterName from "SeriesName" matches your anime journey"
+                const nameIndex = reason.indexOf(characterName);
+                const seriesIndex = reason.indexOf(seriesName);
+                
+                if (nameIndex !== -1 && seriesIndex !== -1) {
+                  const beforeName = reason.substring(0, nameIndex);
+                  const afterName = reason.substring(nameIndex + characterName.length, seriesIndex);
+                  const afterSeries = reason.substring(seriesIndex + seriesName.length);
+                  
+                  return (
+                    <>
+                      {beforeName}
+                      <span className="font-bold">{characterName}</span>
+                      {afterName}
+                      <span className="font-bold">{seriesName}</span>
+                      {afterSeries}
+                    </>
+                  );
+                }
+              }
+              
+              // Fallback to plain text if parsing fails
+              return reason;
+            })()}
             </motion.h3>
           </SlideLayout>
         );
@@ -4189,7 +4247,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <div className="mt-20 relative z-20 w-full flex flex-col items-center justify-center">
                 <motion.div {...fadeIn100} data-framer-motion className="mt-16 w-full flex flex-col items-center">
                   <div className="relative inline-block text-center">
-                    <h1 className="wrapped-brand text-white/60 mb-1 relative z-10 text-center">
+                    <h1 className="wrapped-brand text-white/70 mb-1 relative z-10 text-center">
                       MyAnimeList
                     </h1>
                     <h2 className="wrapped-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white relative z-10 text-center">
@@ -4197,7 +4255,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     </h2>
                   </div>
                 </motion.div>
-                <motion.p className="mt-8 body-md text-white/80 text-center text-container max-w-2xl mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
+                <motion.p className="mt-8 body-md text-white/70 text-center text-container max-w-2xl mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
               <motion.div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center w-full" {...fadeIn} data-framer-motion>
                   <motion.button
                   onClick={handleBegin}
@@ -4221,13 +4279,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     transition={{ duration: 0.4, ease: smoothEase }}
                   />
                 </motion.div>
-                <p className="text-sm text-white/60 text-center">
+                <p className="text-sm text-white/70 text-center">
                     Made by{' '}
                     <motion.a
                       href="https://www.avishkarshinde.com/aboutme"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-white/60 hover:text-white transition-colors underline"
+                      className="text-white/70 hover:text-white transition-colors underline"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -4349,7 +4407,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </motion.button>
                 
-                <p className="text-white/60 text-xs sm:text-sm md:text-base font-mono py-1.5 sm:py-2 px-2 sm:px-4 rounded-full border-box-cyan ">
+                <p className="text-white/70 text-xs sm:text-sm md:text-base font-mono py-1.5 sm:py-2 px-2 sm:px-4 rounded-full border-box-cyan ">
                     {`${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`}
                 </p>
 
@@ -4451,7 +4509,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           {/* Left Column - Thanks For Stopping By */}
           <div className="space-y-4 md:flex-1">
             <h3 className="text-xl sm:text-2xl font-bold text-white">Thanks For Stopping By!</h3>
-            <p className="text-white/80 text-sm sm:text-base">Want to see more? Send me an email, or have a snoop of more work below.</p>
+            <p className="text-white/70 text-sm sm:text-base">Want to see more? Send me an email, or have a snoop of more work below.</p>
             <div className="flex items-center gap-3">
               <span className="text-white text-sm sm:text-base">avishkarshinde1501@gmail.com</span>
               <motion.button
@@ -4572,13 +4630,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <div className="flex flex-col sm:flex-row gap-6 md:gap-8 flex-shrink-0">
             {/* Middle Column - PAGES */}
             <div className="space-y-2 md:space-y-4">
-              <h4 className="text-white/60 text-xs md:text-sm font-medium uppercase tracking-wider">PAGES</h4>
+              <h4 className="text-white/70 text-xs md:text-sm font-medium uppercase tracking-wider">PAGES</h4>
               <div className="space-y-1.5 md:space-y-2">
                 <motion.a
                   href="https://www.avishkarshinde.com/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
+                  className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
                   whileHover={{ x: 4 }}
                             >
                   <span>Portfolio</span>
@@ -4588,7 +4646,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   href="https://www.avishkarshinde.com/aboutme"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
+                  className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
                   whileHover={{ x: 4 }}
                             >
                   <span>About Me</span>
@@ -4598,7 +4656,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   href="https://drive.google.com/file/d/1ta3SF0s3Iy7ryy6ON1FKWl1p9iu32iH2/view?usp=sharing"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
+                  className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
                   whileHover={{ x: 4 }}
                             >
                   <span>Resume</span>
@@ -4609,13 +4667,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
             {/* Right Column - WORK */}
             <div className="space-y-2 md:space-y-4">
-            <h4 className="text-white/60 text-xs md:text-sm font-medium uppercase tracking-wider">UX WORK</h4>
+            <h4 className="text-white/70 text-xs md:text-sm font-medium uppercase tracking-wider">UX WORK</h4>
             <div className="space-y-1.5 md:space-y-2">
               <motion.a
                 href="https://www.avishkarshinde.com/spotify"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
               >
                 <span>Spotify</span>
@@ -4625,7 +4683,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 href="https://www.avishkarshinde.com/toyota-mobility-foundation"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
               >
                 <span>Toyota</span>
@@ -4635,7 +4693,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 href="https://www.avishkarshinde.com/solarhive"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
               >
                 <span>SolarHive</span>
@@ -4645,7 +4703,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 href="https://www.avishkarshinde.com/motion-design"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/80 transition-colors group text-sm md:text-base"
+                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
               >
                 <span>Indiana University</span>
@@ -4656,7 +4714,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           </div>
         </div>
         <div className="mt-8 pt-6 border-t border-white/10">
-          <p className="text-white/60 text-sm text-center">© 2025 Designed by <span className="font-semibold">Avishkar Shinde</span></p>
+          <p className="text-white/70 text-sm text-center">© 2025 Designed by <span className="font-semibold">Avishkar Shinde</span></p>
         </div>
       </div>
     </footer>
