@@ -77,8 +77,17 @@ const float = {
   }
 };
 
-// Stagger container variants
-const staggerContainer = {
+// Stagger container variants - simplified on mobile
+const getStaggerContainer = (isMobile) => isMobile ? {
+  initial: { opacity: 0 },
+  animate: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0
+    }
+  }
+} : {
   initial: { opacity: 0 },
   animate: {
     opacity: 1,
@@ -89,7 +98,18 @@ const staggerContainer = {
   }
 };
 
-const staggerItem = {
+const staggerContainer = getStaggerContainer(false); // Default for backward compatibility
+
+const getStaggerItem = (isMobile) => isMobile ? {
+  initial: { opacity: 0 },
+  animate: {
+    opacity: 1,
+    transition: {
+      duration: 0.2,
+      ease: smoothEase
+    }
+  }
+} : {
   initial: { opacity: 0, y: 20 },
   animate: {
     opacity: 1,
@@ -101,11 +121,19 @@ const staggerItem = {
   }
 };
 
+const staggerItem = getStaggerItem(false); // Default for backward compatibility
 
-const hoverImage = {
+
+// Hover effects - disabled on mobile
+const getHoverImage = (isMobile) => isMobile ? {} : {
   scale: 1.1,
   transition: { duration: 0.3, ease: smoothEase }
 };
+
+const hoverImage = getHoverImage(false); // Keep for backward compatibility
+
+// Helper to get hover props conditionally
+const getHoverProps = (isMobile, hoverProps) => isMobile ? {} : hoverProps;
 
 // Animated Number Component using Framer Motion
 function AnimatedNumber({ value, duration = 1.5, className = '' }) {
@@ -204,6 +232,19 @@ export default function MALWrapped() {
   const [emailCopied, setEmailCopied] = useState(false);
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
+  
+  // Detect mobile for simplified animations
+  const [isMobile, setIsMobile] = useState(() => 
+    typeof window !== 'undefined' && window.innerWidth < 768
+  );
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
   const hasManga = stats && mangaList && mangaList.length > 0;
@@ -437,69 +478,73 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     // Helper function to deduplicate items by title
     const deduplicateByTitle = (items) => {
       const map = new Map();
-      items.forEach(item => {
-        const title = item.node?.title || '';
+      for (let i = 0; i < items.length; i++) {
+        const title = items[i].node?.title || '';
         if (title && !map.has(title)) {
-          map.set(title, item);
+          map.set(title, items[i]);
         }
-      });
+      }
       return Array.from(map.values());
     };
     
-    // Filter anime based on selected year
-    // Use finish_date if available, otherwise use start_date or updated_at
-    const filteredAnime = currentYear === 'all' ? anime : anime.filter(item => {
-      const finishDate = item.list_status?.finish_date;
-      const startDate = item.list_status?.start_date;
-      const updatedAt = item.list_status?.updated_at;
-      
-      // Try finish_date first, then start_date, then updated_at
-      let dateToCheck = finishDate || startDate || updatedAt;
-      if (!dateToCheck) return false;
-      
+    // Optimized date parsing helper - cache results
+    const getItemYear = (item) => {
+      const dateStr = item.list_status?.finish_date || item.list_status?.start_date || item.list_status?.updated_at;
+      if (!dateStr) return null;
       try {
-        const year = new Date(dateToCheck).getFullYear();
-        return year === currentYear;
-      } catch (e) {
-        return false;
+        return new Date(dateStr).getFullYear();
+      } catch {
+        return null;
       }
-    });
-
-    const thisYearAnime = filteredAnime;
-
-    // Get anime with ratings (completed or watching) from filtered list
-    const ratedAnime = thisYearAnime.filter(item => {
-      const status = item.list_status?.status;
-      const score = item.list_status?.score;
-      return (status === 'completed' || status === 'watching') && score && score > 0;
-    });
-
-    // Get completed anime for specific stats
-    const completedAnime = thisYearAnime.filter(item => {
-      const status = item.list_status?.status;
-      const score = item.list_status?.score;
-      return status === 'completed' && score && score > 0;
-    });
+    };
     
-    // Calculate genres (from filtered anime)
-    const genreCounts = {};
-    thisYearAnime.forEach(item => {
-      item.node?.genres?.forEach(genre => {
-        genreCounts[genre.name] = (genreCounts[genre.name] || 0) + 1;
-      });
+    // Filter anime based on selected year - single pass
+    const thisYearAnime = currentYear === 'all' ? anime : anime.filter(item => {
+      const year = getItemYear(item);
+      return year === currentYear;
     });
+
+    // Single pass to categorize anime
+    const ratedAnime = [];
+    const completedAnime = [];
+    for (let i = 0; i < thisYearAnime.length; i++) {
+      const item = thisYearAnime[i];
+      const status = item.list_status?.status;
+      const score = item.list_status?.score;
+      if (score && score > 0) {
+        if (status === 'completed' || status === 'watching') {
+          ratedAnime.push(item);
+        }
+        if (status === 'completed') {
+          completedAnime.push(item);
+        }
+      }
+    }
+    
+    // Calculate genres and studios in single pass
+    const genreCounts = {};
+    const studioCounts = {};
+    for (let i = 0; i < thisYearAnime.length; i++) {
+      const item = thisYearAnime[i];
+      const genres = item.node?.genres;
+      if (genres) {
+        for (let j = 0; j < genres.length; j++) {
+          const name = genres[j].name;
+          if (name) genreCounts[name] = (genreCounts[name] || 0) + 1;
+        }
+      }
+      const studios = item.node?.studios;
+      if (studios) {
+        for (let j = 0; j < studios.length; j++) {
+          const name = studios[j].name;
+          if (name) studioCounts[name] = (studioCounts[name] || 0) + 1;
+        }
+      }
+    }
 
     const topGenres = Object.entries(genreCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
-
-    // Calculate studios (from filtered anime)
-    const studioCounts = {};
-    thisYearAnime.forEach(item => {
-      item.node?.studios?.forEach(studio => {
-        studioCounts[studio.name] = (studioCounts[studio.name] || 0) + 1;
-      });
-    });
 
     const topStudios = Object.entries(studioCounts)
       .sort((a, b) => b[1] - a[1])
@@ -543,13 +588,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     const totalEpisodes = thisYearAnime.reduce((sum, item) => 
       sum + (item.list_status?.num_episodes_watched || 0), 0
     );
-    // Calculate unique seasons
+    // Calculate unique seasons - optimized
     const uniqueSeasons = new Set();
-    thisYearAnime.forEach(item => {
-      if (item.node?.start_season?.year && item.node?.start_season?.season) {
-        uniqueSeasons.add(`${item.node.start_season.year}-${item.node.start_season.season}`);
+    for (let i = 0; i < thisYearAnime.length; i++) {
+      const season = thisYearAnime[i].node?.start_season;
+      if (season?.year && season?.season) {
+        uniqueSeasons.add(`${season.year}-${season.season}`);
       }
-    });
+    }
     const totalSeasons = uniqueSeasons.size;
     const avgEpisodeLength = 24; // minutes
     const totalMinutes = totalEpisodes * avgEpisodeLength;
@@ -569,11 +615,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       return season.charAt(0).toUpperCase() + season.slice(1).toLowerCase();
     };
 
-    thisYearAnime.forEach(item => {
+    // Optimized seasonal highlights
+    for (let i = 0; i < thisYearAnime.length; i++) {
+      const item = thisYearAnime[i];
       const startSeason = item.node?.start_season;
-      if (startSeason && startSeason.season && startSeason.year) {
-        // If a specific year is selected, only include anime that released in that year
-        // If 'all' is selected, include all anime with start_season data
+      if (startSeason?.season && startSeason?.year) {
         if (currentYear === 'all' || startSeason.year === currentYear) {
           const season = capitalizeSeason(startSeason.season);
           if (season && seasonalData[season]) {
@@ -584,7 +630,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           }
         }
       }
-    });
+    }
 
     // Get top anime for each season
     const seasonalHighlights = {};
@@ -601,33 +647,28 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       }
     });
 
-    // Manga stats - filter by year
+    // Manga stats - filter by year and categorize in single pass
     const filteredManga = currentYear === 'all' ? manga : manga.filter(item => {
-      const finishDate = item.list_status?.finish_date;
-      const startDate = item.list_status?.start_date;
-      const updatedAt = item.list_status?.updated_at;
-      
-      let dateToCheck = finishDate || startDate || updatedAt;
-      if (!dateToCheck) return false;
-      
-      try {
-        const year = new Date(dateToCheck).getFullYear();
-        return year === currentYear;
-      } catch (e) {
-        return false;
-      }
+      const year = getItemYear(item);
+      return year === currentYear;
     });
 
-    // Get manga with ratings (completed or reading)
-    const ratedManga = filteredManga.filter(item => {
+    // Single pass to categorize manga
+    const ratedManga = [];
+    const completedManga = [];
+    for (let i = 0; i < filteredManga.length; i++) {
+      const item = filteredManga[i];
       const status = item.list_status?.status;
       const score = item.list_status?.score;
-      return (status === 'completed' || status === 'reading') && score && score > 0;
-    });
-
-    const completedManga = filteredManga.filter(item => 
-      item.list_status?.status === 'completed' && item.list_status?.score > 0
-    );
+      if (score && score > 0) {
+        if (status === 'completed' || status === 'reading') {
+          ratedManga.push(item);
+        }
+        if (status === 'completed') {
+          completedManga.push(item);
+        }
+      }
+    }
 
     const topManga = ratedManga
       .sort((a, b) => b.list_status.score - a.list_status.score)
@@ -796,49 +837,50 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
 
 
-    // 3. Streak Calculation (consecutive days watching)
+    // 3. Streak Calculation (consecutive days watching) - optimized
     const watchDates = new Set();
-    thisYearAnime.forEach(item => {
-      const startDate = item.list_status?.start_date;
-      const finishDate = item.list_status?.finish_date;
-      const updatedAt = item.list_status?.updated_at;
-      
-      // Get all dates when user was active
-      [startDate, finishDate, updatedAt].forEach(dateStr => {
+    for (let i = 0; i < thisYearAnime.length; i++) {
+      const item = thisYearAnime[i];
+      const dates = [
+        item.list_status?.start_date,
+        item.list_status?.finish_date,
+        item.list_status?.updated_at
+      ];
+      for (let j = 0; j < dates.length; j++) {
+        const dateStr = dates[j];
         if (dateStr) {
           try {
             const date = new Date(dateStr);
-            const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-            watchDates.add(dateKey);
-          } catch (e) {
+            watchDates.add(date.toISOString().substring(0, 10));
+          } catch {
             // Ignore invalid dates
           }
         }
-      });
-    });
+      }
+    }
     
-    // Calculate longest streak
+    // Calculate longest streak - optimized
     const sortedDates = Array.from(watchDates).sort();
     let longestStreak = 0;
     let currentStreak = 0;
     let lastDate = null;
     
-    sortedDates.forEach(dateStr => {
-      const currentDate = new Date(dateStr);
+    for (let i = 0; i < sortedDates.length; i++) {
+      const currentDate = new Date(sortedDates[i]);
       if (lastDate) {
-        const daysDiff = Math.floor((currentDate - lastDate) / (1000 * 60 * 60 * 24));
+        const daysDiff = Math.floor((currentDate - lastDate) / 86400000);
         if (daysDiff === 1) {
           currentStreak++;
         } else {
-          longestStreak = Math.max(longestStreak, currentStreak);
+          if (currentStreak > longestStreak) longestStreak = currentStreak;
           currentStreak = 1;
         }
       } else {
         currentStreak = 1;
       }
       lastDate = currentDate;
-    });
-    longestStreak = Math.max(longestStreak, currentStreak);
+    }
+    if (currentStreak > longestStreak) longestStreak = currentStreak;
 
     // 4. Badge System - New badge definitions, only top 2
     const badgeCandidates = [];
@@ -853,22 +895,38 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       });
     }
     
-    // The Explorer - 20+ genres and authors
+    // The Explorer - 20+ genres and authors - optimized
     const uniqueGenres = new Set();
-    thisYearAnime.forEach(item => {
-      item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
-    });
+    for (let i = 0; i < thisYearAnime.length; i++) {
+      const genres = thisYearAnime[i].node?.genres;
+      if (genres) {
+        for (let j = 0; j < genres.length; j++) {
+          uniqueGenres.add(genres[j].name);
+        }
+      }
+    }
     // Add manga genres to the same set to avoid duplication
-    filteredManga.forEach(item => {
-      item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
-    });
+    for (let i = 0; i < filteredManga.length; i++) {
+      const genres = filteredManga[i].node?.genres;
+      if (genres) {
+        for (let j = 0; j < genres.length; j++) {
+          uniqueGenres.add(genres[j].name);
+        }
+      }
+    }
     const uniqueAuthors = new Set();
-    filteredManga.forEach(item => {
-      item.node?.authors?.forEach(author => {
-        const name = `${(author.node?.first_name || '').trim()} ${(author.node?.last_name || '').trim()}`.trim();
-        if (name) uniqueAuthors.add(name);
-      });
-    });
+    for (let i = 0; i < filteredManga.length; i++) {
+      const authors = filteredManga[i].node?.authors;
+      if (authors) {
+        for (let j = 0; j < authors.length; j++) {
+          const author = authors[j].node;
+          if (author) {
+            const name = `${(author.first_name || '').trim()} ${(author.last_name || '').trim()}`.trim();
+            if (name) uniqueAuthors.add(name);
+          }
+        }
+      }
+    }
     if (uniqueGenres.size >= 20 || uniqueAuthors.size >= 20) {
       const descText = uniqueGenres.size >= 20 && uniqueAuthors.size >= 20
         ? `Like Luffy, you crave adventure! This year, you explored ${uniqueGenres.size} genres and ${uniqueAuthors.size} authors`
@@ -906,63 +964,55 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       });
     }
     
-    // The Sprinter - Completed a title within 1-3 days
+    // The Sprinter - Completed a title within 1-3 days - optimized
+    let bingeEntry = null;
     if (totalEpisodes >= 1000 || totalChapters >= 2000) {
       const bingeThresholdDays = 3;
-      const bingeAnimeCandidates = thisYearAnime
-        .map(item => {
+      const bingeAnimeCandidates = [];
+      
+      // Single pass for anime
+      for (let i = 0; i < thisYearAnime.length; i++) {
+        const item = thisYearAnime[i];
+        if (item.list_status?.status === 'completed') {
           const episodes = item.list_status?.num_episodes_watched || 0;
           const days = getCompletionDays(item.list_status?.start_date, item.list_status?.finish_date);
-          return {
-            item,
-            episodes,
-            days,
-            status: item.list_status?.status
-          };
-        })
-        .filter(candidate => 
-          candidate.status === 'completed' &&
-          candidate.days !== null &&
-          candidate.days <= bingeThresholdDays &&
-          candidate.episodes > 0
-        )
-        .sort((a, b) => b.episodes - a.episodes);
-      
-      let bingeEntry = bingeAnimeCandidates[0]
-        ? {
-            title: bingeAnimeCandidates[0].item.node?.title || '',
-            amount: bingeAnimeCandidates[0].episodes,
-            unit: 'episodes',
-            days: bingeAnimeCandidates[0].days
+          if (days !== null && days <= bingeThresholdDays && episodes > 0) {
+            bingeAnimeCandidates.push({ item, episodes, days });
           }
-        : null;
+        }
+      }
       
-      if (!bingeEntry) {
-        const bingeMangaCandidates = filteredManga
-          .map(item => {
+      if (bingeAnimeCandidates.length > 0) {
+        bingeAnimeCandidates.sort((a, b) => b.episodes - a.episodes);
+        const best = bingeAnimeCandidates[0];
+        bingeEntry = {
+          title: best.item.node?.title || '',
+          amount: best.episodes,
+          unit: 'episodes',
+          days: best.days
+        };
+      } else {
+        // Single pass for manga
+        const bingeMangaCandidates = [];
+        for (let i = 0; i < filteredManga.length; i++) {
+          const item = filteredManga[i];
+          if (item.list_status?.status === 'completed') {
             const chapters = item.list_status?.num_chapters_read || 0;
             const days = getCompletionDays(item.list_status?.start_date, item.list_status?.finish_date);
-            return {
-              item,
-              chapters,
-              days,
-              status: item.list_status?.status
-            };
-          })
-          .filter(candidate =>
-            candidate.status === 'completed' &&
-            candidate.days !== null &&
-            candidate.days <= bingeThresholdDays &&
-            candidate.chapters > 0
-          )
-          .sort((a, b) => b.chapters - a.chapters);
+            if (days !== null && days <= bingeThresholdDays && chapters > 0) {
+              bingeMangaCandidates.push({ item, chapters, days });
+            }
+          }
+        }
         
-        if (bingeMangaCandidates[0]) {
+        if (bingeMangaCandidates.length > 0) {
+          bingeMangaCandidates.sort((a, b) => b.chapters - a.chapters);
+          const best = bingeMangaCandidates[0];
           bingeEntry = {
-            title: bingeMangaCandidates[0].item.node?.title || '',
-            amount: bingeMangaCandidates[0].chapters,
+            title: best.item.node?.title || '',
+            amount: best.chapters,
             unit: 'chapters',
-            days: bingeMangaCandidates[0].days
+            days: best.days
           };
         }
       }
@@ -1012,28 +1062,34 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       }
     }
     
-    // The Rookie - Started using MAL that year (check if earliest entry is this year)
+    // The Rookie - Started using MAL that year - optimized
     let isRookie = false;
     if (currentYear !== 'all' && typeof currentYear === 'number') {
-      const allAnimeDates = anime
-        .filter(item => item.list_status?.start_date || item.list_status?.finish_date)
-        .map(item => {
-          const dateStr = item.list_status?.start_date || item.list_status?.finish_date;
-          return dateStr ? new Date(dateStr).getFullYear() : null;
-        })
-        .filter(year => year !== null);
-      const allMangaDates = (manga || [])
-        .filter(item => item.list_status?.start_date || item.list_status?.finish_date)
-        .map(item => {
-          const dateStr = item.list_status?.start_date || item.list_status?.finish_date;
-          return dateStr ? new Date(dateStr).getFullYear() : null;
-        })
-        .filter(year => year !== null);
+      let earliestYear = currentYear;
       
-      const earliestYear = Math.min(
-        ...(allAnimeDates.length > 0 ? allAnimeDates : [currentYear]),
-        ...(allMangaDates.length > 0 ? allMangaDates : [currentYear])
-      );
+      // Single pass for anime
+      for (let i = 0; i < anime.length; i++) {
+        const dateStr = anime[i].list_status?.start_date || anime[i].list_status?.finish_date;
+        if (dateStr) {
+          try {
+            const year = new Date(dateStr).getFullYear();
+            if (year < earliestYear) earliestYear = year;
+          } catch {}
+        }
+      }
+      
+      // Single pass for manga
+      if (manga) {
+        for (let i = 0; i < manga.length; i++) {
+          const dateStr = manga[i].list_status?.start_date || manga[i].list_status?.finish_date;
+          if (dateStr) {
+            try {
+              const year = new Date(dateStr).getFullYear();
+              if (year < earliestYear) earliestYear = year;
+            } catch {}
+          }
+        }
+      }
       
       isRookie = earliestYear === currentYear && totalCompleted < 20;
     }
@@ -1975,7 +2031,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         </div>
           <motion.div 
             className="w-full relative z-20"
-            variants={staggerContainer}
+            variants={getStaggerContainer(isMobile)}
             initial="initial"
             animate="animate"
           >
@@ -2002,20 +2058,27 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const [gapSize, setGapSize] = useState('2px');
       const [itemsPerView, setItemsPerView] = useState(3);
       
-      // Deduplicate items by title AND ID to prevent repeats
+      // Disable hover on mobile
+      const effectiveShowHover = showHover && !isMobile;
+      
+      // Optimized deduplication
       const uniqueItemsMap = new Map();
-      items.forEach(item => {
+      const itemsLen = items.length;
+      for (let i = 0; i < itemsLen; i++) {
+        const item = items[i];
         const title = item.title || '';
-        const id = item.malId || item.mangaId || '';
-        const uniqueKey = `${title}-${id}`;
-        if (title && !uniqueItemsMap.has(uniqueKey)) {
-          uniqueItemsMap.set(uniqueKey, item);
+        if (title) {
+          const id = item.malId || item.mangaId || '';
+          const uniqueKey = `${title}-${id}`;
+          if (!uniqueItemsMap.has(uniqueKey)) {
+            uniqueItemsMap.set(uniqueKey, item);
+          }
         }
-      });
+      }
       const uniqueItems = Array.from(uniqueItemsMap.values());
       const visibleItems = uniqueItems.slice(0, maxItems);
       
-      // Update gap size and items per view based on screen width
+      // Update gap size and items per view based on screen width - throttled
       useEffect(() => {
         const updateResponsive = () => {
           if (window.innerWidth >= 640) {
@@ -2027,8 +2090,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           }
         };
         updateResponsive();
-        window.addEventListener('resize', updateResponsive);
-        return () => window.removeEventListener('resize', updateResponsive);
+        let timeoutId;
+        const handleResize = () => {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(updateResponsive, 150);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+          window.removeEventListener('resize', handleResize);
+          clearTimeout(timeoutId);
+        };
       }, []);
       
       const itemWidth = 100 / itemsPerView;
@@ -2050,17 +2121,21 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }
         
         const scrollSpeed = 0.15;
+        const maxScroll = visibleItems.length * itemWidth;
         let animationFrame;
+        let lastTime = performance.now();
         
-        const animate = () => {
-          setScrollPosition((prev) => {
-            const maxScroll = (visibleItems.length * itemWidth);
-            const next = prev + scrollSpeed;
-            if (next >= maxScroll) {
-              return 0;
-            }
-            return next;
-          });
+        const animate = (currentTime) => {
+          const delta = currentTime - lastTime;
+          lastTime = currentTime;
+          
+          // Throttle updates to ~60fps
+          if (delta >= 16) {
+            setScrollPosition((prev) => {
+              const next = prev + scrollSpeed;
+              return next >= maxScroll ? 0 : next;
+            });
+          }
           animationFrame = requestAnimationFrame(animate);
         };
         
@@ -2087,9 +2162,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             maskImage: shouldScroll ? 'none' : 'linear-gradient(to right, black 0%, black 100%)',
             WebkitMaskImage: shouldScroll ? 'none' : 'linear-gradient(to right, black 0%, black 100%)'
           }}
-          onMouseEnter={() => showHover && setIsHovered(true)}
+          onMouseEnter={() => effectiveShowHover && setIsHovered(true)}
           onMouseLeave={() => {
-            showHover && setIsHovered(false);
+            effectiveShowHover && setIsHovered(false);
             setHoveredItem(null);
           }}
         >
@@ -2111,9 +2186,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               const content = (
                 <motion.div 
                   className="flex flex-col flex-shrink-0 items-center w-full"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ 
+                  initial={isMobile ? false : { opacity: 0, scale: 0.9 }}
+                  animate={isMobile ? false : { opacity: 1, scale: 1 }}
+                  transition={isMobile ? {} : { 
                     duration: 0.4,
                     delay: (idx % visibleItems.length) * 0.05,
                     ease: smoothEase
@@ -2122,8 +2197,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <motion.div 
                 className="aspect-[2/3] w-full bg-transparent rounded-lg relative" 
                     style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}
-                    whileHover={{ borderColor: '#ffffff' }}
-                    transition={{ duration: 0.3, ease: smoothEase }}
+                    whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
+                    transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
                   >
                     {item.coverImage && (
                       <motion.img 
@@ -2131,10 +2206,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         alt={item.title || ''} 
                         crossOrigin="anonymous" 
                         className="w-full h-full object-cover rounded-lg"
-                        whileHover={hoverImage}
+                        whileHover={isMobile ? {} : getHoverImage(false)}
                       />
                     )}
-                    {showHover && hoveredItem === actualIndex && item.title && (
+                    {effectiveShowHover && hoveredItem === actualIndex && item.title && (
                       <motion.div 
                         className="absolute inset-0 bg-black/80 flex items-center justify-center p-2 z-10 rounded-lg pointer-events-none"
                         initial={{ opacity: 0 }}
@@ -2226,9 +2301,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             const itemContent = (
                 <motion.div 
                   className="flex flex-col items-center w-full"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
+                  initial={isMobile ? false : { opacity: 0, y: 20 }}
+                  animate={isMobile ? false : { opacity: 1, y: 0 }}
+                  transition={isMobile ? {} : { 
                     duration: 0.5,
                     delay: idx * 0.08,
                     ease: smoothEase
@@ -2237,8 +2312,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <motion.div 
                 className="aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative w-full" 
                     style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}
-                    whileHover={{ borderColor: '#ffffff' }}
-                    transition={{ duration: 0.3, ease: smoothEase}}
+                    whileHover={getHoverProps(isMobile, { borderColor: '#ffffff' })}
+                    transition={isMobile ? {} : { duration: 0.3, ease: smoothEase}}
                   >
                   
                   {item.coverImage && (
@@ -2247,7 +2322,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       alt={item.title || ''} 
                       crossOrigin="anonymous" 
                       className="w-full h-full object-cover rounded-lg"
-                      whileHover={hoverImage}
+                      whileHover={getHoverImage(isMobile)}
                     />
                   )}
                   
@@ -2301,7 +2376,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </motion.div>
               <motion.div 
                 className="mt-4 w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
-                variants={staggerItem}
+                variants={getStaggerItem(isMobile)}
               >
                 <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 z-20">
                   <motion.a
@@ -2312,8 +2387,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={getHoverProps(isMobile, { scale: 1.05 })}
+                    whileTap={isMobile ? {} : { scale: 0.95 }}
                   >
                     <img 
                       src={userImage} 
@@ -2472,8 +2547,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
                           className="bg-black/70 rounded-xl p-2 h-full"
-                          whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
-                          transition={{ duration: 0.3, ease: smoothEase }}
+                          whileHover={getHoverProps(isMobile, { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' })}
+                          transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate"><span className="body-xs font-regular text-white/70">{idx + 2}.</span> {genreName}</p>
                           <p className="body-xs text-white/70 font-regular">{count} series</p>
@@ -2534,7 +2609,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.3, delay: 0, ease: smoothEase }}
-                    whileHover={{ borderColor: '#ffffff' }}
+                    whileHover={getHoverProps(isMobile, { borderColor: '#ffffff' })}
                   >
                     {topItem.node?.main_picture?.large && (
                       <motion.img 
@@ -2542,7 +2617,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         alt={topItem.node.title} 
                         crossOrigin="anonymous" 
                         className="w-full h-full object-cover rounded-lg"
-                        whileHover={hoverImage}
+                        whileHover={getHoverImage(isMobile)}
                       />
                     )}
                   </motion.div>
@@ -2617,8 +2692,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         >
                           <motion.div 
                             className="bg-black/70 rounded-xl w-full h-full flex flex-row items-center relative z-10"
-                            whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
-                            transition={{ duration: 0.3, ease: smoothEase }}
+                            whileHover={getHoverProps(isMobile, { backgroundColor: 'rgba(0, 0, 0, 0.45)' })}
+                            transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
                           >
                             <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm md:text-base">1</div>
                             {(() => {
@@ -2627,8 +2702,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative z-10 aspect-[2/3] max-h-[225px]" 
                               style={{ boxSizing: 'border-box' }}
-                                  whileHover={{ borderColor: '#ffffff' }}
-                                  transition={{ duration: 0.3, ease: smoothEase}}
+                                  whileHover={getHoverProps(isMobile, { borderColor: '#ffffff' })}
+                                  transition={isMobile ? {} : { duration: 0.3, ease: smoothEase}}
                                 >
                                   {featured.coverImage && (
                                     <motion.img 
@@ -2636,7 +2711,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                       crossOrigin="anonymous" 
                                       alt={featured.title} 
                                       className="w-full h-full object-cover rounded-xl"
-                                      whileHover={hoverImage}
+                                      whileHover={getHoverImage(isMobile)}
                                     />
                                   )}
                                 </motion.div>
@@ -2707,7 +2782,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                         alt={item.title} 
                                         crossOrigin="anonymous" 
                                         className="w-full h-full object-cover rounded-xl"
-                                        whileHover={hoverImage}
+                                        whileHover={getHoverImage(isMobile)}
                                       />
                                     )}
                                   </motion.div>
@@ -2782,8 +2857,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
                         <motion.div 
                           className="bg-black/70 rounded-xl p-2 h-full"
-                          whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
-                          transition={{ duration: 0.3, ease: smoothEase }}
+                          whileHover={getHoverProps(isMobile, { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' })}
+                          transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate"><span className="heading-xs font-regular text-white/70">{idx + 2}.</span> {studioName}</p>
                           <p className="mono text-white/70 font-regular">{count} series</p>
@@ -2841,14 +2916,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     key={season} 
                     className="rounded-xl" 
                     style={{ padding: '2px' }}
-                    variants={staggerItem}
+                    variants={getStaggerItem(isMobile)}
                     initial="initial"
                     animate="animate"
                   >
                     <motion.div 
                       className="bg-black/70 rounded-xl p-2 h-full"
-                      whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
-                      transition={{ duration: 0.3, ease: smoothEase }}
+                      whileHover={getHoverProps(isMobile, { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' })}
+                      transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
                     >
                       <h3 className="heading-md font-semibold text-white mb-1 sm:mb-2 text-sm sm:text-base">{season}{seasonYear}</h3>
                     {highlight && (
@@ -2866,7 +2941,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                     alt={highlight.node.title} 
                                     crossOrigin="anonymous" 
                                     className="w-full h-full object-cover rounded-xl"
-                                    whileHover={hoverImage}
+                                    whileHover={getHoverImage(isMobile)}
                                   />
                             )}
                               </div>  
@@ -2939,8 +3014,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           alt={item.title}
                           className="w-16 md:w-20 h-24 md:h-28 object-cover rounded-lg cursor-pointer"
                           crossOrigin="anonymous"
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.2, ease: smoothEase }}
+                          whileHover={getHoverProps(isMobile, { scale: 1.05 })}
+                          transition={isMobile ? {} : { duration: 0.2, ease: smoothEase }}
                         />
                       </a>
                     )}
@@ -3301,7 +3376,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           alt={topItem.node.title} 
                           crossOrigin="anonymous" 
                           className="w-full h-full object-cover rounded-lg"
-                          whileHover={hoverImage}
+                          whileHover={getHoverImage(isMobile)}
                         />
                       )}
                     </motion.div>
@@ -3378,8 +3453,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         >
                           <motion.div 
                             className="bg-black/70 rounded-xl w-full h-full flex flex-row items-center relative z-10"
-                            whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
-                            transition={{ duration: 0.3, ease: smoothEase }}
+                            whileHover={getHoverProps(isMobile, { backgroundColor: 'rgba(0, 0, 0, 0.45)' })}
+                            transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
                           >
                             <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm md:text-base">1</div>
                             {(() => {
@@ -3388,8 +3463,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative z-10" 
                                   style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '225px' }}
-                                  whileHover={{ borderColor: '#ffffff' }}
-                                  transition={{ duration: 0.3, ease: smoothEase}}
+                                  whileHover={getHoverProps(isMobile, { borderColor: '#ffffff' })}
+                                  transition={isMobile ? {} : { duration: 0.3, ease: smoothEase}}
                                 >
                                   {featured.coverImage && (
                                     <motion.img 
@@ -3397,7 +3472,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                       crossOrigin="anonymous" 
                                       alt={featured.title} 
                                       className="w-full h-full object-cover rounded-xl"
-                                      whileHover={hoverImage}
+                                      whileHover={getHoverImage(isMobile)}
                                     />
                                   )}
                                 </motion.div>
@@ -3468,7 +3543,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                         alt={item.title} 
                                         crossOrigin="anonymous" 
                                         className="w-full h-full object-cover rounded-xl"
-                                        whileHover={hoverImage}
+                                        whileHover={getHoverImage(isMobile)}
                                       />
                                     )}
                                   </motion.div>
@@ -3647,8 +3722,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           alt={item.title}
                           className="w-16 md:w-20 h-24 md:h-28 object-cover rounded-lg cursor-pointer"
                           crossOrigin="anonymous"
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.2, ease: smoothEase }}
+                          whileHover={getHoverProps(isMobile, { scale: 1.05 })}
+                          transition={isMobile ? {} : { duration: 0.2, ease: smoothEase }}
                         />
                       </a>
                     )}
@@ -3787,8 +3862,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 >
                   <motion.div
                     className="bg-black/60 rounded-xl p-2 md:p-4 h-full"
-                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)'}}
-                    transition={{ duration: 0.3, ease: smoothEase }}
+                    whileHover={getHoverProps(isMobile, { scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)'})}
+                    transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
                   >
                     <div className="flex items-center gap-3">
                       <motion.div
@@ -3960,14 +4035,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <SlideLayout  bgColor="blue">
                 <motion.div 
               className="w-full h-full flex flex-col items-center justify-center relative z-20 px-4 sm:px-6 md:px-8"
-              variants={staggerContainer}
+              variants={getStaggerContainer(isMobile)}
               initial="initial"
               animate="animate"
             >
               {/* Image with Heading */}
               <motion.div 
                 className="w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
-                variants={staggerItem}
+                variants={getStaggerItem(isMobile)}
               >
                 <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 flex items-center justify-center flex-shrink-0 z-20">
                   <motion.a
@@ -3978,8 +4053,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={getHoverProps(isMobile, { scale: 1.05 })}
+                    whileTap={isMobile ? {} : { scale: 0.95 }}
                   >
                     <img 
                       src={userImage} 
@@ -4005,7 +4080,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <div className="w-full max-w-3xl flex flex-col gap-6 md:gap-8 text-white relative z-20">
                 <motion.div 
                   className="grid grid-cols-2 gap-4 md:gap-6 relative z-20"
-                  variants={staggerItem}
+                  variants={getStaggerItem(isMobile)}
                 >
                   <div className="space-y-1">
                     <p className="body-sm text-white/70 font-medium mb-1">Top Anime</p>
@@ -4031,7 +4106,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
                 <motion.div 
                   className="grid grid-cols-2 gap-4 md:gap-6 relative z-20"
-                  variants={staggerItem}
+                  variants={getStaggerItem(isMobile)}
                 >
                   <div className="space-y-1">
                     {finaleTopGenre && (
@@ -4054,7 +4129,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
                 <motion.div 
                   className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6 relative z-20"
-                  variants={staggerItem}
+                  variants={getStaggerItem(isMobile)}
                 >
                   <div className="space-y-1">
                     <p className="body-sm text-white/70 font-medium mb-1">Watched</p>
@@ -4335,13 +4410,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       backgroundColor: 'rgba(255, 255, 255, 0.05)',
                       border: '1px solid rgba(255, 255, 255, 0.1)'
                     }}
-                    whileHover={{ 
+                    whileHover={getHoverProps(isMobile, { 
                       scale: 1.1, 
                       backgroundColor: 'rgba(16, 185, 129, 0.8)',
                       borderColor: 'rgba(16, 185, 129, 0.8)'
-                    }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
+                    })}
+                    whileTap={isMobile ? {} : { scale: 0.9 }}
+                    transition={isMobile ? {} : { duration: 0.2 }}
                   >
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span className="text-xs sm:text-sm font-medium">Download</span>
@@ -4355,13 +4430,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
                     border: '1px solid rgba(255, 255, 255, 0.1)'
                   }}
-                  whileHover={{ 
+                  whileHover={getHoverProps(isMobile, { 
                     scale: 1.1, 
                     backgroundColor: 'rgba(211, 68, 68, 0.8)',
                     borderColor: 'rgba(211, 68, 68, 0.8)'
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
+                  })}
+                  whileTap={isMobile ? {} : { scale: 0.9 }}
+                  transition={isMobile ? {} : { duration: 0.2 }}
                 >
                   <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="text-xs sm:text-sm font-medium">Log Out</span>
@@ -4400,9 +4475,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
                 disabled={currentSlide === 0}
                   className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30 transition-all"
-                  whileHover={{ scale: currentSlide === 0 ? 1 : 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  transition={{ duration: 0.2 }}
+                  whileHover={getHoverProps(isMobile, { scale: currentSlide === 0 ? 1 : 1.1 })}
+                  whileTap={isMobile ? {} : { scale: 0.9 }}
+                  transition={isMobile ? {} : { duration: 0.2 }}
               >
                   <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </motion.button>
@@ -4418,12 +4493,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         type="button"
                         onClick={handleShareButtonClick}
                         className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
-                        whileHover={{ 
+                        whileHover={getHoverProps(isMobile, { 
                           scale: 1.1, 
                           backgroundColor: 'rgba(64, 101, 204, 0.8)',
                           borderColor: 'rgba(64, 101, 204, 0.8)'
-                        }}
-                        whileTap={{ scale: 0.9 }}
+                        })}
+                        whileTap={isMobile ? {} : { scale: 0.9 }}
                         transition={{ duration: 0.2 }}
                       >
                         <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -4489,9 +4564,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
                   disabled={currentSlide === slides.length - 1}
                   className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30"
-                  whileHover={{ scale: currentSlide === slides.length - 1 ? 1 : 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
+                  whileHover={getHoverProps(isMobile, { scale: currentSlide === slides.length - 1 ? 1 : 1.1 })}
+                    whileTap={isMobile ? {} : { scale: 0.9 }}
+                    transition={isMobile ? {} : { duration: 0.2 }}
                   >
                   <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                   </motion.button>
@@ -4637,7 +4712,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                  whileHover={{ x: 4 }}
+                  whileHover={getHoverProps(isMobile, { x: 4 })}
                             >
                   <span>Portfolio</span>
                   <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -4647,7 +4722,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                  whileHover={{ x: 4 }}
+                  whileHover={getHoverProps(isMobile, { x: 4 })}
                             >
                   <span>About Me</span>
                   <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -4657,7 +4732,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                  whileHover={{ x: 4 }}
+                  whileHover={getHoverProps(isMobile, { x: 4 })}
                             >
                   <span>Resume</span>
                   <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
