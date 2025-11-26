@@ -66,16 +66,7 @@ const pulse = {
   }
 };
 
-const float = {
-  animate: {
-    y: [0, -20, 0],
-    transition: {
-      duration: 8,
-      repeat: Infinity,
-      ease: smoothEase
-    }
-  }
-};
+// Removed unused float animation
 
 // Stagger container variants
 const staggerContainer = {
@@ -284,27 +275,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     } else if (storedToken) {
       fetchUserData(storedToken);
     }
-  }, []);
-
-  // Load Tenor embed script
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    // Check if script is already loaded
-    if (document.querySelector('script[src="https://tenor.com/embed.js"]')) return;
-    
-    const script = document.createElement('script');
-    script.src = 'https://tenor.com/embed.js';
-    script.async = true;
-    document.body.appendChild(script);
-    
-    return () => {
-      // Cleanup script on unmount if needed
-      const existingScript = document.querySelector('script[src="https://tenor.com/embed.js"]');
-      if (existingScript) {
-        existingScript.remove();
-      }
-    };
   }, []);
 
   async function exchangeCodeForToken(code, verifier) {
@@ -3057,15 +3027,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 className="relative z-10 mb-6 flex items-center justify-center"
                 data-framer-motion
               >
-                <div 
-                  className="tenor-gif-embed w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64"
-                  data-postid="2835984824155095854"
-                  data-share-method="host"
-                  data-aspect-ratio="1.76596"
-                  data-width="100%"
-                >
-                  <a href="https://tenor.com/view/konata-reading-manga-reading-manga-konata-reading-gif-2835984824155095854">Konata Reading GIF</a>
-                </div>
+                <img 
+                  src="/manga-character.webp" 
+                  alt="Manga character"
+                  className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain"
+                />
               </motion.div>
               <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Now let's see what you've been reading
@@ -3316,15 +3282,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     {...pulse} 
                     data-framer-motion
                   >
-                    <div 
-                      className="tenor-gif-embed w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64"
-                      data-postid="2835984824155095854"
-                      data-share-method="host"
-                      data-aspect-ratio="1.76596"
-                      data-width="100%"
-                    >
-                      <a href="https://tenor.com/view/konata-reading-manga-reading-manga-konata-reading-gif-2835984824155095854">Konata Reading GIF</a>
-                    </div>
+                    <img 
+                      src="/manga-character.webp" 
+                      alt="Manga character"
+                      className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain"
+                    />
                   </motion.div>
                   <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative">But one manga kept you turning pages nonstop</h2>
                 </motion.div>
