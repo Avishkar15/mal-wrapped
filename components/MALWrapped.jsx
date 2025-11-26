@@ -3283,7 +3283,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     data-framer-motion
                   >
                     <img 
-                      src="/manga-character.webp" 
+                      src="/reading.gif" 
                       alt="Manga character"
                       className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain"
                     />
