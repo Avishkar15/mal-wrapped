@@ -241,7 +241,7 @@ export default function MALWrapped() {
   ] : [];
 
   
-const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, .4) 25%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, .4) 80%, rgba(0, 0, 0, 1) 100%)';
+const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, .4) 25%, rgba(0, 0, 0, 0.3) 60%, rgba(0, 0, 0, .4) 80%, rgba(0, 0, 0, 1) 100%)';
   // Get website URL for watermark
   const websiteUrl = typeof window !== 'undefined' 
     ? window.location.origin.replace(/^https?:\/\//, '').toUpperCase()
