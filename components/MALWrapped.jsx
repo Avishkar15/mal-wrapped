@@ -437,73 +437,69 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     // Helper function to deduplicate items by title
     const deduplicateByTitle = (items) => {
       const map = new Map();
-      for (let i = 0; i < items.length; i++) {
-        const title = items[i].node?.title || '';
+      items.forEach(item => {
+        const title = item.node?.title || '';
         if (title && !map.has(title)) {
-          map.set(title, items[i]);
+          map.set(title, item);
         }
-      }
+      });
       return Array.from(map.values());
     };
     
-    // Optimized date parsing helper - cache results
-    const getItemYear = (item) => {
-      const dateStr = item.list_status?.finish_date || item.list_status?.start_date || item.list_status?.updated_at;
-      if (!dateStr) return null;
+    // Filter anime based on selected year
+    // Use finish_date if available, otherwise use start_date or updated_at
+    const filteredAnime = currentYear === 'all' ? anime : anime.filter(item => {
+      const finishDate = item.list_status?.finish_date;
+      const startDate = item.list_status?.start_date;
+      const updatedAt = item.list_status?.updated_at;
+      
+      // Try finish_date first, then start_date, then updated_at
+      let dateToCheck = finishDate || startDate || updatedAt;
+      if (!dateToCheck) return false;
+      
       try {
-        return new Date(dateStr).getFullYear();
-      } catch {
-        return null;
+        const year = new Date(dateToCheck).getFullYear();
+        return year === currentYear;
+      } catch (e) {
+        return false;
       }
-    };
-    
-    // Filter anime based on selected year - single pass
-    const thisYearAnime = currentYear === 'all' ? anime : anime.filter(item => {
-      const year = getItemYear(item);
-      return year === currentYear;
     });
 
-    // Single pass to categorize anime
-    const ratedAnime = [];
-    const completedAnime = [];
-    for (let i = 0; i < thisYearAnime.length; i++) {
-      const item = thisYearAnime[i];
+    const thisYearAnime = filteredAnime;
+
+    // Get anime with ratings (completed or watching) from filtered list
+    const ratedAnime = thisYearAnime.filter(item => {
       const status = item.list_status?.status;
       const score = item.list_status?.score;
-      if (score && score > 0) {
-        if (status === 'completed' || status === 'watching') {
-          ratedAnime.push(item);
-        }
-        if (status === 'completed') {
-          completedAnime.push(item);
-        }
-      }
-    }
+      return (status === 'completed' || status === 'watching') && score && score > 0;
+    });
+
+    // Get completed anime for specific stats
+    const completedAnime = thisYearAnime.filter(item => {
+      const status = item.list_status?.status;
+      const score = item.list_status?.score;
+      return status === 'completed' && score && score > 0;
+    });
     
-    // Calculate genres and studios in single pass
+    // Calculate genres (from filtered anime)
     const genreCounts = {};
-    const studioCounts = {};
-    for (let i = 0; i < thisYearAnime.length; i++) {
-      const item = thisYearAnime[i];
-      const genres = item.node?.genres;
-      if (genres) {
-        for (let j = 0; j < genres.length; j++) {
-          const name = genres[j].name;
-          if (name) genreCounts[name] = (genreCounts[name] || 0) + 1;
-        }
-      }
-      const studios = item.node?.studios;
-      if (studios) {
-        for (let j = 0; j < studios.length; j++) {
-          const name = studios[j].name;
-          if (name) studioCounts[name] = (studioCounts[name] || 0) + 1;
-        }
-      }
-    }
+    thisYearAnime.forEach(item => {
+      item.node?.genres?.forEach(genre => {
+        genreCounts[genre.name] = (genreCounts[genre.name] || 0) + 1;
+      });
+    });
 
     const topGenres = Object.entries(genreCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
+
+    // Calculate studios (from filtered anime)
+    const studioCounts = {};
+    thisYearAnime.forEach(item => {
+      item.node?.studios?.forEach(studio => {
+        studioCounts[studio.name] = (studioCounts[studio.name] || 0) + 1;
+      });
+    });
 
     const topStudios = Object.entries(studioCounts)
       .sort((a, b) => b[1] - a[1])
@@ -547,14 +543,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     const totalEpisodes = thisYearAnime.reduce((sum, item) => 
       sum + (item.list_status?.num_episodes_watched || 0), 0
     );
-    // Calculate unique seasons - optimized
+    // Calculate unique seasons
     const uniqueSeasons = new Set();
-    for (let i = 0; i < thisYearAnime.length; i++) {
-      const season = thisYearAnime[i].node?.start_season;
-      if (season?.year && season?.season) {
-        uniqueSeasons.add(`${season.year}-${season.season}`);
+    thisYearAnime.forEach(item => {
+      if (item.node?.start_season?.year && item.node?.start_season?.season) {
+        uniqueSeasons.add(`${item.node.start_season.year}-${item.node.start_season.season}`);
       }
-    }
+    });
     const totalSeasons = uniqueSeasons.size;
     const avgEpisodeLength = 24; // minutes
     const totalMinutes = totalEpisodes * avgEpisodeLength;
@@ -574,11 +569,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       return season.charAt(0).toUpperCase() + season.slice(1).toLowerCase();
     };
 
-    // Optimized seasonal highlights
-    for (let i = 0; i < thisYearAnime.length; i++) {
-      const item = thisYearAnime[i];
+    thisYearAnime.forEach(item => {
       const startSeason = item.node?.start_season;
-      if (startSeason?.season && startSeason?.year) {
+      if (startSeason && startSeason.season && startSeason.year) {
+        // If a specific year is selected, only include anime that released in that year
+        // If 'all' is selected, include all anime with start_season data
         if (currentYear === 'all' || startSeason.year === currentYear) {
           const season = capitalizeSeason(startSeason.season);
           if (season && seasonalData[season]) {
@@ -589,7 +584,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           }
         }
       }
-    }
+    });
 
     // Get top anime for each season
     const seasonalHighlights = {};
@@ -606,28 +601,33 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       }
     });
 
-    // Manga stats - filter by year and categorize in single pass
+    // Manga stats - filter by year
     const filteredManga = currentYear === 'all' ? manga : manga.filter(item => {
-      const year = getItemYear(item);
-      return year === currentYear;
+      const finishDate = item.list_status?.finish_date;
+      const startDate = item.list_status?.start_date;
+      const updatedAt = item.list_status?.updated_at;
+      
+      let dateToCheck = finishDate || startDate || updatedAt;
+      if (!dateToCheck) return false;
+      
+      try {
+        const year = new Date(dateToCheck).getFullYear();
+        return year === currentYear;
+      } catch (e) {
+        return false;
+      }
     });
 
-    // Single pass to categorize manga
-    const ratedManga = [];
-    const completedManga = [];
-    for (let i = 0; i < filteredManga.length; i++) {
-      const item = filteredManga[i];
+    // Get manga with ratings (completed or reading)
+    const ratedManga = filteredManga.filter(item => {
       const status = item.list_status?.status;
       const score = item.list_status?.score;
-      if (score && score > 0) {
-        if (status === 'completed' || status === 'reading') {
-          ratedManga.push(item);
-        }
-        if (status === 'completed') {
-          completedManga.push(item);
-        }
-      }
-    }
+      return (status === 'completed' || status === 'reading') && score && score > 0;
+    });
+
+    const completedManga = filteredManga.filter(item => 
+      item.list_status?.status === 'completed' && item.list_status?.score > 0
+    );
 
     const topManga = ratedManga
       .sort((a, b) => b.list_status.score - a.list_status.score)
@@ -796,50 +796,49 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
 
 
-    // 3. Streak Calculation (consecutive days watching) - optimized
+    // 3. Streak Calculation (consecutive days watching)
     const watchDates = new Set();
-    for (let i = 0; i < thisYearAnime.length; i++) {
-      const item = thisYearAnime[i];
-      const dates = [
-        item.list_status?.start_date,
-        item.list_status?.finish_date,
-        item.list_status?.updated_at
-      ];
-      for (let j = 0; j < dates.length; j++) {
-        const dateStr = dates[j];
+    thisYearAnime.forEach(item => {
+      const startDate = item.list_status?.start_date;
+      const finishDate = item.list_status?.finish_date;
+      const updatedAt = item.list_status?.updated_at;
+      
+      // Get all dates when user was active
+      [startDate, finishDate, updatedAt].forEach(dateStr => {
         if (dateStr) {
           try {
             const date = new Date(dateStr);
-            watchDates.add(date.toISOString().substring(0, 10));
-          } catch {
+            const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+            watchDates.add(dateKey);
+          } catch (e) {
             // Ignore invalid dates
           }
         }
-      }
-    }
+      });
+    });
     
-    // Calculate longest streak - optimized
+    // Calculate longest streak
     const sortedDates = Array.from(watchDates).sort();
     let longestStreak = 0;
     let currentStreak = 0;
     let lastDate = null;
     
-    for (let i = 0; i < sortedDates.length; i++) {
-      const currentDate = new Date(sortedDates[i]);
+    sortedDates.forEach(dateStr => {
+      const currentDate = new Date(dateStr);
       if (lastDate) {
-        const daysDiff = Math.floor((currentDate - lastDate) / 86400000);
+        const daysDiff = Math.floor((currentDate - lastDate) / (1000 * 60 * 60 * 24));
         if (daysDiff === 1) {
           currentStreak++;
         } else {
-          if (currentStreak > longestStreak) longestStreak = currentStreak;
+          longestStreak = Math.max(longestStreak, currentStreak);
           currentStreak = 1;
         }
       } else {
         currentStreak = 1;
       }
       lastDate = currentDate;
-    }
-    if (currentStreak > longestStreak) longestStreak = currentStreak;
+    });
+    longestStreak = Math.max(longestStreak, currentStreak);
 
     // 4. Badge System - New badge definitions, only top 2
     const badgeCandidates = [];
@@ -854,38 +853,22 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       });
     }
     
-    // The Explorer - 20+ genres and authors - optimized
+    // The Explorer - 20+ genres and authors
     const uniqueGenres = new Set();
-    for (let i = 0; i < thisYearAnime.length; i++) {
-      const genres = thisYearAnime[i].node?.genres;
-      if (genres) {
-        for (let j = 0; j < genres.length; j++) {
-          uniqueGenres.add(genres[j].name);
-        }
-      }
-    }
+    thisYearAnime.forEach(item => {
+      item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
+    });
     // Add manga genres to the same set to avoid duplication
-    for (let i = 0; i < filteredManga.length; i++) {
-      const genres = filteredManga[i].node?.genres;
-      if (genres) {
-        for (let j = 0; j < genres.length; j++) {
-          uniqueGenres.add(genres[j].name);
-        }
-      }
-    }
+    filteredManga.forEach(item => {
+      item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
+    });
     const uniqueAuthors = new Set();
-    for (let i = 0; i < filteredManga.length; i++) {
-      const authors = filteredManga[i].node?.authors;
-      if (authors) {
-        for (let j = 0; j < authors.length; j++) {
-          const author = authors[j].node;
-          if (author) {
-            const name = `${(author.first_name || '').trim()} ${(author.last_name || '').trim()}`.trim();
-            if (name) uniqueAuthors.add(name);
-          }
-        }
-      }
-    }
+    filteredManga.forEach(item => {
+      item.node?.authors?.forEach(author => {
+        const name = `${(author.node?.first_name || '').trim()} ${(author.node?.last_name || '').trim()}`.trim();
+        if (name) uniqueAuthors.add(name);
+      });
+    });
     if (uniqueGenres.size >= 20 || uniqueAuthors.size >= 20) {
       const descText = uniqueGenres.size >= 20 && uniqueAuthors.size >= 20
         ? `Like Luffy, you crave adventure! This year, you explored ${uniqueGenres.size} genres and ${uniqueAuthors.size} authors`
@@ -923,55 +906,63 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       });
     }
     
-    // The Sprinter - Completed a title within 1-3 days - optimized
-    let bingeEntry = null;
+    // The Sprinter - Completed a title within 1-3 days
     if (totalEpisodes >= 1000 || totalChapters >= 2000) {
       const bingeThresholdDays = 3;
-      const bingeAnimeCandidates = [];
-      
-      // Single pass for anime
-      for (let i = 0; i < thisYearAnime.length; i++) {
-        const item = thisYearAnime[i];
-        if (item.list_status?.status === 'completed') {
+      const bingeAnimeCandidates = thisYearAnime
+        .map(item => {
           const episodes = item.list_status?.num_episodes_watched || 0;
           const days = getCompletionDays(item.list_status?.start_date, item.list_status?.finish_date);
-          if (days !== null && days <= bingeThresholdDays && episodes > 0) {
-            bingeAnimeCandidates.push({ item, episodes, days });
-          }
-        }
-      }
+          return {
+            item,
+            episodes,
+            days,
+            status: item.list_status?.status
+          };
+        })
+        .filter(candidate => 
+          candidate.status === 'completed' &&
+          candidate.days !== null &&
+          candidate.days <= bingeThresholdDays &&
+          candidate.episodes > 0
+        )
+        .sort((a, b) => b.episodes - a.episodes);
       
-      if (bingeAnimeCandidates.length > 0) {
-        bingeAnimeCandidates.sort((a, b) => b.episodes - a.episodes);
-        const best = bingeAnimeCandidates[0];
-        bingeEntry = {
-          title: best.item.node?.title || '',
-          amount: best.episodes,
-          unit: 'episodes',
-          days: best.days
-        };
-      } else {
-        // Single pass for manga
-        const bingeMangaCandidates = [];
-        for (let i = 0; i < filteredManga.length; i++) {
-          const item = filteredManga[i];
-          if (item.list_status?.status === 'completed') {
+      let bingeEntry = bingeAnimeCandidates[0]
+        ? {
+            title: bingeAnimeCandidates[0].item.node?.title || '',
+            amount: bingeAnimeCandidates[0].episodes,
+            unit: 'episodes',
+            days: bingeAnimeCandidates[0].days
+          }
+        : null;
+      
+      if (!bingeEntry) {
+        const bingeMangaCandidates = filteredManga
+          .map(item => {
             const chapters = item.list_status?.num_chapters_read || 0;
             const days = getCompletionDays(item.list_status?.start_date, item.list_status?.finish_date);
-            if (days !== null && days <= bingeThresholdDays && chapters > 0) {
-              bingeMangaCandidates.push({ item, chapters, days });
-            }
-          }
-        }
+            return {
+              item,
+              chapters,
+              days,
+              status: item.list_status?.status
+            };
+          })
+          .filter(candidate =>
+            candidate.status === 'completed' &&
+            candidate.days !== null &&
+            candidate.days <= bingeThresholdDays &&
+            candidate.chapters > 0
+          )
+          .sort((a, b) => b.chapters - a.chapters);
         
-        if (bingeMangaCandidates.length > 0) {
-          bingeMangaCandidates.sort((a, b) => b.chapters - a.chapters);
-          const best = bingeMangaCandidates[0];
+        if (bingeMangaCandidates[0]) {
           bingeEntry = {
-            title: best.item.node?.title || '',
-            amount: best.chapters,
+            title: bingeMangaCandidates[0].item.node?.title || '',
+            amount: bingeMangaCandidates[0].chapters,
             unit: 'chapters',
-            days: best.days
+            days: bingeMangaCandidates[0].days
           };
         }
       }
@@ -1021,34 +1012,28 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       }
     }
     
-    // The Rookie - Started using MAL that year - optimized
+    // The Rookie - Started using MAL that year (check if earliest entry is this year)
     let isRookie = false;
     if (currentYear !== 'all' && typeof currentYear === 'number') {
-      let earliestYear = currentYear;
+      const allAnimeDates = anime
+        .filter(item => item.list_status?.start_date || item.list_status?.finish_date)
+        .map(item => {
+          const dateStr = item.list_status?.start_date || item.list_status?.finish_date;
+          return dateStr ? new Date(dateStr).getFullYear() : null;
+        })
+        .filter(year => year !== null);
+      const allMangaDates = (manga || [])
+        .filter(item => item.list_status?.start_date || item.list_status?.finish_date)
+        .map(item => {
+          const dateStr = item.list_status?.start_date || item.list_status?.finish_date;
+          return dateStr ? new Date(dateStr).getFullYear() : null;
+        })
+        .filter(year => year !== null);
       
-      // Single pass for anime
-      for (let i = 0; i < anime.length; i++) {
-        const dateStr = anime[i].list_status?.start_date || anime[i].list_status?.finish_date;
-        if (dateStr) {
-          try {
-            const year = new Date(dateStr).getFullYear();
-            if (year < earliestYear) earliestYear = year;
-          } catch {}
-        }
-      }
-      
-      // Single pass for manga
-      if (manga) {
-        for (let i = 0; i < manga.length; i++) {
-          const dateStr = manga[i].list_status?.start_date || manga[i].list_status?.finish_date;
-          if (dateStr) {
-            try {
-              const year = new Date(dateStr).getFullYear();
-              if (year < earliestYear) earliestYear = year;
-            } catch {}
-          }
-        }
-      }
+      const earliestYear = Math.min(
+        ...(allAnimeDates.length > 0 ? allAnimeDates : [currentYear]),
+        ...(allMangaDates.length > 0 ? allMangaDates : [currentYear])
+      );
       
       isRookie = earliestYear === currentYear && totalCompleted < 20;
     }
@@ -2017,24 +2002,20 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const [gapSize, setGapSize] = useState('2px');
       const [itemsPerView, setItemsPerView] = useState(3);
       
-      // Optimized deduplication
+      // Deduplicate items by title AND ID to prevent repeats
       const uniqueItemsMap = new Map();
-      const itemsLen = items.length;
-      for (let i = 0; i < itemsLen; i++) {
-        const item = items[i];
+      items.forEach(item => {
         const title = item.title || '';
-        if (title) {
-          const id = item.malId || item.mangaId || '';
-          const uniqueKey = `${title}-${id}`;
-          if (!uniqueItemsMap.has(uniqueKey)) {
-            uniqueItemsMap.set(uniqueKey, item);
-          }
+        const id = item.malId || item.mangaId || '';
+        const uniqueKey = `${title}-${id}`;
+        if (title && !uniqueItemsMap.has(uniqueKey)) {
+          uniqueItemsMap.set(uniqueKey, item);
         }
-      }
+      });
       const uniqueItems = Array.from(uniqueItemsMap.values());
       const visibleItems = uniqueItems.slice(0, maxItems);
       
-      // Update gap size and items per view based on screen width - throttled
+      // Update gap size and items per view based on screen width
       useEffect(() => {
         const updateResponsive = () => {
           if (window.innerWidth >= 640) {
@@ -2046,16 +2027,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           }
         };
         updateResponsive();
-        let timeoutId;
-        const handleResize = () => {
-          clearTimeout(timeoutId);
-          timeoutId = setTimeout(updateResponsive, 150);
-        };
-        window.addEventListener('resize', handleResize);
-        return () => {
-          window.removeEventListener('resize', handleResize);
-          clearTimeout(timeoutId);
-        };
+        window.addEventListener('resize', updateResponsive);
+        return () => window.removeEventListener('resize', updateResponsive);
       }, []);
       
       const itemWidth = 100 / itemsPerView;
@@ -2077,21 +2050,17 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }
         
         const scrollSpeed = 0.15;
-        const maxScroll = visibleItems.length * itemWidth;
         let animationFrame;
-        let lastTime = performance.now();
         
-        const animate = (currentTime) => {
-          const delta = currentTime - lastTime;
-          lastTime = currentTime;
-          
-          // Throttle updates to ~60fps
-          if (delta >= 16) {
-            setScrollPosition((prev) => {
-              const next = prev + scrollSpeed;
-              return next >= maxScroll ? 0 : next;
-            });
-          }
+        const animate = () => {
+          setScrollPosition((prev) => {
+            const maxScroll = (visibleItems.length * itemWidth);
+            const next = prev + scrollSpeed;
+            if (next >= maxScroll) {
+              return 0;
+            }
+            return next;
+          });
           animationFrame = requestAnimationFrame(animate);
         };
         
