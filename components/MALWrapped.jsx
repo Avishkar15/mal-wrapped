@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Download, LogOut, Share2, Github, Youtube, Linkedin, Instagram, ExternalLink, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -66,16 +66,7 @@ const pulse = {
   }
 };
 
-const float = {
-  animate: {
-    y: [0, -20, 0],
-    transition: {
-      duration: 8,
-      repeat: Infinity,
-      ease: smoothEase
-    }
-  }
-};
+// Removed unused float animation
 
 // Stagger container variants
 const staggerContainer = {
@@ -102,17 +93,27 @@ const staggerItem = {
 };
 
 
-const hoverImage = {
+// Optimized hover - disabled on mobile for performance
+const getHoverImage = (isMobile) => isMobile ? {} : {
   scale: 1.1,
   transition: { duration: 0.3, ease: smoothEase }
 };
 
-// Animated Number Component using Framer Motion
+const hoverImage = getHoverImage(false); // Keep for backward compatibility
+
+// Animated Number Component - optimized for mobile
 function AnimatedNumber({ value, duration = 1.5, className = '' }) {
   const numValue = Number(value) || 0;
   const [displayValue, setDisplayValue] = useState(0);
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   useEffect(() => {
+    // On mobile, skip animation for better performance
+    if (isMobile) {
+      setDisplayValue(numValue);
+      return;
+    }
+    
     // Reset to 0 when value changes
     setDisplayValue(0);
     
@@ -130,7 +131,6 @@ function AnimatedNumber({ value, duration = 1.5, className = '' }) {
       const progress = Math.min(elapsed / (duration * 1000), 1);
       
       // Gentler ease-out function: starts fast, slows down but not too much
-      // Using quadratic ease-out instead of cubic for less extreme slowdown
       const eased = 1 - Math.pow(1 - progress, 2);
       
       const currentValue = startValue + (endValue - startValue) * eased;
@@ -139,7 +139,6 @@ function AnimatedNumber({ value, duration = 1.5, className = '' }) {
       if (progress < 1) {
         animationFrameId = requestAnimationFrame(animate);
       } else {
-        // Ensure we end exactly at the target value
         setDisplayValue(endValue);
       }
     };
@@ -152,14 +151,14 @@ function AnimatedNumber({ value, duration = 1.5, className = '' }) {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [numValue, duration]);
+  }, [numValue, duration, isMobile]);
 
   return (
     <motion.span 
       className={className}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, ease: smoothEase }}
+      initial={isMobile ? false : { opacity: 0, scale: 0.8 }}
+      animate={isMobile ? false : { opacity: 1, scale: 1 }}
+      transition={isMobile ? {} : { duration: 0.3, ease: smoothEase }}
     >
       {Math.floor(displayValue).toLocaleString()}
     </motion.span>
@@ -205,10 +204,14 @@ export default function MALWrapped() {
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
 
-  const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
-  const hasManga = stats && mangaList && mangaList.length > 0;
+  // Memoize expensive checks
+  const hasAnime = useMemo(() => stats && stats.thisYearAnime && stats.thisYearAnime.length > 0, [stats]);
+  const hasManga = useMemo(() => stats && mangaList && mangaList.length > 0, [stats, mangaList]);
   
-  const slides = stats ? [
+  // Detect mobile for performance optimizations (only check once on mount)
+  const [isMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  
+  const slides = useMemo(() => stats ? [
     { id: 'welcome' },
     { id: 'anime_count' },
     ...(hasAnime ? [
@@ -238,7 +241,7 @@ export default function MALWrapped() {
     ...(stats.badges && stats.badges.length > 0 ? [{ id: 'badges' }] : []),
     ...(stats.characterTwin ? [{ id: 'character_twin' }] : []),
     { id: 'finale' },
-  ] : [];
+  ] : [], [stats, hasAnime, hasManga]);
 
   
 const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, .4) 25%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, .4) 80%, rgba(0, 0, 0, 1) 100%)';
@@ -272,6 +275,27 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     } else if (storedToken) {
       fetchUserData(storedToken);
     }
+  }, []);
+
+  // Load Tenor embed script
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Check if script is already loaded
+    if (document.querySelector('script[src="https://tenor.com/embed.js"]')) return;
+    
+    const script = document.createElement('script');
+    script.src = 'https://tenor.com/embed.js';
+    script.async = true;
+    document.body.appendChild(script);
+    
+    return () => {
+      // Cleanup script on unmount if needed
+      const existingScript = document.querySelector('script[src="https://tenor.com/embed.js"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
   }, []);
 
   async function exchangeCodeForToken(code, verifier) {
@@ -911,7 +935,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const bingeThresholdDays = 3;
       const bingeAnimeCandidates = thisYearAnime
         .map(item => {
-          const episodes = item.list_status?.num_episodes_watched || 0;
+            const episodes = item.list_status?.num_episodes_watched || 0;
           const days = getCompletionDays(item.list_status?.start_date, item.list_status?.finish_date);
           return {
             item,
@@ -970,13 +994,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       if (bingeEntry) {
         const titlePreview = bingeEntry.title.substring(0, 30) + (bingeEntry.title.length > 30 ? '...' : '');
         const bingeDesc = `Like Naruto, you never gave up! You blitzed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}.`;
-        
-        badgeCandidates.push({ 
+      
+      badgeCandidates.push({ 
           type: 'the_sprinter', 
           name: 'The Sprinter',
-          description: bingeDesc,
+        description: bingeDesc,
           score: bingeEntry.amount + (3 - bingeEntry.days) * 50
-        });
+      });
       }
     }
     
@@ -2001,8 +2025,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const [scrollPosition, setScrollPosition] = useState(0);
       const [gapSize, setGapSize] = useState('2px');
       const [itemsPerView, setItemsPerView] = useState(3);
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
       
-      // Deduplicate items by title AND ID to prevent repeats
+      // Memoize expensive deduplication
+      const visibleItems = useMemo(() => {
       const uniqueItemsMap = new Map();
       items.forEach(item => {
         const title = item.title || '';
@@ -2012,8 +2038,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           uniqueItemsMap.set(uniqueKey, item);
         }
       });
-      const uniqueItems = Array.from(uniqueItemsMap.values());
-      const visibleItems = uniqueItems.slice(0, maxItems);
+        return Array.from(uniqueItemsMap.values()).slice(0, maxItems);
+      }, [items, maxItems]);
       
       // Update gap size and items per view based on screen width
       useEffect(() => {
@@ -2044,8 +2070,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const shouldCenter = !shouldScroll && visibleItems.length < itemsPerView;
       
       useEffect(() => {
-        // Only animate if we have more items than viewport and not hovered
-        if (visibleItems.length <= itemsPerView || isHovered) {
+        // Disable auto-scroll on mobile for better performance
+        if (isMobile || visibleItems.length <= itemsPerView || isHovered) {
           return;
         }
         
@@ -2066,7 +2092,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         animationFrame = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(animationFrame);
-      }, [visibleItems.length, itemsPerView, isHovered, itemWidth]);
+      }, [visibleItems.length, itemsPerView, isHovered, itemWidth, isMobile]);
 
       const getMALUrl = (item) => {
         if (item.malId) {
@@ -2111,9 +2137,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               const content = (
                 <motion.div 
                   className="flex flex-col flex-shrink-0 items-center w-full"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ 
+                  initial={isMobile ? false : { opacity: 0, scale: 0.9 }}
+                  animate={isMobile ? false : { opacity: 1, scale: 1 }}
+                  transition={isMobile ? {} : { 
                     duration: 0.4,
                     delay: (idx % visibleItems.length) * 0.05,
                     ease: smoothEase
@@ -2122,7 +2148,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <motion.div 
                 className="aspect-[2/3] w-full bg-transparent rounded-lg relative" 
                     style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}
-                    whileHover={{ borderColor: '#ffffff' }}
+                    whileHover={isMobile ? {} : { borderColor: '#ffffff' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     {item.coverImage && (
@@ -2131,7 +2157,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         alt={item.title || ''} 
                         crossOrigin="anonymous" 
                         className="w-full h-full object-cover rounded-lg"
-                        whileHover={hoverImage}
+                        whileHover={isMobile ? {} : hoverImage}
+                        loading="lazy"
                       />
                     )}
                     {showHover && hoveredItem === actualIndex && item.title && (
@@ -2694,7 +2721,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ duration: 0.4 }}
                                 >
-                                <motion.div 
+                                  <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative w-full z-10 aspect-[2/3] max-h-[175px]" 
                                   style={{ boxSizing: 'border-box' }}
                                     whileHover={{ borderColor: '#ffffff' }}
@@ -3021,11 +3048,15 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 className="relative z-10 mb-6 flex items-center justify-center"
                 data-framer-motion
               >
-                <img 
-                  src="/manga-character.webp" 
-                  alt="Manga character"
-                  className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain"
-                />
+                <div 
+                  className="tenor-gif-embed w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64"
+                  data-postid="2835984824155095854"
+                  data-share-method="host"
+                  data-aspect-ratio="1.76596"
+                  data-width="100%"
+                >
+                  <a href="https://tenor.com/view/konata-reading-manga-reading-manga-konata-reading-gif-2835984824155095854">Konata Reading GIF</a>
+                </div>
               </motion.div>
               <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Now let's see what you've been reading
@@ -3276,11 +3307,15 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     {...pulse} 
                     data-framer-motion
                   >
-                    <img 
-                      src="/manga-character.webp" 
-                      alt="Manga character"
-                      className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain"
-                    />
+                    <div 
+                      className="tenor-gif-embed w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64"
+                      data-postid="2835984824155095854"
+                      data-share-method="host"
+                      data-aspect-ratio="1.76596"
+                      data-width="100%"
+                    >
+                      <a href="https://tenor.com/view/konata-reading-manga-reading-manga-konata-reading-gif-2835984824155095854">Konata Reading GIF</a>
+                    </div>
                   </motion.div>
                   <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative">But one manga kept you turning pages nonstop</h2>
                 </motion.div>
@@ -3455,9 +3490,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ duration: 0.4 }}
                                 >
-                                <motion.div 
+                                  <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative w-full z-10" 
-                                  style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '175px' }}
+                                    style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '175px' }}
                                     whileHover={{ borderColor: '#ffffff' }}
                                     transition={{ duration: 0.3, ease: smoothEase}}
                                   >
