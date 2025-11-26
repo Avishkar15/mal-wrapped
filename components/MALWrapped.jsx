@@ -66,7 +66,16 @@ const pulse = {
   }
 };
 
-// Removed unused float animation
+const float = {
+  animate: {
+    y: [0, -20, 0],
+    transition: {
+      duration: 8,
+      repeat: Infinity,
+      ease: smoothEase
+    }
+  }
+};
 
 // Stagger container variants
 const staggerContainer = {
