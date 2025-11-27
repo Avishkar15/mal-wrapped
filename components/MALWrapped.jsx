@@ -202,7 +202,6 @@ export default function MALWrapped() {
   const [selectedYear, setSelectedYear] = useState(2025);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
 
@@ -1469,10 +1468,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     if (!slideRef.current || typeof window === 'undefined') return null;
     
     try {
-      setIsDownloading(true);
-      // Wait a bit for state to update and re-render
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
       const cardElement = slideRef.current;
       
       // Detect mobile device for optimization
@@ -1482,7 +1477,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       // Dynamically import snapdom
       const { snapdom } = await import('@zumer/snapdom');
       
-      // Simplified plugin - only stop animations on the main element
+      // Plugin to handle download headings and stop animations
       const capturePlugin = {
         name: 'mal-wrapped-capture',
         async afterClone(context) {
@@ -1491,9 +1486,22 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           
           const clonedElement = clonedDoc.querySelector('.slide-card') || clonedDoc.body;
           if (clonedElement) {
+            // Stop animations
             clonedElement.style.animation = 'none';
             clonedElement.style.transition = 'none';
             clonedElement.style.animationPlayState = 'paused';
+            
+            // Hide original headings and show download headings
+            const originalHeadings = clonedElement.querySelectorAll('[data-original-heading]');
+            const downloadHeadings = clonedElement.querySelectorAll('[data-download-heading]');
+            
+            originalHeadings.forEach(el => {
+              el.style.display = 'none';
+            });
+            
+            downloadHeadings.forEach(el => {
+              el.style.display = '';
+            });
           }
         }
       };
@@ -1573,11 +1581,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }
       });
       
-      setIsDownloading(false);
       return result;
     } catch (err) {
       console.error('Error generating PNG:', err);
-      setIsDownloading(false);
       throw err;
     }
   }
@@ -2314,8 +2320,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-medium  text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Top Anime' : (stats.selectedYear === 'all' ? 'Overall' : 'In ' + stats.selectedYear) + ', you binged through'}
+            <motion.h2 className="body-md font-medium  text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            {stats.selectedYear === 'all' ? 'Overall' : 'In ' + stats.selectedYear}, you binged through
+            </motion.h2>
+            <motion.h2 className="body-md font-medium  text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Top Anime
             </motion.h2>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white ">
@@ -2351,8 +2360,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         return (
           <SlideLayout bgColor="green">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Total Watch Time' : 'That adds up to'}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            That adds up to
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Total Watch Time
             </motion.h2>
             <motion.div className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center" {...fadeSlideUp} data-framer-motion>
               <div className="text-center">
@@ -2409,8 +2421,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const otherGenres = stats.topGenres?.slice(1, 5) || [];
         return (
           <SlideLayout  bgColor="yellow">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Top 5 Anime Genres' : 'You kept coming back to same genres'}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            You kept coming back to same genres
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Top 5 Anime Genres
             </motion.h2>
             {topGenre ? (
               <>
@@ -2476,7 +2491,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain"
                   />
                 </motion.div>
-                <h2 className="body-md font-medium font-medium text-white mt-4 text-container z-10 relative">{isDownloading ? 'My #1 Anime' : 'But one show rose above everything'}</h2>
+                <h2 className="body-md font-medium font-medium text-white mt-4 text-container z-10 relative" data-original-heading>But one show rose above everything</h2>
+                <h2 className="body-md font-medium font-medium text-white mt-4 text-container z-10 relative" data-download-heading style={{ display: 'none' }}>My #1 Anime</h2>
               </motion.div>
             ) : phase === 1 && topItem ? (
               <motion.div className="text-center relative overflow-hidden z-10">
@@ -2553,8 +2569,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           return (
             <SlideLayout>
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  {isDownloading ? 'My Top 5 Anime' : 'These anime stole the spotlight'}
+                <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+                  These anime stole the spotlight
+                </motion.h2>
+                <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+                  My Top 5 Anime
                 </motion.h2>
                 <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
                   {(() => {
@@ -2716,8 +2735,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="red">
             <div className="text-center relative">
-            <motion.h2 className="body-md font-bold text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Top Studios' : 'These studios defined your watchlist'}
+            <motion.h2 className="body-md font-bold text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            These studios defined your watchlist
+            </motion.h2>
+            <motion.h2 className="body-md font-bold text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Top Studios
             </motion.h2>
             </div>
             {topStudio ? (
@@ -2775,8 +2797,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="pink">
             <div className="text-center relative">
-              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              {isDownloading ? 'My Seasonal Favorites' : 'Each season dropped something special'}
+              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+              Each season dropped something special
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+              My Seasonal Favorites
             </motion.h2>
             </div>
             <div className="mt-2 sm:mt-4 flex flex-col md:grid md:grid-cols-2 gap-1.5 sm:gap-2 relative z-10">
@@ -2862,8 +2887,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              {isDownloading ? 'My Hidden Gems' : 'You spotted quality where few were looking'}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+              You spotted quality where few were looking
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+              My Hidden Gems
             </motion.h2>
             <motion.div className="mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
               {rareAnimeItems.map((item, idx) => (
@@ -2928,8 +2956,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout  bgColor="red">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Lowest Rated Anime' : 'You rated these anime the lowest'}
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            You rated these anime the lowest
+            </motion.h2>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Lowest Rated Anime
             </motion.h2>
             {didntLand.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -2952,8 +2983,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout  bgColor="green">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Plan to Watch List' : 'Your planned-to-watch list only got longer'}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            Your planned-to-watch list only got longer
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Plan to Watch List
             </motion.h2>
             {plannedAnimeItems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -2980,8 +3014,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain"
                 />
               </motion.div>
-              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                {isDownloading ? 'My Manga Stats' : "Now let's see what you've been reading"}
+              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+                Now let's see what you've been reading
+              </motion.h2>
+              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+                My Manga Stats
               </motion.h2>
               <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 From screens to pages
@@ -3038,8 +3075,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         return (
           <SlideLayout bgColor="yellow">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Total Manga Read' : (stats.selectedYear === 'all' ? 'Till now' : 'In ' + stats.selectedYear) + ', you read through'}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            {stats.selectedYear === 'all' ? 'Till now' : 'In ' + stats.selectedYear}, you read through
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Total Manga Read
             </motion.h2>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white ">
@@ -3074,8 +3114,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Total Reading Time' : "That's"}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            That's
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Total Reading Time
             </motion.h2>
             <motion.div className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center" {...fadeSlideUp} data-framer-motion>
               <div className="text-center">
@@ -3170,8 +3213,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const otherMangaGenres = topMangaGenreList.slice(1, 5);
         return (
           <SlideLayout  bgColor="yellow">
-          <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-          {isDownloading ? 'My Top 5 Manga Genres' : 'These genres kept you glued to pages'}
+          <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+          These genres kept you glued to pages
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+          My Top 5 Manga Genres
             </motion.h2>
             {topMangaGenre ? (
               <>
@@ -3235,7 +3281,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       className="w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 object-contain"
                     />
                   </motion.div>
-                  <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative">{isDownloading ? 'My #1 Manga' : 'But one manga kept you turning pages nonstop'}</h2>
+                  <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative" data-original-heading>But one manga kept you turning pages nonstop</h2>
+                  <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative" data-download-heading style={{ display: 'none' }}>My #1 Manga</h2>
                 </motion.div>
               ) : phase === 1 && topItem ? (
                 <motion.div className="text-center relative overflow-hidden z-10">
@@ -3314,8 +3361,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           return (
             <SlideLayout>
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  {isDownloading ? 'My Top 5 Manga' : 'These manga ruled your shelves'}
+                <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+                  These manga ruled your shelves
+                </motion.h2>
+                <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+                  My Top 5 Manga
                 </motion.h2>
                 <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
                   {(() => {
@@ -3508,8 +3558,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const otherAuthors = stats.topAuthors?.slice(1, 5) || [];
         return (
           <SlideLayout  bgColor="pink">
-          <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-          {isDownloading ? 'My Top Authors' : 'These authors kept appearing across your reads'}
+          <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+          These authors kept appearing across your reads
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+          My Top Authors
             </motion.h2>
             {topAuthor ? (
               <>
@@ -3570,8 +3623,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              {isDownloading ? 'My Hidden Gem Manga' : 'These low-profile reads turned out surprisingly strong'}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+              These low-profile reads turned out surprisingly strong
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+              My Hidden Gem Manga
             </motion.h2>
             <motion.div className="mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
               {rareMangaItems.map((item, idx) => (
@@ -3636,8 +3692,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout  bgColor="red">
-          <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-          {isDownloading ? 'My Lowest Rated Manga' : 'But even great readers hit a few misses'}
+          <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+          But even great readers hit a few misses
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+          My Lowest Rated Manga
             </motion.h2>
             {mangaDidntLand.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
@@ -3662,8 +3721,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout  bgColor="green">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Plan to Read List' : "You planned to read these manga, but haven't yet"}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            You planned to read these manga, but haven't yet
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Plan to Read List
             </motion.h2>
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
@@ -3688,8 +3750,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const milestonePercent = Math.min(100, Math.max(1, Math.round((milestoneCount / 1000000) * 100))); // Rough estimate
         return (
           <SlideLayout bgColor="yellow">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              {isDownloading ? 'My Milestone' : 'You hit a major milestone!'}
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+              You hit a major milestone!
+            </motion.h2>
+            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+              My Milestone
             </motion.h2>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white">
@@ -3725,8 +3790,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         
         return (
           <SlideLayout bgColor="purple">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              {isDownloading ? 'My Badges' : 'You earned some impressive badges'}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+              You earned some impressive badges
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+              My Badges
             </motion.h2>
             <motion.div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-2 max-w-3xl mx-auto relative z-10" {...fadeSlideUp} data-framer-motion>
               {stats.badges.map((badge, idx) => (
@@ -3781,8 +3849,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         const characterImage = stats.characterTwin.characterImage || stats.characterTwin.coverImage || '/Mascot.webp';
         return (
           <SlideLayout bgColor="pink">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {isDownloading ? 'My Anime Doppelgänger' : 'Your anime doppelgänger'}
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-original-heading>
+            Your anime doppelgänger
+            </motion.h2>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion data-download-heading style={{ display: 'none' }}>
+            My Anime Doppelgänger
             </motion.h2>
             <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 mb-4">
