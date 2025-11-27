@@ -1474,10 +1474,40 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
       const scale = isMobile ? 1 : 2; // Lower scale on mobile for better performance
       
+      // Get current slide ID for heading
+      const currentSlideId = slides[currentSlide]?.id;
+      
+      // Mapping of slide IDs to heading text (only for slides that should have headings in download)
+      const slideHeadings = {
+        'top_genre': 'My Top Genre',
+        'top_5_anime': 'My Top 5 Anime',
+        'top_5_manga': 'My Top 5 Manga',
+        'top_manga_genre': 'My Top Genre',
+        'top_studio': 'My Top Studio',
+        'top_author': 'My Top Author',
+        'hidden_gems_anime': 'Hidden Gems',
+        'hidden_gems_manga': 'Hidden Gems',
+        'didnt_land_anime': 'Didn\'t Land',
+        'didnt_land_manga': 'Didn\'t Land',
+        'planned_anime': 'Planned to Watch',
+        'planned_manga': 'Planned to Read',
+        'seasonal_highlights': 'Seasonal Highlights',
+        'milestones': 'Milestones',
+        'character_twin': 'Character Twin',
+        'badges': 'Badges',
+        'anime_count': 'Anime Count',
+        'manga_count': 'Manga Count',
+        'anime_time': 'Watch Time',
+        'manga_time': 'Reading Time',
+        'drumroll_anime': 'Top Anime',
+        'drumroll_manga': 'Top Manga',
+        'anime_to_manga_transition': 'Transition'
+      };
+      
       // Dynamically import snapdom
       const { snapdom } = await import('@zumer/snapdom');
       
-      // Simplified plugin - only stop animations on the main element
+      // Plugin to add headings and stop animations
       const capturePlugin = {
         name: 'mal-wrapped-capture',
         async afterClone(context) {
@@ -1486,9 +1516,45 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           
           const clonedElement = clonedDoc.querySelector('.slide-card') || clonedDoc.body;
           if (clonedElement) {
+            // Stop animations
             clonedElement.style.animation = 'none';
             clonedElement.style.transition = 'none';
             clonedElement.style.animationPlayState = 'paused';
+            
+            // Add heading if one exists for this slide
+            const headingText = slideHeadings[currentSlideId];
+            if (headingText) {
+              // Create heading element
+              const heading = clonedDoc.createElement('div');
+              heading.className = 'download-heading';
+              // Responsive font size based on scale
+              const fontSize = isMobile ? '20px' : '28px';
+              heading.style.cssText = `
+                position: absolute;
+                top: ${isMobile ? '16px' : '24px'};
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 1000;
+                font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+                font-size: ${fontSize};
+                font-weight: 700;
+                color: rgba(255, 255, 255, 0.95);
+                text-align: center;
+                text-transform: uppercase;
+                letter-spacing: 3px;
+                pointer-events: none;
+                white-space: nowrap;
+                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+                padding: 8px 24px;
+                background: rgba(0, 0, 0, 0.3);
+                border-radius: 8px;
+                backdrop-filter: blur(10px);
+              `;
+              heading.textContent = headingText;
+              
+              // Insert heading at the top of the slide card
+              clonedElement.insertBefore(heading, clonedElement.firstChild);
+            }
           }
         }
       };
