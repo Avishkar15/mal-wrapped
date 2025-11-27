@@ -1516,20 +1516,26 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             clonedElement.style.transition = 'none';
             clonedElement.style.animationPlayState = 'paused';
           }
-
-          // Replace headings based on data-slide-heading attribute
+        },
+        async beforeRender(context) {
+          // Replace headings right before rendering - DOM should be fully set up
+          const clonedDoc = context.clonedDocument;
+          if (!clonedDoc) return;
+          
+          // Query all elements with data-slide-heading attribute
           const headingElements = clonedDoc.querySelectorAll('[data-slide-heading]');
+          
           headingElements.forEach(element => {
             const slideType = element.getAttribute('data-slide-heading');
             const newHeading = headingReplacements[slideType];
-            if (newHeading) {
-              // Store original text content to preserve any formatting
-              const originalText = element.textContent.trim();
-              if (originalText) {
-                // Clear all child nodes and set new text
-                element.innerHTML = '';
-                element.textContent = newHeading;
+            
+            if (newHeading && slideType) {
+              // Clear all child nodes first
+              while (element.firstChild) {
+                element.removeChild(element.firstChild);
               }
+              // Set new text content directly
+              element.textContent = newHeading;
             }
           });
         }
