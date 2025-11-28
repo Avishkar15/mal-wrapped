@@ -1464,11 +1464,38 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     }
   }
 
+  // Helper function to wait for fonts to load
+  async function waitForFonts() {
+    if (typeof document === 'undefined') return;
+    
+    try {
+      // Wait for fonts to be ready
+      await document.fonts.ready;
+      
+      // Additional check for specific fonts used in the app
+      const fontsToCheck = ['Sora', 'DM Sans', 'Space Mono'];
+      const fontPromises = fontsToCheck.map(font => {
+        return document.fonts.check(`12px "${font}"`);
+      });
+      
+      // Give fonts a moment to fully load
+      await Promise.all(fontPromises);
+      
+      // Small delay to ensure fonts are fully rendered
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } catch (err) {
+      console.warn('Font loading check failed, proceeding anyway:', err);
+    }
+  }
+
   async function generatePNG() {
     if (!slideRef.current || typeof window === 'undefined') return null;
     
     try {
       const cardElement = slideRef.current;
+      
+      // Wait for fonts to load before capturing (improves performance and font accuracy)
+      await waitForFonts();
       
       // Detect mobile device for optimization
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
@@ -1494,11 +1521,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       };
       
       // Capture with snapdom - exclude only navigation containers using data attribute
+      // embedFonts: true ensures fonts are properly embedded in the screenshot
       const out = await snapdom(cardElement, {
         backgroundColor: '#0A0A0A',
         scale: scale,
         exclude: ['[data-exclude-from-screenshot]'],
-        embedFonts: false,
+        embedFonts: true, // Changed to true to ensure fonts are captured correctly
         plugins: [capturePlugin]
       });
       
