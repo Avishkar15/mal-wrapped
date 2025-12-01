@@ -2439,11 +2439,20 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </motion.div>
                 {genreAnime.length > 0 && <div className="relative z-10"><ImageCarousel items={genreAnime} maxItems={10} showHover={true} showNames={false} /></div>}
                 {otherGenres.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-1.5 md:gap-2 relative z-10">
+                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
                     {otherGenres.map(([genreName, count], idx) => (
-                      <motion.div key={idx} className="text-center" variants={staggerItem}>
-                        <p className="heading-sm font-semibold text-white truncate"><span className="body-sm font-bold text-white/70">{idx + 2}.</span> {genreName}</p>
-                        <p className="text-sm text-white/70 font-regular">{count} series</p>
+                      <motion.div 
+                        key={idx} 
+                        className="text-center py-2" 
+                        variants={staggerItem}
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.2, ease: smoothEase }}
+                      >
+                        <p className="heading-sm font-semibold text-white truncate mb-1">
+                          <span className="body-sm font-bold text-white/50 mr-1.5">{idx + 2}.</span> 
+                          {genreName}
+                        </p>
+                        <p className="text-xs text-white/60 font-medium tracking-wide">{count} series</p>
                       </motion.div>
                     ))}
                   </div>
@@ -2938,7 +2947,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         return (
           <SlideLayout  bgColor="red">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You rated these anime the lowest
             </motion.h2>
             {didntLand.length > 0 ? (
@@ -3191,11 +3200,20 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </motion.div>
                 {mangaGenreItems.length > 0 && <div className="relative z-10"><ImageCarousel items={mangaGenreItems} maxItems={10} showHover={true} showNames={false} /></div>}
                 {otherMangaGenres.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
+                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
                     {otherMangaGenres.map(([genreName, count], idx) => (
-                      <motion.div key={idx} className="text-center" variants={staggerItem}>
-                        <p className="heading-sm font-semibold text-white truncate"><span className="body-sm font-bold text-white/70">{idx + 2}.</span> {genreName}</p>
-                        <p className="text-sm text-white/70 font-regular">{count} manga</p>
+                      <motion.div 
+                        key={idx} 
+                        className="text-center py-2" 
+                        variants={staggerItem}
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.2, ease: smoothEase }}
+                      >
+                        <p className="heading-sm font-semibold text-white truncate mb-1">
+                          <span className="body-sm font-bold text-white/50 mr-1.5">{idx + 2}.</span> 
+                          {genreName}
+                        </p>
+                        <p className="text-xs text-white/60 font-medium tracking-wide">{count} manga</p>
                       </motion.div>
                     ))}
                   </div>
@@ -3524,11 +3542,20 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <div className="relative z-10"><ImageCarousel items={authorManga} maxItems={10} showHover={true} showNames={false} /></div>
                 )}
                 {otherAuthors.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
+                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
                     {otherAuthors.map(([authorName, count], idx) => (
-                      <motion.div key={idx} className="text-center" variants={staggerItem}>
-                        <p className="heading-sm font-semibold text-white truncate"><span className="body-sm font-bold text-white/70">{idx + 2}.</span> {authorName}</p>
-                        <p className="text-sm text-white/70 font-regular">{count} manga</p>
+                      <motion.div 
+                        key={idx} 
+                        className="text-center py-2" 
+                        variants={staggerItem}
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.2, ease: smoothEase }}
+                      >
+                        <p className="heading-sm font-semibold text-white truncate mb-1">
+                          <span className="body-sm font-bold text-white/50 mr-1.5">{idx + 2}.</span> 
+                          {authorName}
+                        </p>
+                        <p className="text-xs text-white/60 font-medium tracking-wide">{count} manga</p>
                       </motion.div>
                     ))}
                   </div>
