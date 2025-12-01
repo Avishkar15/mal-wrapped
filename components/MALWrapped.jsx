@@ -2438,6 +2438,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <p className="body-sm text-white/70 font-medium">{stats.topGenres[0][1]} series</p>
                 </motion.div>
                 {genreAnime.length > 0 && <div className="relative z-10"><ImageCarousel items={genreAnime} maxItems={10} showHover={true} showNames={false} /></div>}
+                {otherGenres.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-1.5 md:gap-2 relative z-10">
+                    {otherGenres.map(([genreName, count], idx) => (
+                      <motion.div key={idx} className="text-center" variants={staggerItem}>
+                        <p className="heading-sm font-semibold text-white truncate"><span className="body-sm font-bold text-white/70">{idx + 2}.</span> {genreName}</p>
+                        <p className="text-sm text-white/70 font-regular">{count} series</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
                 <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You know what you love
             </motion.h3>
               </>
@@ -2472,7 +2482,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   data-framer-motion
                 >
                   <img 
-                    src="https://media1.tenor.com/m/Y9mAEIcjy5kAAAAC/absolute-cinema-cinema.gif" 
+                    src="https://media1.tenor.com/m/WyRUInAxmXIAAAAd/nokotan-absolute-cinema.gif" 
                     alt="Anime character"
                     className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                   />
@@ -3181,6 +3191,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <p className="body-sm text-white/70 font-regular">{topMangaGenre[1]} manga</p>
                 </motion.div>
                 {mangaGenreItems.length > 0 && <div className="relative z-10"><ImageCarousel items={mangaGenreItems} maxItems={10} showHover={true} showNames={false} /></div>}
+                {otherMangaGenres.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
+                    {otherMangaGenres.map(([genreName, count], idx) => (
+                      <motion.div key={idx} className="text-center" variants={staggerItem}>
+                        <p className="heading-sm font-semibold text-white truncate"><span className="body-sm font-bold text-white/70">{idx + 2}.</span> {genreName}</p>
+                        <p className="text-sm text-white/70 font-regular">{count} manga</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Clearly, you have a type
             </motion.h3>
@@ -3504,6 +3524,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 </motion.div>
                 {authorManga.length > 0 && (
                   <div className="relative z-10"><ImageCarousel items={authorManga} maxItems={10} showHover={true} showNames={false} /></div>
+                )}
+                {otherAuthors.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
+                    {otherAuthors.map(([authorName, count], idx) => (
+                      <motion.div key={idx} className="text-center" variants={staggerItem}>
+                        <p className="heading-sm font-semibold text-white truncate"><span className="body-sm font-bold text-white/70">{idx + 2}.</span> {authorName}</p>
+                        <p className="text-sm text-white/70 font-regular">{count} manga</p>
+                      </motion.div>
+                    ))}
+                  </div>
                 )}
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 You know who delivers good writing
@@ -3927,22 +3957,22 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   className="grid grid-cols-2 gap-4 md:gap-6 relative z-20"
                   variants={staggerItem}
                 >
-                  <div className="space-y-1">
+                  <div>
                     <p className="body-sm text-white/70 font-medium mb-1">Top Anime</p>
                     {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white truncate">
-                          <span className="title-sm text-white font-medium truncate mr-2">{String(i + 1)}</span>
+                          <span className="text-md text-white/70 font-medium truncate mr-2">{String(i + 1)}</span>
                           <span className="title-md text-white font-medium truncate">{a.node.title}</span>
                       </p>
                     ))}
                   </div>
                   
-                  <div className="space-y-1">
+                  <div>
                     <p className="body-sm text-white/70 font-medium mb-1">Top Manga</p>
                     
                     {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="text-white truncate">
-                          <span className="title-sm text-white font-medium truncate mr-2">{String(i + 1)}</span>
+                          <span className="text-md text-white/70 font-medium truncate mr-2">{String(i + 1)}</span>
                           <span className="title-md text-white font-medium truncate">{m.node.title}</span>
                       </p>
                     ))}
@@ -3953,7 +3983,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   className="grid grid-cols-2 gap-4 md:gap-6 relative z-20"
                   variants={staggerItem}
                 >
-                  <div className="space-y-1">
+                  <div>
                     {finaleTopGenre && (
                       <>
                         <p className="body-sm text-white/70 font-medium mb-1">Favorite Genre</p>
@@ -3962,7 +3992,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     )}
                   </div>
                   
-                  <div className="space-y-1">
+                  <div>
                     {favoriteAuthor && (
                       <>
                         <p className="body-sm text-white/70 font-medium mb-1">Favorite Author</p>
@@ -3976,19 +4006,19 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6 relative z-20"
                   variants={staggerItem}
                 >
-                  <div className="space-y-1">
+                  <div>
                     <p className="body-sm text-white/70 font-medium mb-1">Watched</p>
                     <p className="title-md text-white  font-medium">
                     {stats.totalAnime || 0} Anime
                   </p>
                   </div>
-                  <div className="space-y-1">
+                  <div>
                     <p className="body-sm text-white/70 font-medium mb-1">Read</p>
                     <p className="title-md text-white font-medium">
                     {stats.totalManga || 0} Manga
                   </p>
                 </div>
-                <div className="space-y-1">
+                <div>
                   <p className="body-sm text-white/70 font-medium mb-1">Time Spent</p>
                   <p className="title-lg text-white font-medium">
                   {totalDays > 0 ? (
