@@ -172,7 +172,7 @@ function getComparisonCopy(percentage, nounPlural) {
   return {
     prefix: isAboveAverage ? "That's " : "That's only ",
     suffix: isAboveAverage
-      ? ` ${nounPlural} more compared to other MAL users. You’re leaving the crowd behind!`
+      ? ` more ${nounPlural} compared to other MAL users. You’re leaving the crowd behind!`
       : ` ${nounPlural} compared to other MAL users. Don’t worry, every hero has a slow arc!`
   };
 }
@@ -2478,7 +2478,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <motion.div className="text-center relative overflow-hidden z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.div 
                   className="relative z-10 mb-6 flex items-center justify-center"
-                  {...pulse} 
                   data-framer-motion
                 >
                   <img 
@@ -2487,7 +2486,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                   />
                 </motion.div>
-                <h2 className="body-md font-medium font-medium text-white mt-4 text-container z-10 relative">But one show rose above everything</h2>
+                <h2 className="body-md font-medium font-medium text-white mt-4 text-container z-10 relative">But the anime that rose above everything was...</h2>
               </motion.div>
             ) : phase === 1 && topItem ? (
               <motion.div className="text-center relative overflow-hidden z-10">
@@ -2629,7 +2628,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   {featured.genres.slice(0, 2).map(g => (
                                     <motion.span 
                                       key={g} 
-                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular" 
+                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular border border-white/20" 
                                       initial={{ opacity: 0, scale: 0.8 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ duration: 0.3, delay: 0.3 }}
@@ -3231,7 +3230,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 <motion.div className="text-center relative overflow-hidden z-10" {...fadeSlideUp} data-framer-motion>
                   <motion.div 
                     className="relative z-10 mb-6 flex items-center justify-center"
-                    {...pulse} 
                     data-framer-motion
                   >
                     <img 
@@ -3240,7 +3238,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                     />
                   </motion.div>
-                  <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative">But one manga kept you turning pages nonstop</h2>
+                  <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative">But the manga that kept you turning pages nonstop was...</h2>
                 </motion.div>
               ) : phase === 1 && topItem ? (
                 <motion.div className="text-center relative overflow-hidden z-10">
@@ -3384,7 +3382,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   {featured.genres.slice(0, 2).map(g => (
                                     <motion.span 
                                       key={g} 
-                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular" 
+                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular border border-white/20" 
                                       initial={{ opacity: 0, scale: 0.8 }}
                                       animate={{ opacity: 1, scale: 1 }}
                                       transition={{ duration: 0.3, delay: 0.3 }}
@@ -4223,7 +4221,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <motion.img
                     src="/avatar.webp"
                     alt="XAvishkar"
-                    className="relative w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 object-contain pointer-events-none z-10 mt-1 mb-1 mx-auto rounded-xl"
+                    className="relative w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 object-contain pointer-events-none z-10 mt-1 mx-auto rounded-xl"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: smoothEase }}
