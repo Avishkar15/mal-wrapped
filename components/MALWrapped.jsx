@@ -2364,7 +2364,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       Wrapped
                     </h2>
                   </div>
-                  <p className="body-md font-regular text-white mt-8 text-center text-container max-w-2xl mx-auto">A look back at your {stats.selectedYear === 'all' ? 'anime journey' : 'year'}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
+                  <p className="body-md font-regular text-white mt-8 text-center text-container max-w-2xl mx-auto">A look back at your {stats.selectedYear === 'all' ? 'journey' : stats.selectedYear}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
               </motion.div>
               <motion.div 
                 className="mt-4 w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
@@ -2427,7 +2427,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium  text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {stats.selectedYear === 'all' ? 'Overall' : 'In ' + stats.selectedYear}, you binged through
+            {stats.selectedYear === 'all' ? 'Overall' : 'In ' + stats.selectedYear}, you watched through
             </motion.h2>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white ">
@@ -2522,7 +2522,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout>
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            You kept coming back to same genres
+            You couldn't get enough of
             </motion.h2>
             {topGenre ? (
               <>
@@ -2588,7 +2588,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                   />
                 </motion.div>
-                <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">But the anime that rose above everything was...</h2>
+                <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">And your top anime of {stats.selectedYear === 'all' ? 'all time' : stats.selectedYear}?</h2>
               </motion.div>
             ) : phase === 1 && topItem ? (
               <motion.div className="text-center relative overflow-hidden z-10">
@@ -2665,7 +2665,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             <SlideLayout>
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  These anime stole the spotlight
+                  These stole the spotlight
                 </motion.h2>
                 <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
                   {(() => {
@@ -2799,7 +2799,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     );
                   })()}
                 </div>
-                <motion.h2 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h2>
+                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h3>
               </motion.div>
             </SlideLayout>
           );
@@ -2884,7 +2884,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <SlideLayout bgColor="pink">
             <div className="text-center relative">
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Each season dropped something special
+              Every season brought something new
             </motion.h2>
             </div>
             <motion.div 
@@ -2949,7 +2949,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 );
               })}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You caught every wave right on time
+            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Something for every mood
             </motion.h3>
           </SlideLayout>
         );
@@ -2974,7 +2974,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              You spotted quality where few were looking
+            You saw something others missed
             </motion.h2>
             <motion.div className="mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
               {rareAnimeItems.map((item, idx) => (
@@ -3041,7 +3041,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <SlideLayout  bgColor="red">
             {didntLand.length > 0 && (
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Not every anime hit the way you hoped
+              But some just didn't click
               </motion.h2>
             )}
             {didntLand.length > 0 ? (
@@ -3067,7 +3067,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <SlideLayout  bgColor="green">
             {plannedAnimeItems.length > 0 && (
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Your planned-to-watch list only got longer
+              So many shows, so little time
               </motion.h2>
             )}
             {plannedAnimeItems.length > 0 ? (
@@ -3098,9 +3098,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Now let's see what you've been reading
               </motion.h2>
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                From screens to pages
-              </motion.h3>
+             
             </motion.div>
           </SlideLayout>
         );
@@ -3286,7 +3284,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout  bgColor="yellow">
           <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-          These genres kept you glued to pages
+          You kept returning to
             </motion.h2>
             {topMangaGenre ? (
               <>
@@ -3315,7 +3313,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                 )}
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                Clearly, you have a type
+                A tested formula
             </motion.h3>
               </>
               
@@ -3352,7 +3350,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                     />
                   </motion.div>
-                  <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">But the manga that kept you turning pages nonstop was...</h2>
+                  <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">And your top manga of {stats.selectedYear === 'all' ? 'all time' : stats.selectedYear}?</h2>
                 </motion.div>
               ) : phase === 1 && topItem ? (
                 <motion.div className="text-center relative overflow-hidden z-10">
@@ -3431,7 +3429,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             <SlideLayout>
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  These manga ruled your shelves
+                  These ruled your shelves
                 </motion.h2>
                 <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
                   {(() => {
@@ -3565,7 +3563,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     );
                   })()}
                 </div>
-                <motion.h2 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h2>
+                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A year of great reads</motion.h3>
               </motion.div>
             </SlideLayout>
           );
@@ -3622,7 +3620,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout  bgColor="pink">
           <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-          These authors kept appearing across your reads
+          These creators shaped your taste
             </motion.h2>
             {topAuthor ? (
               <>
@@ -3653,7 +3651,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </div>
                 )}
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                You know who delivers good writing
+                You know who delivers
             </motion.h3>
               </>
               
@@ -3752,14 +3750,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <SlideLayout  bgColor="red">
           {mangaDidntLand.length > 0 && (
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            But even great readers hit a few misses
+            But some didn't stick the landing
               </motion.h2>
           )}
             {mangaDidntLand.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={mangaDidntLand} maxItems={3} />
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                Happens to the best of us
+                Even legends have their misses
             </motion.h3>
               </motion.div>
             ) : (
@@ -3780,14 +3778,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <SlideLayout  bgColor="green">
             {plannedMangaItems.length > 0 && (
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              You planned to read these manga, but haven't yet
+              Manga you bookmarked for later
               </motion.h2>
             )}
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedMangaItems} maxItems={3} />
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                The backlog continues to grow...
+                So many volumes, so little time...
             </motion.h3>
               </motion.div>
             ) : (
@@ -3887,7 +3885,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               ))}
             </motion.div>
             <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Your dedication shows!
+            Wear them with pride!
             </motion.h3>
           </SlideLayout>
         );
@@ -3899,7 +3897,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="pink">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            Your anime doppelgänger
+            You're most like
             </motion.h2>
             <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 mb-4">
