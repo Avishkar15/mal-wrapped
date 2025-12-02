@@ -2213,12 +2213,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   >
                   
                   {item.coverImage && (
-                    <motion.img 
+                    <img 
                       src={item.coverImage} 
                       alt={item.title || ''} 
                       crossOrigin="anonymous" 
                       className="w-full h-full object-cover rounded-lg"
-                      whileHover={hoverImage}
                     />
                   )}
                   
