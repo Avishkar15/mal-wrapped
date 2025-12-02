@@ -1667,9 +1667,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return;
       }
 
+      const yearText = stats?.selectedYear && stats.selectedYear !== 'all' ? `${stats.selectedYear} ` : '';
       const shareData = {
-        title: `My ${stats?.selectedYear || '2024'} MAL Wrapped`,
-        text: `Check out your ${stats?.selectedYear || '2024'} MyAnimeList Wrapped!`,
+        title: `My ${yearText}MAL Wrapped`,
+        text: `Check out your ${yearText}MyAnimeList Wrapped!`,
         url: window.location.href,
         files: [result.file],
       };
@@ -1724,9 +1725,61 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     }
   }
 
-  function shareToSocial(platform) {
-    const shareText = `Check out your ${stats?.selectedYear || '2024'} MyAnimeList Wrapped!`;
+  async function shareToSocial(platform) {
+    const yearText = stats?.selectedYear && stats.selectedYear !== 'all' ? `${stats.selectedYear} ` : '';
+    const shareText = `Check out your ${yearText}MyAnimeList Wrapped!`;
     const shareUrl = window.location.href;
+    
+    // Find finale slide index
+    const finaleIndex = slides.findIndex(slide => slide.id === 'finale');
+    
+    // For platforms that support file sharing (WhatsApp, Facebook on mobile), generate and share the finale image
+    const supportsFileSharing = ['whatsapp', 'facebook'].includes(platform) && 
+                                 navigator.share && 
+                                 navigator.canShare;
+    
+    if (supportsFileSharing && finaleIndex !== -1) {
+      try {
+        // Save current slide
+        const previousSlide = currentSlide;
+        
+        // Navigate to finale slide
+        setCurrentSlide(finaleIndex);
+        
+        // Wait for slide to render
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Generate PNG of finale slide
+        const result = await generatePNG();
+        
+        if (result && result.file) {
+          const shareData = {
+            title: `My ${yearText}MAL Wrapped`,
+            text: shareText,
+            url: shareUrl,
+            files: [result.file],
+          };
+          
+          if (navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+            // Restore previous slide
+            setCurrentSlide(previousSlide);
+            setShowShareMenu(false);
+            return;
+          }
+        }
+        
+        // If sharing failed, restore slide and fall through to URL sharing
+        setCurrentSlide(previousSlide);
+      } catch (error) {
+        if (error?.name !== 'AbortError') {
+          console.error('Error sharing image:', error);
+        }
+        // Fall through to URL sharing
+      }
+    }
+    
+    // URL-based sharing for desktop or platforms that don't support file sharing
     const encodedText = encodeURIComponent(shareText);
     const encodedUrl = encodeURIComponent(shareUrl);
     
