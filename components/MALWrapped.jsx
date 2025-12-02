@@ -1730,26 +1730,23 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     const shareText = `Check out your ${yearText}MyAnimeList Wrapped!`;
     const shareUrl = window.location.href;
     
-    // Find finale slide index
-    const finaleIndex = slides.findIndex(slide => slide.id === 'finale');
-    
-    // For platforms that support file sharing (WhatsApp, Facebook on mobile), generate and share the finale image
-    const supportsFileSharing = ['whatsapp', 'facebook'].includes(platform) && 
-                                 navigator.share && 
-                                 navigator.canShare;
-    
-    if (supportsFileSharing && finaleIndex !== -1) {
+    // Try to use Web Share API with image first (works on mobile and some desktop browsers)
+    if (navigator.share && navigator.canShare) {
+      // Find finale slide index
+      const finaleIndex = slides.findIndex(slide => slide.id === 'finale');
+      const slideIndex = finaleIndex !== -1 ? finaleIndex : currentSlide;
+      
+      // Save current slide
+      const previousSlide = currentSlide;
+      
       try {
-        // Save current slide
-        const previousSlide = currentSlide;
-        
-        // Navigate to finale slide
-        setCurrentSlide(finaleIndex);
+        // Navigate to the slide we want to share
+        setCurrentSlide(slideIndex);
         
         // Wait for slide to render
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Generate PNG of finale slide
+        // Generate PNG of the slide
         const result = await generatePNG();
         
         if (result && result.file) {
@@ -1769,17 +1766,24 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           }
         }
         
-        // If sharing failed, restore slide and fall through to URL sharing
+        // If sharing failed, restore slide
         setCurrentSlide(previousSlide);
       } catch (error) {
+        // Always restore slide on error
+        setCurrentSlide(previousSlide);
+        
         if (error?.name !== 'AbortError') {
-          console.error('Error sharing image:', error);
+          console.error('Error sharing with image:', error);
+          // Fall through to URL sharing
+        } else {
+          // User cancelled
+          setShowShareMenu(false);
+          return;
         }
-        // Fall through to URL sharing
       }
     }
     
-    // URL-based sharing for desktop or platforms that don't support file sharing
+    // Fallback to URL-based sharing for desktop or platforms that don't support file sharing
     const encodedText = encodeURIComponent(shareText);
     const encodedUrl = encodeURIComponent(shareUrl);
     
