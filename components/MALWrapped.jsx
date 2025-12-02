@@ -189,7 +189,6 @@ function getCompletionDays(startDate, finishDate) {
 
 export default function MALWrapped() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState('');
@@ -1786,43 +1785,27 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYear]);
 
-  // Auto-advance slides every 10 seconds with progress indicator
+  // Auto-advance slides every 15 seconds
   useEffect(() => {
     // Only auto-advance when wrapped is loaded and user is authenticated
     if (!stats || !isAuthenticated || !slides || slides.length === 0) {
       return;
     }
 
-    // Reset progress when slide changes
-    setAutoAdvanceProgress(0);
+    const interval = setInterval(() => {
+      setCurrentSlide((prevSlide) => {
+        // Skip welcome slide (index 0) - start from slide 1
+        const nextSlide = prevSlide + 1;
+        // Loop back to slide 1 (skip welcome) when reaching the end
+        if (nextSlide >= slides.length) {
+          return 1;
+        }
+        return nextSlide;
+      });
+    }, 10000); // 15 seconds
 
-    const duration = 10000; // 10 seconds
-    const updateInterval = 50; // Update every 50ms for smooth animation
-    const steps = duration / updateInterval;
-    let currentStep = 0;
-
-    const progressInterval = setInterval(() => {
-      currentStep++;
-      const progress = (currentStep / steps) * 100;
-      setAutoAdvanceProgress(Math.min(progress, 100));
-
-      if (currentStep >= steps) {
-        // Time to advance to next slide
-        setCurrentSlide((prevSlide) => {
-          // Skip welcome slide (index 0) - start from slide 1
-          const nextSlide = prevSlide + 1;
-          // Loop back to slide 1 (skip welcome) when reaching the end
-          if (nextSlide >= slides.length) {
-            return 1;
-          }
-          return nextSlide;
-        });
-        // Progress will reset on next render due to currentSlide change
-      }
-    }, updateInterval);
-
-    return () => clearInterval(progressInterval);
-  }, [stats, isAuthenticated, slides, currentSlide]);
+    return () => clearInterval(interval);
+  }, [stats, isAuthenticated, slides]);
 
   async function handleBegin() {
     if (typeof window === 'undefined') {
@@ -4374,15 +4357,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {slides.map((_, i) => {
                   const isCompleted = i < currentSlide;
                   const isActive = i === currentSlide;
-                  // For active slide, use auto-advance progress; for completed, use 100%
-                  const progressWidth = isCompleted ? 100 : (isActive ? autoAdvanceProgress : 0);
                   return (
                     <div key={i} className="flex-1 h-1 sm:h-1.5 rounded-full bg-white/10 overflow-hidden">
-                      <motion.div 
-                        className={`h-full rounded-full ${isActive ? 'bg-white' : 'bg-white/30'}`} 
-                        initial={{ width: isCompleted ? '100%' : '0%' }}
-                        animate={{ width: `${progressWidth}%` }}
-                        transition={{ duration: 0.1, ease: 'linear' }}
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 ease-out ${isActive ? 'bg-white' : 'bg-white/30'}`} 
+                        style={{ width: (isCompleted || isActive) ? '100%' : '0%' }} 
                       />
                     </div>
                   );
@@ -4390,35 +4369,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </div>
               
               {/* Slide Content */}
-              <div 
-                key={currentSlide} 
-                className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" 
-                style={{ zIndex: 0 }}
-              >
-                {/* Left corner touch area - Previous slide */}
-                <div
-                  className="absolute left-0 top-0 bottom-0 w-1/4 z-20 cursor-pointer md:cursor-default"
-                  onClick={() => setCurrentSlide((prev) => Math.max(0, prev - 1))}
-                  onTouchStart={() => {
-                    if (currentSlide > 0) {
-                      setCurrentSlide((prev) => Math.max(0, prev - 1));
-                    }
-                  }}
-                  style={{ touchAction: 'manipulation' }}
-                />
-                
-                {/* Right corner touch area - Next slide */}
-                <div
-                  className="absolute right-0 top-0 bottom-0 w-1/4 z-20 cursor-pointer md:cursor-default"
-                  onClick={() => setCurrentSlide((prev) => Math.min(slides.length - 1, prev + 1))}
-                  onTouchStart={() => {
-                    if (currentSlide < slides.length - 1) {
-                      setCurrentSlide((prev) => Math.min(slides.length - 1, prev + 1));
-                    }
-                  }}
-                  style={{ touchAction: 'manipulation' }}
-                />
-                
+              <div key={currentSlide} className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" style={{ zIndex: 0 }}>
                 {/* Top gradient fade - above rainbow shapes, below content */}
                
                 
