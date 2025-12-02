@@ -1810,7 +1810,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
   // Animate progress bar for current slide
   useEffect(() => {
-    // Reset progress when slide changes
+    // Reset progress immediately when slide changes (don't wait)
     setSlideProgress(0);
     
     // Only animate progress if wrapped is loaded and user is authenticated
@@ -1826,8 +1826,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     const duration = 10000; // 10 seconds to match auto-advance
     const startTime = Date.now();
     let animationFrameId = null;
+    let isCancelled = false;
     
     const updateProgress = () => {
+      if (isCancelled) return;
+      
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
       setSlideProgress(progress);
@@ -1837,9 +1840,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       }
     };
     
+    // Start animation immediately on next frame
     animationFrameId = requestAnimationFrame(updateProgress);
     
     return () => {
+      isCancelled = true;
       if (animationFrameId !== null) {
         cancelAnimationFrame(animationFrameId);
       }
@@ -4446,7 +4451,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         className={`h-full rounded-full ${isActive ? 'bg-white' : 'bg-white/30'}`} 
                         style={{ 
                           width: width,
-                          transition: isActive ? 'none' : 'width 0.3s ease-out'
+                          transition: isActive ? 'none' : 'width 0.3s ease-out',
+                          willChange: isActive ? 'width' : 'auto'
                         }} 
                       />
                     </div>
