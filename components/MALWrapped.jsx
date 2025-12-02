@@ -4500,7 +4500,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 href="https://www.linkedin.com/in/xavishkar/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
                 style={{ 
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -4511,7 +4511,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   borderColor: 'rgba(0, 119, 181, 0.8)'
                 }}
                 whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
                 title="LinkedIn"
               >
                 <Linkedin size={20} className="text-white" />
@@ -4520,7 +4520,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 href="https://www.youtube.com/@x.avishkar"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
                 style={{ 
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -4531,7 +4531,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   borderColor: 'rgba(255, 0, 0, 0.8)'
                 }}
                 whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
                 title="YouTube"
               >
                 <Youtube size={20} className="text-white" />
@@ -4540,7 +4540,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 href="https://www.instagram.com/x.avishkar"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
                 style={{ 
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -4551,7 +4551,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   borderColor: 'rgba(228, 64, 95, 0.8)'
                 }}
                 whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
                 title="Instagram"
               >
                 <Instagram size={20} className="text-white" />
@@ -4560,7 +4560,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 href="https://github.com/Avishkar15"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
                 style={{ 
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -4571,7 +4571,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   borderColor: 'rgba(255, 255, 255, 0.8)'
                 }}
                 whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
                 title="GitHub"
               >
                 <Github size={20} className="text-white" />
@@ -4580,7 +4580,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       href="https://myanimelist.net/profile/XAvishkar"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white transition-all group"
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
                       style={{ 
                         backgroundColor: 'rgba(255, 255, 255, 0.05)',
                         border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -4591,7 +4591,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         borderColor: 'rgba(46, 81, 162, 0.8)'
                       }}
                       whileTap={{ scale: 0.9 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
                       title="MyAnimeList"
                     >
                       <MyAnimeListIcon size={20} className="text-white" />
@@ -4659,7 +4659,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
                 whileHover={{ x: 4 }}
               >
-                <span>Toyota</span>
+                <span>Toyota Mobility Foundation</span>
                 <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.a>
               <motion.a
