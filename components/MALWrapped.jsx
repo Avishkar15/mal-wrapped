@@ -258,7 +258,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       'top_genre': 'My Most Watched Genres',
       'drumroll_anime': 'My Top Anime',
       'top_5_anime': 'My Top 5 Anime',
-      'top_studio': 'My Favorite Studio',
+      'top_studio': 'My Favorite Studios',
       'seasonal_highlights': 'My Seasonal Highlights',
       'hidden_gems_anime': 'My Hidden Anime Gems',
       'didnt_land_anime': 'My Least Rated Anime',
@@ -2520,7 +2520,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
         const otherGenres = stats.topGenres?.slice(1, 5) || [];
         return (
-          <SlideLayout  bgColor="yellow">
+          <SlideLayout>
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
             You kept coming back to same genres
             </motion.h2>
@@ -2575,7 +2575,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           }, []);
 
           return (
-            <SlideLayout>
+            <SlideLayout bgColor="yellow">
             {phase === 0 ? (
               <motion.div className="text-center relative overflow-hidden z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.div 
@@ -4331,7 +4331,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <motion.img
                     src="/avatar.webp"
                     alt="XAvishkar"
-                    className="relative w-40 h-40 sm:w-44 sm:h-44 md:w-48 md:h-48 object-contain pointer-events-none z-10 mt-1 mx-auto rounded-xl"
+                    className="relative h-36 object-cover pointer-events-none z-10 mt-1 mb-1 mx-auto rounded-xl"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: smoothEase }}
