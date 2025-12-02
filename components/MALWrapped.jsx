@@ -2192,19 +2192,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
       return (
         <div className="mt-4 flex justify-center w-full px-2">
-          <div className={`grid ${getGridCols()} gap-4 place-items-center w-full max-w-4xl mx-auto`}>
+          <motion.div 
+            className={`grid ${getGridCols()} gap-4 place-items-center w-full max-w-4xl mx-auto`}
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+          >
           {visibleItems.map((item, idx) => {
             const malUrl = getMALUrl(item);
             const itemContent = (
                 <motion.div 
                   className="flex flex-col items-center w-full"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    duration: 0.5,
-                    delay: idx * 0.08,
-                    ease: smoothEase
-                  }}
+                  variants={staggerItem}
                 >
                   <motion.div 
                 className="aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative w-full" 
@@ -2247,7 +2246,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </motion.div>
             );
           })}
-          </div>
+          </motion.div>
         </div>
       );
     };
@@ -2495,7 +2494,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                   />
                 </motion.div>
-                <h2 className="body-md font-medium font-medium text-white mt-4 text-container z-10 relative">But the anime that rose above everything was...</h2>
+                <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">But the anime that rose above everything was...</h2>
               </motion.div>
             ) : phase === 1 && topItem ? (
               <motion.div className="text-center relative overflow-hidden z-10">
@@ -2653,18 +2652,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         {others.length > 0 && (
                           <motion.div 
                             className="grid grid-cols-4 gap-2 w-full relative z-10"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delayChildren: 0.4, staggerChildren: 0.1 }}
+                            variants={staggerContainer}
+                            initial="initial"
+                            animate="animate"
                           >
                             {others.map((item, index) => {
                               const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                               const itemContent = (
                                 <motion.div 
                                   className="flex flex-col w-full min-w-0 relative z-10"
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ duration: 0.4 }}
+                                  variants={staggerItem}
                                 >
                                 <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative w-full z-10 aspect-[2/3] max-h-[175px]" 
@@ -2798,7 +2795,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               Each season dropped something special
             </motion.h2>
             </div>
-            <div className="mt-2 sm:mt-4 flex flex-col md:grid md:grid-cols-2 gap-1.5 sm:gap-2 relative z-10">
+            <motion.div 
+              className="mt-2 sm:mt-4 flex flex-col md:grid md:grid-cols-2 gap-1.5 sm:gap-2 relative z-10"
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+            >
               {seasons.map(season => {
                 const seasonData = stats.seasonalHighlights?.[season];
                 if (!seasonData) return null;
@@ -2814,8 +2816,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     className="rounded-xl" 
                     style={{ padding: '2px' }}
                     variants={staggerItem}
-                    initial="initial"
-                    animate="animate"
                   >
                     <motion.div 
                       className="bg-black/70 rounded-xl p-2 h-full"
@@ -2856,7 +2856,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
             <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You caught every wave right on time
             </motion.h3>
           </SlideLayout>
@@ -3256,7 +3256,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                     />
                   </motion.div>
-                  <h2 className="body-md font-regular text-white mt-4 text-container z-10 relative">But the manga that kept you turning pages nonstop was...</h2>
+                  <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">But the manga that kept you turning pages nonstop was...</h2>
                 </motion.div>
               ) : phase === 1 && topItem ? (
                 <motion.div className="text-center relative overflow-hidden z-10">
@@ -3416,18 +3416,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         {others.length > 0 && (
                           <motion.div 
                             className="grid grid-cols-4 gap-2 w-full relative z-10"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delayChildren: 0.4, staggerChildren: 0.1 }}
+                            variants={staggerContainer}
+                            initial="initial"
+                            animate="animate"
                           >
                             {others.map((item, index) => {
                               const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                               const itemContent = (
                                 <motion.div 
                                   className="flex flex-col w-full min-w-0 relative z-10"
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ duration: 0.4 }}
+                                  variants={staggerItem}
                                 >
                                 <motion.div 
                                   className="bg-transparent rounded-xl overflow-hidden relative w-full z-10" 
