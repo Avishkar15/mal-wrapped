@@ -189,10 +189,8 @@ function getCompletionDays(startDate, finishDate) {
 
 export default function MALWrapped() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [autoAdvanceProgress, setAutoAdvanceProgress] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-  const [isPaused, setIsPaused] = useState(false);
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState('');
@@ -1789,47 +1787,86 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYear]);
 
-  // Auto-advance slides every 15 seconds with progress indicator
+  // Auto-advance slides every 15 seconds
   useEffect(() => {
     // Only auto-advance when wrapped is loaded and user is authenticated
-    if (!stats || !isAuthenticated || !slides || slides.length === 0 || isPaused) {
+    if (!stats || !isAuthenticated || !slides || slides.length === 0) {
       return;
     }
 
-    // Reset progress when slide changes
-    setAutoAdvanceProgress(0);
+    const interval = setInterval(() => {
+      setCurrentSlide((prevSlide) => {
+        // Skip welcome slide (index 0) - start from slide 1
+        const nextSlide = prevSlide + 1;
+        // Loop back to slide 1 (skip welcome) when reaching the end
+        if (nextSlide >= slides.length) {
+          return 1;
+        }
+        return nextSlide;
+      });
+    }, 10000); // 15 seconds
 
-    const duration = 15000; // 15 seconds
-    const updateInterval = 50; // Update every 50ms for smooth animation
-    const steps = duration / updateInterval;
-    let currentStep = 0;
+    return () => clearInterval(interval);
+  }, [stats, isAuthenticated, slides]);
 
-    const progressInterval = setInterval(() => {
-      if (isPaused) {
-        return;
-      }
-      
-      currentStep++;
-      const progress = (currentStep / steps) * 100;
-      setAutoAdvanceProgress(Math.min(progress, 100));
+  // Touch and swipe handlers for mobile navigation
+  const minSwipeDistance = 50; // Minimum distance for a swipe
 
-      if (currentStep >= steps) {
-        // Time to advance to next slide
-        setCurrentSlide((prevSlide) => {
-          // Skip welcome slide (index 0) - start from slide 1
-          const nextSlide = prevSlide + 1;
-          // Loop back to slide 1 (skip welcome) when reaching the end
-          if (nextSlide >= slides.length) {
-            return 1;
-          }
-          return nextSlide;
-        });
-        // Progress will reset on next render due to currentSlide change
-      }
-    }, updateInterval);
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
 
-    return () => clearInterval(progressInterval);
-  }, [stats, isAuthenticated, slides, currentSlide, isPaused]);
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentSlide < slides.length - 1) {
+      // Swipe left - go to next slide
+      setCurrentSlide((prev) => Math.min(slides.length - 1, prev + 1));
+    } else if (isRightSwipe && currentSlide > 0) {
+      // Swipe right - go to previous slide
+      setCurrentSlide((prev) => Math.max(0, prev - 1));
+    }
+    
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  // Tap handlers for left/right sides of screen (Instagram story style)
+  const handleSlideTap = (e) => {
+    // Don't handle tap if user clicked on an interactive element
+    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) {
+      return;
+    }
+    
+    if (!slides || slides.length === 0) return;
+    
+    const screenWidth = window.innerWidth;
+    const tapX = e.clientX;
+    
+    if (!tapX) return;
+    
+    const leftThird = screenWidth / 3;
+    const rightThird = (screenWidth / 3) * 2;
+    
+    if (tapX < leftThird && currentSlide > 0) {
+      // Tap left side - go to previous slide
+      e.preventDefault();
+      setCurrentSlide((prev) => Math.max(0, prev - 1));
+    } else if (tapX > rightThird && currentSlide < slides.length - 1) {
+      // Tap right side - go to next slide
+      e.preventDefault();
+      setCurrentSlide((prev) => Math.min(slides.length - 1, prev + 1));
+    }
+  };
 
   async function handleBegin() {
     if (typeof window === 'undefined') {
@@ -4381,15 +4418,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {slides.map((_, i) => {
                   const isCompleted = i < currentSlide;
                   const isActive = i === currentSlide;
-                  // For active slide, use auto-advance progress; for completed, use 100%
-                  const progressWidth = isCompleted ? 100 : (isActive ? autoAdvanceProgress : 0);
                   return (
                     <div key={i} className="flex-1 h-1 sm:h-1.5 rounded-full bg-white/10 overflow-hidden">
-                      <motion.div 
-                        className={`h-full rounded-full ${isActive ? 'bg-white' : 'bg-white/30'}`} 
-                        initial={{ width: isCompleted ? '100%' : '0%' }}
-                        animate={{ width: `${progressWidth}%` }}
-                        transition={{ duration: 0.1, ease: 'linear' }}
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 ease-out ${isActive ? 'bg-white' : 'bg-white/30'}`} 
+                        style={{ width: (isCompleted || isActive) ? '100%' : '0%' }} 
                       />
                     </div>
                   );
@@ -4401,36 +4434,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 key={currentSlide} 
                 className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" 
                 style={{ zIndex: 0 }}
-                onTouchStart={(e) => {
-                  setTouchStart(e.targetTouches[0].clientX);
-                  setIsPaused(true);
-                }}
-                onTouchMove={(e) => {
-                  setTouchEnd(e.targetTouches[0].clientX);
-                }}
-                onTouchEnd={() => {
-                  if (!touchStart || !touchEnd) {
-                    setIsPaused(false);
-                    return;
-                  }
-                  
-                  const distance = touchStart - touchEnd;
-                  const minSwipeDistance = 50; // Minimum distance for a swipe
-                  const isLeftSwipe = distance > minSwipeDistance;
-                  const isRightSwipe = distance < -minSwipeDistance;
-
-                  if (isLeftSwipe && currentSlide < slides.length - 1) {
-                    // Swipe left - go to next slide
-                    setCurrentSlide((prev) => Math.min(slides.length - 1, prev + 1));
-                  } else if (isRightSwipe && currentSlide > 0) {
-                    // Swipe right - go to previous slide
-                    setCurrentSlide((prev) => Math.max(0, prev - 1));
-                  }
-                  
-                  setTouchStart(null);
-                  setTouchEnd(null);
-                  setIsPaused(false);
-                }}
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+                onClick={handleSlideTap}
               >
                 {/* Top gradient fade - above rainbow shapes, below content */}
                
@@ -4443,11 +4450,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               {/* Bottom Controls */}
               <div className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-10" data-exclude-from-screenshot>
                 <motion.button
-                onClick={() => {
-                  setIsPaused(true);
-                  setCurrentSlide(Math.max(0, currentSlide - 1));
-                  setTimeout(() => setIsPaused(false), 100);
-                }}
+                onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
                 disabled={currentSlide === 0}
                   className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30 transition-all"
                   whileHover={{ scale: currentSlide === 0 ? 1 : 1.1 }}
@@ -4536,11 +4539,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   )}
 
                   <motion.button
-                  onClick={() => {
-                    setIsPaused(true);
-                    setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1));
-                    setTimeout(() => setIsPaused(false), 100);
-                  }}
+                  onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
                   disabled={currentSlide === slides.length - 1}
                   className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30"
                   whileHover={{ scale: currentSlide === slides.length - 1 ? 1 : 1.1 }}
