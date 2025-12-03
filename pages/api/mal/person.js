@@ -20,23 +20,17 @@ export default async function handler(req, res) {
     }
   
     const accessToken = authHeader.replace('Bearer ', '');
-    const { offset = 0, limit = 100 } = req.query;
+    const { personId } = req.query;
+  
+    if (!personId) {
+      return res.status(400).json({ error: 'Person ID is required' });
+    }
   
     try {
-      console.log(`Fetching manga list (offset: ${offset}, limit: ${limit})...`);
-      
-      const fields = [
-        'list_status{status,score,start_date,finish_date,num_chapters_read,num_volumes_read,updated_at}',
-        'genres{name}',
-        'authors{node{id,first_name,last_name}}',
-        'title',
-        'main_picture',
-        'id',
-        'num_list_users'
-      ].join(',');
+      console.log(`Fetching person data for ID: ${personId}...`);
       
       const response = await fetch(
-        `https://api.myanimelist.net/v2/users/@me/mangalist?offset=${offset}&limit=${limit}&fields=${fields}&nsfw=true`, 
+        `https://api.myanimelist.net/v2/people/${personId}?fields=id,first_name,last_name,main_picture`, 
         {
           method: 'GET',
           headers: {
@@ -52,13 +46,14 @@ export default async function handler(req, res) {
         return res.status(response.status).json(data);
       }
   
-      console.log(`Manga list fetched: ${data.data?.length || 0} items`);
+      console.log(`Person data fetched successfully`);
       return res.status(200).json(data);
     } catch (error) {
-      console.error('Manga list fetch error:', error);
+      console.error('Person data fetch error:', error);
       return res.status(500).json({ 
         error: 'Internal server error',
         message: error.message 
       });
     }
   }
+

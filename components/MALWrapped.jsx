@@ -202,6 +202,7 @@ export default function MALWrapped() {
   const [selectedYear, setSelectedYear] = useState(2025);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
+  const [authorPhotos, setAuthorPhotos] = useState({});
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
 
@@ -699,6 +700,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     };
     
     const authorCounts = {};
+    const authorIds = {}; // Store author IDs
+    
     filteredManga.forEach(item => {
       item.node?.authors?.forEach(author => {
         const name = normalizeAuthorName(
@@ -707,13 +710,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         );
         if (name) {
           authorCounts[name] = (authorCounts[name] || 0) + 1;
+          // Store the first author ID we encounter for each name
+          if (!authorIds[name] && author.node?.id) {
+            authorIds[name] = author.node.id;
+          }
         }
       });
     });
 
     const topAuthors = Object.entries(authorCounts)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
+      .slice(0, 5)
+      .map(([name, count]) => [name, count, authorIds[name]]); // Include author ID
 
     // ========== NEW UNIQUE FEATURES ==========
     
@@ -1842,6 +1850,40 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
     return () => clearInterval(interval);
   }, [stats, isAuthenticated, slides]);
+
+  // Fetch author photos from MAL API
+  useEffect(() => {
+    if (!stats?.topAuthors || !isAuthenticated) return;
+    
+    const fetchAuthorPhotos = async () => {
+      const photos = {};
+      const storedToken = localStorage.getItem('mal_access_token');
+      if (!storedToken) return;
+      
+      for (const authorEntry of stats.topAuthors) {
+        const [authorName, count, authorId] = authorEntry;
+        if (authorId) {
+          try {
+            const response = await fetch(`/api/mal/person?personId=${authorId}`, {
+              headers: { 'Authorization': `Bearer ${storedToken}` },
+            });
+            if (response.ok) {
+              const data = await response.json();
+              if (data.main_picture?.large || data.main_picture?.medium) {
+                photos[authorName] = data.main_picture.large || data.main_picture.medium;
+              }
+            }
+          } catch (error) {
+            console.warn(`Failed to fetch photo for ${authorName}:`, error);
+          }
+        }
+      }
+      
+      setAuthorPhotos(photos);
+    };
+    
+    fetchAuthorPhotos();
+  }, [stats?.topAuthors, isAuthenticated]);
 
   // Instagram story-style tap handlers for mobile navigation
   const handleSlideTap = (e) => {
@@ -3573,93 +3615,111 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
 
       case 'top_author':
-        const topAuthor = stats.topAuthors && stats.topAuthors.length > 0 ? stats.topAuthors[0][0] : null;
         const normalizeAuthorName = (first, last) => {
           return `${(first || '').trim()} ${(last || '').trim()}`.trim().replace(/\s+/g, ' ');
         };
         
-        const topAuthorMangaRaw = topAuthor ? (mangaListData || []).filter(item => {
-          if (stats.selectedYear !== 'all') {
-            const finishDate = item.list_status?.finish_date;
-            const startDate = item.list_status?.start_date;
-            const updatedAt = item.list_status?.updated_at;
-            let dateToCheck = finishDate || startDate || updatedAt;
-            if (!dateToCheck) return false;
-            try {
-              const year = new Date(dateToCheck).getFullYear();
-              if (year !== stats.selectedYear) return false;
-            } catch (e) {
-              return false;
+        // Get manga for each top author
+        const getAuthorManga = (authorName) => {
+          const authorMangaRaw = (mangaListData || []).filter(item => {
+            if (stats.selectedYear !== 'all') {
+              const finishDate = item.list_status?.finish_date;
+              const startDate = item.list_status?.start_date;
+              const updatedAt = item.list_status?.updated_at;
+              let dateToCheck = finishDate || startDate || updatedAt;
+              if (!dateToCheck) return false;
+              try {
+                const year = new Date(dateToCheck).getFullYear();
+                if (year !== stats.selectedYear) return false;
+              } catch (e) {
+                return false;
+              }
             }
-          }
-          return item.node?.authors?.some(a => {
-            const name = normalizeAuthorName(
-              a.node?.first_name || '',
-              a.node?.last_name || ''
-            );
-            return name === topAuthor;
+            return item.node?.authors?.some(a => {
+              const name = normalizeAuthorName(
+                a.node?.first_name || '',
+                a.node?.last_name || ''
+              );
+              return name === authorName;
+            });
           });
-        }) : [];
+          
+          // Deduplicate manga by title
+          const authorMangaMap = new Map();
+          authorMangaRaw.forEach(item => {
+            const title = item.node?.title || '';
+            if (title && !authorMangaMap.has(title)) {
+              authorMangaMap.set(title, item);
+            }
+          });
+          return Array.from(authorMangaMap.values()).map(item => item.node?.title || '').filter(Boolean);
+        };
         
-        // Deduplicate manga by title to avoid showing the same work multiple times
-        const topAuthorMangaMap = new Map();
-        topAuthorMangaRaw.forEach(item => {
-          const title = item.node?.title || '';
-          if (title && !topAuthorMangaMap.has(title)) {
-            topAuthorMangaMap.set(title, item);
-          }
-        });
-        const topAuthorManga = Array.from(topAuthorMangaMap.values());
+        const topAuthors = stats.topAuthors || [];
         
-        const authorManga = topAuthorManga.map(item => ({
-          title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
-          mangaId: item.node?.id
-        }));
-        const otherAuthors = stats.topAuthors?.slice(1, 5) || [];
         return (
-          <SlideLayout  bgColor="pink">
-          <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-          These creators shaped your taste
+          <SlideLayout bgColor="pink">
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              These creators shaped your taste
             </motion.h2>
-            {topAuthor ? (
-              <>
-                <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-                  <p className="heading-lg font-semibold text-white "><span className="body-lg font-bold text-white/70">1.</span> {topAuthor}</p>
-                  <p className="body-sm text-white/70 font-regular">{stats.topAuthors[0][1]} entries</p>
-                </motion.div>
-                {authorManga.length > 0 && (
-                  <div className="relative z-10"><ImageCarousel items={authorManga} maxItems={10} showHover={true} showNames={false} /></div>
-                )}
-                {otherAuthors.length > 0 && (
-                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
-                    {otherAuthors.map(([authorName, count], idx) => (
-                      <motion.div 
-                        key={idx} 
-                        className="text-center py-2" 
-                        variants={staggerItem}
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.2, ease: smoothEase }}
-                      >
-                        <p className="heading-sm font-semibold text-white truncate mb-1">
-                          <span className="body-sm font-bold text-white/50 mr-1.5">{idx + 2}.</span> 
-                          {authorName}
+            {topAuthors.length > 0 ? (
+              <motion.div 
+                className="mt-6 space-y-6 relative z-10"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+              >
+                {topAuthors.map(([authorName, count], idx) => {
+                  const authorManga = getAuthorManga(authorName);
+                  const authorPhoto = authorPhotos[authorName] || '/Mascot.webp';
+                  
+                  // Format works text: "Work 1, Work 2, and X more works read"
+                  let worksText = '';
+                  if (authorManga.length === 0) {
+                    worksText = '';
+                  } else if (authorManga.length === 1) {
+                    worksText = `${authorManga[0]}`;
+                  } else if (authorManga.length === 2) {
+                    worksText = `${authorManga[0]}, ${authorManga[1]}`;
+                  } else {
+                    const remaining = authorManga.length - 2;
+                    worksText = `${authorManga[0]}, ${authorManga[1]}, and ${remaining} more work${remaining !== 1 ? 's' : ''} read`;
+                  }
+                  
+                  return (
+                    <motion.div
+                      key={idx}
+                      className="flex items-center gap-4"
+                      variants={staggerItem}
+                    >
+                      <img 
+                        src={authorPhoto} 
+                        alt={authorName}
+                        className="w-16 h-16 rounded-full object-cover border-2 border-white/20 flex-shrink-0"
+                        onError={(e) => {
+                          e.target.src = '/Mascot.webp';
+                        }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="heading-md font-semibold text-white">
+                          <span className="body-md font-bold text-white/70">{idx + 1}.</span> {authorName}
                         </p>
-                        <p className="text-sm text-white/60 font-medium tracking-wide">{count} entries</p>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                You know who delivers
-            </motion.h3>
-              </>
-              
+                        {worksText && (
+                          <p className="body-sm text-white/70 font-regular mt-1">{worksText}</p>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
             ) : (
               <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 No author took the spotlight
-            </motion.h3>
+              </motion.h3>
             )}
+            <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-6" {...fadeSlideUp} data-framer-motion>
+              You know who delivers
+            </motion.h3>
           </SlideLayout>
         );
 
