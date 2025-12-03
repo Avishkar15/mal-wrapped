@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@mateoaranda/jikanjs": "^1.3.1",
     "@zumer/snapdom": "^1.9.14",
     "dom-to-image": "^2.6.0",
     "dom-to-image-more": "^3.7.2",

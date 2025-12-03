@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       const fields = [
         'list_status{status,score,start_date,finish_date,num_chapters_read,num_volumes_read,updated_at}',
         'genres{name}',
-        'authors{node{first_name,last_name}}',
+        'authors{node{id,first_name,last_name}}',
         'title',
         'main_picture',
         'id',
