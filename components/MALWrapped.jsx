@@ -4136,22 +4136,22 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   variants={staggerItem}
                 >
                   <div>
-                    <p className="body-sm text-white/70 font-medium mb-1">Top Anime</p>
+                    <p className="text-sm md:text-base text-white/70 font-regular mb-1">Top Anime</p>
                     {stats.topRated.slice(0, 5).map((a, i) => (
                         <p key={a.node.id} className="text-white truncate">
-                          <span className="text-md text-white/70 font-medium truncate mr-2">{String(i + 1)}</span>
-                          <span className="title-md text-white font-medium truncate">{a.node.title}</span>
+                          <span className="title-sm text-white font-medium truncate mr-2">{String(i + 1)}</span>
+                          <span className="title-sm text-white font-medium truncate">{a.node.title}</span>
                       </p>
                     ))}
                   </div>
                   
                   <div>
-                    <p className="body-sm text-white/70 font-medium mb-1">Top Manga</p>
+                    <p className="text-sm md:text-base text-white/70 font-regular mb-1">Top Manga</p>
                     
                     {stats.topManga.slice(0, 5).map((m, i) => (
                         <p key={m.node.id} className="text-white truncate">
-                          <span className="text-md text-white/70 font-medium truncate mr-2">{String(i + 1)}</span>
-                          <span className="title-md text-white font-medium truncate">{m.node.title}</span>
+                          <span className="title-sm text-white font-medium truncate mr-2">{String(i + 1)}</span>
+                          <span className="title-sm  text-white font-medium truncate">{m.node.title}</span>
                       </p>
                     ))}
                   </div>
@@ -4164,7 +4164,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <div>
                     {finaleTopGenre && (
                       <>
-                        <p className="body-sm text-white/70 font-medium mb-1">Favorite Genre</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">Favorite Genre</p>
                         <p className="title-md text-white font-medium">{finaleTopGenre[0]}</p>
                       </>
                     )}
@@ -4173,7 +4173,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   <div>
                     {favoriteAuthor && (
                       <>
-                        <p className="body-sm text-white/70 font-medium mb-1">Favorite Author</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">Favorite Author</p>
                         <p className="title-md text-white font-medium">{favoriteAuthor}</p>
                       </>
                     )}
@@ -4185,19 +4185,19 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   variants={staggerItem}
                 >
                   <div>
-                    <p className="body-sm text-white/70 font-medium mb-1">Watched</p>
+                    <p className="text-sm md:text-base text-white/70 font-regular mb-1">Watched</p>
                     <p className="title-md text-white  font-medium">
                     {stats.totalAnime || 0} Anime
                   </p>
                   </div>
                   <div>
-                    <p className="body-sm text-white/70 font-medium mb-1">Read</p>
+                    <p className="text-sm md:text-base text-white/70 font-regular mb-1">Read</p>
                     <p className="title-md text-white font-medium">
                     {stats.totalManga || 0} Manga
                   </p>
                 </div>
                 <div>
-                  <p className="body-sm text-white/70 font-medium mb-1">Time Spent</p>
+                  <p className="text-sm md:text-base text-white/70 font-regular mb-1">Time Spent</p>
                   <p className="title-lg text-white font-medium">
                   {totalDays > 0 ? (
                     <>
