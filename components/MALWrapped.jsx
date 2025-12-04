@@ -2981,7 +2981,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               <p className="title-md truncate font-semibold text-white">{highlight.node?.title}</p>
                               <p className="body-sm text-white/70 truncate font-medium">{highlight.node?.studios?.[0]?.name || ''}</p>
                               <p className="mono text-yellow-300 mt-1 sm:mt-2 font-semibold mt-1">★ {highlight.list_status?.score ? Math.round(highlight.list_status.score) : 'Not Rated Yet'}</p>
-                              <p className="mono text-white/70 truncate mt-1 sm:mt-2 font-regular">{seasonData.totalAnime} anime this season</p>
+                              <p className="text-sm md:text-md text-white/70 truncate mt-1 sm:mt-2 font-regular">{seasonData.totalAnime} anime this season</p>
                           </div>
                         </div>
                       </>
@@ -3058,7 +3058,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           <span className="mono text-yellow-300 font-semibold">★ {Math.round(item.userRating)}</span>
                         </div>
                       )}
-                      <p className="body-sm text-white/70 mt-1 font-regular">
+                      <p className="text-sm md:text-md  text-white/70 mt-1 font-regular">
                         Only {item.popularity.toLocaleString()} people watched this!
                       </p>
                     </div>
@@ -3693,14 +3693,16 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       variants={staggerItem}
                     >
                       <div className="relative w-16 h-16 flex-shrink-0">
-                        <img 
-                          src={authorPhoto} 
-                          alt={authorName}
-                          className="w-full h-full rounded-xl object-cover"
-                          onError={(e) => {
-                            e.target.src = '/Mascot.webp';
-                          }}
-                        />
+                        <div className="bg-black/60 rounded-xl w-full h-full p-1">
+                          <img 
+                            src={authorPhoto} 
+                            alt={authorName}
+                            className="w-full h-full rounded-xl object-cover"
+                            onError={(e) => {
+                              e.target.src = '/Mascot.webp';
+                            }}
+                          />
+                        </div>
                         <div className="absolute top-0.5 right-0.5 z-10 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs">
                           {idx + 1}
                         </div>
@@ -3710,7 +3712,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           {authorName}
                         </p>
                         {worksText && (
-                          <p className="body-sm text-white/70 font-regular mt-1">{worksText}</p>
+                          <p className="text-sm md:text-md text-white/70 font-regular mt-1">{worksText}</p>
                         )}
                       </div>
                     </motion.div>
