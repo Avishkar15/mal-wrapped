@@ -1324,7 +1324,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         genre: genreText,
         reason: matchingGenreNames !== 'anime'
           ? `Based on your love for ${matchingGenreNames}, ${bestMatch.name} from '${bestMatch.series}' matches your vibes`
-          : `${bestMatch.name} from '${bestMatch.series}' matches your anime journey`,
+          : `${bestMatch.name} from '${bestMatch.series}' matches your journey`,
         coverImage: '/Mascot.webp', // Will be updated with character image
         type: 'character',
         animeId: bestMatch.malId,
@@ -2548,7 +2548,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                   <p className="heading-lg font-semibold text-white "><span className="body-lg font-bold text-white/70">1.</span> {topGenre}</p>
-                  <p className="body-sm text-white/70 font-medium">{stats.topGenres[0][1]} entries</p>
+                  <p className="text-sm md:text-base text-white/70 font-medium">{stats.topGenres[0][1]} entries</p>
                 </motion.div>
                 {genreAnime.length > 0 && <div className="relative z-10"><ImageCarousel items={genreAnime} maxItems={10} showHover={true} showNames={false} /></div>}
                 {otherGenres.length > 0 && (
@@ -2565,7 +2565,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           <span className="body-sm font-bold text-white/50 mr-1.5">{idx + 2}.</span> 
                           {genreName}
                         </p>
-                        <p className="text-sm text-white/60 font-medium tracking-wide">{count} entries</p>
+                        <p className="text-sm md:text-base text-white/70 font-medium tracking-wide">{count} entries</p>
                       </motion.div>
                     ))}
                   </div>
@@ -2749,7 +2749,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   {featured.genres.slice(0, 2).map(g => (
                                     <motion.span 
                                       key={g} 
-                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular border border-white/20" 
+                                      className="mono text-white/70 px-2 py-0.5 rounded-lg font-regular border border-white/20" 
                                       {...fadeSlideUp}
                                       transition={{ ...fadeSlideUp.transition, delay: 0.3 }}
                                     >
@@ -3310,7 +3310,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <>
                 <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
                   <p className="heading-lg font-semibold text-white "><span className="body-lg font-body text-white/70">1.</span> {topMangaGenre[0]}</p>
-                  <p className="body-sm text-white/70 font-regular">{topMangaGenre[1]} entries</p>
+                  <p className="text-sm md:text-base text-white/70 font-regular">{topMangaGenre[1]} entries</p>
                 </motion.div>
                 {mangaGenreItems.length > 0 && <div className="relative z-10"><ImageCarousel items={mangaGenreItems} maxItems={10} showHover={true} showNames={false} /></div>}
                 {otherMangaGenres.length > 0 && (
@@ -3327,7 +3327,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           <span className="body-sm font-bold text-white/50 mr-1.5">{idx + 2}.</span> 
                           {genreName}
                         </p>
-                        <p className="text-sm text-white/60 font-medium tracking-wide">{count} entries</p>
+                        <p className="text-sm md:text-base text-white/70 font-medium tracking-wide">{count} entries</p>
                       </motion.div>
                     ))}
                   </div>
@@ -3941,7 +3941,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       </motion.div>
                       <div className="flex-1 min-w-0">
                         <p className="heading-sm font-semibold text-white mb-1">{badge.name}</p>
-                        <p className="text-sm text-white/70 font-regular leading-relaxed">{badge.description}</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular leading-relaxed">{badge.description}</p>
                       </div>
                     </div>
                   </motion.div>
