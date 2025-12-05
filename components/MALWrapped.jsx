@@ -2687,83 +2687,73 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                   These stole the spotlight
                 </motion.h2>
-                <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
+                <div className="mt-4 sm:mt-6 flex flex-col gap-4 sm:gap-6 w-full max-w-3xl mx-auto relative z-10">
                   {(() => {
                     const [featured, ...others] = top5Formatted;
                     return (
                       <>
+                        {/* Featured #1 Item */}
                         <motion.div 
-                          className="rounded-xl overflow-hidden flex flex-row items-left relative w-full z-10" 
-                          style={{ padding: '2px' }}
+                          className="relative w-full z-10"
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
-                          <motion.div 
-                            className="bg-black/70 rounded-xl w-full h-full flex flex-row items-center relative z-10"
-                            whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
-                            transition={{ duration: 0.3, ease: smoothEase }}
-                          >
-                            <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm md:text-base">1</div>
-                            {(() => {
-                              const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
-                              const featuredImage = (
-                                <motion.div 
-                                  className="bg-transparent rounded-xl overflow-hidden relative z-10 aspect-[2/3] max-h-[225px]" 
-                              style={{ boxSizing: 'border-box' }}
-                                  whileHover={{ borderColor: '#ffffff' }}
-                                  transition={{ duration: 0.3, ease: smoothEase}}
-                                >
-                                  {featured.coverImage && (
-                                    <motion.img 
-                                      src={featured.coverImage} 
-                                      crossOrigin="anonymous" 
-                                      alt={featured.title} 
-                                      className="w-full h-full object-cover rounded-xl"
-                                      whileHover={hoverImage}
-                                    />
-                                  )}
-                                </motion.div>
-                              );
-                              return featuredUrl ? (
-                                <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
-                                  {featuredImage}
-                                </a>
-                              ) : featuredImage;
-                            })()}
+                          <div className="relative">
+                            {/* Large number badge */}
+                            <div className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 z-20 w-12 h-12 sm:w-16 sm:h-16 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-2xl sm:text-3xl md:text-4xl border-4 border-white/20">
+                              1
+                            </div>
+                            {/* Image with dotted border frame */}
+                            <div className="relative border-2 border-dashed border-white/30 rounded-xl p-2 bg-black/20">
+                              {(() => {
+                                const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
+                                const featuredImage = (
+                                  <motion.div 
+                                    className="bg-transparent rounded-xl overflow-hidden relative z-10 aspect-[2/3] max-h-[300px] sm:max-h-[400px]" 
+                                    style={{ boxSizing: 'border-box' }}
+                                    whileHover={{ scale: 1.02 }}
+                                    transition={{ duration: 0.3, ease: smoothEase}}
+                                  >
+                                    {featured.coverImage && (
+                                      <motion.img 
+                                        src={featured.coverImage} 
+                                        crossOrigin="anonymous" 
+                                        alt={featured.title} 
+                                        className="w-full h-full object-cover rounded-xl"
+                                      />
+                                    )}
+                                  </motion.div>
+                                );
+                                return featuredUrl ? (
+                                  <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
+                                    {featuredImage}
+                                  </a>
+                                ) : featuredImage;
+                              })()}
+                            </div>
+                            {/* Title and details below image */}
                             <motion.div 
-                              className="p-1.5 sm:p-2 flex flex-col justify-left flex-grow min-w-0 text-left relative z-10"
-                              initial={{ opacity: 0, x: 20 }}
-                              animate={{ opacity: 1, x: 0 }}
+                              className="mt-3 text-center"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                              <h3 className="title-md mt-1.5 sm:mt-2 truncate font-semibold text-white text-left">{featured.title}</h3>
-                              {featured.studio && <p className="mt-1 body-sm text-white/70 truncate font-medium text-left">{featured.studio}</p>}
-                              {featured.author && <p className="mt-1 body-sm text-white/70 truncate font-medium text-left">{featured.author}</p>}
-                              <div className="flex items-left justify-left mono text-yellow-300 mt-1 font-semibold">
-                                <span className="mr-0.5 sm:mr-1">★</span>
+                              <h3 className="title-lg sm:title-xl font-semibold text-white mb-1">{featured.title}</h3>
+                              {featured.studio && <p className="text-sm md:text-base text-white/70 font-medium">{featured.studio}</p>}
+                              {featured.author && <p className="text-sm md:text-base text-white/70 font-medium">{featured.author}</p>}
+                              <div className="flex items-center justify-center mono text-yellow-300 mt-2 font-semibold">
+                                <span className="mr-1">★</span>
                                 <span>{Math.round(featured.userRating)}</span>
                               </div>
-                              {featured.genres.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-1.5 justify-left items-left">
-                                  {featured.genres.slice(0, 2).map(g => (
-                                    <motion.span 
-                                      key={g} 
-                                      className="mono text-white/70 px-2 py-0.5 rounded-lg font-regular border border-white/20" 
-                                      {...fadeSlideUp}
-                                      transition={{ ...fadeSlideUp.transition, delay: 0.3 }}
-                                    >
-                                      {g}
-                                    </motion.span>
-                                  ))}
-                                </div>
-                              )}
                             </motion.div>
-                          </motion.div>
+                          </div>
                         </motion.div>
+                        
+                        {/* Items #2-5 as vertical list */}
                         {others.length > 0 && (
                           <motion.div 
-                            className="grid grid-cols-4 gap-2 w-full relative z-10"
+                            className="space-y-3 sm:space-y-4 relative z-10"
                             variants={staggerContainer}
                             initial="initial"
                             animate="animate"
@@ -2772,37 +2762,40 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                               const itemContent = (
                                 <motion.div 
-                                  className="flex flex-col w-full min-w-0 relative z-10"
+                                  className="flex items-center gap-3 sm:gap-4 w-full"
                                   variants={staggerItem}
                                 >
-                                <motion.div 
-                                  className="bg-transparent rounded-xl overflow-hidden relative w-full z-10 aspect-[2/3] max-h-[175px]" 
-                                  style={{ boxSizing: 'border-box' }}
-                                    whileHover={{ borderColor: '#ffffff' }}
-                                    transition={{ duration: 0.3, ease: smoothEase}}
-                                  >
-                                    <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm">{index + 2}</div>
+                                  {/* Number badge */}
+                                  <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-lg sm:text-xl">
+                                    {index + 2}
+                                  </div>
+                                  {/* Thumbnail */}
+                                  <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden">
                                     {item.coverImage && (
                                       <motion.img 
                                         src={item.coverImage} 
                                         alt={item.title} 
                                         crossOrigin="anonymous" 
-                                        className="w-full h-full object-cover rounded-xl"
-                                        whileHover={hoverImage}
+                                        className="w-full h-full object-cover"
+                                        whileHover={{ scale: 1.05 }}
+                                        transition={{ duration: 0.2 }}
                                       />
                                     )}
-                                  </motion.div>
-                                  <div className="mt-2 text-center w-full min-w-0 relative z-10">
-                                    <h3 className="title-sm truncate font-semibold text-white">{item.title}</h3>
-                                    <div className="flex items-center justify-center mono text-yellow-300 font-semibold mt-1">
-                                      <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
+                                  </div>
+                                  {/* Title and details */}
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="title-sm sm:title-md font-semibold text-white truncate">{item.title}</h3>
+                                    {item.studio && <p className="text-xs sm:text-sm text-white/70 truncate mt-0.5">{item.studio}</p>}
+                                    {item.author && <p className="text-xs sm:text-sm text-white/70 truncate mt-0.5">{item.author}</p>}
+                                    <div className="flex items-center mono text-yellow-300 mt-1 font-semibold text-xs sm:text-sm">
+                                      <span className="mr-1">★</span>
                                       <span>{Math.round(item.userRating)}</span>
                                     </div>
                                   </div>
                                 </motion.div>
                               );
                               return (
-                                <motion.div key={item.id} className="w-full min-w-0 relative z-10">
+                                <motion.div key={item.id} className="w-full">
                                   {malUrl ? (
                                     <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                       {itemContent}
@@ -3451,83 +3444,73 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                   These ruled your shelves
                 </motion.h2>
-                <div className="mt-2 sm:mt-3 flex flex-col gap-1.5 sm:gap-2 w-full relative z-10">
+                <div className="mt-4 sm:mt-6 flex flex-col gap-4 sm:gap-6 w-full max-w-3xl mx-auto relative z-10">
                   {(() => {
                     const [featured, ...others] = top5Formatted;
                     return (
                       <>
+                        {/* Featured #1 Item */}
                         <motion.div 
-                          className="rounded-xl overflow-hidden flex flex-row items-left relative w-full z-10" 
-                          style={{ padding: '2px' }}
+                          className="relative w-full z-10"
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
-                          <motion.div 
-                            className="bg-black/70 rounded-xl w-full h-full flex flex-row items-center relative z-10"
-                            whileHover={{ backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
-                            transition={{ duration: 0.3, ease: smoothEase }}
-                          >
-                            <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-10 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm md:text-base">1</div>
-                            {(() => {
-                              const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
-                              const featuredImage = (
-                                <motion.div 
-                                  className="bg-transparent rounded-xl overflow-hidden relative z-10" 
-                                  style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '225px' }}
-                                  whileHover={{ borderColor: '#ffffff' }}
-                                  transition={{ duration: 0.3, ease: smoothEase}}
-                                >
-                                  {featured.coverImage && (
-                                    <motion.img 
-                                      src={featured.coverImage} 
-                                      crossOrigin="anonymous" 
-                                      alt={featured.title} 
-                                      className="w-full h-full object-cover rounded-xl"
-                                      whileHover={hoverImage}
-                                    />
-                                  )}
-                                </motion.div>
-                              );
-                              return featuredUrl ? (
-                                <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
-                                  {featuredImage}
-                                </a>
-                              ) : featuredImage;
-                            })()}
+                          <div className="relative">
+                            {/* Large number badge */}
+                            <div className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 z-20 w-12 h-12 sm:w-16 sm:h-16 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-2xl sm:text-3xl md:text-4xl border-4 border-white/20">
+                              1
+                            </div>
+                            {/* Image with dotted border frame */}
+                            <div className="relative border-2 border-dashed border-white/30 rounded-xl p-2 bg-black/20">
+                              {(() => {
+                                const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
+                                const featuredImage = (
+                                  <motion.div 
+                                    className="bg-transparent rounded-xl overflow-hidden relative z-10 aspect-[2/3] max-h-[300px] sm:max-h-[400px]" 
+                                    style={{ boxSizing: 'border-box' }}
+                                    whileHover={{ scale: 1.02 }}
+                                    transition={{ duration: 0.3, ease: smoothEase}}
+                                  >
+                                    {featured.coverImage && (
+                                      <motion.img 
+                                        src={featured.coverImage} 
+                                        crossOrigin="anonymous" 
+                                        alt={featured.title} 
+                                        className="w-full h-full object-cover rounded-xl"
+                                      />
+                                    )}
+                                  </motion.div>
+                                );
+                                return featuredUrl ? (
+                                  <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
+                                    {featuredImage}
+                                  </a>
+                                ) : featuredImage;
+                              })()}
+                            </div>
+                            {/* Title and details below image */}
                             <motion.div 
-                              className="p-1.5 sm:p-2 flex flex-col justify-left flex-grow min-w-0 text-left relative z-10"
-                              initial={{ opacity: 0, x: 20 }}
-                              animate={{ opacity: 1, x: 0 }}
+                              className="mt-3 text-center"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                              <h3 className="title-md mt-1.5 sm:mt-2 truncate font-semibold text-white text-left">{featured.title}</h3>
-                              {featured.studio && <p className="mt-1 body-sm text-white/70 truncate font-medium text-left">{featured.studio}</p>}
-                              {featured.author && <p className="mt-1 body-sm text-white/70 truncate font-medium text-left">{featured.author}</p>}
-                              <div className="flex items-left justify-left mono text-yellow-300 mt-1 font-semibold">
-                                <span className="mr-0.5 sm:mr-1">★</span>
+                              <h3 className="title-lg sm:title-xl font-semibold text-white mb-1">{featured.title}</h3>
+                              {featured.studio && <p className="text-sm md:text-base text-white/70 font-medium">{featured.studio}</p>}
+                              {featured.author && <p className="text-sm md:text-base text-white/70 font-medium">{featured.author}</p>}
+                              <div className="flex items-center justify-center mono text-yellow-300 mt-2 font-semibold">
+                                <span className="mr-1">★</span>
                                 <span>{Math.round(featured.userRating)}</span>
                               </div>
-                              {featured.genres.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-2 justify-left items-left">
-                                  {featured.genres.slice(0, 2).map(g => (
-                                    <motion.span 
-                                      key={g} 
-                                      className="mono text-white px-2 py-0.5 rounded-lg font-regular border border-white/20" 
-                                      {...fadeSlideUp}
-                                      transition={{ ...fadeSlideUp.transition, delay: 0.3 }}
-                                    >
-                                      {g}
-                                    </motion.span>
-                                  ))}
-                                </div>
-                              )}
                             </motion.div>
-                          </motion.div>
+                          </div>
                         </motion.div>
+                        
+                        {/* Items #2-5 as vertical list */}
                         {others.length > 0 && (
                           <motion.div 
-                            className="grid grid-cols-4 gap-2 w-full relative z-10"
+                            className="space-y-3 sm:space-y-4 relative z-10"
                             variants={staggerContainer}
                             initial="initial"
                             animate="animate"
@@ -3536,37 +3519,40 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                               const itemContent = (
                                 <motion.div 
-                                  className="flex flex-col w-full min-w-0 relative z-10"
+                                  className="flex items-center gap-3 sm:gap-4 w-full"
                                   variants={staggerItem}
                                 >
-                                <motion.div 
-                                  className="bg-transparent rounded-xl overflow-hidden relative w-full z-10" 
-                                  style={{ boxSizing: 'border-box', aspectRatio: '2/3', maxHeight: '175px' }}
-                                    whileHover={{ borderColor: '#ffffff' }}
-                                    transition={{ duration: 0.3, ease: smoothEase}}
-                                  >
-                                    <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 z-10 w-5 h-5 sm:w-6 sm:h-6 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs sm:text-sm">{index + 2}</div>
+                                  {/* Number badge */}
+                                  <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-lg sm:text-xl">
+                                    {index + 2}
+                                  </div>
+                                  {/* Thumbnail */}
+                                  <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden">
                                     {item.coverImage && (
                                       <motion.img 
                                         src={item.coverImage} 
                                         alt={item.title} 
                                         crossOrigin="anonymous" 
-                                        className="w-full h-full object-cover rounded-xl"
-                                        whileHover={hoverImage}
+                                        className="w-full h-full object-cover"
+                                        whileHover={{ scale: 1.05 }}
+                                        transition={{ duration: 0.2 }}
                                       />
                                     )}
-                                  </motion.div>
-                                  <div className="mt-2 text-center w-full min-w-0 relative z-10">
-                                    <h3 className="title-sm truncate font-semibold text-white">{item.title}</h3>
-                                    <div className="flex items-center justify-center mono text-yellow-300 font-semibold mt-1">
-                                      <span className="mr-0.5 sm:mr-1 shrink-0">★</span>
+                                  </div>
+                                  {/* Title and details */}
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="title-sm sm:title-md font-semibold text-white truncate">{item.title}</h3>
+                                    {item.studio && <p className="text-xs sm:text-sm text-white/70 truncate mt-0.5">{item.studio}</p>}
+                                    {item.author && <p className="text-xs sm:text-sm text-white/70 truncate mt-0.5">{item.author}</p>}
+                                    <div className="flex items-center mono text-yellow-300 mt-1 font-semibold text-xs sm:text-sm">
+                                      <span className="mr-1">★</span>
                                       <span>{Math.round(item.userRating)}</span>
                                     </div>
                                   </div>
                                 </motion.div>
                               );
                               return (
-                                <motion.div key={item.id} className="w-full min-w-0 relative z-10">
+                                <motion.div key={item.id} className="w-full">
                                   {malUrl ? (
                                     <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                       {itemContent}
@@ -3638,7 +3624,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="pink">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              These creators shaped your taste
+            Your go-to authors
             </motion.h2>
             {topAuthors.length > 0 ? (
               <motion.div 
@@ -3722,7 +3708,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </motion.h3>
             )}
             <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-              You know who delivers
+              You know who delivers!
             </motion.h3>
           </SlideLayout>
         );
@@ -3789,7 +3775,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           <span className="mono text-yellow-300 font-semibold">★ {Math.round(item.userRating)}</span>
                         </div>
                       )}
-                      <p className="text-sm text-white/70 mt-1 font-regular">
+                      <p className="text-sm md:text-base text-white/70 mt-1 font-regular">
                         Only {item.popularity.toLocaleString()} people read this!
                       </p>
                     </div>
@@ -4096,10 +4082,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             >
               {/* Image with Heading */}
               <motion.div 
-                className="w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
+                className="w-full max-w-3xl flex items-center justify-center gap-4 sm:gap-6 mb-6 sm:mb-8 relative z-20"
                 variants={staggerItem}
               >
-                <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40 flex items-center justify-center flex-shrink-0 z-20">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 flex items-center justify-center flex-shrink-0 z-20">
                   <motion.a
                     href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
                     target="_blank"
@@ -4124,7 +4110,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
                   >
-                    {username || 'Your'}'s {stats.selectedYear !== 'all' ? `${stats.selectedYear} ` : ''}MyAnimeList Wrapped
+                    My {stats.selectedYear !== 'all' ? `${stats.selectedYear} ` : 'All Time'}MyAnimeList Wrapped
                   </motion.h2>
               </div>
               </motion.div>
@@ -4186,19 +4172,19 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 >
                   <div>
                     <p className="text-sm md:text-base text-white/70 font-regular mb-1">Watched</p>
-                    <p className="title-md text-white  font-medium">
+                    <p className="title-lg text-white  font-bold">
                     {stats.totalAnime || 0} Anime
                   </p>
                   </div>
                   <div>
                     <p className="text-sm md:text-base text-white/70 font-regular mb-1">Read</p>
-                    <p className="title-md text-white font-medium">
+                    <p className="title-lg text-white font-bold">
                     {stats.totalManga || 0} Manga
                   </p>
                 </div>
                 <div>
                   <p className="text-sm md:text-base text-white/70 font-regular mb-1">Time Spent</p>
-                  <p className="title-lg text-white font-medium">
+                  <p className="title-lg text-white font-bold">
                   {totalDays > 0 ? (
                     <>
                       {totalDays} Days
