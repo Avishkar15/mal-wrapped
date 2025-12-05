@@ -2694,52 +2694,57 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <>
                         {/* Featured #1 Item */}
                         <motion.div 
-                          className="w-full max-w-2xl mx-auto z-10"
+                          className="relative w-full max-w-xs mx-auto z-10"
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
-                          {(() => {
-                            const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
-                            const itemContent = (
-                              <motion.div 
-                                className="flex items-center gap-2.5 sm:gap-3 w-full"
-                              >
-                                {/* Number badge */}
-                                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-base sm:text-lg">
-                                  1
-                                </div>
-                                {/* Thumbnail */}
-                                <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden">
+                          <div className="relative">
+                            {/* Large number badge */}
+                            <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 z-20 w-10 h-10 sm:w-12 sm:h-12 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-xl sm:text-2xl md:text-3xl">
+                              1
+                            </div>
+                            {/* Image */}
+                            {(() => {
+                              const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
+                              const featuredImage = (
+                                <motion.div 
+                                  className="rounded-xl overflow-hidden relative z-10 aspect-[2/3] w-full max-w-[120px] sm:max-w-[140px] mx-auto" 
+                                  whileHover={{ scale: 1.02 }}
+                                  transition={{ duration: 0.3, ease: smoothEase}}
+                                >
                                   {featured.coverImage && (
                                     <motion.img 
                                       src={featured.coverImage} 
-                                      alt={featured.title} 
                                       crossOrigin="anonymous" 
-                                      className="w-full h-full object-cover"
-                                      whileHover={{ scale: 1.05 }}
-                                      transition={{ duration: 0.2 }}
+                                      alt={featured.title} 
+                                      className="w-full h-full object-cover rounded-xl"
                                     />
                                   )}
-                                </div>
-                                {/* Title and details */}
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-sm sm:text-base font-semibold text-white truncate">{featured.title}</h3>
-                                  {featured.studio && <p className="text-xs text-white/70 truncate mt-0.5">{featured.studio}</p>}
-                                  {featured.author && <p className="text-xs text-white/70 truncate mt-0.5">{featured.author}</p>}
-                                  <div className="flex items-center mono text-yellow-300 mt-0.5 font-semibold text-xs">
-                                    <span className="mr-0.5">★</span>
-                                    <span>{Math.round(featured.userRating)}</span>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            );
-                            return featuredUrl ? (
-                              <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                {itemContent}
-                              </a>
-                            ) : itemContent;
-                          })()}
+                                </motion.div>
+                              );
+                              return featuredUrl ? (
+                                <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
+                                  {featuredImage}
+                                </a>
+                              ) : featuredImage;
+                            })()}
+                            {/* Title and details below image */}
+                            <motion.div 
+                              className="mt-2 text-center"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.5, delay: 0.2 }}
+                            >
+                              <h3 className="title-md sm:title-lg font-semibold text-white mb-0.5">{featured.title}</h3>
+                              {featured.studio && <p className="text-xs sm:text-sm text-white/70 font-medium">{featured.studio}</p>}
+                              {featured.author && <p className="text-xs sm:text-sm text-white/70 font-medium">{featured.author}</p>}
+                              <div className="flex items-center justify-center mono text-yellow-300 mt-1 font-semibold text-sm">
+                                <span className="mr-1">★</span>
+                                <span>{Math.round(featured.userRating)}</span>
+                              </div>
+                            </motion.div>
+                          </div>
                         </motion.div>
                         
                         {/* Items #2-5 - vertical list on mobile, 2x2 grid on desktop */}
@@ -3443,52 +3448,57 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <>
                         {/* Featured #1 Item */}
                         <motion.div 
-                          className="w-full max-w-2xl mx-auto z-10"
+                          className="relative w-full max-w-xs mx-auto z-10"
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
-                          {(() => {
-                            const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
-                            const itemContent = (
-                              <motion.div 
-                                className="flex items-center gap-2.5 sm:gap-3 w-full"
-                              >
-                                {/* Number badge */}
-                                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-base sm:text-lg">
-                                  1
-                                </div>
-                                {/* Thumbnail */}
-                                <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden">
+                          <div className="relative">
+                            {/* Large number badge */}
+                            <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 z-20 w-10 h-10 sm:w-12 sm:h-12 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-xl sm:text-2xl md:text-3xl">
+                              1
+                            </div>
+                            {/* Image */}
+                            {(() => {
+                              const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
+                              const featuredImage = (
+                                <motion.div 
+                                  className="rounded-xl overflow-hidden relative z-10 aspect-[2/3] w-full max-w-[120px] sm:max-w-[140px] mx-auto" 
+                                  whileHover={{ scale: 1.02 }}
+                                  transition={{ duration: 0.3, ease: smoothEase}}
+                                >
                                   {featured.coverImage && (
                                     <motion.img 
                                       src={featured.coverImage} 
-                                      alt={featured.title} 
                                       crossOrigin="anonymous" 
-                                      className="w-full h-full object-cover"
-                                      whileHover={{ scale: 1.05 }}
-                                      transition={{ duration: 0.2 }}
+                                      alt={featured.title} 
+                                      className="w-full h-full object-cover rounded-xl"
                                     />
                                   )}
-                                </div>
-                                {/* Title and details */}
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="text-sm sm:text-base font-semibold text-white truncate">{featured.title}</h3>
-                                  {featured.studio && <p className="text-xs text-white/70 truncate mt-0.5">{featured.studio}</p>}
-                                  {featured.author && <p className="text-xs text-white/70 truncate mt-0.5">{featured.author}</p>}
-                                  <div className="flex items-center mono text-yellow-300 mt-0.5 font-semibold text-xs">
-                                    <span className="mr-0.5">★</span>
-                                    <span>{Math.round(featured.userRating)}</span>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            );
-                            return featuredUrl ? (
-                              <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                {itemContent}
-                              </a>
-                            ) : itemContent;
-                          })()}
+                                </motion.div>
+                              );
+                              return featuredUrl ? (
+                                <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
+                                  {featuredImage}
+                                </a>
+                              ) : featuredImage;
+                            })()}
+                            {/* Title and details below image */}
+                            <motion.div 
+                              className="mt-2 text-center"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.5, delay: 0.2 }}
+                            >
+                              <h3 className="title-md sm:title-lg font-semibold text-white mb-0.5">{featured.title}</h3>
+                              {featured.studio && <p className="text-xs sm:text-sm text-white/70 font-medium">{featured.studio}</p>}
+                              {featured.author && <p className="text-xs sm:text-sm text-white/70 font-medium">{featured.author}</p>}
+                              <div className="flex items-center justify-center mono text-yellow-300 mt-1 font-semibold text-sm">
+                                <span className="mr-1">★</span>
+                                <span>{Math.round(featured.userRating)}</span>
+                              </div>
+                            </motion.div>
+                          </div>
                         </motion.div>
                         
                         {/* Items #2-5 - vertical list on mobile, 2x2 grid on desktop */}
@@ -3646,45 +3656,46 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     <>
                       {/* Featured #1 Author */}
                       <motion.div 
-                        className="w-full max-w-2xl mx-auto z-10"
+                        className="relative w-full max-w-xs mx-auto z-10"
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                       >
-                        <motion.div
-                          className="rounded-xl overflow-hidden"
-                          style={{ padding: '2px' }}
-                        >
-                          <motion.div
-                            className="bg-black/60 rounded-xl p-2 md:p-4"
-                            whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)'}}
-                            transition={{ duration: 0.3, ease: smoothEase }}
+                        <div className="relative">
+                          {/* Large number badge */}
+                          <div className="absolute -top-1 -left-1 sm:-top-2 sm:-left-2 z-20 w-10 h-10 sm:w-12 sm:h-12 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-xl sm:text-2xl md:text-3xl">
+                            1
+                          </div>
+                          {/* Image */}
+                          <div className="relative">
+                            <motion.div 
+                              className="rounded-xl overflow-hidden relative z-10 aspect-square w-full max-w-[120px] sm:max-w-[140px] mx-auto" 
+                              whileHover={{ scale: 1.02 }}
+                              transition={{ duration: 0.3, ease: smoothEase}}
+                            >
+                              <img 
+                                src={featuredAuthorPhoto} 
+                                alt={featured[0]}
+                                className="w-full h-full object-cover rounded-xl"
+                                onError={(e) => {
+                                  e.target.src = '/Mascot.webp';
+                                }}
+                              />
+                            </motion.div>
+                          </div>
+                          {/* Title and details below image */}
+                          <motion.div 
+                            className="mt-2 text-center"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
                           >
-                            <div className="flex items-center gap-4">
-                              <div className="relative w-16 h-16 flex-shrink-0">
-                                <img 
-                                  src={featuredAuthorPhoto} 
-                                  alt={featured[0]}
-                                  className="w-full h-full rounded-xl object-cover"
-                                  onError={(e) => {
-                                    e.target.src = '/Mascot.webp';
-                                  }}
-                                />
-                                <div className="absolute top-0.5 right-0.5 z-10 w-5 h-5 bg-black/70 text-white rounded-full flex items-center justify-center font-semibold text-xs">
-                                  1
-                                </div>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="title-md font-semibold text-white">
-                                  {featured[0]}
-                                </p>
-                                {featuredWorksText && (
-                                  <p className="text-sm md:text-base text-white/70 font-regular mt-1">{featuredWorksText}</p>
-                                )}
-                              </div>
-                            </div>
+                            <h3 className="title-md sm:title-lg font-semibold text-white mb-0.5">{featured[0]}</h3>
+                            {featuredWorksText && (
+                              <p className="text-xs sm:text-sm text-white/70 font-medium mt-1">{featuredWorksText}</p>
+                            )}
                           </motion.div>
-                        </motion.div>
+                        </div>
                       </motion.div>
                       
                       {/* Other Authors #2-5 */}
