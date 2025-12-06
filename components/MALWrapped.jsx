@@ -2931,7 +2931,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             </motion.h2>
             </div>
             <motion.div 
-              className="mt-2 sm:mt-4 grid grid-cols-2 gap-1.5 sm:gap-2 relative z-10 max-w-2xl mx-auto"
+              className="mt-2 sm:mt-4 grid grid-cols-2 gap-2 sm:gap-3 relative z-10 max-w-2xl mx-auto"
               variants={staggerContainer}
               initial="initial"
               animate="animate"
@@ -2948,12 +2948,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 return (
                   <motion.div 
                     key={season} 
-                    className="flex flex-col"
+                    className="rounded-xl overflow-hidden"
+                    style={{ padding: '2px' }}
                     variants={staggerItem}
                   >
                     <motion.div 
-                      className="h-full flex flex-col items-center"
-                      whileHover={{ scale: 1.02 }}
+                      className="bg-black/60 rounded-xl p-2 md:p-4 h-full flex flex-col items-center"
+                      whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                       transition={{ duration: 0.3, ease: smoothEase }}
                     >
                       <h3 className="body-sm font-medium text-white mb-1 sm:mb-2 text-center">{season}{seasonYear}</h3>
