@@ -2630,7 +2630,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   data-framer-motion
                 >
                   <img 
-                    src="https://media1.tenor.com/m/WyRUInAxmXIAAAAd/nokotan-absolute-cinema.gif" 
+                    src="/anime.gif" 
                     alt="Anime character"
                     className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                   />
@@ -3130,7 +3130,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 data-framer-motion
               >
                 <img 
-                  src="https://media1.tenor.com/m/6906u9o39PMAAAAC/asteroid-in-love-mira-konohata.gif" 
+                  src="/read.gif" 
                   alt="Manga character"
                   className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                 />
@@ -3385,7 +3385,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     data-framer-motion
                   >
                     <img 
-                      src="https://media1.tenor.com/m/X1zk_5PC2RUAAAAC/chrollo-lucilfer.gif " 
+                      src="/manga.gif " 
                       alt="Manga character"
                       className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                     />
