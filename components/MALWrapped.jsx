@@ -242,7 +242,7 @@ export default function MALWrapped() {
   ] : [];
 
   
-const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, .4) 25%, rgba(0, 0, 0, 0.3) 60%, rgba(0, 0, 0, .4) 80%, rgba(0, 0, 0, 1) 100%)';
+const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, .6) 25%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, .6) 80%, rgba(0, 0, 0, 1) 100%)';
   // Get website URL for watermark
   const websiteUrl = typeof window !== 'undefined' 
     ? window.location.origin.replace(/^https?:\/\//, '').toUpperCase()
@@ -1955,6 +1955,49 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     // Define userImage for use across all slides
     const userImage = userData?.picture || '/Mascot.webp';
 
+    // Helper function to get bgColor for current slide
+    const getSlideBgColor = (slideId) => {
+      const colorMap = {
+        'welcome': 'pink',
+        'anime_count': 'blue',
+        'anime_time': 'green',
+        'top_genre': 'yellow',
+        'top_studio': 'red',
+        'seasonal_anime': 'pink',
+        'hidden_gems_anime': 'blue',
+        'didnt_land_anime': 'red',
+        'planned_anime': 'green',
+        'anime_to_manga_transition': 'black',
+        'manga_count': 'yellow',
+        'manga_time': 'blue',
+        'top_manga_genre': 'yellow',
+        'top_author': 'pink',
+        'hidden_gems_manga': 'blue',
+        'didnt_land_manga': 'red',
+        'planned_manga': 'green',
+        'milestone': 'yellow',
+        'badges': 'purple',
+        'character_twin': 'pink'
+      };
+      return colorMap[slideId] || 'black';
+    };
+
+    // Helper function to map bgColor to Tailwind color class
+    const getNumberCircleColor = (bgColor) => {
+      const colorClasses = {
+        'black': 'bg-purple-500',
+        'pink': 'bg-pink-500',
+        'yellow': 'bg-yellow-500',
+        'blue': 'bg-blue-500',
+        'green': 'bg-green-500',
+        'red': 'bg-red-500',
+        'purple': 'bg-purple-500'
+      };
+      return colorClasses[bgColor] || 'bg-pink-500';
+    };
+
+    const currentSlideColor = getNumberCircleColor(getSlideBgColor(slide.id));
+
     const SlideLayout = ({ children, bgColor = 'black' }) => {
       // Spotify-like background colors with subtle tint (solid colors)
       const bgColorClasses = {
@@ -2694,7 +2737,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <>
                         {/* Featured #1 Item */}
                         <motion.div 
-                          className="relative w-full max-w-2xl z-10"
+                          className="relative w-full max-w-3xl z-10"
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
@@ -2707,7 +2750,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 const featuredImage = (
                                   <div className="relative">
                                     {/* Number badge in circle at top left */}
-                                    <div className="absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                                    <div className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}>
                                       1
                                     </div>
                                     <motion.div 
@@ -2754,7 +2797,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         {/* Items #2-5 - vertical list on mobile, 2x2 grid on desktop */}
                         {others.length > 0 && (
                           <motion.div 
-                            className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-2xl"
+                            className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-3xl"
                             variants={staggerContainer}
                             initial="initial"
                             animate="animate"
@@ -2769,7 +2812,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   {/* Thumbnail */}
                                   <div className="relative flex-shrink-0">
                                     {/* Number badge in circle at top left - outside overflow container */}
-                                    <div className="absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
+                                    <div className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}>
                                       {index + 2}
                                     </div>
                                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
@@ -3453,7 +3496,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <>
                         {/* Featured #1 Item */}
                         <motion.div 
-                          className="relative w-full max-w-2xl z-10"
+                          className="relative w-full max-w-3xl z-10"
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
@@ -3466,7 +3509,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 const featuredImage = (
                                   <div className="relative">
                                     {/* Number badge in circle at top left */}
-                                    <div className="absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                                    <div className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}>
                                       1
                                     </div>
                                     <motion.div 
@@ -3513,7 +3556,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         {/* Items #2-5 - vertical list on mobile, 2x2 grid on desktop */}
                         {others.length > 0 && (
                           <motion.div 
-                            className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-2xl"
+                            className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-3xl"
                             variants={staggerContainer}
                             initial="initial"
                             animate="animate"
@@ -3528,7 +3571,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   {/* Thumbnail */}
                                   <div className="relative flex-shrink-0">
                                     {/* Number badge in circle at top left - outside overflow container */}
-                                    <div className="absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
+                                    <div className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}>
                                       {index + 2}
                                     </div>
                                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
@@ -3668,7 +3711,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   
                   const featuredAuthorContent = (
                     <motion.div 
-                      className="relative w-full max-w-2xl z-10"
+                      className="relative w-full max-w-3xl z-10"
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
@@ -3678,11 +3721,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         <div className="flex-shrink-0">
                           <div className="relative">
                             {/* Number badge in circle at top left */}
-                            <div className="absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                            <div className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}>
                               1
                             </div>
                             <motion.div 
-                              className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-16 h-16 sm:w-20 sm:h-20 md:w-32 md:h-48" 
+                              className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-20 h-20 md:w-32 md:h-48" 
                               whileHover={{ scale: 1.02 }}
                               transition={{ duration: 0.3, ease: smoothEase}}
                             >
@@ -3731,7 +3774,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       {/* Other Authors #2-5 */}
                       {others.length > 0 && (
                         <motion.div 
-                          className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative max-w-2xl z-10"
+                          className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative max-w-3xl z-10"
                           variants={staggerContainer}
                           initial="initial"
                           animate="animate"
@@ -3774,7 +3817,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               >
                                 <div className="relative w-20 h-20 flex-shrink-0">
                                   {/* Number badge in circle at top left */}
-                                  <div className="absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
+                                  <div className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}>
                                     {idx + 2}
                                   </div>
                                   <img 
@@ -3804,14 +3847,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className="relative z-10"
+                                className="relative z-10 block mb-2.5 md:mb-0"
                               >
                                 {authorContent}
                               </a>
                             ) : (
-                              <React.Fragment key={idx}>
+                              <div key={idx} className="mb-2.5 md:mb-0">
                                 {authorContent}
-                              </React.Fragment>
+                              </div>
                             );
                           })}
                         </motion.div>
