@@ -3501,7 +3501,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
-                          <div className="flex items-center gap-4 md:flex-col md:items-center md:gap-3">
+                          <div className="flex items-center gap-2.5 sm:gap-3 md:flex-col md:items-center">
                             {/* Image - square on mobile, larger 2/3 aspect on desktop */}
                             <div className="flex-shrink-0">
                               {(() => {
@@ -3709,67 +3709,62 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     }
                   }
                   
-                  const featuredAuthorContent = (
-                    <motion.div 
-                      className="relative w-full max-w-3xl z-10"
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
-                    >
-                      <div className="flex items-center gap-4 md:flex-col md:items-center md:gap-3">
-                        {/* Image - square on mobile, larger 2/3 aspect on desktop */}
-                        <div className="flex-shrink-0">
-                          <div className="relative">
-                            {/* Number badge in circle at top left */}
-                            <div className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}>
-                              1
-                            </div>
-                            <motion.div 
-                              className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-20 h-20 md:w-32 md:h-48" 
-                              whileHover={{ scale: 1.02 }}
-                              transition={{ duration: 0.3, ease: smoothEase}}
-                            >
-                              <img 
-                                src={featuredAuthorPhoto} 
-                                alt={featuredAuthorName}
-                                className="w-full h-full object-cover rounded-lg"
-                                onError={(e) => {
-                                  e.target.src = '/Mascot.webp';
-                                }}
-                              />
-                            </motion.div>
-                          </div>
-                        </div>
-                        {/* Title and details - beside on mobile, below on desktop */}
-                        <motion.div 
-                          className="flex-1 min-w-0 md:text-center md:flex-1"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.5, delay: 0.2 }}
-                        >
-                          <h3 className="title-sm md:title-md font-semibold text-white mb-1">{featuredAuthorName}</h3>
-                          {featuredWorksText && (
-                            <p className="text-sm md:text-base text-white/70 font-medium mt-1">{featuredWorksText}</p>
-                          )}
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  );
-                  
                   return (
                     <>
                       {/* Featured #1 Author */}
-                      {featuredAuthorUrl ? (
-                        <a 
-                          href={featuredAuthorUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          onClick={(e) => e.stopPropagation()} 
-                          className="relative z-10"
-                        >
-                          {featuredAuthorContent}
-                        </a>
-                      ) : featuredAuthorContent}
+                      <motion.div 
+                        className="relative w-full max-w-3xl z-10"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
+                      >
+                        <div className="flex items-center gap-2.5 sm:gap-3 md:flex-col md:items-center">
+                          {/* Image - square on mobile, larger 2/3 aspect on desktop */}
+                          <div className="flex-shrink-0">
+                            {(() => {
+                              const featuredImage = (
+                                <div className="relative">
+                                  {/* Number badge in circle at top left */}
+                                  <div className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}>
+                                    1
+                                  </div>
+                                  <motion.div 
+                                    className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-20 h-20 md:w-32 md:h-48" 
+                                    whileHover={{ scale: 1.02 }}
+                                    transition={{ duration: 0.3, ease: smoothEase}}
+                                  >
+                                    <img 
+                                      src={featuredAuthorPhoto} 
+                                      alt={featuredAuthorName}
+                                      className="w-full h-full object-cover rounded-lg"
+                                      onError={(e) => {
+                                        e.target.src = '/Mascot.webp';
+                                      }}
+                                    />
+                                  </motion.div>
+                                </div>
+                              );
+                              return featuredAuthorUrl ? (
+                                <a href={featuredAuthorUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
+                                  {featuredImage}
+                                </a>
+                              ) : featuredImage;
+                            })()}
+                          </div>
+                          {/* Title and details - beside on mobile, below on desktop */}
+                          <motion.div 
+                            className="flex-1 min-w-0 md:text-center md:flex-1"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                          >
+                            <h3 className="title-sm md:title-md font-semibold text-white mb-1">{featuredAuthorName}</h3>
+                            {featuredWorksText && (
+                              <p className="text-sm md:text-base text-white/70 font-medium mt-1">{featuredWorksText}</p>
+                            )}
+                          </motion.div>
+                        </div>
+                      </motion.div>
                       
                       {/* Other Authors #2-5 */}
                       {others.length > 0 && (
