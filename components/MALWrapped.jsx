@@ -2931,7 +2931,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             </motion.h2>
             </div>
             <motion.div 
-              className="mt-2 sm:mt-4 flex flex-col md:grid md:grid-cols-2 gap-1.5 sm:gap-2 relative z-10 max-w-2xl mx-auto"
+              className="mt-2 sm:mt-4 grid grid-cols-2 gap-1.5 sm:gap-2 relative z-10 max-w-2xl mx-auto"
               variants={staggerContainer}
               initial="initial"
               animate="animate"
@@ -2948,19 +2948,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 return (
                   <motion.div 
                     key={season} 
-                    className="rounded-xl" 
-                    style={{ padding: '2px' }}
+                    className="flex flex-col"
                     variants={staggerItem}
                   >
                     <motion.div 
-                      className="h-full"
+                      className="h-full flex flex-col items-center"
                       whileHover={{ scale: 1.02 }}
                       transition={{ duration: 0.3, ease: smoothEase }}
                     >
                       <h3 className="body-sm font-medium text-white mb-1 sm:mb-2 text-center">{season}{seasonYear}</h3>
                     {highlight && (
                       <>
-                          <div className="flex flex-col items-center gap-1.5 sm:gap-2">
+                          <div className="flex flex-col items-center gap-1.5 sm:gap-2 w-full">
                             <motion.div 
                               className="bg-transparent aspect-[2/3] rounded-lg overflow-hidden relative w-16 md:w-20" 
                               style={{ boxSizing: 'border-box' }}
@@ -2978,7 +2977,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                             )}
                               </div>  
                             </motion.div>
-                          <div className="flex-1 min-w-0 text-center">
+                          <div className="w-full text-center">
                               <p className="title-sm truncate font-semibold text-white">{highlight.node?.title}</p>
                               <p className="mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base">★ {highlight.list_status?.score ? Math.round(highlight.list_status.score) : 'Not Rated Yet'}</p>
                                <p className="text-sm md:text-base text-white/70 truncate mt-1 font-regular">{seasonData.totalAnime} anime this season</p>
