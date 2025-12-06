@@ -2899,10 +2899,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 {otherStudios.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherStudios.map(([studioName, count], idx) => (
-                      <motion.div key={idx} className="text-center rounded-xl" style={{ padding: '2px' }} variants={staggerItem}>
+                      <motion.div key={idx} className="text-center" variants={staggerItem}>
                         <motion.div 
-                          className="bg-white/5 backdrop-blur-sm rounded-xl p-2 h-full border border-white/10"
-                          whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                          className="h-full"
+                          whileHover={{ scale: 1.02 }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
                           <p className="heading-sm font-semibold text-white truncate"><span className="body-sm font-bold text-white/70">{idx + 2}.</span> {studioName}</p>
@@ -2969,8 +2969,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     variants={staggerItem}
                   >
                     <motion.div 
-                      className="bg-white/5 backdrop-blur-sm rounded-xl p-2 h-full border border-white/10"
-                      whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                      className="h-full"
+                      whileHover={{ scale: 1.02 }}
                       transition={{ duration: 0.3, ease: smoothEase }}
                     >
                       <h3 className="body-sm font-medium text-white mb-1 sm:mb-2 ">{season}{seasonYear}</h3>
@@ -3045,8 +3045,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
                   <motion.div
-                    className="bg-white/5 backdrop-blur-sm rounded-xl p-2 md:p-4 flex items-center gap-4 border border-white/10"
-                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                    className="flex items-center gap-4"
+                    whileHover={{ scale: 1.02 }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     {item.coverImage && (
@@ -3833,7 +3833,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                     {authorName}
                                   </p>
                                   {worksText && (
-                                    <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{worksText}</p>
+                                    <p className="text-sm md:text-base text-white/70 mt-0.5">{worksText}</p>
                                   )}
                                 </div>
                               </motion.div>
@@ -3901,8 +3901,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
                   <motion.div
-                    className="bg-white/5 backdrop-blur-sm rounded-xl p-2 md:p-4 flex items-center gap-4 border border-white/10"
-                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                    className="flex items-center gap-4"
+                    whileHover={{ scale: 1.02 }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     {item.coverImage && (
