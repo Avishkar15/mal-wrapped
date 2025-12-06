@@ -2699,8 +2699,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                         >
-                          <div className="flex items-center gap-4 sm:gap-6">
-                            {/* Image on left in white container */}
+                          <div className="flex items-center gap-4 md:flex-col md:items-center md:gap-3">
+                            {/* Image - square on mobile, larger 2/3 aspect on desktop */}
                             <div className="flex-shrink-0">
                               {(() => {
                                 const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
@@ -2711,7 +2711,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                       1
                                     </div>
                                     <motion.div 
-                                      className="rounded-lg overflow-hidden relative aspect-[2/3] w-20 sm:w-24 md:w-28 max-w-[80px] sm:max-w-[96px] md:max-w-[112px]" 
+                                      className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-16 h-16 sm:w-20 sm:h-20 md:w-32 md:h-48" 
                                       whileHover={{ scale: 1.02 }}
                                       transition={{ duration: 0.3, ease: smoothEase}}
                                     >
@@ -2733,9 +2733,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 ) : featuredImage;
                               })()}
                             </div>
-                            {/* Title and details on right */}
+                            {/* Title and details - beside on mobile, below on desktop */}
                             <motion.div 
-                              className="flex-1 min-w-0"
+                              className="flex-1 min-w-0 md:text-center md:flex-1"
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
@@ -2743,7 +2743,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               <h3 className="title-md font-semibold text-white mb-1">{featured.title}</h3>
                               {featured.studio && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.studio}</p>}
                               {featured.author && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.author}</p>}
-                              <div className="flex items-center mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base">
+                              <div className="flex items-center mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base md:justify-center">
                                 <span className="mr-1">★</span>
                                 <span>{Math.round(featured.userRating)}</span>
                               </div>
@@ -2767,21 +2767,23 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   variants={staggerItem}
                                 >
                                   {/* Thumbnail */}
-                                  <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
-                                    {/* Number badge in circle at top left */}
+                                  <div className="relative flex-shrink-0">
+                                    {/* Number badge in circle at top left - outside overflow container */}
                                     <div className="absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
                                       {index + 2}
                                     </div>
-                                    {item.coverImage && (
-                                      <motion.img 
-                                        src={item.coverImage} 
-                                        alt={item.title} 
-                                        crossOrigin="anonymous" 
-                                        className="w-full h-full object-cover"
-                                        whileHover={{ scale: 1.05 }}
-                                        transition={{ duration: 0.2 }}
-                                      />
-                                    )}
+                                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
+                                      {item.coverImage && (
+                                        <motion.img 
+                                          src={item.coverImage} 
+                                          alt={item.title} 
+                                          crossOrigin="anonymous" 
+                                          className="w-full h-full object-cover"
+                                          whileHover={{ scale: 1.05 }}
+                                          transition={{ duration: 0.2 }}
+                                        />
+                                      )}
+                                    </div>
                                   </div>
                                   {/* Title and details */}
                                   <div className="flex-1 min-w-0">
@@ -2928,7 +2930,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
                       transition={{ duration: 0.3, ease: smoothEase }}
                     >
-                      <h3 className="heading-md font-semibold text-white mb-1 sm:mb-2 text-sm sm:text-base">{season}{seasonYear}</h3>
+                      <h3 className="body-sm font-medium text-white mb-1 sm:mb-2 ">{season}{seasonYear}</h3>
                     {highlight && (
                       <>
                           <div className="flex gap-1.5 sm:gap-2">
@@ -2950,10 +2952,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               </div>  
                             </motion.div>
                           <div className="flex-1 min-w-0">
-                              <p className="title-md truncate font-semibold text-white">{highlight.node?.title}</p>
-                              <p className="body-sm text-white/70 truncate font-medium">{highlight.node?.studios?.[0]?.name || ''}</p>
-                              <p className="mono text-yellow-300 mt-1 sm:mt-2 font-semibold mt-1">★ {highlight.list_status?.score ? Math.round(highlight.list_status.score) : 'Not Rated Yet'}</p>
-                               <p className="text-sm md:text-base text-white/70 truncate mt-1 sm:mt-2 font-regular">{seasonData.totalAnime} anime this season</p>
+                              <p className="title-sm truncate font-semibold text-white">{highlight.node?.title}</p>
+                              <p className="mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base">★ {highlight.list_status?.score ? Math.round(highlight.list_status.score) : 'Not Rated Yet'}</p>
+                               <p className="text-sm md:text-base text-white/70 truncate mt-1 font-regular">{seasonData.totalAnime} anime this season</p>
                           </div>
                         </div>
                       </>
@@ -3498,7 +3499,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               animate={{ opacity: 1 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                              <h3 className="title-md font-semibold text-white mb-1">{featured.title}</h3>
+                              <h3 className="title-sm md:title-md font-semibold text-white mb-1">{featured.title}</h3>
                               {featured.studio && <p className="text-sm md:text-base text-white/70 font-medium mb-0.5">{featured.studio}</p>}
                               {featured.author && <p className="text-sm md:text-base text-white/70 font-medium mb-0.5">{featured.author}</p>}
                               <div className="flex items-center mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base">
@@ -3525,28 +3526,30 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   variants={staggerItem}
                                 >
                                   {/* Thumbnail */}
-                                  <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
-                                    {/* Number badge in circle at top left */}
+                                  <div className="relative flex-shrink-0">
+                                    {/* Number badge in circle at top left - outside overflow container */}
                                     <div className="absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
                                       {index + 2}
                                     </div>
-                                    {item.coverImage && (
-                                      <motion.img 
-                                        src={item.coverImage} 
-                                        alt={item.title} 
-                                        crossOrigin="anonymous" 
-                                        className="w-full h-full object-cover"
-                                        whileHover={{ scale: 1.05 }}
-                                        transition={{ duration: 0.2 }}
-                                      />
-                                    )}
+                                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
+                                      {item.coverImage && (
+                                        <motion.img 
+                                          src={item.coverImage} 
+                                          alt={item.title} 
+                                          crossOrigin="anonymous" 
+                                          className="w-full h-full object-cover"
+                                          whileHover={{ scale: 1.05 }}
+                                          transition={{ duration: 0.2 }}
+                                        />
+                                      )}
+                                    </div>
                                   </div>
                                   {/* Title and details */}
                                   <div className="flex-1 min-w-0">
                                     <h3 className="title-sm font-semibold text-white truncate">{item.title}</h3>
                                     {item.studio && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.studio}</p>}
                                     {item.author && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.author}</p>}
-                                    <div className="flex items-center mono text-yellow-300 mt-0.5 font-semibold text-xs">
+                                    <div className="flex items-center mono text-yellow-300 mt-0.5 font-semibold text-sm">
                                       <span className="mr-0.5">★</span>
                                       <span>{Math.round(item.userRating)}</span>
                                     </div>
@@ -3670,8 +3673,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
                     >
-                      <div className="flex items-center gap-4 sm:gap-6">
-                        {/* Image on left in white container */}
+                      <div className="flex items-center gap-4 md:flex-col md:items-center md:gap-3">
+                        {/* Image - square on mobile, larger 2/3 aspect on desktop */}
                         <div className="flex-shrink-0">
                           <div className="relative">
                             {/* Number badge in circle at top left */}
@@ -3679,7 +3682,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               1
                             </div>
                             <motion.div 
-                              className="rounded-lg overflow-hidden relative aspect-square w-20 sm:w-24 md:w-28 max-w-[80px] sm:max-w-[96px] md:max-w-[112px]" 
+                              className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-16 h-16 sm:w-20 sm:h-20 md:w-32 md:h-48" 
                               whileHover={{ scale: 1.02 }}
                               transition={{ duration: 0.3, ease: smoothEase}}
                             >
@@ -3694,9 +3697,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                             </motion.div>
                           </div>
                         </div>
-                        {/* Title and details on right */}
+                        {/* Title and details - beside on mobile, below on desktop */}
                         <motion.div 
-                          className="flex-1 min-w-0"
+                          className="flex-1 min-w-0 md:text-center md:flex-1"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.5, delay: 0.2 }}
