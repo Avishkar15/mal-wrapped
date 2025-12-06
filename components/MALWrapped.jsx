@@ -2707,11 +2707,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 const featuredImage = (
                                   <div className="relative">
                                     {/* Number badge in circle at top left */}
-                                    <div className="absolute top-0 left-0 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-lg sm:text-xl md:text-2xl">
+                                    <div className="absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-sm sm:text-base">
                                       1
                                     </div>
                                     <motion.div 
-                                      className="rounded-lg overflow-hidden relative aspect-[2/3] w-22 h-34 sm:w-26 sm:h-40" 
+                                      className="rounded-lg overflow-hidden relative aspect-[2/3] w-20 sm:w-24 md:w-28 max-w-[80px] sm:max-w-[96px] md:max-w-[112px]" 
                                       whileHover={{ scale: 1.02 }}
                                       transition={{ duration: 0.3, ease: smoothEase}}
                                     >
@@ -2769,7 +2769,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   {/* Thumbnail */}
                                   <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
                                     {/* Number badge in circle at top left */}
-                                    <div className="absolute top-0 left-0 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-base sm:text-lg">
+                                    <div className="absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
                                       {index + 2}
                                     </div>
                                     {item.coverImage && (
@@ -3465,11 +3465,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 const featuredImage = (
                                   <div className="relative">
                                     {/* Number badge in circle at top left */}
-                                    <div className="absolute top-0 left-0 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-lg sm:text-xl md:text-2xl">
+                                    <div className="absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-sm sm:text-base">
                                       1
                                     </div>
                                     <motion.div 
-                                      className="rounded-lg overflow-hidden relative aspect-[2/3] w-22 h-34 sm:w-26 sm:h-40" 
+                                      className="rounded-lg overflow-hidden relative aspect-[2/3] w-20 sm:w-24 md:w-28 max-w-[80px] sm:max-w-[96px] md:max-w-[112px]" 
                                       whileHover={{ scale: 1.02 }}
                                       transition={{ duration: 0.3, ease: smoothEase}}
                                     >
@@ -3527,7 +3527,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   {/* Thumbnail */}
                                   <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
                                     {/* Number badge in circle at top left */}
-                                    <div className="absolute top-0 left-0 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-base sm:text-lg">
+                                    <div className="absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
                                       {index + 2}
                                     </div>
                                     {item.coverImage && (
@@ -3632,8 +3632,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               <div className="mt-4 sm:mt-6 flex flex-col gap-4 sm:gap-6 w-full max-w-3xl mx-auto relative z-10">
                 {(() => {
                   const [featured, ...others] = topAuthors;
-                  const featuredAuthorManga = getAuthorManga(featured[0]);
-                  const featuredAuthorPhoto = authorPhotos[featured[0]] || '/Mascot.webp';
+                  const featuredAuthorName = featured[0];
+                  const featuredAuthorId = featured[2];
+                  const featuredAuthorManga = getAuthorManga(featuredAuthorName);
+                  const featuredAuthorPhoto = authorPhotos[featuredAuthorName] || '/Mascot.webp';
+                  const featuredAuthorUrl = featuredAuthorId ? `https://myanimelist.net/people/${featuredAuthorId}/` : null;
                   
                   // Format works text for featured author
                   let featuredWorksText = '';
@@ -3660,53 +3663,67 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     }
                   }
                   
+                  const featuredAuthorContent = (
+                    <motion.div 
+                      className="relative w-full max-w-2xl z-10"
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
+                    >
+                      <div className="flex items-center gap-4 sm:gap-6">
+                        {/* Image on left in white container */}
+                        <div className="flex-shrink-0">
+                          <div className="relative">
+                            {/* Number badge in circle at top left */}
+                            <div className="absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                              1
+                            </div>
+                            <motion.div 
+                              className="rounded-lg overflow-hidden relative aspect-square w-20 sm:w-24 md:w-28 max-w-[80px] sm:max-w-[96px] md:max-w-[112px]" 
+                              whileHover={{ scale: 1.02 }}
+                              transition={{ duration: 0.3, ease: smoothEase}}
+                            >
+                              <img 
+                                src={featuredAuthorPhoto} 
+                                alt={featuredAuthorName}
+                                className="w-full h-full object-cover rounded-lg"
+                                onError={(e) => {
+                                  e.target.src = '/Mascot.webp';
+                                }}
+                              />
+                            </motion.div>
+                          </div>
+                        </div>
+                        {/* Title and details on right */}
+                        <motion.div 
+                          className="flex-1 min-w-0"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.5, delay: 0.2 }}
+                        >
+                          <h3 className="title-lg font-semibold text-white mb-1">{featuredAuthorName}</h3>
+                          {featuredWorksText && (
+                            <p className="text-sm md:text-base text-white/70 font-medium mt-1">{featuredWorksText}</p>
+                          )}
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  );
+                  
                   return (
                     <>
                       {/* Featured #1 Author */}
-                      <motion.div 
-                        className="relative w-full max-w-2xl z-10"
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
-                      >
-                        <div className="flex items-center gap-4 sm:gap-6">
-                          {/* Image on left in white container */}
-                          <div className="flex-shrink-0">
-                            <div className="relative">
-                              {/* Number badge in circle at top left */}
-                              <div className="absolute top-0 left-0 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-lg sm:text-xl md:text-2xl">
-                                1
-                              </div>
-                              <motion.div 
-                                className="rounded-lg overflow-hidden relative aspect-square w-22 h-22 sm:w-26 sm:h-26" 
-                                whileHover={{ scale: 1.02 }}
-                                transition={{ duration: 0.3, ease: smoothEase}}
-                              >
-                                <img 
-                                  src={featuredAuthorPhoto} 
-                                  alt={featured[0]}
-                                  className="w-full h-full object-cover rounded-lg"
-                                  onError={(e) => {
-                                    e.target.src = '/Mascot.webp';
-                                  }}
-                                />
-                              </motion.div>
-                            </div>
-                          </div>
-                          {/* Title and details on right */}
-                          <motion.div 
-                            className="flex-1 min-w-0"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                          >
-                            <h3 className="title-lg font-semibold text-white mb-1">{featured[0]}</h3>
-                            {featuredWorksText && (
-                              <p className="text-sm md:text-base text-white/70 font-medium mt-1">{featuredWorksText}</p>
-                            )}
-                          </motion.div>
-                        </div>
-                      </motion.div>
+                      {featuredAuthorUrl ? (
+                        <a 
+                          href={featuredAuthorUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          onClick={(e) => e.stopPropagation()} 
+                          className="relative z-10"
+                        >
+                          {featuredAuthorContent}
+                        </a>
+                      ) : featuredAuthorContent}
                       
                       {/* Other Authors #2-5 */}
                       {others.length > 0 && (
@@ -3716,9 +3733,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           initial="initial"
                           animate="animate"
                         >
-                          {others.map(([authorName, count], idx) => {
+                          {others.map((authorEntry, idx) => {
+                            const [authorName, count, authorId] = authorEntry;
                             const authorManga = getAuthorManga(authorName);
                             const authorPhoto = authorPhotos[authorName] || '/Mascot.webp';
+                            const authorUrl = authorId ? `https://myanimelist.net/people/${authorId}/` : null;
                             
                             // Format works text
                             let worksText = '';
@@ -3745,15 +3764,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               }
                             }
                             
-                            return (
+                            const authorContent = (
                               <motion.div
-                                key={idx}
                                 className="flex items-center gap-4"
                                 variants={staggerItem}
                               >
                                 <div className="relative w-20 h-20 flex-shrink-0">
                                   {/* Number badge in circle at top left */}
-                                  <div className="absolute top-0 left-0 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-base sm:text-lg">
+                                  <div className="absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
                                     {idx + 2}
                                   </div>
                                   <img 
@@ -3774,6 +3792,23 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   )}
                                 </div>
                               </motion.div>
+                            );
+                            
+                            return authorUrl ? (
+                              <a
+                                key={idx}
+                                href={authorUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="relative z-10"
+                              >
+                                {authorContent}
+                              </a>
+                            ) : (
+                              <React.Fragment key={idx}>
+                                {authorContent}
+                              </React.Fragment>
                             );
                           })}
                         </motion.div>
