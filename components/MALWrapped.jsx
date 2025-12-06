@@ -2694,7 +2694,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       <>
                         {/* Featured #1 Item */}
                         <motion.div 
-                          className="relative w-full max-w-2xl mx-auto z-10"
+                          className="relative w-full max-w-2xl z-10"
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
@@ -2711,7 +2711,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                       1
                                     </div>
                                     <motion.div 
-                                      className="rounded-lg overflow-hidden relative aspect-[2/3] w-24 h-36 sm:w-28 sm:h-42" 
+                                      className="rounded-lg overflow-hidden relative aspect-[2/3] w-22 h-34 sm:w-26 sm:h-40" 
                                       whileHover={{ scale: 1.02 }}
                                       transition={{ duration: 0.3, ease: smoothEase}}
                                     >
@@ -2740,7 +2740,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               animate={{ opacity: 1 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                              <h3 className="title-lg sm:title-xl font-semibold text-white mb-1">{featured.title}</h3>
+                              <h3 className="title-lg font-semibold text-white mb-1">{featured.title}</h3>
                               {featured.studio && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.studio}</p>}
                               {featured.author && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.author}</p>}
                               <div className="flex items-center mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base">
@@ -2754,7 +2754,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         {/* Items #2-5 - vertical list on mobile, 2x2 grid on desktop */}
                         {others.length > 0 && (
                           <motion.div 
-                            className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-2xl mx-auto"
+                            className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-2xl"
                             variants={staggerContainer}
                             initial="initial"
                             animate="animate"
@@ -2767,7 +2767,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   variants={staggerItem}
                                 >
                                   {/* Thumbnail */}
-                                  <div className="relative flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden">
+                                  <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
+                                    {/* Number badge outside on left */}
+                                    <div className="absolute -left-3 sm:-left-4 top-0 z-10 text-pink-500 font-bold text-xl sm:text-2xl" style={{ WebkitTextStroke: '2px white', textStroke: '2px white' }}>
+                                      {index + 2}
+                                    </div>
                                     {item.coverImage && (
                                       <motion.img 
                                         src={item.coverImage} 
@@ -2778,16 +2782,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                         transition={{ duration: 0.2 }}
                                       />
                                     )}
-                                    {/* Number badge inside image */}
-                                    <div className="absolute top-0.5 right-0.5 z-10 w-5 h-5 bg-purple-800/70 text-white rounded-full flex items-center justify-center font-semibold text-xs">
-                                      {index + 2}
-                                    </div>
                                   </div>
                                   {/* Title and details */}
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="text-sm sm:text-base font-semibold text-white truncate">{item.title}</h3>
-                                    {item.studio && <p className="text-xs text-white/70 truncate mt-0.5">{item.studio}</p>}
-                                    {item.author && <p className="text-xs text-white/70 truncate mt-0.5">{item.author}</p>}
+                                    <h3 className="title-sm font-semibold text-white truncate">{item.title}</h3>
+                                    {item.studio && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.studio}</p>}
+                                    {item.author && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.author}</p>}
                                     <div className="flex items-center mono text-yellow-300 mt-0.5 font-semibold text-xs">
                                       <span className="mr-0.5">★</span>
                                       <span>{Math.round(item.userRating)}</span>
@@ -3321,7 +3321,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                           <span className="body-sm font-bold text-white/50 mr-1.5">{idx + 2}.</span> 
                           {genreName}
                         </p>
-                        <p className="text-sm md:text-base text-white/70 font-medium tracking-wide">{count} entries</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular tracking-wide">{count} entries</p>
                       </motion.div>
                     ))}
                   </div>
@@ -3469,7 +3469,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                       1
                                     </div>
                                     <motion.div 
-                                      className="rounded-lg overflow-hidden relative aspect-[2/3] w-24 h-36 sm:w-28 sm:h-42" 
+                                      className="rounded-lg overflow-hidden relative aspect-[2/3] w-22 h-34 sm:w-26 sm:h-40" 
                                       whileHover={{ scale: 1.02 }}
                                       transition={{ duration: 0.3, ease: smoothEase}}
                                     >
@@ -3498,9 +3498,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               animate={{ opacity: 1 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                              <h3 className="title-lg sm:title-xl font-semibold text-white mb-1">{featured.title}</h3>
-                              {featured.studio && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.studio}</p>}
-                              {featured.author && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.author}</p>}
+                              <h3 className="title-lg font-semibold text-white mb-1">{featured.title}</h3>
+                              {featured.studio && <p className="text-sm md:text-base text-white/70 font-medium mb-0.5">{featured.studio}</p>}
+                              {featured.author && <p className="text-sm md:text-base text-white/70 font-medium mb-0.5">{featured.author}</p>}
                               <div className="flex items-center mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base">
                                 <span className="mr-1">★</span>
                                 <span>{Math.round(featured.userRating)}</span>
@@ -3512,7 +3512,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         {/* Items #2-5 - vertical list on mobile, 2x2 grid on desktop */}
                         {others.length > 0 && (
                           <motion.div 
-                            className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-2xl mx-auto"
+                            className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-2xl"
                             variants={staggerContainer}
                             initial="initial"
                             animate="animate"
@@ -3525,7 +3525,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                   variants={staggerItem}
                                 >
                                   {/* Thumbnail */}
-                                  <div className="relative flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden">
+                                  <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
+                                    {/* Number badge outside on left */}
+                                    <div className="absolute -left-3 sm:-left-4 top-0 z-10 text-pink-500 font-bold text-xl sm:text-2xl" style={{ WebkitTextStroke: '2px white', textStroke: '2px white' }}>
+                                      {index + 2}
+                                    </div>
                                     {item.coverImage && (
                                       <motion.img 
                                         src={item.coverImage} 
@@ -3536,16 +3540,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                         transition={{ duration: 0.2 }}
                                       />
                                     )}
-                                    {/* Number badge inside image */}
-                                    <div className="absolute top-0.5 right-0.5 z-10 w-5 h-5 bg-purple-800/70 text-white rounded-full flex items-center justify-center font-semibold text-xs">
-                                      {index + 2}
-                                    </div>
                                   </div>
                                   {/* Title and details */}
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="text-sm sm:text-base font-semibold text-white truncate">{item.title}</h3>
-                                    {item.studio && <p className="text-xs text-white/70 truncate mt-0.5">{item.studio}</p>}
-                                    {item.author && <p className="text-xs text-white/70 truncate mt-0.5">{item.author}</p>}
+                                    <h3 className="title-sm font-semibold text-white truncate">{item.title}</h3>
+                                    {item.studio && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.studio}</p>}
+                                    {item.author && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.author}</p>}
                                     <div className="flex items-center mono text-yellow-300 mt-0.5 font-semibold text-xs">
                                       <span className="mr-0.5">★</span>
                                       <span>{Math.round(item.userRating)}</span>
@@ -3644,19 +3644,19 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   if (featuredAuthorManga.length === 0) {
                     featuredWorksText = '';
                   } else if (featuredAuthorManga.length === 1) {
-                    featuredWorksText = `You read ${firstWork}`;
+                    featuredWorksText = `${firstWork}`;
                   } else if (featuredAuthorManga.length === 2) {
                     if (isFirstWorkLong) {
-                      featuredWorksText = `You read ${firstWork} and 1 more work`;
+                      featuredWorksText = `${firstWork} and 1 more`;
                     } else {
-                      featuredWorksText = `You read ${firstWork} and ${secondWork}`;
+                      featuredWorksText = `${firstWork} and ${secondWork}`;
                     }
                   } else {
                     const remaining = featuredAuthorManga.length - 2;
                     if (isFirstWorkLong) {
-                      featuredWorksText = `You read ${firstWork} and ${featuredAuthorManga.length - 1} more work${featuredAuthorManga.length - 1 !== 1 ? 's' : ''}`;
+                      featuredWorksText = `${firstWork} and ${featuredAuthorManga.length - 1} more}`;
                     } else {
-                      featuredWorksText = `You read ${firstWork}, ${secondWork}, and ${remaining} more work${remaining !== 1 ? 's' : ''}`;
+                      featuredWorksText = `${firstWork}, ${secondWork}, and ${remaining} more`;
                     }
                   }
                   
@@ -3664,7 +3664,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     <>
                       {/* Featured #1 Author */}
                       <motion.div 
-                        className="relative w-full max-w-2xl mx-auto z-10"
+                        className="relative w-full max-w-2xl z-10"
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
@@ -3678,7 +3678,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 1
                               </div>
                               <motion.div 
-                                className="rounded-lg overflow-hidden relative aspect-square w-24 h-24 sm:w-28 sm:h-28" 
+                                className="rounded-lg overflow-hidden relative aspect-square w-22 h-22 sm:w-26 sm:h-26" 
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ duration: 0.3, ease: smoothEase}}
                               >
@@ -3700,7 +3700,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.5, delay: 0.2 }}
                           >
-                            <h3 className="title-lg sm:title-xl font-semibold text-white mb-1">{featured[0]}</h3>
+                            <h3 className="title-lg font-semibold text-white mb-1">{featured[0]}</h3>
                             {featuredWorksText && (
                               <p className="text-sm md:text-base text-white/70 font-medium mt-1">{featuredWorksText}</p>
                             )}
@@ -3711,7 +3711,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                       {/* Other Authors #2-5 */}
                       {others.length > 0 && (
                         <motion.div 
-                          className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10"
+                          className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative max-w-2xl z-10"
                           variants={staggerContainer}
                           initial="initial"
                           animate="animate"
@@ -3729,19 +3729,19 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                             if (authorManga.length === 0) {
                               worksText = '';
                             } else if (authorManga.length === 1) {
-                              worksText = `You read ${firstWork}`;
+                              worksText = `${firstWork}`;
                             } else if (authorManga.length === 2) {
                               if (isFirstWorkLong) {
-                                worksText = `You read ${firstWork} and 1 more work`;
+                                worksText = `${firstWork} and 1 more`;
                               } else {
-                                worksText = `You read ${firstWork} and ${secondWork}`;
+                                worksText = `${firstWork}, ${secondWork}`;
                               }
                             } else {
                               const remaining = authorManga.length - 2;
                               if (isFirstWorkLong) {
-                                worksText = `You read ${firstWork} and ${authorManga.length - 1} more work${authorManga.length - 1 !== 1 ? 's' : ''}`;
+                                worksText = `${firstWork} and ${authorManga.length - 1} more`;
                               } else {
-                                worksText = `You read ${firstWork}, ${secondWork}, and ${remaining} more work${remaining !== 1 ? 's' : ''}`;
+                                worksText = `${firstWork}, ${secondWork}, and ${remaining} more`;
                               }
                             }
                             
@@ -3751,7 +3751,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 className="flex items-center gap-4"
                                 variants={staggerItem}
                               >
-                                <div className="relative w-16 h-16 flex-shrink-0">
+                                <div className="relative w-20 h-20 flex-shrink-0">
+                                  {/* Number badge outside on left */}
+                                  <div className="absolute -left-3 sm:-left-4 top-0 z-10 text-pink-500 font-bold text-xl sm:text-2xl" style={{ WebkitTextStroke: '2px white', textStroke: '2px white' }}>
+                                    {idx + 2}
+                                  </div>
                                   <img 
                                     src={authorPhoto} 
                                     alt={authorName}
@@ -3760,12 +3764,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                       e.target.src = '/Mascot.webp';
                                     }}
                                   />
-                                  <div className="absolute top-0.5 right-0.5 z-10 w-5 h-5 bg-pink-700/70 text-white rounded-full flex items-center justify-center font-semibold text-xs">
-                                    {idx + 2}
-                                  </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="title-md font-semibold text-white">
+                                  <p className="title-sm font-semibold text-white">
                                     {authorName}
                                   </p>
                                   {worksText && (
