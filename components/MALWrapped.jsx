@@ -2705,9 +2705,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               {(() => {
                                 const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                                 const featuredImage = (
-                                  <div className="bg-white rounded-xl p-2 relative">
-                                    {/* Number badge outside on left */}
-                                    <div className="absolute -left-2 sm:-left-3 top-2 sm:top-3 z-20 text-pink-500 font-bold text-2xl sm:text-3xl md:text-4xl" style={{ WebkitTextStroke: '3px white', textStroke: '3px white' }}>
+                                  <div className="relative">
+                                    {/* Number badge in circle at top left */}
+                                    <div className="absolute top-0 left-0 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-lg sm:text-xl md:text-2xl">
                                       1
                                     </div>
                                     <motion.div 
@@ -2763,20 +2763,15 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                               const itemContent = (
                                 <motion.div 
-                                  className="flex items-center gap-2.5 sm:gap-3 w-full relative pl-6 sm:pl-8"
+                                  className="flex items-center gap-2.5 sm:gap-3 w-full"
                                   variants={staggerItem}
                                 >
-                                  {/* Number badge outside on left */}
-                                  <div className="absolute left-0 top-0 z-10 font-bold text-xl sm:text-2xl" style={{ 
-                                    WebkitTextStroke: '3px white',
-                                    WebkitTextFillColor: '#ec4899',
-                                    color: '#ec4899',
-                                    textShadow: '0 0 0 white'
-                                  }}>
-                                    {index + 2}
-                                  </div>
                                   {/* Thumbnail */}
                                   <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
+                                    {/* Number badge in circle at top left */}
+                                    <div className="absolute top-0 left-0 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-base sm:text-lg">
+                                      {index + 2}
+                                    </div>
                                     {item.coverImage && (
                                       <motion.img 
                                         src={item.coverImage} 
@@ -3468,9 +3463,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               {(() => {
                                 const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
                                 const featuredImage = (
-                                  <div className="bg-white rounded-xl p-2 relative">
-                                    {/* Number badge outside on left */}
-                                    <div className="absolute -left-2 sm:-left-3 top-2 sm:top-3 z-20 text-pink-500 font-bold text-2xl sm:text-3xl md:text-4xl" style={{ WebkitTextStroke: '3px white', textStroke: '3px white' }}>
+                                  <div className="relative">
+                                    {/* Number badge in circle at top left */}
+                                    <div className="absolute top-0 left-0 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-lg sm:text-xl md:text-2xl">
                                       1
                                     </div>
                                     <motion.div 
@@ -3526,20 +3521,15 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                               const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
                               const itemContent = (
                                 <motion.div 
-                                  className="flex items-center gap-2.5 sm:gap-3 w-full relative pl-6 sm:pl-8"
+                                  className="flex items-center gap-2.5 sm:gap-3 w-full"
                                   variants={staggerItem}
                                 >
-                                  {/* Number badge outside on left */}
-                                  <div className="absolute left-0 top-0 z-10 font-bold text-xl sm:text-2xl" style={{ 
-                                    WebkitTextStroke: '3px white',
-                                    WebkitTextFillColor: '#ec4899',
-                                    color: '#ec4899',
-                                    textShadow: '0 0 0 white'
-                                  }}>
-                                    {index + 2}
-                                  </div>
                                   {/* Thumbnail */}
                                   <div className="relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden">
+                                    {/* Number badge in circle at top left */}
+                                    <div className="absolute top-0 left-0 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-base sm:text-lg">
+                                      {index + 2}
+                                    </div>
                                     {item.coverImage && (
                                       <motion.img 
                                         src={item.coverImage} 
@@ -3682,9 +3672,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                         <div className="flex items-center gap-4 sm:gap-6">
                           {/* Image on left in white container */}
                           <div className="flex-shrink-0">
-                            <div className="bg-white rounded-xl p-2 relative">
-                              {/* Number badge outside on left */}
-                              <div className="absolute -left-2 sm:-left-3 top-2 sm:top-3 z-20 text-pink-500 font-bold text-2xl sm:text-3xl md:text-4xl" style={{ WebkitTextStroke: '3px white', textStroke: '3px white' }}>
+                            <div className="relative">
+                              {/* Number badge in circle at top left */}
+                              <div className="absolute top-0 left-0 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-lg sm:text-xl md:text-2xl">
                                 1
                               </div>
                               <motion.div 
@@ -3762,8 +3752,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                                 variants={staggerItem}
                               >
                                 <div className="relative w-20 h-20 flex-shrink-0">
-                                  {/* Number badge outside on left */}
-                                  <div className="absolute -left-3 sm:-left-4 top-0 z-10 text-pink-500 font-bold text-xl sm:text-2xl" style={{ WebkitTextStroke: '2px white', textStroke: '2px white' }}>
+                                  {/* Number badge in circle at top left */}
+                                  <div className="absolute top-0 left-0 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-base sm:text-lg">
                                     {idx + 2}
                                   </div>
                                   <img 
