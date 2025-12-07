@@ -2309,12 +2309,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   const malUrl = getMALUrlForMobile(item);
                   const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}`;
                   const itemStyle = {
-                    width: `${itemWidth}%`,
+                    minWidth: '120px',
+                    width: '120px',
                     flexShrink: 0
                   };
                   const content = (
                     <div className="flex flex-col items-center" style={itemStyle}>
-                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '275px', boxSizing: 'border-box', overflow: 'hidden' }}>
                         {item.coverImage && (
                           <img 
                             src={item.coverImage} 
@@ -2377,14 +2378,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   const malUrl = getMALUrlForMobile(item);
                   const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}`;
                   const itemStyle = {
-                    width: shouldCenter ? `${100 / itemsPerView}%` : `${itemWidth}%`,
+                    minWidth: '120px',
+                    width: shouldCenter ? '120px' : '120px',
                     flexShrink: 0,
-                    minWidth: shouldCenter ? '120px' : 'auto',
-                    maxWidth: shouldCenter ? '183px' : 'none'
+                    maxWidth: shouldCenter ? '183px' : '120px'
                   };
                   const content = (
                     <div className="flex flex-col items-center" style={itemStyle}>
-                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '275px', boxSizing: 'border-box', overflow: 'hidden' }}>
                         {item.coverImage && (
                           <img 
                             src={item.coverImage} 
