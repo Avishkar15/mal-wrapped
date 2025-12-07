@@ -893,7 +893,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_hunter', 
         name: 'The Hunter',
-        description: `Gon seeks the rarest finds, and so do you. You’ve uncovered ${hiddenGemsCount} hidden gems most fans miss.`,
+        description: `You’ve hunted down ${hiddenGemsCount} that most fans skip. Instincts like Gon’s always lead to something special.`,
         score: hiddenGemsCount * 10
       });
     }
@@ -916,10 +916,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     });
     if (uniqueGenres.size >= 20 || uniqueAuthors.size >= 20) {
       const descText = uniqueGenres.size >= 20 && uniqueAuthors.size >= 20
-        ? `Like Luffy, you crave adventure! This year, you explored ${uniqueGenres.size} genres and ${uniqueAuthors.size} authors`
+        ? `You roamed far, discovering  ${uniqueGenres.size} genres and ${uniqueAuthors.size} authors. That’s a journey even Luffy would respect.`
         : uniqueGenres.size >= 20
-        ? `Like Luffy, you crave adventure! This year, you explored ${uniqueGenres.size} genres`
-        : `Like Luffy, you crave adventure! This year, you explored ${uniqueAuthors.size} authors`;
+        ? `You roamed far, discovering ${uniqueGenres.size} genres. That’s a journey even Luffy would respect.`
+        : `You roamed far, discovering ${uniqueAuthors.size} authors. That’s a journey even Luffy would respect.`;
       
       badgeCandidates.push({ 
         type: 'the_explorer', 
@@ -931,11 +931,11 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     
     // The Archivist - 100+ completed anime and manga combined
     const totalCompleted = completedAnime.length + completedManga.length;
-    if (totalCompleted >= 100) {
+    if (totalCompleted >= 500) {
       badgeCandidates.push({ 
         type: 'the_archivist', 
         name: 'The Archivist',
-        description: `Myne’s love of stories is endless, and yours is too. You’ve finished ${totalCompleted} titles!`,
+        description: `Your completed shelf now holds ${totalCompleted} anime and manga! Myne would happily dive into a collection like that`,
         score: totalCompleted
       });
     }
@@ -946,7 +946,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_strategist', 
         name: 'The Strategist',
-        description: `Like Light, you plan every move. With ${totalPlanned} titles in your queue, you’re already two steps ahead.`,
+        description: `With ${totalPlanned} lined up in your planned list, every move is calculated. Light would call this a solid plan.`,
         score: totalPlanned
       });
     }
@@ -1014,7 +1014,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       
       if (bingeEntry) {
         const titlePreview = bingeEntry.title.substring(0, 30) + (bingeEntry.title.length > 30 ? '...' : '');
-        const bingeDesc = `Like Naruto, you never gave up! You blitzed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}.`;
+        const bingeDesc = `You blazed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}. That kind of nonstop push is peak Naruto energy.`;
         
         badgeCandidates.push({ 
           type: 'the_sprinter', 
@@ -1038,7 +1038,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_loyalist', 
         name: 'The Loyalist',
-        description: `Rem is loyal to the end. With ${loyalistCount} works from ${loyalistName}, you’re just as devoted.`,
+        description: `You kept returning to ${loyalistName}, finishing ${loyalistCount} of their works. Rem would be proud of your devotion.`,
         score: loyalistCount
       });
     }
@@ -1049,9 +1049,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const genrePercentage = (topGenreCount / thisYearAnime.length) * 100;
       if (topGenreCount >= 40 || genrePercentage > 40) {
         badgeCandidates.push({ 
-          type: 'the_specialist', 
-          name: 'The Specialist',
-          description: `Like Sailor Moon, you shined brightest in ${topGenres[0][0]} genre  , completing ${topGenreCount} titles.`,
+          type: 'the_guardian', 
+          name: 'The Guardian',
+          description: `You shined brightest in ${topGenres[0][0]} genre, finishing ${topGenreCount} titles. Usagi would be proud of how firmly you’ve defended your favorite genre`,
           score: genrePercentage
         });
       }
@@ -1073,7 +1073,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_rookie', 
         name: 'The Rookie',
-        description: `Deku’s story might be complete, but yours is just beginning! Welcome to MyAnimeList!`,
+        description: `Deku’s story might be complete, but yours is just getting started! Welcome to MyAnimeList. Plus Ultra!`,
         score: 1000 // High score to prioritize if they qualify
       });
     }
@@ -2287,7 +2287,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         };
 
         if (shouldScroll) {
-          const scrollDuration = visibleItems.length * 1.5; // Faster: 1.5 seconds per item for mobile
+          const scrollDuration = visibleItems.length * 0.8; // Faster: 0.8 seconds per item for mobile
           // On mobile, make items larger - use 2 items per view instead of 3
           const mobileItemsPerView = 2;
           const mobileItemWidth = 100 / mobileItemsPerView;
@@ -2698,7 +2698,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium  text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {stats.selectedYear === 'all' ? 'Overall' : 'In ' + stats.selectedYear}, you watched through
+            {stats.selectedYear === 'all' ? 'Overall' : 'In ' + stats.selectedYear}, you watched
             </motion.h2>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white ">
@@ -2936,7 +2936,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             <SlideLayout>
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  These stole the spotlight
+                Your personal hall of fame
                 </motion.h2>
                 <div className="mt-4 sm:mt-6 flex flex-col gap-4 sm:gap-6 w-full max-w-3xl mx-auto relative z-10">
                   {(() => {
@@ -3151,7 +3151,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <SlideLayout bgColor="pink">
             <div className="text-center relative">
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Every season brought something new
+              Your year, season by season
             </motion.h2>
             </div>
             <motion.div 
@@ -3215,7 +3215,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 );
               })}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Something for every mood
+            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Consistently great picks
             </motion.h3>
           </SlideLayout>
         );
@@ -3225,7 +3225,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           return (
             <SlideLayout bgColor="blue">
               <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                No hidden gems discovered this time
+              No overlooked anime in your list this time
               </motion.h3>
             </SlideLayout>
           );
@@ -3240,7 +3240,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            You saw something others missed
+            You saw shows that others missed
             </motion.h2>
             <motion.div className="mt-4 relative z-10 max-w-2xl mx-auto" {...fadeSlideUp} data-framer-motion>
               {rareAnimeItems.map((item, idx) => (
@@ -3289,7 +3289,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               ))}
             </motion.div>
             <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            You found <span className="text-white font-semibold">{stats.hiddenGemsAnimeCount ?? 0}</span> such anime. A true hidden-gem hunter
+            You found <span className="text-white font-semibold">{stats.hiddenGemsAnimeCount ?? 0}</span> such anime. You've got an eye for quality
             </motion.h3>
           </SlideLayout>
         );
@@ -3331,7 +3331,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <SlideLayout  bgColor="green">
             {plannedAnimeItems.length > 0 && (
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              So many shows, so little time
+              Your watchlist kept growing
               </motion.h2>
             )}
             {plannedAnimeItems.length > 0 ? (
@@ -3416,7 +3416,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="yellow">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {stats.selectedYear === 'all' ? 'Till now' : 'In ' + stats.selectedYear}, you read through
+            {stats.selectedYear === 'all' ? 'Till now' : 'In ' + stats.selectedYear}, you read
             </motion.h2>
             <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
               <p className="number-xl text-white ">
@@ -3452,7 +3452,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            That's
+            That's a total of
             </motion.h2>
             <motion.div className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center" {...fadeSlideUp} data-framer-motion>
               <div className="text-center">
@@ -3693,7 +3693,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             <SlideLayout>
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
                 <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  These ruled your shelves
+                Your most unforgettable reads
                 </motion.h2>
                 <div className="mt-4 sm:mt-6 flex flex-col gap-2.5 sm:gap-3 w-full max-w-3xl mx-auto relative z-10">
                   {(() => {
@@ -3823,7 +3823,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                     );
                   })()}
                 </div>
-                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A year of great reads</motion.h3>
+                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>These are the stories you'll carry with you</motion.h3>
               </motion.div>
             </SlideLayout>
           );
@@ -3878,7 +3878,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="pink">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            Your go-to authors
+            The authors you can't get enough of
             </motion.h2>
             {topAuthors.length > 0 ? (
               <div className="mt-4 sm:mt-6 flex flex-col gap-4 sm:gap-6 w-full max-w-3xl mx-auto relative z-10">
@@ -4069,7 +4069,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               </motion.h3>
             )}
             <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-              You know who delivers!
+            You'd read anything they write
             </motion.h3>
           </SlideLayout>
         );
@@ -4094,7 +4094,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              These low-profile reads turned out surprisingly strong
+            You went digging
             </motion.h2>
             <motion.div className="mt-4 relative z-10 max-w-2xl mx-auto" {...fadeSlideUp} data-framer-motion>
               {rareMangaItems.map((item, idx) => (
@@ -4145,7 +4145,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               ))}
             </motion.div>
             <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            You found <span className="text-white font-semibold">{stats.hiddenGemsMangaCount ?? 0}</span> such titles. Not everyone finds gems like these
+            And struck gold. You found <span className="text-white font-semibold">{stats.hiddenGemsMangaCount ?? 0}</span> such titles.
             </motion.h3>
           </SlideLayout>
         );
@@ -4189,14 +4189,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           <SlideLayout  bgColor="green">
             {plannedMangaItems.length > 0 && (
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Manga you bookmarked for later
+              You bookmarked these for later
               </motion.h2>
             )}
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
                 <GridImages items={plannedMangaItems} maxItems={3} />
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                So many volumes, so little time...
+                Later just never quite arrived...
             </motion.h3>
               </motion.div>
             ) : (
@@ -4246,14 +4246,14 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
           'the_strategist': '/badges/the-strategist.webp', // Boy with green hair and lightning
           'the_sprinter': '/badges/the_sprinter.webp', // Naruto eating ramen
           'the_loyalist': '/badges/the-loyalist.webp', // Sailor Moon
-          'the_specialist': '/badges/the-genre-master.webp', // Gon Freecss
+          'the_guardian': '/badges/the-genre-master.webp', // Gon Freecss
           'the_rookie': '/badges/the-rookie.webp' // Rem
         };
         
         return (
           <SlideLayout bgColor="purple">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              You earned some impressive badges
+            The badges you earned along the way
             </motion.h2>
             <motion.div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-2 max-w-3xl mx-auto relative z-10" {...fadeSlideUp} data-framer-motion>
               {stats.badges.map((badge, idx) => (
@@ -4296,7 +4296,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               ))}
             </motion.div>
             <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            Wear them with pride!
+            Each one tells a story
             </motion.h3>
           </SlideLayout>
         );
