@@ -801,7 +801,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     
     const rareAnimeGems = deduplicateByTitle(allRareAnime).slice(0, 3);
     
-    const allRareManga = completedManga
+    // For hidden gems, use all completed manga (not just rated ones) - same as anime
+    const completedMangaForGems = filteredManga.filter(item => {
+      const { status } = item.list_status || {};
+      return status === 'completed';
+    });
+    
+    const allRareManga = completedMangaForGems
       .map(item => ({
         ...item,
         popularity: item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER,
@@ -1416,8 +1422,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       // New unique features
       milestones: milestones,
       thisYearMilestone: thisYearMilestone,
-      rareAnimeGems: rareAnimeGems,
-      rareMangaGems: rareMangaGems,
+      rareAnimeGems: rareAnimeGems && rareAnimeGems.length > 0 ? rareAnimeGems : [],
+      rareMangaGems: rareMangaGems && rareMangaGems.length > 0 ? rareMangaGems : [],
       hiddenGemsCount: hiddenGemsCount,
       hiddenGemsMangaCount: hiddenGemsMangaCount ?? 0,
       hiddenGemsAnimeCount: hiddenGemsAnimeCount ?? 0,
