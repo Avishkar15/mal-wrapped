@@ -655,6 +655,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const { status, score } = item.list_status || {};
       return status === 'completed' && score > 0;
     });
+    
 
     const topManga = ratedManga
       .sort((a, b) => b.list_status.score - a.list_status.score)
@@ -667,9 +668,24 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         .sort((a, b) => a.list_status.score - b.list_status.score)
     ).slice(0, 5);
     
-    // Hidden gems manga (high community score, low popularity) - 3 items, deduplicate by title
-    // This will be set later to match rareMangaGems structure
-    let hiddenGemsManga = [];
+    // Hidden gems manga (high community score, low popularity) - same as anime implementation
+    const hiddenGemsMangaRaw = completedManga
+      .filter(item => {
+        const malScore = item.node?.mean ?? 0;
+        const popularity = item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
+        return malScore >= 7.0 && popularity < 50000;
+      })
+      .sort((a, b) => {
+        const malScoreA = a.node?.mean ?? 0;
+        const malScoreB = b.node?.mean ?? 0;
+        if (malScoreB !== malScoreA) {
+          return malScoreB - malScoreA;
+        }
+        const popularityA = a.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
+        const popularityB = b.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
+        return popularityA - popularityB;
+      });
+    const hiddenGemsManga = deduplicateByTitle(hiddenGemsMangaRaw).slice(0, 3);
     
     // Planned to read - deduplicate by title
     const plannedManga = deduplicateByTitle(
@@ -4054,16 +4070,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         );
 
       case 'hidden_gems_manga':
-        // Use rareMangaGems (preferred) or hiddenGemsManga as fallback
-        // Check both possible sources
-        let mangaGemsToDisplay = [];
-        if (stats.rareMangaGems && Array.isArray(stats.rareMangaGems) && stats.rareMangaGems.length > 0) {
-          mangaGemsToDisplay = stats.rareMangaGems;
-        } else if (stats.hiddenGemsManga && Array.isArray(stats.hiddenGemsManga) && stats.hiddenGemsManga.length > 0) {
-          mangaGemsToDisplay = stats.hiddenGemsManga;
-        }
-        
-        if (!mangaGemsToDisplay || mangaGemsToDisplay.length === 0) {
+        if (!stats.rareMangaGems || stats.rareMangaGems.length === 0) {
           return (
             <SlideLayout bgColor="blue">
               <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
@@ -4072,22 +4079,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             </SlideLayout>
           );
         }
-        const rareMangaItems = mangaGemsToDisplay.map(item => {
-          // Handle both mapped structure (with popularity/malScore) and raw structure
-          const title = item.node?.title || item.title || '';
-          const coverImage = item.node?.main_picture?.large || item.node?.main_picture?.medium || item.coverImage || '';
-          const popularity = item.popularity !== undefined ? item.popularity : (item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER);
-          const malScore = item.malScore !== undefined ? item.malScore : (item.node?.mean ?? 0);
-          const mangaId = item.node?.id || item.mangaId;
-          
-          return {
-            title,
-            coverImage,
-            popularity,
-            malScore,
-            mangaId
-          };
-        });
+        const rareMangaItems = stats.rareMangaGems.map(item => ({
+          title: item.node?.title || '',
+          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
+          popularity: item.popularity,
+          malScore: item.malScore,
+          mangaId: item.node?.id
+        }));
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
