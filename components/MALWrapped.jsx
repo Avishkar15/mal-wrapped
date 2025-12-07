@@ -924,7 +924,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_explorer', 
         name: 'The Explorer',
-        description: `${descText}.`,
+        description: `${descText}`,
         score: uniqueGenres.size + uniqueAuthors.size
       });
     }
@@ -1051,7 +1051,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         badgeCandidates.push({ 
           type: 'the_guardian', 
           name: 'The Guardian',
-          description: `You shined brightest in ${topGenres[0][0]} genre, finishing ${topGenreCount} titles. Usagi would be proud of how firmly you’ve defended your favorite genre`,
+          description: `You became the guardian of ${topGenres[0][0]}, finishing ${topGenreCount} titles. Like Usagi, you protected what you love.`,
           score: genrePercentage
         });
       }
