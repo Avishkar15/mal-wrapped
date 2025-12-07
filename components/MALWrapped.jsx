@@ -781,8 +781,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
     // 2. Rarity Features - Hidden gems: least members (below threshold), sorted by MAL mean score descending
     const HIDDEN_GEM_ANIME_THRESHOLD = 70000;
-    const HIDDEN_GEM_MANGA_THRESHOLD = 50000;
-    const HIDDEN_GEM_SCORE_THRESHOLD = 7.0;
+    const HIDDEN_GEM_MANGA_THRESHOLD = 70000;
+    const HIDDEN_GEM_SCORE_THRESHOLD = 5.0;
     
     const allRareAnime = completedAnime
       .map(item => ({
@@ -2287,17 +2287,20 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         };
 
         if (shouldScroll) {
-          const scrollDuration = visibleItems.length * 3; // 3 seconds per item for mobile
+          const scrollDuration = visibleItems.length * 1.5; // Faster: 1.5 seconds per item for mobile
           // On mobile, make items larger - use 2 items per view instead of 3
           const mobileItemsPerView = 2;
           const mobileItemWidth = 100 / mobileItemsPerView;
           return (
-            <div 
+            <motion.div 
               className="mt-2 sm:mt-3 overflow-hidden relative flex justify-center"
               style={{ 
                 maskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
                 WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)'
               }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: smoothEase }}
             >
               <div 
                 className="flex flex-row"
@@ -2358,19 +2361,22 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   }
                 }
               `}</style>
-            </div>
+            </motion.div>
           );
         } else {
           // Mobile non-scrolling (centered items)
           const mobileItemsPerView = 2;
           const mobileItemWidth = 100 / mobileItemsPerView;
           return (
-            <div 
+            <motion.div 
               className="mt-2 sm:mt-3 overflow-hidden relative flex justify-center"
               style={{ 
                 maskImage: 'linear-gradient(to right, black 0%, black 100%)',
                 WebkitMaskImage: 'linear-gradient(to right, black 0%, black 100%)'
               }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: smoothEase }}
             >
               <div 
                 className="flex flex-row"
@@ -2421,7 +2427,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   );
                 })}
               </div>
-            </div>
+            </motion.div>
           );
         }
       }
