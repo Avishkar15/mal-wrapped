@@ -2127,8 +2127,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       );
     };
 
-    // Image Carousel Component - Always carousel on all screen sizes
+    // Image Carousel Component - Different implementations for mobile and desktop
     const ImageCarousel = ({ items, maxItems = 10, showHover = true, showNames = false }) => {
+      const [isMobile, setIsMobile] = useState(false);
       const [isHovered, setIsHovered] = useState(false);
       const [hoveredItem, setHoveredItem] = useState(null);
       const [gapSize, setGapSize] = useState('2px');
@@ -2151,10 +2152,13 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const uniqueItems = Array.from(uniqueItemsMap.values());
       const visibleItems = uniqueItems.slice(0, maxItems);
       
-      // Update gap size and items per view based on screen width
+      // Update gap size, items per view, and mobile detection based on screen width
       useEffect(() => {
         const updateResponsive = () => {
-          if (window.innerWidth >= 640) {
+          const width = window.innerWidth;
+          const mobile = width < 768; // Mobile breakpoint
+          setIsMobile(mobile);
+          if (width >= 640) {
             setGapSize('8px');
             setItemsPerView(5);
           } else {
@@ -2183,9 +2187,9 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       const animationDuration = visibleItems.length * 2; // 2 seconds per item
       const maxScroll = visibleItems.length * itemWidth; // Maximum scroll in percentage
 
-      // Handle animation with position preservation
+      // Handle animation with position preservation (desktop only)
       useEffect(() => {
-        if (!shouldScroll) return;
+        if (!shouldScroll || isMobile) return;
 
         let animationFrameId;
 
@@ -2212,10 +2216,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             cancelAnimationFrame(animationFrameId);
           }
         };
-      }, [shouldScroll, isHovered, maxScroll, animationDuration, x]);
+      }, [shouldScroll, isHovered, maxScroll, animationDuration, x, isMobile]);
 
-      // Handle hover state changes to preserve position
+      // Handle hover state changes to preserve position (desktop only)
       useEffect(() => {
+        if (isMobile) return;
+        
         if (isHovered) {
           // Pause: save current position
           pausedPositionRef.current = x.get();
@@ -2230,7 +2236,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             startTimeRef.current = Date.now() - (adjustedElapsed * 1000);
           }
         }
-      }, [isHovered, maxScroll, animationDuration, x]);
+      }, [isHovered, maxScroll, animationDuration, x, isMobile]);
 
       const getMALUrl = (item) => {
         if (item.malId) {
@@ -2244,6 +2250,151 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
       if (visibleItems.length === 0) return null;
 
+      // Simple mobile carousel - CSS-based, no complex animations
+      if (isMobile) {
+        const getMALUrlForMobile = (item) => {
+          if (item.malId) {
+            return `https://myanimelist.net/anime/${item.malId}`;
+          }
+          if (item.mangaId) {
+            return `https://myanimelist.net/manga/${item.mangaId}`;
+          }
+          return null;
+        };
+
+        if (shouldScroll) {
+          const scrollDuration = visibleItems.length * 3; // 3 seconds per item for mobile
+          return (
+            <div 
+              className="mt-2 sm:mt-3 overflow-hidden relative flex justify-center"
+              style={{ 
+                maskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)'
+              }}
+            >
+              <div 
+                className="flex"
+                style={{ 
+                  gap: gapSize,
+                  justifyContent: 'flex-start',
+                  width: '100%',
+                  animation: `scrollMobile ${scrollDuration}s linear infinite`
+                }}
+              >
+                {[...visibleItems, ...visibleItems].map((item, idx) => {
+                  const malUrl = getMALUrlForMobile(item);
+                  const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}`;
+                  const itemStyle = {
+                    width: `${itemWidth}%`,
+                    flexShrink: 0
+                  };
+                  const content = (
+                    <div className="flex flex-col items-center" style={itemStyle}>
+                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+                        {item.coverImage && (
+                          <img 
+                            src={item.coverImage} 
+                            alt={item.title || ''} 
+                            crossOrigin="anonymous" 
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        )}
+                      </div>
+                      {showNames && item.title && (
+                        <div className="mt-2 text-center">
+                          <p className="title-sm truncate">{item.title}</p>
+                          {item.userRating && (
+                            <p className="mono font-semibold text-yellow-300 mt-1">★ {Math.round(item.userRating)}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                  return malUrl ? (
+                    <a key={uniqueKey} href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                      {content}
+                    </a>
+                  ) : (
+                    <div key={uniqueKey}>{content}</div>
+                  );
+                })}
+              </div>
+              <style>{`
+                @keyframes scrollMobile {
+                  0% {
+                    transform: translateX(0);
+                  }
+                  100% {
+                    transform: translateX(-50%);
+                  }
+                }
+              `}</style>
+            </div>
+          );
+        } else {
+          // Mobile non-scrolling (centered items)
+          return (
+            <div 
+              className="mt-2 sm:mt-3 overflow-hidden relative flex justify-center"
+              style={{ 
+                maskImage: 'linear-gradient(to right, black 0%, black 100%)',
+                WebkitMaskImage: 'linear-gradient(to right, black 0%, black 100%)'
+              }}
+            >
+              <div 
+                className="flex"
+                style={{ 
+                  gap: gapSize,
+                  justifyContent: shouldCenter ? 'center' : 'flex-start',
+                  width: shouldCenter ? 'auto' : '100%'
+                }}
+              >
+                {visibleItems.map((item, idx) => {
+                  const malUrl = getMALUrlForMobile(item);
+                  const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}`;
+                  const itemStyle = {
+                    width: shouldCenter ? `${100 / itemsPerView}%` : `${itemWidth}%`,
+                    flexShrink: 0,
+                    minWidth: shouldCenter ? '120px' : 'auto',
+                    maxWidth: shouldCenter ? '183px' : 'none'
+                  };
+                  const content = (
+                    <div className="flex flex-col items-center" style={itemStyle}>
+                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+                        {item.coverImage && (
+                          <img 
+                            src={item.coverImage} 
+                            alt={item.title || ''} 
+                            crossOrigin="anonymous" 
+                            className="w-full h-full object-cover rounded-lg"
+                          />
+                        )}
+                      </div>
+                      {showNames && item.title && (
+                        <div className="mt-2 text-center">
+                          <p className="title-sm truncate">{item.title}</p>
+                          {item.userRating && (
+                            <p className="mono font-semibold text-yellow-300 mt-1">★ {Math.round(item.userRating)}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                  return malUrl ? (
+                    <a key={uniqueKey} href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                      {content}
+                    </a>
+                  ) : (
+                    <div key={uniqueKey}>{content}</div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+      }
+
+      // Desktop Framer Motion ticker - smooth and interactive
       return (
         <div 
           ref={containerRef}
@@ -2282,7 +2433,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   }}
                 >
                   <motion.div 
-                className="aspect-[2/3] w-full bg-transparent rounded-lg relative" 
+                    className="aspect-[2/3] w-full bg-transparent rounded-lg relative" 
                     style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}
                     whileHover={{ borderColor: '#ffffff' }}
                     transition={{ duration: 0.3, ease: smoothEase }}
