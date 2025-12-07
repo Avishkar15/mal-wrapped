@@ -2181,8 +2181,8 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
             setGapSize('8px');
             setItemsPerView(5);
           } else {
-            setGapSize('8px');
-            setItemsPerView(2); // Show 2 items on mobile for larger size
+            setGapSize('6px');
+            setItemsPerView(3);
           }
         };
         // Set initial value immediately
@@ -2379,12 +2379,12 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                   const itemStyle = {
                     width: shouldCenter ? `${100 / itemsPerView}%` : `${itemWidth}%`,
                     flexShrink: 0,
-                    minWidth: shouldCenter ? '150px' : 'auto',
-                    maxWidth: shouldCenter ? '220px' : 'none'
+                    minWidth: shouldCenter ? '120px' : 'auto',
+                    maxWidth: shouldCenter ? '183px' : 'none'
                   };
                   const content = (
                     <div className="flex flex-col items-center" style={itemStyle}>
-                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '400px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
                         {item.coverImage && (
                           <img 
                             src={item.coverImage} 
