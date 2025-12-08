@@ -4763,7 +4763,7 @@ export default function MALWrapped() {
                   <motion.img
                     src="/avatar.webp"
                     alt="XAvishkar"
-                    className="relative h-28 object-cover pointer-events-none z-10 mt-1 mb-1 mx-auto rounded-xl"
+                    className="relative h-24 md:h-28 object-cover pointer-events-none z-10 mt-1 mb-1 mx-auto rounded-xl"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: smoothEase }}
