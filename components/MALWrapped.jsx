@@ -4721,8 +4721,21 @@ export default function MALWrapped() {
                 }}
               />
               
-              <div className="mt-20 relative z-20 w-full flex flex-col items-center justify-center">
-                <motion.div {...fadeIn100} data-framer-motion className="mt-16 w-full flex flex-col items-center">
+              <div className="relative z-20 w-full flex flex-col items-center justify-center">
+                <motion.div {...fadeIn100} data-framer-motion className="w-full flex flex-col items-center">
+                  {/* Logo */}
+                  <motion.div 
+                    className="mb-8 relative z-10"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: smoothEase }}
+                  >
+                    <img 
+                      src="/preview.webp" 
+                      alt="MAL Wrapped Logo" 
+                      className="h-28 sm:h-32 md:h-36 w-auto mx-auto rounded-xl"
+                    />
+                  </motion.div>
                   <div className="relative inline-block text-center">
                     <h1 className="wrapped-brand text-white/70 mb-1 relative z-10 text-center">
                       MyAnimeList
@@ -4750,7 +4763,7 @@ export default function MALWrapped() {
                   <motion.img
                     src="/avatar.webp"
                     alt="XAvishkar"
-                    className="relative h-32 object-cover pointer-events-none z-10 mt-1 mb-1 mx-auto rounded-xl"
+                    className="relative h-28 object-cover pointer-events-none z-10 mt-1 mb-1 mx-auto rounded-xl"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: smoothEase }}
