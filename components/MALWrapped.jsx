@@ -791,9 +791,9 @@ export default function MALWrapped() {
     });
 
     // 2. Rarity Features - Hidden gems: least members (below threshold), sorted by MAL mean score descending
-    const HIDDEN_GEM_ANIME_THRESHOLD = 70000;
-    const HIDDEN_GEM_MANGA_THRESHOLD = 70000;
-    const HIDDEN_GEM_SCORE_THRESHOLD = 5.0;
+    const HIDDEN_GEM_ANIME_THRESHOLD = 80000;
+    const HIDDEN_GEM_MANGA_THRESHOLD = 40000;
+    const HIDDEN_GEM_SCORE_THRESHOLD = 7.0;
     
     const allRareAnime = completedAnime
       .map(item => ({
@@ -2540,13 +2540,25 @@ export default function MALWrapped() {
     };
 
     // Grid Image Component for hidden gems, didn't land, and planned sections
-    const GridImages = ({ items, maxItems = 5 }) => {
+    const GridImages = ({ items, maxItems = 5, verticalOnMobile = false }) => {
       const visibleItems = items.slice(0, maxItems);
       const itemCount = visibleItems.length;
       
       // Dynamically set columns based on number of items
       // On mobile: max 3 columns, on larger screens: use item count (max 5)
       const getGridCols = () => {
+        if (verticalOnMobile) {
+          // Vertical layout on mobile (flex-col), horizontal on larger screens
+          if (itemCount === 0) return 'sm:grid-cols-1';
+          if (itemCount === 1) return 'sm:grid-cols-1';
+          if (itemCount === 2) return 'sm:grid-cols-2';
+          if (itemCount === 3) return 'sm:grid-cols-3';
+          if (itemCount === 4) return 'sm:grid-cols-2 md:grid-cols-4';
+          // 5 or more items
+          return 'sm:grid-cols-3 md:grid-cols-5';
+        }
+        
+        // Original grid layout
         if (itemCount === 0) return 'grid-cols-1';
         if (itemCount === 1) return 'grid-cols-1';
         if (itemCount === 2) return 'grid-cols-2';
@@ -2562,7 +2574,7 @@ export default function MALWrapped() {
       return (
         <div className="mt-4 flex justify-center w-full px-2">
           <motion.div 
-            className={`grid ${getGridCols()} gap-4 place-items-center w-full max-w-4xl mx-auto`}
+            className={`${verticalOnMobile ? 'flex flex-col sm:grid' : 'grid'} ${getGridCols()} gap-4 place-items-center w-full max-w-4xl mx-auto`}
             variants={staggerContainer}
             initial="initial"
             animate="animate"
@@ -3312,7 +3324,7 @@ export default function MALWrapped() {
             )}
             {didntLand.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <GridImages items={didntLand} maxItems={3} />
+                <GridImages items={didntLand} maxItems={3} verticalOnMobile={true} />
                 <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Better luck next season!
             </motion.h3>
               </motion.div>
@@ -3338,7 +3350,7 @@ export default function MALWrapped() {
             )}
             {plannedAnimeItems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <GridImages items={plannedAnimeItems} maxItems={3} />
+                <GridImages items={plannedAnimeItems} maxItems={3} verticalOnMobile={true} />
                 <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>One day you’ll get to them… probably</motion.h3>
               </motion.div>
             ) : (
@@ -4168,7 +4180,7 @@ export default function MALWrapped() {
           )}
             {mangaDidntLand.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
-                <GridImages items={mangaDidntLand} maxItems={3} />
+                <GridImages items={mangaDidntLand} maxItems={3} verticalOnMobile={true} />
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Even legends have their misses
             </motion.h3>
@@ -4196,7 +4208,7 @@ export default function MALWrapped() {
             )}
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
-                <GridImages items={plannedMangaItems} maxItems={3} />
+                <GridImages items={plannedMangaItems} maxItems={3} verticalOnMobile={true} />
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                 Later just never quite arrived...
             </motion.h3>
@@ -4723,6 +4735,19 @@ export default function MALWrapped() {
               
               <div className="mt-20 relative z-20 w-full flex flex-col items-center justify-center">
                 <motion.div {...fadeIn100} data-framer-motion className="mt-16 w-full flex flex-col items-center">
+                  {/* Logo */}
+                  <motion.div 
+                    className="mb-8 relative z-10"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: smoothEase }}
+                  >
+                    <img 
+                      src="/preview.webp" 
+                      alt="MAL Wrapped Logo" 
+                      className="h-28 sm:h-32 md:h-36 w-auto mx-auto rounded-xl"
+                    />
+                  </motion.div>
                   <div className="relative inline-block text-center">
                     <h1 className="wrapped-brand text-white/70 mb-1 relative z-10 text-center">
                       MyAnimeList
@@ -4750,7 +4775,7 @@ export default function MALWrapped() {
                   <motion.img
                     src="/avatar.webp"
                     alt="XAvishkar"
-                    className="relative h-36 object-cover pointer-events-none z-10 mt-1 mb-1 mx-auto rounded-xl"
+                    className="relative h-32 object-cover pointer-events-none z-10 mt-1 mb-1 mx-auto rounded-xl"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: smoothEase }}
@@ -4759,7 +4784,7 @@ export default function MALWrapped() {
                 <p className="text-sm text-white/70 text-center">
                     Made by{' '}
                     <motion.a
-                      href="https://www.avishkarshinde.com/aboutme"
+                      href="https://myanimelist.net/profile/XAvishkar"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-white/70 hover:text-white transition-colors underline"
