@@ -893,7 +893,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       badgeCandidates.push({ 
         type: 'the_hunter', 
         name: 'The Hunter',
-        description: `You’ve hunted down ${hiddenGemsCount} that most fans skip. Instincts like Gon’s always lead to something special.`,
+        description: `You’ve hunted down ${hiddenGemsCount} underated titles that most fans skip. Instincts like Gon’s always lead to something special.`,
         score: hiddenGemsCount * 10
       });
     }
@@ -929,14 +929,20 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       });
     }
     
-    // The Archivist - 100+ completed anime and manga combined
+    // The Archivist - 130+ for year, 500+ for all time
     const totalCompleted = completedAnime.length + completedManga.length;
-    if (totalCompleted >= 500) {
+    const allTimeCompleted = (anime || []).filter(item => item.list_status?.status === 'completed').length + 
+                             (manga || []).filter(item => item.list_status?.status === 'completed').length;
+    
+    const archivistThreshold = currentYear === 'all' ? 500 : 130;
+    const completedCount = currentYear === 'all' ? allTimeCompleted : totalCompleted;
+    
+    if (completedCount >= archivistThreshold) {
       badgeCandidates.push({ 
         type: 'the_archivist', 
         name: 'The Archivist',
-        description: `Your completed shelf now holds ${totalCompleted} anime and manga! Myne would happily dive into a collection like that`,
-        score: totalCompleted
+        description: `Your completed shelf now holds ${completedCount} anime and manga! Myne would happily dive into a collection like that`,
+        score: completedCount
       });
     }
     
@@ -1014,7 +1020,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       
       if (bingeEntry) {
         const titlePreview = bingeEntry.title.substring(0, 30) + (bingeEntry.title.length > 30 ? '...' : '');
-        const bingeDesc = `You blazed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}. That kind of nonstop push is peak Naruto energy.`;
+        const bingeDesc = `You blazed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}. That not giving up attitude is peak Naruto energy.`;
         
         badgeCandidates.push({ 
           type: 'the_sprinter', 
@@ -1051,7 +1057,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         badgeCandidates.push({ 
           type: 'the_guardian', 
           name: 'The Guardian',
-          description: `You became the guardian of ${topGenres[0][0]}, finishing ${topGenreCount} titles. Like Usagi, you protected what you love.`,
+          description: `You became the guardian of ${topGenres[0][0]} genre, finishing ${topGenreCount} titles. Like Usagi, you protected what you love.`,
           score: genrePercentage
         });
       }
@@ -1209,6 +1215,21 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       characterDatabase = maleCharacterDatabase;
     }
     
+    // Filter to only characters from anime the user has watched
+    const userAnimeIds = new Set(
+      anime.map(item => item.node?.id).filter(id => id !== undefined && id !== null)
+    );
+    
+    // Filter character database to only include characters from watched anime
+    const watchedCharacterDatabase = characterDatabase.filter(character => 
+      userAnimeIds.has(character.malId)
+    );
+    
+    // Use watched characters if available, otherwise fall back to all characters
+    const availableCharacterDatabase = watchedCharacterDatabase.length > 0 
+      ? watchedCharacterDatabase 
+      : characterDatabase;
+    
     // Normalize genre names for matching (handle MAL genre variations)
     const normalizeGenre = (genre) => {
       if (!genre) return '';
@@ -1264,7 +1285,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     let bestScore = 0;
     
     if (userTopGenres.length > 0) {
-      characterDatabase.forEach(character => {
+      availableCharacterDatabase.forEach(character => {
         const characterGenres = character.genres.map(normalizeGenre);
         
         // Calculate overlap score - check if any of user's top 3 genres match character genres
@@ -1290,18 +1311,18 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     // If no match found, use top genre to find closest match
     if (!bestMatch && topGenres.length > 0) {
       const topGenre = normalizeGenre(topGenres[0][0]);
-      bestMatch = characterDatabase.find(char => 
+      bestMatch = availableCharacterDatabase.find(char => 
         char.genres.some(g => {
           const charNorm = normalizeGenre(g).toLowerCase();
           const topNorm = topGenre.toLowerCase();
           return charNorm === topNorm || charNorm.includes(topNorm) || topNorm.includes(charNorm);
         })
-      ) || characterDatabase[0]; // Fallback to first character
+      ) || (availableCharacterDatabase.length > 0 ? availableCharacterDatabase[0] : null); // Fallback to first character from watched anime
     }
     
-    // Always create a character twin (use first character as fallback if needed)
-    if (!bestMatch) {
-      bestMatch = characterDatabase[0];
+    // Only create a character twin if we have a match (prefer watched anime, but allow fallback)
+    if (!bestMatch && availableCharacterDatabase.length > 0) {
+      bestMatch = availableCharacterDatabase[0];
     }
     
     let characterTwin = null;
