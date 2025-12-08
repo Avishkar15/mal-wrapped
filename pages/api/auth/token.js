@@ -17,11 +17,6 @@ export default async function handler(req, res) {
   const { code, code_verifier, redirect_uri } = req.body;
 
   if (!code || !code_verifier || !redirect_uri) {
-    console.error('Missing parameters:', { 
-      has_code: !!code, 
-      has_verifier: !!code_verifier, 
-      has_redirect_uri: !!redirect_uri 
-    });
     return res.status(400).json({ 
       error: 'Missing required parameters',
       required: ['code', 'code_verifier', 'redirect_uri']
@@ -38,7 +33,6 @@ export default async function handler(req, res) {
   const CLIENT_SECRET = process.env.MAL_CLIENT_SECRET;
 
   if (!CLIENT_ID) {
-    console.error('CLIENT_ID is not set in environment variables');
     return res.status(500).json({ 
       error: 'Server configuration error',
       error_description: 'CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID in Vercel environment variables.',
@@ -47,7 +41,6 @@ export default async function handler(req, res) {
   }
 
   if (!CLIENT_SECRET) {
-    console.error('CLIENT_SECRET is not set in environment variables');
     return res.status(500).json({ 
       error: 'Server configuration error',
       error_description: 'CLIENT_SECRET is not configured. Please set MAL_CLIENT_SECRET in Vercel environment variables. Web apps require a client secret.',
@@ -56,8 +49,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('Exchanging code for token...');
-    
     const formData = new URLSearchParams({
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
@@ -65,14 +56,6 @@ export default async function handler(req, res) {
       code_verifier: code_verifier,
       grant_type: 'authorization_code',
       redirect_uri: normalizedRedirectUri
-    });
-
-    console.log('Token exchange request:', {
-      redirect_uri: normalizedRedirectUri,
-      code_length: code.length,
-      verifier_length: code_verifier.length,
-      client_id_set: !!CLIENT_ID,
-      client_secret_set: !!CLIENT_SECRET
     });
 
     const response = await fetch('https://myanimelist.net/v1/oauth2/token', {
@@ -89,7 +72,6 @@ export default async function handler(req, res) {
     } catch (e) {
       // If response is not JSON, try to get text
       const text = await response.text();
-      console.error('MAL API error (non-JSON):', text);
       return res.status(response.status).json({ 
         error: 'invalid_request',
         error_description: text || 'Unknown error',
@@ -98,24 +80,11 @@ export default async function handler(req, res) {
     }
 
     if (!response.ok) {
-      console.error('MAL API error:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: data.error,
-        error_description: data.error_description,
-        message: data.message,
-        redirect_uri: redirect_uri,
-        has_code: !!code,
-        has_verifier: !!code_verifier,
-        client_id_length: CLIENT_ID?.length
-      });
       return res.status(response.status).json(data);
     }
 
-    console.log('Token exchange successful');
     return res.status(200).json(data);
   } catch (error) {
-    console.error('Token exchange error:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       message: error.message 

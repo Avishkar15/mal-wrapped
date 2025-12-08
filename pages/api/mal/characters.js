@@ -27,8 +27,6 @@ export default async function handler(req, res) {
     }
 
     try {
-      console.log(`Fetching characters for anime ${animeId}...`);
-      
       const fields = [
         'id',
         'first_name',
@@ -51,14 +49,11 @@ export default async function handler(req, res) {
       const data = await response.json();
   
       if (!response.ok) {
-        console.error('MAL API error:', data);
         return res.status(response.status).json(data);
       }
   
-      console.log(`Characters fetched: ${data.data?.length || 0} items`);
       return res.status(200).json(data);
     } catch (error) {
-      console.error('Characters fetch error:', error);
       return res.status(500).json({ 
         error: 'Internal server error',
         message: error.message 

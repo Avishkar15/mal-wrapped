@@ -23,8 +23,6 @@ export default async function handler(req, res) {
     const { offset = 0, limit = 100 } = req.query;
   
     try {
-      console.log(`Fetching manga list (offset: ${offset}, limit: ${limit})...`);
-      
       const fields = [
         'list_status{status,score,start_date,finish_date,num_chapters_read,num_volumes_read,updated_at}',
         'genres{name}',
@@ -49,14 +47,11 @@ export default async function handler(req, res) {
       const data = await response.json();
   
       if (!response.ok) {
-        console.error('MAL API error:', data);
         return res.status(response.status).json(data);
       }
   
-      console.log(`Manga list fetched: ${data.data?.length || 0} items`);
       return res.status(200).json(data);
     } catch (error) {
-      console.error('Manga list fetch error:', error);
       return res.status(500).json({ 
         error: 'Internal server error',
         message: error.message 

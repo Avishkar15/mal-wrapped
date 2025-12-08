@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Download, LogOut, Share2, Github, Youtube, Linkedin, Instagram, ExternalLink, Copy } from 'lucide-react';
 import { motion, useMotionValue } from 'framer-motion';
 
@@ -11,6 +11,16 @@ const MyAnimeListIcon = ({ size = 20, className = '' }) => (
 
 const smoothEase = [0.25, 0.1, 0.25, 1];
 
+// Helper function to get MAL URL for anime/manga
+const getMALUrl = (item) => {
+  if (item?.malId) {
+    return `https://myanimelist.net/anime/${item.malId}`;
+  }
+  if (item?.mangaId) {
+    return `https://myanimelist.net/manga/${item.mangaId}`;
+  }
+  return null;
+};
 
 function generateCodeVerifier(length = 128) {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
@@ -209,7 +219,7 @@ export default function MALWrapped() {
   const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
   const hasManga = stats && mangaList && mangaList.length > 0;
   
-  const slides = stats ? [
+  const slides = useMemo(() => stats ? [
     { id: 'welcome' },
     { id: 'anime_count' },
     ...(hasAnime ? [
@@ -239,17 +249,16 @@ export default function MALWrapped() {
     ...(stats.badges && stats.badges.length > 0 ? [{ id: 'badges' }] : []),
     ...(stats.characterTwin ? [{ id: 'character_twin' }] : []),
     { id: 'finale' },
-  ] : [];
+  ] : [], [stats, hasAnime, hasManga]);
 
-  
-const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, .5) 25%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, .5) 80%, rgba(0, 0, 0, 1) 100%)';
   // Get website URL for watermark
-  const websiteUrl = typeof window !== 'undefined' 
-    ? window.location.origin.replace(/^https?:\/\//, '').toUpperCase()
-    : 'MAL-WRAPPED.VERCEL.APP';
+  const websiteUrl = useMemo(() => {
+    if (typeof window === 'undefined') return 'MAL-WRAPPED.VERCEL.APP';
+    return window.location.origin.replace(/^https?:\/\//, '').toUpperCase();
+  }, []);
 
   // Get slide-specific watermark text
-  function getWatermarkText(slideId) {
+  const getWatermarkText = useCallback((slideId) => {
     if (!slideId) return websiteUrl;
     
     const watermarkMap = {
@@ -281,7 +290,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     };
     
     return watermarkMap[slideId] || websiteUrl;
-  }
+  }, [websiteUrl]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -413,7 +422,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       calculateStats(allAnime, []);
       return allAnime;
     } catch (err) {
-      console.error('Error fetching anime list:', err);
+      // Error fetching anime list
       setError('Failed to load anime list. Please try again.');
       return [];
     }
@@ -463,7 +472,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       // Recalculate with current year selection
       calculateStats(animeToUse, allManga);
     } catch (err) {
-      console.error('Error fetching manga list:', err);
+      // Error fetching manga list
     }
   }
 
@@ -705,10 +714,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
     const mangaDays = Math.floor(mangaHours / 24);
 
     // Manga authors (from filtered manga)
-    // Normalize author names to avoid duplicates from spacing/case variations
-    const normalizeAuthorName = (first, last) => {
-      return `${(first || '').trim()} ${(last || '').trim()}`.trim().replace(/\s+/g, ' ');
-    };
     
     const authorCounts = {};
     const authorIds = {}; // Store author IDs
@@ -1475,7 +1480,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       });
       
       if (!response.ok) {
-        console.error('Failed to fetch characters');
+        // Failed to fetch characters
         return;
       }
       
@@ -1520,7 +1525,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }));
       }
     } catch (err) {
-      console.error('Error fetching character image:', err);
+      // Error fetching character image
     }
   }
 
@@ -1567,7 +1572,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       // Small delay to ensure fonts are fully rendered
       await new Promise(resolve => setTimeout(resolve, 100));
     } catch (err) {
-      console.warn('Font loading check failed, proceeding anyway:', err);
+      // Font loading check failed, proceeding anyway
     }
   }
 
@@ -1680,7 +1685,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }
       });
     } catch (err) {
-      console.error('Error generating PNG:', err);
+      // Error generating PNG
       throw err;
     }
   }
@@ -1702,7 +1707,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      console.error('Download error:', err);
+      // Download error
       alert('Failed to download image. Please try again.');
     }
   }
@@ -1721,7 +1726,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       alert('Image copied to clipboard!');
       setShowShareMenu(false);
     } catch (err) {
-      console.error('Failed to copy image:', err);
+      // Failed to copy image
       alert('Failed to copy image to clipboard. Please try downloading instead.');
     }
   }
@@ -1733,7 +1738,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       setEmailCopied(true);
       setTimeout(() => setEmailCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy email:', err);
+      // Failed to copy email
     }
   }
 
@@ -1774,7 +1779,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
       }
     } catch (error) {
       if (error?.name !== 'AbortError') {
-        console.error('Error sharing image:', error);
+            // Error sharing image
         alert('Failed to share image. Please try again.');
       }
     } finally {
@@ -1892,7 +1897,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
               }
             }
           } catch (error) {
-            console.warn(`Failed to fetch photo for ${authorName}:`, error);
+            // Failed to fetch photo
           }
         }
       }
@@ -2281,31 +2286,10 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         }
       }, [isHovered, maxScroll, animationDuration, x, isMobile]);
 
-      const getMALUrl = (item) => {
-        if (item.malId) {
-          return `https://myanimelist.net/anime/${item.malId}`;
-        }
-        if (item.mangaId) {
-          return `https://myanimelist.net/manga/${item.mangaId}`;
-        }
-        return null;
-      };
-
       if (visibleItems.length === 0) return null;
 
       // Simple mobile carousel - CSS-based, no complex animations
-      // Check if mobile on client side (after initial render)
-      const isMobileClient = typeof window !== 'undefined' && window.innerWidth < 768;
-      if (isMobileClient || isMobile) {
-        const getMALUrlForMobile = (item) => {
-          if (item.malId) {
-            return `https://myanimelist.net/anime/${item.malId}`;
-          }
-          if (item.mangaId) {
-            return `https://myanimelist.net/manga/${item.mangaId}`;
-          }
-          return null;
-        };
+      if (isMobile) {
 
         if (shouldScroll) {
           const scrollDuration = visibleItems.length * 0.8; // Faster: 0.8 seconds per item for mobile
@@ -2334,7 +2318,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 }}
               >
                 {[...visibleItems, ...visibleItems].map((item, idx) => {
-                  const malUrl = getMALUrlForMobile(item);
+                  const malUrl = getMALUrl(item);
                   const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}`;
                   const itemStyle = {
                     width: `${mobileItemWidth}%`,
@@ -2409,7 +2393,7 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
                 }}
               >
                 {visibleItems.map((item, idx) => {
-                  const malUrl = getMALUrlForMobile(item);
+                  const malUrl = getMALUrl(item);
                   const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}`;
                   const itemStyle = {
                     width: shouldCenter ? `${100 / mobileItemsPerView}%` : `${mobileItemWidth}%`,
@@ -2566,15 +2550,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
         return 'grid-cols-3 sm:grid-cols-5';
       };
 
-      const getMALUrl = (item) => {
-        if (item.malId) {
-          return `https://myanimelist.net/anime/${item.malId}`;
-        }
-        if (item.mangaId) {
-          return `https://myanimelist.net/manga/${item.mangaId}`;
-        }
-        return null;
-      };
 
       if (visibleItems.length === 0) return null;
 
@@ -3854,10 +3829,6 @@ const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, r
 
 
       case 'top_author':
-        const normalizeAuthorName = (first, last) => {
-          return `${(first || '').trim()} ${(last || '').trim()}`.trim().replace(/\s+/g, ' ');
-        };
-        
         // Get manga for each top author
         const getAuthorManga = (authorName) => {
           const authorMangaRaw = (mangaListData || []).filter(item => {
