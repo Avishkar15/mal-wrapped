@@ -716,6 +716,10 @@ export default function MALWrapped() {
     const mangaDays = Math.floor(mangaHours / 24);
 
     // Manga authors (from filtered manga)
+    // Normalize author names to avoid duplicates from spacing/case variations
+    const normalizeAuthorName = (first, last) => {
+      return `${(first || '').trim()} ${(last || '').trim()}`.trim().replace(/\s+/g, ' ');
+    };
     
     const authorCounts = {};
     const authorIds = {}; // Store author IDs
@@ -3832,6 +3836,10 @@ export default function MALWrapped() {
 
       case 'top_author':
         // Get manga for each top author
+        const normalizeAuthorName = (first, last) => {
+          return `${(first || '').trim()} ${(last || '').trim()}`.trim().replace(/\s+/g, ' ');
+        };
+        
         const getAuthorManga = (authorName) => {
           const authorMangaRaw = (mangaListData || []).filter(item => {
             if (stats.selectedYear !== 'all') {
