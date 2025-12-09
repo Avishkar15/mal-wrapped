@@ -1517,7 +1517,8 @@ export default function MALWrapped() {
           footer: `Average score: ${averageRating.toFixed(1)} — You trust your own judgment over popular opinions`,
           image: '/rating-styles/contrarian.webp'
         };
-      } else if (midRatings > 0.5 && Math.abs(averageRating - 7.0) < 1.0) {
+      } else if (midRatings >= 0.65 && Math.abs(averageRating - 7.0) < 0.5 && lowRatings < 0.15 && highRatings < 0.25) {
+        // Very strict: 65%+ mid ratings, average between 6.5-7.5, low extremes < 15%, high extremes < 25%
         ratingStyle = {
           type: 'middle_ground',
           name: 'The Balanced Reviewer',
@@ -2140,7 +2141,7 @@ export default function MALWrapped() {
         'milestone': 'yellow',
         'badges': 'purple',
         'character_twin': 'pink',
-        'rating_style': 'orange'
+        'rating_style': 'green'
       };
       return colorMap[slideId] || 'black';
     };
