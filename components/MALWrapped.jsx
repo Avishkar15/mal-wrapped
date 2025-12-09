@@ -1150,20 +1150,41 @@ export default function MALWrapped() {
       }
     }
 
-    // 6. Anime Age - Calculate average release year based on watched anime
-    const animeReleaseYears = [];
+    // 6. Anime Age - Calculate average release year based on watched anime and manga
+    const releaseYears = [];
+    
+    // Add anime release years
     thisYearAnime.forEach(item => {
       const status = item.list_status?.status;
       // Only count completed or watching anime (not planned)
       if (status === 'completed' || status === 'watching') {
         // Try to get release year from start_season first, then start_date
         if (item.node?.start_season?.year) {
-          animeReleaseYears.push(item.node.start_season.year);
+          releaseYears.push(item.node.start_season.year);
         } else if (item.node?.start_date) {
           try {
             const year = new Date(item.node.start_date).getFullYear();
             if (!isNaN(year) && year > 1900 && year <= new Date().getFullYear()) {
-              animeReleaseYears.push(year);
+              releaseYears.push(year);
+            }
+          } catch (e) {
+            // Invalid date, skip
+          }
+        }
+      }
+    });
+    
+    // Add manga release years
+    filteredManga.forEach(item => {
+      const status = item.list_status?.status;
+      // Only count completed or reading manga (not planned)
+      if (status === 'completed' || status === 'reading') {
+        // Try to get release year from start_date
+        if (item.node?.start_date) {
+          try {
+            const year = new Date(item.node.start_date).getFullYear();
+            if (!isNaN(year) && year > 1900 && year <= new Date().getFullYear()) {
+              releaseYears.push(year);
             }
           } catch (e) {
             // Invalid date, skip
@@ -1174,30 +1195,30 @@ export default function MALWrapped() {
     
     let animeAge = null;
     let animeAgeText = '';
-    if (animeReleaseYears.length > 0) {
+    if (releaseYears.length > 0) {
       const averageYear = Math.round(
-        animeReleaseYears.reduce((sum, year) => sum + year, 0) / animeReleaseYears.length
+        releaseYears.reduce((sum, year) => sum + year, 0) / releaseYears.length
       );
       const currentYear = new Date().getFullYear();
       animeAge = currentYear - averageYear;
       
       // Generate descriptive text based on the era
       if (averageYear >= 2020) {
-        animeAgeText = 'Since I was into anime from the Early 2020s';
+        animeAgeText = 'Since you were into anime and manga from the Early 2020s';
       } else if (averageYear >= 2015) {
-        animeAgeText = 'Since I was into anime from the Mid 2010s';
+        animeAgeText = 'Since you were into anime and manga from the Mid 2010s';
       } else if (averageYear >= 2010) {
-        animeAgeText = 'Since I was into anime from the Early 2010s';
+        animeAgeText = 'Since you were into anime and manga from the Early 2010s';
       } else if (averageYear >= 2005) {
-        animeAgeText = 'Since I was into anime from the Mid 2000s';
+        animeAgeText = 'Since you were into anime and manga from the Mid 2000s';
       } else if (averageYear >= 2000) {
-        animeAgeText = 'Since I was into anime from the Early 2000s';
+        animeAgeText = 'Since you were into anime and manga from the Early 2000s';
       } else if (averageYear >= 1995) {
-        animeAgeText = 'Since I was into anime from the Late 90s';
+        animeAgeText = 'Since you were into anime and manga from the Late 90s';
       } else if (averageYear >= 1990) {
-        animeAgeText = 'Since I was into anime from the Early 90s';
+        animeAgeText = 'Since you were into anime and manga from the Early 90s';
       } else {
-        animeAgeText = `Since I was into anime from ${averageYear}`;
+        animeAgeText = `Since you were into anime and manga from ${averageYear}`;
       }
     }
 
@@ -4466,11 +4487,8 @@ export default function MALWrapped() {
         return (
           <SlideLayout bgColor="green">
             <motion.div className="flex flex-col items-center justify-center min-h-[60vh] relative z-10" {...fadeSlideUp} data-framer-motion>
-              <motion.div className="text-center mb-8">
-                <h2 className="body-md font-medium text-white mb-2">
-                  My <span className="bg-yellow-400/20 text-yellow-400 px-2 py-1 rounded-md">Anime</span> Age
-                </h2>
-              </motion.div>
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+Your anime taste has an age...            </motion.h2>
               <motion.div
                 className="text-center"
                 initial={{ opacity: 0, scale: 0.8 }}
