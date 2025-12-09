@@ -250,7 +250,6 @@ export default function MALWrapped() {
     ] : []),
     ...(stats.badges && stats.badges.length > 0 ? [{ id: 'badges' }] : []),
     ...(stats.characterTwin ? [{ id: 'character_twin' }] : []),
-    ...(stats.animeAge ? [{ id: 'anime_age' }] : []),
     { id: 'finale' },
   ] : [], [stats, hasAnime, hasManga]);
 
@@ -289,7 +288,6 @@ export default function MALWrapped() {
       'planned_manga': 'My Planned-to-Read Manga',
       'badges': 'My Badges',
       'character_twin': 'My Anime Twin',
-      'anime_age': 'My Anime Age',
       'finale': 'MAL-WRAPPED.VERCEL.APP'
     };
     
@@ -1150,79 +1148,7 @@ export default function MALWrapped() {
       }
     }
 
-    // 6. Anime Age - Calculate average release year based on watched anime and manga
-    const releaseYears = [];
-    
-    // Add anime release years
-    thisYearAnime.forEach(item => {
-      const status = item.list_status?.status;
-      // Only count completed or watching anime (not planned)
-      if (status === 'completed' || status === 'watching') {
-        // Try to get release year from start_season first, then start_date
-        if (item.node?.start_season?.year) {
-          releaseYears.push(item.node.start_season.year);
-        } else if (item.node?.start_date) {
-          try {
-            const year = new Date(item.node.start_date).getFullYear();
-            if (!isNaN(year) && year > 1900 && year <= new Date().getFullYear()) {
-              releaseYears.push(year);
-            }
-          } catch (e) {
-            // Invalid date, skip
-          }
-        }
-      }
-    });
-    
-    // Add manga release years
-    filteredManga.forEach(item => {
-      const status = item.list_status?.status;
-      // Only count completed or reading manga (not planned)
-      if (status === 'completed' || status === 'reading') {
-        // Try to get release year from start_date
-        if (item.node?.start_date) {
-          try {
-            const year = new Date(item.node.start_date).getFullYear();
-            if (!isNaN(year) && year > 1900 && year <= new Date().getFullYear()) {
-              releaseYears.push(year);
-            }
-          } catch (e) {
-            // Invalid date, skip
-          }
-        }
-      }
-    });
-    
-    let animeAge = null;
-    let animeAgeText = '';
-    if (releaseYears.length > 0) {
-      const averageYear = Math.round(
-        releaseYears.reduce((sum, year) => sum + year, 0) / releaseYears.length
-      );
-      const currentYear = new Date().getFullYear();
-      animeAge = currentYear - averageYear;
-      
-      // Generate descriptive text based on the era
-      if (averageYear >= 2020) {
-        animeAgeText = 'Since you were into anime and manga from the Early 2020s';
-      } else if (averageYear >= 2015) {
-        animeAgeText = 'Since you were into anime and manga from the Mid 2010s';
-      } else if (averageYear >= 2010) {
-        animeAgeText = 'Since you were into anime and manga from the Early 2010s';
-      } else if (averageYear >= 2005) {
-        animeAgeText = 'Since you were into anime and manga from the Mid 2000s';
-      } else if (averageYear >= 2000) {
-        animeAgeText = 'Since you were into anime and manga from the Early 2000s';
-      } else if (averageYear >= 1995) {
-        animeAgeText = 'Since you were into anime and manga from the Late 90s';
-      } else if (averageYear >= 1990) {
-        animeAgeText = 'Since you were into anime and manga from the Early 90s';
-      } else {
-        animeAgeText = `Since you were into anime and manga from ${averageYear}`;
-      }
-    }
-
-    // 7. Character Twin Suggestion - Match user's genres with popular characters
+    // 6. Character Twin Suggestion - Match user's genres with popular characters
     // Male character database with genres and MAL anime IDs
     const maleCharacterDatabase = [
       { name: 'Spike Spiegel', series: 'Cowboy Bebop', malId: 1, genres: ['Sci-Fi', 'Action', 'Drama'] },
@@ -1544,8 +1470,6 @@ export default function MALWrapped() {
       episodeComparison: episodeComparison,
       mangaComparison: mangaComparison,
       totalCompletedAnime: totalCompletedAnime,
-      animeAge: animeAge,
-      animeAgeText: animeAgeText,
     };
     
     setStats(statsData);
@@ -2108,8 +2032,7 @@ export default function MALWrapped() {
         'planned_manga': 'green',
         'milestone': 'yellow',
         'badges': 'purple',
-        'character_twin': 'pink',
-        'anime_age': 'green'
+        'character_twin': 'pink'
       };
       return colorMap[slideId] || 'black';
     };
@@ -4479,40 +4402,6 @@ export default function MALWrapped() {
               return reason;
             })()}
             </motion.h3>
-          </SlideLayout>
-        );
-
-      case 'anime_age':
-        if (!stats.animeAge) return null;
-        return (
-          <SlideLayout bgColor="green">
-            <motion.div className="flex flex-col items-center justify-center min-h-[60vh] relative z-10" {...fadeSlideUp} data-framer-motion>
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-Your anime taste has an age...            </motion.h2>
-              <motion.div
-                className="text-center"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: smoothEase }}
-              >
-                <h1 className="text-8xl sm:text-9xl md:text-[12rem] font-bold text-green-400 drop-shadow-lg" style={{ 
-                  textShadow: '0 0 20px rgba(74, 222, 128, 0.5), 0 0 40px rgba(74, 222, 128, 0.3)',
-                  WebkitTextStroke: '2px rgba(0, 0, 0, 0.3)'
-                }}>
-                  {stats.animeAge}
-                </h1>
-              </motion.div>
-              {stats.animeAgeText && (
-                <motion.p 
-                  className="body-md text-white/80 text-center mt-6 max-w-md"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3, ease: smoothEase }}
-                >
-                  {stats.animeAgeText}
-                </motion.p>
-              )}
-            </motion.div>
           </SlideLayout>
         );
 
