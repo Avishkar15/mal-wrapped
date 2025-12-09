@@ -4473,7 +4473,7 @@ export default function MALWrapped() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
                   >
-                    My {stats.selectedYear !== 'all' ? `${stats.selectedYear} ` : 'All Time'}MyAnimeList Wrapped
+                    {username ? `${username}'s` : 'My'} {stats.selectedYear !== 'all' ? `${stats.selectedYear} ` : 'All Time'} MyAnimeList Wrapped
                   </motion.h2>
               </div>
               </motion.div>
