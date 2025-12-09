@@ -232,7 +232,7 @@ export default function MALWrapped() {
       // { id: 'top_studio' },
       { id: 'seasonal_highlights' },
       { id: 'hidden_gems_anime' },
-      { id: 'didnt_land_anime' },
+      { id: 'binge_day' },
       { id: 'planned_anime' },
       ...(stats.milestones && stats.milestones.length > 0 && stats.thisYearMilestone ? [{ id: 'milestones' }] : []),
     ] : []),
@@ -245,7 +245,7 @@ export default function MALWrapped() {
       { id: 'top_5_manga' },
       { id: 'top_author' },
       { id: 'hidden_gems_manga' },
-      { id: 'didnt_land_manga' },
+      { id: 'longest_manga' },
       { id: 'planned_manga' },
     ] : []),
     ...(stats.badges && stats.badges.length > 0 ? [{ id: 'badges' }] : []),
@@ -274,7 +274,7 @@ export default function MALWrapped() {
       'top_studio': 'My Favorite Studios',
       'seasonal_highlights': 'My Seasonal Highlights',
       'hidden_gems_anime': 'My Hidden Anime Gems',
-      'didnt_land_anime': 'My Least Rated Anime',
+      'binge_day': 'My Most Binge-Watched Day',
       'planned_anime': 'My Planned-to-Watch Anime',
       'milestones': 'My Milestones',
       'anime_to_manga_transition': 'MAL-WRAPPED.VERCEL.APP',
@@ -285,7 +285,7 @@ export default function MALWrapped() {
       'top_5_manga': 'My Top 5 Manga',
       'top_author': 'My Favorite Authors',
       'hidden_gems_manga': 'My Hidden Manga Gems',
-      'didnt_land_manga': 'My Least Rated Manga',
+      'longest_manga': 'My Longest Manga Journey',
       'planned_manga': 'My Planned-to-Read Manga',
       'badges': 'My Badges',
       'character_twin': 'My Anime Twin',
@@ -558,12 +558,56 @@ export default function MALWrapped() {
       .sort((a, b) => b.list_status.score - a.list_status.score)
       .slice(0, 5);
     
-    // Lowest rated shows (completed only, with ratings 6 or below) - deduplicate by title
-    const lowestRated = deduplicateByTitle(
-      completedAnime
-        .filter(item => item.list_status.score > 0 && item.list_status.score <= 6)
-        .sort((a, b) => a.list_status.score - b.list_status.score)
-    ).slice(0, 5);
+    // Most Binge-Watched Day - find the day with most episodes watched
+    const bingeDayData = { date: null, episodes: 0, hours: 0, anime: [] };
+    const dayEpisodeCounts = {};
+    const dayOfWeekCounts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 }; // Sunday = 0, Monday = 1, etc.
+    
+    thisYearAnime.forEach(item => {
+      const updatedAt = item.list_status?.updated_at;
+      if (updatedAt) {
+        try {
+          const date = new Date(updatedAt);
+          if (!isNaN(date.getTime())) {
+            const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
+            const dayOfWeek = date.getDay();
+            const episodes = item.list_status?.num_episodes_watched || 0;
+            
+            if (episodes > 0) {
+              if (!dayEpisodeCounts[dateStr]) {
+                dayEpisodeCounts[dateStr] = { episodes: 0, hours: 0, anime: [] };
+              }
+              dayEpisodeCounts[dateStr].episodes += episodes;
+              dayEpisodeCounts[dateStr].hours += (episodes * 24) / 60; // 24 minutes per episode
+              dayEpisodeCounts[dateStr].anime.push({
+                title: item.node?.title || '',
+                episodes: episodes
+              });
+              
+              dayOfWeekCounts[dayOfWeek] += episodes;
+            }
+          }
+        } catch (e) {
+          // Invalid date, skip
+        }
+      }
+    });
+    
+    // Find the day with most episodes
+    Object.entries(dayEpisodeCounts).forEach(([dateStr, data]) => {
+      if (data.episodes > bingeDayData.episodes) {
+        bingeDayData.date = dateStr;
+        bingeDayData.episodes = data.episodes;
+        bingeDayData.hours = data.hours;
+        bingeDayData.anime = data.anime;
+      }
+    });
+    
+    // Find most watched day of week
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const mostWatchedDayOfWeek = Object.entries(dayOfWeekCounts)
+      .sort((a, b) => b[1] - a[1])[0];
+    const mostWatchedDayName = mostWatchedDayOfWeek ? dayNames[parseInt(mostWatchedDayOfWeek[0])] : null;
     
     // Planned to watch (status: plan_to_watch) - get from original list before filtering
     const plannedAnime = deduplicateByTitle(
@@ -678,12 +722,54 @@ export default function MALWrapped() {
       .sort((a, b) => b.list_status.score - a.list_status.score)
       .slice(0, 5);
     
-    // Lowest rated manga (6 or below)
-    const lowestRatedManga = deduplicateByTitle(
-      completedManga
-        .filter(item => item.list_status.score > 0 && item.list_status.score <= 6)
-        .sort((a, b) => a.list_status.score - b.list_status.score)
-    ).slice(0, 5);
+    // Longest Manga Journey - find manga with most chapters read
+    let longestMangaJourney = null;
+    const mangaChaptersMap = new Map();
+    
+    filteredManga.forEach(item => {
+      const chapters = item.list_status?.num_chapters_read || 0;
+      const title = item.node?.title || '';
+      const mangaId = item.node?.id;
+      
+      if (chapters > 0 && title) {
+        if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < chapters) {
+          const startDate = item.list_status?.start_date;
+          const finishDate = item.list_status?.finish_date;
+          let monthsActive = 0;
+          
+          if (startDate && finishDate) {
+            try {
+              const start = new Date(startDate);
+              const finish = new Date(finishDate);
+              if (!isNaN(start.getTime()) && !isNaN(finish.getTime())) {
+                const months = (finish.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30);
+                monthsActive = Math.max(1, Math.ceil(months));
+              }
+            } catch (e) {
+              // Invalid date, skip
+            }
+          }
+          
+          mangaChaptersMap.set(title, {
+            title,
+            chapters,
+            mangaId,
+            coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
+            monthsActive
+          });
+        }
+      }
+    });
+    
+    // Find the manga with most chapters
+    if (mangaChaptersMap.size > 0) {
+      const longestManga = Array.from(mangaChaptersMap.values())
+        .sort((a, b) => b.chapters - a.chapters)[0];
+      
+      if (longestManga) {
+        longestMangaJourney = longestManga;
+      }
+    }
     
     // Hidden gems manga (high community score, low popularity) - same as anime implementation
     const hiddenGemsMangaRaw = completedManga
@@ -1417,6 +1503,57 @@ export default function MALWrapped() {
       sum + (item.list_status?.num_chapters_read || 0), 0
     );
     
+    // Calculate reading pace (chapters per week)
+    // Average MAL user reads ~18 chapters per week
+    const averageChaptersPerWeek = 18;
+    let chaptersPerWeek = 0;
+    let readingPaceComparison = null;
+    
+    if (currentYear === 'all') {
+      // For "all time", estimate based on years of activity
+      // Find earliest start date from manga list
+      let earliestDate = null;
+      (manga || []).forEach(item => {
+        const startDate = item.list_status?.start_date;
+        if (startDate) {
+          try {
+            const date = new Date(startDate);
+            if (!isNaN(date.getTime()) && (!earliestDate || date < earliestDate)) {
+              earliestDate = date;
+            }
+          } catch (e) {
+            // Invalid date, skip
+          }
+        }
+      });
+      
+      if (earliestDate) {
+        const now = new Date();
+        const yearsActive = Math.max(1, (now - earliestDate) / (1000 * 60 * 60 * 24 * 365));
+        const totalWeeks = yearsActive * 52;
+        if (totalWeeks > 0) {
+          chaptersPerWeek = allTimeChapters / totalWeeks;
+        }
+      } else {
+        // Fallback: assume 2 years of activity
+        chaptersPerWeek = allTimeChapters / (2 * 52);
+      }
+    } else {
+      // For specific year: 52 weeks
+      const weeksInYear = 52;
+      chaptersPerWeek = totalChapters / weeksInYear;
+    }
+    
+    if (chaptersPerWeek > 0) {
+      const pacePercentage = Math.round((chaptersPerWeek / averageChaptersPerWeek) * 100);
+      readingPaceComparison = {
+        userChaptersPerWeek: Math.round(chaptersPerWeek * 10) / 10, // Round to 1 decimal
+        averageChaptersPerWeek: averageChaptersPerWeek,
+        percentage: pacePercentage,
+        isAboveAverage: chaptersPerWeek > averageChaptersPerWeek
+      };
+    }
+    
     const mangaComparison = {
       userChapters: totalChapters,
       averageChapters: averageChaptersPerYear,
@@ -1425,7 +1562,8 @@ export default function MALWrapped() {
       allTimeChapters: allTimeChapters,
       averageAllTime: averageChaptersAllTime,
       allTimePercentage: Math.round((allTimeChapters / averageChaptersAllTime) * 100),
-      isAboveAverageAllTime: allTimeChapters > averageChaptersAllTime
+      isAboveAverageAllTime: allTimeChapters > averageChaptersAllTime,
+      readingPace: readingPaceComparison
     };
 
     // Removed obscure studios calculation
@@ -1473,59 +1611,111 @@ export default function MALWrapped() {
                                allTimeManga.filter(item => item.list_status?.status === 'completed').length;
       const allTimeCompletionRate = allTimeTotal > 0 ? allTimeCompleted / allTimeTotal : 0;
       
-      // Determine archetype (check in priority order)
-      if (averageRating >= 8.0 && lowRatings < 0.1) {
-        ratingStyle = {
-          type: 'generous_soul',
-          name: 'The Generous Soul',
-          footer: `Average score: ${averageRating.toFixed(1)} — You see the best in everything`,
-          image: '/rating-styles/generous-soul.webp'
-        };
-      } else if (averageRating < 6.5 && lowRatings > 0.3) {
-        ratingStyle = {
-          type: 'harsh_critic',
-          name: 'The Harsh Critic',
-          footer: `Average score: ${averageRating.toFixed(1)} — High standards, no compromises`,
-          image: '/rating-styles/harsh-critic.webp'
-        };
-      } else if ((highRatings > 0.4 || veryHighRatings > 0.3) || (veryLowRatings > 0.2 && lowRatings > 0.4)) {
-        ratingStyle = {
-          type: 'perfectionist',
-          name: 'The Perfectionist',
-          footer: `Average score: ${averageRating.toFixed(1)} — It's either masterpiece or miss. No in-between`,
-          image: '/rating-styles/perfectionist.webp'
-        };
-      } else if (completionRate >= 0.95 && allTimeCompletionRate >= 0.90 && totalItems >= 20) {
-        // Very strict: 95%+ completion rate this year, 90%+ all-time, and at least 20 items
-        ratingStyle = {
-          type: 'completionist',
-          name: 'The Completionist',
-          footer: `Average score: ${averageRating.toFixed(1)} — You finish everything, even the rough ones`,
-          image: '/rating-styles/completionist.webp'
-        };
-      } else if (closeMatches > 0.6) {
-        ratingStyle = {
-          type: 'hype_rider',
-          name: 'The Hype Rider',
-          footer: `Average score: ${averageRating.toFixed(1)} — Your taste lines up with the community, and that's perfectly fine`,
-          image: '/rating-styles/hype-rider.webp'
-        };
-      } else if (largeDifferences > 0.4) {
-        ratingStyle = {
-          type: 'contrarian',
-          name: 'The Contrarian',
-          footer: `Average score: ${averageRating.toFixed(1)} — You trust your own judgment over popular opinions`,
-          image: '/rating-styles/contrarian.webp'
-        };
-      } else if (midRatings >= 0.65 && Math.abs(averageRating - 7.0) < 0.5 && lowRatings < 0.15 && highRatings < 0.25) {
-        // Very strict: 65%+ mid ratings, average between 6.5-7.5, low extremes < 15%, high extremes < 25%
-        ratingStyle = {
-          type: 'middle_ground',
-          name: 'The Balanced Reviewer',
-          footer: `Average score: ${averageRating.toFixed(1)} — Fair and measured in every rating you give`,
-          image: '/rating-styles/balanced-reviewer.webp'
-        };
+      // Determine archetype using a scoring system to ensure all are achievable
+      // Score each archetype and pick the highest scoring one
+      const archetypeScores = {};
+      
+      // The Generous Soul: High average, few low ratings
+      if (averageRating >= 7.5 && lowRatings < 0.15) {
+        archetypeScores.generous_soul = (averageRating - 7.0) * 10 + (0.15 - lowRatings) * 20;
+      }
+      
+      // The Harsh Critic: Low average, many low ratings
+      if (averageRating < 7.0 && lowRatings > 0.25) {
+        archetypeScores.harsh_critic = (7.0 - averageRating) * 10 + (lowRatings - 0.25) * 20;
+      }
+      
+      // The Perfectionist: Polarized ratings (mostly highs OR mostly lows, or extreme polarization)
+      const polarizationScore = Math.max(veryHighRatings, veryLowRatings) + Math.abs(highRatings - lowRatings);
+      if (polarizationScore > 0.5 || (veryHighRatings > 0.25) || (veryLowRatings > 0.15 && lowRatings > 0.35)) {
+        archetypeScores.perfectionist = polarizationScore * 30;
+      }
+      
+      // The Completionist: Very high completion rate
+      if (completionRate >= 0.90 && allTimeCompletionRate >= 0.85 && totalItems >= 15) {
+        archetypeScores.completionist = (completionRate - 0.85) * 50 + (allTimeCompletionRate - 0.80) * 30;
+      }
+      
+      // The Hype Rider: Ratings align with community
+      if (closeMatches > 0.5) {
+        archetypeScores.hype_rider = (closeMatches - 0.5) * 40;
+      }
+      
+      // The Contrarian: Ratings differ from community
+      if (largeDifferences > 0.3) {
+        archetypeScores.contrarian = (largeDifferences - 0.3) * 40;
+      }
+      
+      // The Balanced Reviewer: Most ratings in middle range, balanced distribution
+      if (midRatings >= 0.55 && Math.abs(averageRating - 7.0) < 0.8 && lowRatings < 0.20 && highRatings < 0.30) {
+        archetypeScores.middle_ground = (midRatings - 0.50) * 30 + (0.8 - Math.abs(averageRating - 7.0)) * 10;
+      }
+      
+      // Find the highest scoring archetype
+      const maxScore = Math.max(...Object.values(archetypeScores), 0);
+      const topArchetype = Object.keys(archetypeScores).find(key => archetypeScores[key] === maxScore);
+      
+      if (topArchetype) {
+        switch (topArchetype) {
+          case 'generous_soul':
+            ratingStyle = {
+              type: 'generous_soul',
+              name: 'The Generous Soul',
+              footer: `Average score: ${averageRating.toFixed(1)} — You see the best in everything`,
+              image: '/rating-styles/generous-soul.webp'
+            };
+            break;
+          case 'harsh_critic':
+            ratingStyle = {
+              type: 'harsh_critic',
+              name: 'The Harsh Critic',
+              footer: `Average score: ${averageRating.toFixed(1)} — High standards, no compromises`,
+              image: '/rating-styles/harsh-critic.webp'
+            };
+            break;
+          case 'perfectionist':
+            ratingStyle = {
+              type: 'perfectionist',
+              name: 'The Perfectionist',
+              footer: `Average score: ${averageRating.toFixed(1)} — It's either masterpiece or miss. No in-between`,
+              image: '/rating-styles/perfectionist.webp'
+            };
+            break;
+          case 'completionist':
+            ratingStyle = {
+              type: 'completionist',
+              name: 'The Completionist',
+              footer: `Average score: ${averageRating.toFixed(1)} — You finish everything, even the rough ones`,
+              image: '/rating-styles/completionist.webp'
+            };
+            break;
+          case 'hype_rider':
+            ratingStyle = {
+              type: 'hype_rider',
+              name: 'The Hype Rider',
+              footer: `Average score: ${averageRating.toFixed(1)} — Your taste lines up with the community, and that's perfectly fine`,
+              image: '/rating-styles/hype-rider.webp'
+            };
+            break;
+          case 'contrarian':
+            ratingStyle = {
+              type: 'contrarian',
+              name: 'The Contrarian',
+              footer: `Average score: ${averageRating.toFixed(1)} — You trust your own judgment over popular opinions`,
+              image: '/rating-styles/contrarian.webp'
+            };
+            break;
+          case 'middle_ground':
+            ratingStyle = {
+              type: 'middle_ground',
+              name: 'The Balanced Reviewer',
+              footer: `Average score: ${averageRating.toFixed(1)} — Fair and measured in every rating you give`,
+              image: '/rating-styles/balanced-reviewer.webp'
+            };
+            break;
+        }
       } else {
+        // Wild Card: Only if no other archetype scores high enough
         ratingStyle = {
           type: 'wild_card',
           name: 'The Wild Card',
@@ -1551,9 +1741,10 @@ export default function MALWrapped() {
       topAuthors: topAuthors.length > 0 ? topAuthors : [],
       seasonalHighlights: seasonalHighlights,
       selectedYear: currentYear,
-      lowestRatedAnime: lowestRated.length > 0 ? lowestRated : [],
+      bingeDay: bingeDayData.date ? bingeDayData : null,
+      mostWatchedDayOfWeek: mostWatchedDayName,
       plannedAnime: plannedAnime.length > 0 ? plannedAnime : [],
-      lowestRatedManga: lowestRatedManga.length > 0 ? lowestRatedManga : [],
+      longestMangaJourney: longestMangaJourney,
       plannedManga: plannedManga.length > 0 ? plannedManga : [],
       totalChapters: totalChapters,
       totalVolumes: totalVolumes,
@@ -2128,7 +2319,7 @@ export default function MALWrapped() {
         'top_studio': 'red',
         'seasonal_anime': 'pink',
         'hidden_gems_anime': 'blue',
-        'didnt_land_anime': 'red',
+        'binge_day': 'purple',
         'planned_anime': 'green',
         'anime_to_manga_transition': 'black',
         'manga_count': 'yellow',
@@ -2136,7 +2327,7 @@ export default function MALWrapped() {
         'top_manga_genre': 'yellow',
         'top_author': 'pink',
         'hidden_gems_manga': 'blue',
-        'didnt_land_manga': 'red',
+        'longest_manga': 'blue',
         'planned_manga': 'green',
         'milestone': 'yellow',
         'badges': 'purple',
@@ -3409,30 +3600,44 @@ export default function MALWrapped() {
           </SlideLayout>
         );
 
-      case 'didnt_land_anime':
-        const didntLand = stats.lowestRatedAnime.slice(0, 5).map(item => ({
-          title: item.node.title,
-          coverImage: item.node.main_picture?.large || item.node.main_picture?.medium || '',
-          userRating: item.list_status.score,
-          malId: item.node.id
-        }));
+      case 'binge_day':
+        if (!stats.bingeDay || !stats.bingeDay.date) return null;
+        
+        const bingeDate = new Date(stats.bingeDay.date);
+        const formattedDate = bingeDate.toLocaleDateString('en-US', { 
+          month: 'long', 
+          day: 'numeric', 
+          year: 'numeric' 
+        });
+        const topAnimeFromBinge = stats.bingeDay.anime
+          .sort((a, b) => b.episodes - a.episodes)[0];
+        
         return (
-          <SlideLayout  bgColor="red">
-            {didntLand.length > 0 && (
-              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              But some just didn't click
-              </motion.h2>
+          <SlideLayout bgColor="purple">
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              Your longest watch marathon
+            </motion.h2>
+            <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
+              <p className="heading-lg text-white font-semibold text-center mb-2">
+                {formattedDate}
+              </p>
+              <p className="body-md text-white/80 text-center mb-4">
+                {stats.bingeDay.episodes} episodes / {stats.bingeDay.hours.toFixed(1)} hours
+              </p>
+              {topAnimeFromBinge && (
+                <p className="body-sm text-white/70 text-center text-container italic">
+                  "{topAnimeFromBinge.title}" — You couldn't stop
+                </p>
+              )}
+            </motion.div>
+            {stats.mostWatchedDayOfWeek && (
+              <motion.p className="body-sm text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+                Most of your watching happens on {stats.mostWatchedDayOfWeek}s
+              </motion.p>
             )}
-            {didntLand.length > 0 ? (
-              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <GridImages items={didntLand} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Better luck next season!
+            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              That's what we call commitment
             </motion.h3>
-              </motion.div>
-            ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Nothing rated low, because nothing was rated at all</motion.h3>
-            )}
-            
           </SlideLayout>
         );
 
@@ -3601,6 +3806,23 @@ export default function MALWrapped() {
                     <span className="text-white font-semibold">{mangaDisplayPercentage}%</span>
                     {mangaComparisonCopy.suffix}
                   </p>
+                </div>
+              )}
+              {mangaComparison?.readingPace && (
+                <div className="text-center mt-6 w-full">
+                  <p className="body-sm text-white/70 font-regular mb-2">Your reading pace</p>
+                  <p className="number-md text-white font-semibold">
+                    {mangaComparison.readingPace.userChaptersPerWeek.toFixed(1)} chapters/week
+                  </p>
+                  {mangaComparison.readingPace.percentage > 0 && (
+                    <p className="body-sm text-white/70 font-regular mt-2 text-container">
+                      {mangaComparison.readingPace.isAboveAverage ? "That's " : "That's only "}
+                      <span className="text-white font-semibold">{mangaComparison.readingPace.percentage}%</span>
+                      {mangaComparison.readingPace.isAboveAverage 
+                        ? " of the average MAL reader's pace. You're a speed reader!" 
+                        : " of the average MAL reader's pace. Take your time and enjoy the journey!"}
+                    </p>
+                  )}
                 </div>
               )}
             </motion.div>
@@ -4265,32 +4487,47 @@ export default function MALWrapped() {
           </SlideLayout>
         );
 
-      case 'didnt_land_manga':
-        const mangaDidntLand = stats.lowestRatedManga.slice(0, 5).map(item => ({
-          title: item.node.title,
-          coverImage: item.node.main_picture?.large || item.node.main_picture?.medium || '',
-          userRating: item.list_status.score,
-          mangaId: item.node.id
-        }));
+      case 'longest_manga':
+        if (!stats.longestMangaJourney) return null;
+        
+        const journey = stats.longestMangaJourney;
+        const chaptersText = journey.chapters >= 1000 
+          ? `${Math.floor(journey.chapters / 1000)}+ chapters` 
+          : `${journey.chapters}+ chapters`;
+        const timeText = journey.monthsActive >= 12
+          ? `${Math.floor(journey.monthsActive / 12)} ${Math.floor(journey.monthsActive / 12) === 1 ? 'year' : 'years'}`
+          : `${journey.monthsActive} ${journey.monthsActive === 1 ? 'month' : 'months'}`;
+        
         return (
-          <SlideLayout  bgColor="red">
-          {mangaDidntLand.length > 0 && (
+          <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            But some didn't stick the landing
-              </motion.h2>
-          )}
-            {mangaDidntLand.length > 0 ? (
-              <motion.div {...fadeSlideUp} data-framer-motion>
-                <GridImages items={mangaDidntLand} maxItems={3} />
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                Even legends have their misses
+              Your longest commitment
+            </motion.h2>
+            <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
+              {journey.coverImage && (
+                <motion.img
+                  src={journey.coverImage}
+                  alt={journey.title}
+                  className="w-32 h-48 object-cover rounded-xl mb-4"
+                  crossOrigin="anonymous"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              )}
+              <p className="heading-lg text-white font-semibold text-center mb-2">
+                {journey.title}
+              </p>
+              <p className="number-md text-white font-medium text-center mb-2">
+                {chaptersText}
+              </p>
+              <p className="body-sm text-white/70 text-center text-container">
+                You've been on this journey for {timeText}
+              </p>
+            </motion.div>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              That's dedication at its finest
             </motion.h3>
-              </motion.div>
-            ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                Nothing rated low, rather nothing rated at all
-            </motion.h3>
-            )}
           </SlideLayout>
         );
 
