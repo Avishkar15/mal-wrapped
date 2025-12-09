@@ -250,6 +250,7 @@ export default function MALWrapped() {
     ] : []),
     ...(stats.badges && stats.badges.length > 0 ? [{ id: 'badges' }] : []),
     ...(stats.characterTwin ? [{ id: 'character_twin' }] : []),
+    ...(stats.ratingStyle ? [{ id: 'rating_style' }] : []),
     { id: 'finale' },
   ] : [], [stats, hasAnime, hasManga]);
 
@@ -288,6 +289,7 @@ export default function MALWrapped() {
       'planned_manga': 'My Planned-to-Read Manga',
       'badges': 'My Badges',
       'character_twin': 'My Anime Twin',
+      'rating_style': 'My Rating Style',
       'finale': 'MAL-WRAPPED.VERCEL.APP'
     };
     
@@ -1428,6 +1430,101 @@ export default function MALWrapped() {
 
     // Removed obscure studios calculation
 
+    // 7. Rating Style Archetype
+    let ratingStyle = null;
+    const allRatedItems = [
+      ...ratedAnime.map(item => ({ score: item.list_status.score, malScore: item.node?.mean })),
+      ...ratedManga.map(item => ({ score: item.list_status.score, malScore: item.node?.mean }))
+    ].filter(item => item.score > 0 && item.malScore !== undefined && item.malScore > 0);
+
+    if (allRatedItems.length >= 10) {
+      const scores = allRatedItems.map(item => item.score);
+      const averageRating = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+      
+      // Rating distribution
+      const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 };
+      scores.forEach(s => {
+        const rounded = Math.round(s);
+        if (rounded >= 1 && rounded <= 10) ratingCounts[rounded]++;
+      });
+      
+      const lowRatings = (ratingCounts[1] + ratingCounts[2] + ratingCounts[3] + ratingCounts[4] + ratingCounts[5]) / scores.length;
+      const midRatings = (ratingCounts[6] + ratingCounts[7] + ratingCounts[8]) / scores.length;
+      const highRatings = (ratingCounts[9] + ratingCounts[10]) / scores.length;
+      const veryHighRatings = ratingCounts[10] / scores.length;
+      const veryLowRatings = (ratingCounts[1] + ratingCounts[2] + ratingCounts[3]) / scores.length;
+      
+      // Compare with MAL community scores
+      const malDifferences = allRatedItems.map(item => Math.abs(item.score - item.malScore));
+      const avgMalDifference = malDifferences.reduce((sum, d) => sum + d, 0) / malDifferences.length;
+      const largeDifferences = malDifferences.filter(d => d >= 2).length / malDifferences.length;
+      const closeMatches = malDifferences.filter(d => d <= 0.5).length / malDifferences.length;
+      
+      // Completion rate
+      const totalItems = thisYearAnime.length + filteredManga.length;
+      const completedItems = completedAnime.length + completedManga.length;
+      const completionRate = totalItems > 0 ? completedItems / totalItems : 0;
+      
+      // Determine archetype (check in priority order)
+      if (averageRating >= 8.0 && lowRatings < 0.1) {
+        ratingStyle = {
+          type: 'generous_soul',
+          name: 'The Generous Soul',
+          footer: `Average score: ${averageRating.toFixed(1)} — You see the best in everything`,
+          image: '/rating-styles/generous-soul.webp'
+        };
+      } else if (averageRating < 6.5 && lowRatings > 0.3) {
+        ratingStyle = {
+          type: 'harsh_critic',
+          name: 'The Harsh Critic',
+          footer: `Average score: ${averageRating.toFixed(1)} — High standards, no compromises`,
+          image: '/rating-styles/harsh-critic.webp'
+        };
+      } else if ((highRatings > 0.4 || veryHighRatings > 0.3) || (veryLowRatings > 0.2 && lowRatings > 0.4)) {
+        ratingStyle = {
+          type: 'perfectionist',
+          name: 'The Perfectionist',
+          footer: `It's either masterpiece or miss — no in-between`,
+          image: '/rating-styles/perfectionist.webp'
+        };
+      } else if (completionRate >= 0.8) {
+        ratingStyle = {
+          type: 'completionist',
+          name: 'The Completionist',
+          footer: `You finish everything, even the rough ones`,
+          image: '/rating-styles/completionist.webp'
+        };
+      } else if (closeMatches > 0.6) {
+        ratingStyle = {
+          type: 'hype_rider',
+          name: 'The Hype Rider',
+          footer: `If everyone loves it, so do you`,
+          image: '/rating-styles/hype-rider.webp'
+        };
+      } else if (largeDifferences > 0.4) {
+        ratingStyle = {
+          type: 'contrarian',
+          name: 'The Contrarian',
+          footer: `You march to your own beat`,
+          image: '/rating-styles/contrarian.webp'
+        };
+      } else if (midRatings > 0.5 && Math.abs(averageRating - 7.0) < 1.0) {
+        ratingStyle = {
+          type: 'middle_ground',
+          name: 'The Balanced Reviewer',
+          footer: `Average score: ${averageRating.toFixed(1)} — Fair and measured`,
+          image: '/rating-styles/balanced-reviewer.webp'
+        };
+      } else {
+        ratingStyle = {
+          type: 'wild_card',
+          name: 'The Wild Card',
+          footer: `Unpredictable and impossible to pin down`,
+          image: '/rating-styles/wild-card.webp'
+        };
+      }
+    }
+
     const statsData = {
       thisYearAnime: thisYearAnime.length > 0 ? thisYearAnime : [],
       totalAnime: thisYearAnime.length,
@@ -1470,6 +1567,7 @@ export default function MALWrapped() {
       episodeComparison: episodeComparison,
       mangaComparison: mangaComparison,
       totalCompletedAnime: totalCompletedAnime,
+      ratingStyle: ratingStyle,
     };
     
     setStats(statsData);
@@ -2032,7 +2130,8 @@ export default function MALWrapped() {
         'planned_manga': 'green',
         'milestone': 'yellow',
         'badges': 'purple',
-        'character_twin': 'pink'
+        'character_twin': 'pink',
+        'rating_style': 'orange'
       };
       return colorMap[slideId] || 'black';
     };
@@ -4401,6 +4500,40 @@ export default function MALWrapped() {
               // Fallback to plain text if parsing fails
               return reason;
             })()}
+            </motion.h3>
+          </SlideLayout>
+        );
+
+      case 'rating_style':
+        if (!stats.ratingStyle) return null;
+        return (
+          <SlideLayout bgColor="orange">
+            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              You rate like...
+            </motion.h2>
+            <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
+              <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center flex-shrink-0 mb-6">
+                <motion.div
+                  className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
+                  {...fadeSlideUp}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <img
+                    src={stats.ratingStyle.image}
+                    alt={stats.ratingStyle.name}
+                    className="w-full h-full object-cover"
+                    crossOrigin="anonymous"
+                    onError={(e) => {
+                      e.target.src = '/Mascot.webp';
+                    }}
+                  />
+                </motion.div>
+              </div>
+              <p className="heading-lg text-white font-semibold text-center">{stats.ratingStyle.name}</p>
+            </motion.div>
+            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+              {stats.ratingStyle.footer}
             </motion.h3>
           </SlideLayout>
         );
