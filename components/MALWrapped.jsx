@@ -541,52 +541,6 @@ export default function MALWrapped() {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    // Calculate demographic distribution (Shounen, Seinen, Shoujo, Josei)
-    const demographicCounts = { Shounen: 0, Seinen: 0, Shoujo: 0, Josei: 0 };
-    const normalizeDemographic = (name) => {
-      if (!name) return null;
-      const normalized = name.toLowerCase().trim();
-      if (normalized === 'shounen' || normalized === 'shonen') return 'Shounen';
-      if (normalized === 'seinen') return 'Seinen';
-      if (normalized === 'shoujo' || normalized === 'shojo') return 'Shoujo';
-      if (normalized === 'josei') return 'Josei';
-      return null;
-    };
-    
-    // Count demographics from anime
-    thisYearAnime.forEach(item => {
-      item.node?.genres?.forEach(genre => {
-        const demo = normalizeDemographic(genre.name);
-        if (demo) demographicCounts[demo]++;
-      });
-    });
-    
-    // Count demographics from manga
-    filteredManga.forEach(item => {
-      item.node?.genres?.forEach(genre => {
-        const demo = normalizeDemographic(genre.name);
-        if (demo) demographicCounts[demo]++;
-      });
-    });
-    
-    const totalDemographicItems = Object.values(demographicCounts).reduce((sum, count) => sum + count, 0);
-    const demographicDistribution = Object.entries(demographicCounts)
-      .map(([name, count]) => ({
-        name,
-        count,
-        percentage: totalDemographicItems > 0 ? Math.round((count / totalDemographicItems) * 100) : 0
-      }))
-      .filter(demo => demo.count > 0)
-      .sort((a, b) => b.count - a.count);
-    
-    // Character images for each demographic
-    const demographicCharacters = {
-      'Shounen': '/demographics/shounen.webp',
-      'Seinen': '/demographics/seinen.webp',
-      'Shoujo': '/demographics/shoujo.webp',
-      'Josei': '/demographics/josei.webp'
-    };
-
     // Calculate studios (from filtered anime)
     const studioCounts = {};
     thisYearAnime.forEach(item => {
@@ -700,6 +654,44 @@ export default function MALWrapped() {
     const filteredManga = filterByYear(manga).filter(item => 
       item.list_status?.status !== 'plan_to_read'
     );
+
+    // Calculate demographic distribution (Shounen, Seinen, Shoujo, Josei)
+    const demographicCounts = { Shounen: 0, Seinen: 0, Shoujo: 0, Josei: 0 };
+    const normalizeDemographic = (name) => {
+      if (!name) return null;
+      const normalized = name.toLowerCase().trim();
+      if (normalized === 'shounen' || normalized === 'shonen') return 'Shounen';
+      if (normalized === 'seinen') return 'Seinen';
+      if (normalized === 'shoujo' || normalized === 'shojo') return 'Shoujo';
+      if (normalized === 'josei') return 'Josei';
+      return null;
+    };
+    
+    // Count demographics from anime
+    thisYearAnime.forEach(item => {
+      item.node?.genres?.forEach(genre => {
+        const demo = normalizeDemographic(genre.name);
+        if (demo) demographicCounts[demo]++;
+      });
+    });
+    
+    // Count demographics from manga
+    filteredManga.forEach(item => {
+      item.node?.genres?.forEach(genre => {
+        const demo = normalizeDemographic(genre.name);
+        if (demo) demographicCounts[demo]++;
+      });
+    });
+    
+    const totalDemographicItems = Object.values(demographicCounts).reduce((sum, count) => sum + count, 0);
+    const demographicDistribution = Object.entries(demographicCounts)
+      .map(([name, count]) => ({
+        name,
+        count,
+        percentage: totalDemographicItems > 0 ? Math.round((count / totalDemographicItems) * 100) : 0
+      }))
+      .filter(demo => demo.count > 0)
+      .sort((a, b) => b.count - a.count);
 
     // Get manga with ratings (completed or reading)
     const ratedManga = filteredManga.filter(item => {
