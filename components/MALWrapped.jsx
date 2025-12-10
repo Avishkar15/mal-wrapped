@@ -3287,10 +3287,11 @@ export default function MALWrapped() {
                         }}
                         transition={{
                           scale: useFlexLayout ? {
-                            duration: 1.2,
-                            ease: smoothEase
+                            duration: 0,
+                            ease: "linear"
                           } : phase1Complete ? {
                             duration: 3.5,
+                            delay: idx * 0.3,
                             times: isTop ? [0, 0.25, 0.5, 0.75, 1] : [0, 0.25, 0.5, 0.75, 1],
                             ease: "easeInOut",
                             repeat: Infinity,
@@ -3338,8 +3339,8 @@ export default function MALWrapped() {
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ 
                                 delay: isTop 
-                                  ? 5.2 
-                                  : 5.2 + (allDemographics.filter(d => d.name !== topDemographic.name).findIndex(d => d.name === demo.name) * 0.1), 
+                                  ? 4 
+                                  : 4 + (allDemographics.filter(d => d.name !== topDemographic.name).findIndex(d => d.name === demo.name) * 0.1), 
                                 duration: 0.5 
                               }}
                             >
@@ -3351,8 +3352,8 @@ export default function MALWrapped() {
                               animate={{ opacity: showPercentages ? 1 : 0, y: 0 }}
                               transition={{ 
                                 delay: isTop 
-                                  ? 5.2 
-                                  : 5.2 + (allDemographics.filter(d => d.name !== topDemographic.name).findIndex(d => d.name === demo.name) * 0.1), 
+                                  ? 4 
+                                  : 4 + (allDemographics.filter(d => d.name !== topDemographic.name).findIndex(d => d.name === demo.name) * 0.1), 
                                 duration: 0.5 
                               }}
                             >
