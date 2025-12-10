@@ -566,7 +566,7 @@ export default function MALWrapped() {
     // Planned to watch (status: plan_to_watch) - get from original list before filtering
     const plannedAnime = deduplicateByTitle(
       filterByYear(anime).filter(item => item.list_status?.status === 'plan_to_watch')
-    ).slice(0, 5);
+    );
 
     // Hidden gems (high community score, low popularity) - combine with rarest for merged slide
     const hiddenGemsRaw = completedAnime
@@ -725,27 +725,43 @@ export default function MALWrapped() {
       .sort((a, b) => b.list_status.score - a.list_status.score)
       .slice(0, 5);
     
-    // Longest Manga Journey
+    // Longest Manga Journey - find manga with most chapters read
     let longestMangaJourney = null;
     const mangaChaptersMap = new Map();
     
+    // Helper to estimate reading time (average 5 minutes per chapter)
+    const estimateReadingTime = (chapters) => {
+      const minutes = chapters * 5;
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+      return { minutes, hours, days };
+    };
+    
     if (currentYear === 'all') {
-      // For all time: find manga with most total chapters from all manga (excluding plan_to_read)
+      // For all time: find manga with most chapters read from all manga (excluding plan_to_read)
       const allMangaExcludingPlanned = (manga || []).filter(item => 
         item.list_status?.status !== 'plan_to_read'
       );
       allMangaExcludingPlanned.forEach(item => {
-        const totalChapters = item.node?.num_chapters || 0;
+        const chaptersRead = item.list_status?.num_chapters_read || 0;
         const title = item.node?.title || '';
         const mangaId = item.node?.id;
+        const startDate = item.list_status?.start_date;
+        const finishDate = item.list_status?.finish_date;
+        const status = item.list_status?.status;
         
-        if (totalChapters > 0 && title) {
-          if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < totalChapters) {
+        if (chaptersRead > 0 && title) {
+          if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < chaptersRead) {
+            const readingTime = estimateReadingTime(chaptersRead);
             mangaChaptersMap.set(title, {
               title,
-              chapters: totalChapters,
+              chapters: chaptersRead,
               mangaId,
-              coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || ''
+              coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
+              startDate,
+              finishDate,
+              status,
+              readingTime
             });
           }
         }
@@ -753,24 +769,32 @@ export default function MALWrapped() {
     } else {
       // For specific year: find manga with most chapters read in that year
       filteredManga.forEach(item => {
-        const chapters = item.list_status?.num_chapters_read || 0;
+        const chaptersRead = item.list_status?.num_chapters_read || 0;
         const title = item.node?.title || '';
         const mangaId = item.node?.id;
+        const startDate = item.list_status?.start_date;
+        const finishDate = item.list_status?.finish_date;
+        const status = item.list_status?.status;
         
-        if (chapters > 0 && title) {
-          if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < chapters) {
+        if (chaptersRead > 0 && title) {
+          if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < chaptersRead) {
+            const readingTime = estimateReadingTime(chaptersRead);
             mangaChaptersMap.set(title, {
               title,
-              chapters,
+              chapters: chaptersRead,
               mangaId,
-              coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || ''
+              coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
+              startDate,
+              finishDate,
+              status,
+              readingTime
             });
           }
         }
       });
     }
     
-    // Find the manga with most chapters
+    // Find the manga with most chapters read
     if (mangaChaptersMap.size > 0) {
       const longestManga = Array.from(mangaChaptersMap.values())
         .sort((a, b) => b.chapters - a.chapters)[0];
@@ -802,7 +826,7 @@ export default function MALWrapped() {
     // Planned to read - get from original list before filtering
     const plannedManga = deduplicateByTitle(
       filterByYear(manga).filter(item => item.list_status?.status === 'plan_to_read')
-    ).slice(0, 5);
+    );
     
     // Calculate manga chapters/volumes and time
     const totalChapters = filteredManga.reduce((sum, item) => 
@@ -3222,8 +3246,8 @@ export default function MALWrapped() {
                     const isTop = demo.name === topDemographic.name;
                     const initialPos = quadrantPositions[idx] || { x: 0, y: 0 };
                     // Reduce spacing on mobile
-                    const horizontalSpacing = isMobile ? 80 : 120;
-                    const verticalSpacing = isMobile ? 60 : 100;
+                    const horizontalSpacing = isMobile ? 60 : 120;
+                    const verticalSpacing = isMobile ? 40 : 100;
                     const finalX = isTop 
                       ? 0 
                       : (otherIndices.indexOf(idx) - (otherIndices.length - 1) / 2) * horizontalSpacing;
@@ -3792,7 +3816,7 @@ export default function MALWrapped() {
             )}
             {plannedAnimeItems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <ImageCarousel items={plannedAnimeItems} maxItems={10} showHover={true} showNames={false} />
+                <ImageCarousel items={plannedAnimeItems} maxItems={plannedAnimeItems.length} showHover={true} showNames={false} />
                 <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                   One day you'll get to them… probably
                 </motion.h3>
@@ -4621,11 +4645,35 @@ export default function MALWrapped() {
         const journey = stats.longestMangaJourney;
         const chaptersText = `${journey.chapters.toLocaleString()} chapters`;
         
+        // Format dates
+        const formatDate = (dateString) => {
+          if (!dateString) return null;
+          try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+          } catch (e) {
+            return null;
+          }
+        };
+        
+        const startDateFormatted = formatDate(journey.startDate);
+        const finishDateFormatted = formatDate(journey.finishDate);
+        const isCompleted = journey.status === 'completed';
+        
+        // Format reading time
+        const readingTimeText = journey.readingTime ? (
+          journey.readingTime.days > 0 
+            ? `${journey.readingTime.days} ${journey.readingTime.days === 1 ? 'day' : 'days'}`
+            : journey.readingTime.hours > 0
+            ? `${journey.readingTime.hours} ${journey.readingTime.hours === 1 ? 'hour' : 'hours'}`
+            : `${journey.readingTime.minutes} ${journey.readingTime.minutes === 1 ? 'minute' : 'minutes'}`
+        ) : null;
+        
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               {stats.selectedYear === 'all' ? 'Your longest manga' : 'Your most read manga'}
-              </motion.h2>
+            </motion.h2>
             <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
               {journey.coverImage && (
                 <motion.img
@@ -4641,10 +4689,25 @@ export default function MALWrapped() {
               <p className="heading-lg text-white font-semibold text-center mb-2">
                 {journey.title}
               </p>
-              <p className="body-sm text-white/70 text-center text-container">
+              <p className="body-sm text-white/70 text-center text-container mb-1">
                 {chaptersText}
               </p>
-              </motion.div>
+              {readingTimeText && (
+                <p className="body-sm text-white/70 text-center text-container mb-1">
+                  {readingTimeText} of reading
+                </p>
+              )}
+              {startDateFormatted && (
+                <p className="body-sm text-white/70 text-center text-container mb-1">
+                  Started: {startDateFormatted}
+                </p>
+              )}
+              {isCompleted && finishDateFormatted && (
+                <p className="body-sm text-white/70 text-center text-container">
+                  Completed: {finishDateFormatted}
+                </p>
+              )}
+            </motion.div>
             <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
               That's dedication at its finest
             </motion.h3>
@@ -4666,7 +4729,7 @@ export default function MALWrapped() {
             )}
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
-                <ImageCarousel items={plannedMangaItems} maxItems={10} showHover={true} showNames={false} />
+                <ImageCarousel items={plannedMangaItems} maxItems={plannedMangaItems.length} showHover={true} showNames={false} />
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                   Later just never quite arrived...
             </motion.h3>
