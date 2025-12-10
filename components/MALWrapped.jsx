@@ -3138,25 +3138,13 @@ export default function MALWrapped() {
       case 'demographic': {
         const DemographicContent = () => {
           const [showPercentages, setShowPercentages] = useState(false);
-          const [useFlexLayout, setUseFlexLayout] = useState(false);
-          const [phase1Complete, setPhase1Complete] = useState(false);
           
           useEffect(() => {
-            // Mark phase 1 as complete after initial animation (0.5s)
-            const phase1Timer = setTimeout(() => {
-              setPhase1Complete(true);
-            }, 500);
-            // Switch to flex layout after phase 1 completes (4s delay for longer phase 1)
-            const flexTimer = setTimeout(() => {
-              setUseFlexLayout(true);
-            }, 4000);
-            // Show percentages after reveal completes (4s delay + 1.2s transition = ~5.2s)
+            // Show percentages after reveal completes (1.5s delay + 1.2s transition = ~2.7s)
             const percentageTimer = setTimeout(() => {
               setShowPercentages(true);
-            }, 5200);
+            }, 2700);
             return () => {
-              clearTimeout(phase1Timer);
-              clearTimeout(flexTimer);
               clearTimeout(percentageTimer);
             };
           }, []);
@@ -3234,9 +3222,9 @@ export default function MALWrapped() {
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Your demographic preference
               </motion.h2>
-              <motion.div className="mt-4 flex flex-col items-center relative z-10 min-h-[50vh] justify-center" {...fadeSlideUp} data-framer-motion>
+              <motion.div className="mt-8 flex flex-col items-center relative z-10 min-h-[50vh] justify-center" {...fadeSlideUp} data-framer-motion>
                 <motion.div
-                  className="relative w-full min-h-[50vh] flex items-center justify-center"
+                  className="relative w-full h-80 flex items-center justify-center"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
@@ -3244,22 +3232,10 @@ export default function MALWrapped() {
                   {allDemographics.map((demo, idx) => {
                     const isTop = demo.name === topDemographic.name;
                     const initialPos = quadrantPositions[idx] || { x: 0, y: 0 };
-                    
-                    // Calculate final positions (matching flex layout spacing)
-                    let finalX = 0;
-                    let finalY = 0;
-                    if (isTop) {
-                      finalX = 0;
-                      finalY = -100; // Top center, above
-                    } else {
-                      // Find position in the "others" array
-                      const others = allDemographics.filter(d => d.name !== topDemographic.name);
-                      const otherPosition = others.findIndex(d => d.name === demo.name);
-                      // Spacing: circle width (112px) + gap (32px) = 144px spacing
-                      // Center the row: for 3 items, positions are -144, 0, 144
-                      finalX = (otherPosition - (others.length - 1) / 2) * 144;
-                      finalY = 100; // Below center
-                    }
+                    const finalX = isTop 
+                      ? 0 
+                      : (otherIndices.indexOf(idx) - (otherIndices.length - 1) / 2) * 100;
+                    const finalY = isTop ? -80 : 80;
                     
                     return (
                       <motion.div
@@ -3272,35 +3248,17 @@ export default function MALWrapped() {
                           y: initialPos.y
                         }}
                         animate={{
-                          scale: useFlexLayout 
-                            ? (isTop ? 1.25 : 0.9)
-                            : phase1Complete
-                              ? (isTop
-                                  ? [1, 1.3, 1, 1.25, 1]
-                                  : [1, 1.3, 0.8, 1.2, 1])
-                              : (isTop
-                                  ? [0, 1]
-                                  : [0, 1]),
-                          opacity: [0, 1, 1, 1, 1, 1],
-                          x: useFlexLayout ? finalX : initialPos.x,
-                          y: useFlexLayout ? finalY : initialPos.y
+                          scale: [0, 1, isTop ? 1.25 : 0.9],
+                          opacity: [0, 1, 1],
+                          x: [initialPos.x, initialPos.x, finalX],
+                          y: [initialPos.y, initialPos.y, finalY]
                         }}
                         transition={{
-                          scale: useFlexLayout ? {
-                            duration: 0,
-                            ease: "linear"
-                          } : phase1Complete ? {
-                            duration: 3.5,
-                            delay: idx * 0.3,
-                            times: isTop ? [0, 0.25, 0.5, 0.75, 1] : [0, 0.25, 0.5, 0.75, 1],
-                            ease: "easeInOut",
-                            repeat: Infinity,
-                            repeatDelay: 0,
-                            repeatType: "loop"
-                          } : {
-                            duration: 0.5,
+                          scale: {
+                            duration: 2.5,
                             delay: idx * 0.1,
-                            ease: "easeOut"
+                            times: [0, 0.4, 1],
+                            ease: "easeInOut"
                           },
                           opacity: {
                             duration: 0.5,
@@ -3308,12 +3266,12 @@ export default function MALWrapped() {
                           },
                           x: {
                             duration: 1.2,
-                            delay: useFlexLayout ? 0 : 4,
+                            delay: 1.5,
                             ease: smoothEase
                           },
                           y: {
                             duration: 1.2,
-                            delay: useFlexLayout ? 0 : 4,
+                            delay: 1.5,
                             ease: smoothEase
                           }
                         }}
@@ -3331,45 +3289,26 @@ export default function MALWrapped() {
                             }}
                           />
                         </div>
-                        {useFlexLayout && (
-                          <>
-                            <motion.p 
-                              className={`${isTop ? 'title-sm text-white font-bold' : 'body-sm text-white/80 font-medium'} text-center`}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ 
-                                delay: isTop 
-                                  ? 4 
-                                  : 4 + (allDemographics.filter(d => d.name !== topDemographic.name).findIndex(d => d.name === demo.name) * 0.1), 
-                                duration: 0.5 
-                              }}
-                            >
-                              {demo.name}
-                            </motion.p>
-                            <motion.p 
-                              className={`${isTop ? 'body-sm' : 'body-sm'} text-white/70 text-center mb-2`}
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: showPercentages ? 1 : 0, y: 0 }}
-                              transition={{ 
-                                delay: isTop 
-                                  ? 4 
-                                  : 4 + (allDemographics.filter(d => d.name !== topDemographic.name).findIndex(d => d.name === demo.name) * 0.1), 
-                                duration: 0.5 
-                              }}
-                            >
-                              {demo.percentage}%
-                            </motion.p>
-                          </>
-                        )}
+                        <p className={`${isTop ? 'heading-sm' : 'body-sm'} text-white/80 font-medium text-center mb-1`}>
+                          {demo.name}
+                        </p>
+                        <motion.p 
+                          className={`${isTop ? 'body-md' : 'body-sm'} text-white/70 text-center`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: showPercentages ? 1 : 0 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          {demo.percentage}%
+                        </motion.p>
                       </motion.div>
                     );
                   })}
                 </motion.div>
                 <motion.p 
-                  className="body-sm text-white/70 text-center mt-4 max-w-md"
+                  className="body-sm text-white/70 text-center mt-8 max-w-md"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 5.2, duration: 0.5 }}
+                  transition={{ delay: 2.7, duration: 0.5 }}
                 >
                   {getFooterText()}
                 </motion.p>
