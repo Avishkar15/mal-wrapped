@@ -3222,7 +3222,7 @@ export default function MALWrapped() {
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Your demographic preference
               </motion.h2>
-              <motion.div className="mt-8 flex flex-col items-center relative z-10 min-h-[50vh] justify-center" {...fadeSlideUp} data-framer-motion>
+              <motion.div className="mt-4 flex flex-col items-center relative z-10 min-h-[50vh] justify-center" {...fadeSlideUp} data-framer-motion>
                 <motion.div
                   className="relative w-full h-80 flex items-center justify-center"
                   initial={{ opacity: 0 }}
@@ -3234,8 +3234,8 @@ export default function MALWrapped() {
                     const initialPos = quadrantPositions[idx] || { x: 0, y: 0 };
                     const finalX = isTop 
                       ? 0 
-                      : (otherIndices.indexOf(idx) - (otherIndices.length - 1) / 2) * 100;
-                    const finalY = isTop ? -80 : 80;
+                      : (otherIndices.indexOf(idx) - (otherIndices.length - 1) / 2) * 140;
+                    const finalY = isTop ? -120 : 120;
                     
                     return (
                       <motion.div
@@ -3248,17 +3248,17 @@ export default function MALWrapped() {
                           y: initialPos.y
                         }}
                         animate={{
-                          scale: [0, 1, isTop ? 1.25 : 0.9],
+                          scale: [0, 1, 0.8,1,0.8, isTop ? 1.25 : 0.8],
                           opacity: [0, 1, 1],
                           x: [initialPos.x, initialPos.x, finalX],
                           y: [initialPos.y, initialPos.y, finalY]
                         }}
                         transition={{
                           scale: {
-                            duration: 2.5,
+                            duration: 3.5,
                             delay: idx * 0.1,
-                            times: [0, 0.4, 1],
-                            ease: "easeInOut"
+                            times: [0, 0.4, 0.6, 0.8, 1],
+                            ease: smoothEase,
                           },
                           opacity: {
                             duration: 0.5,
@@ -3289,11 +3289,11 @@ export default function MALWrapped() {
                             }}
                           />
                         </div>
-                        <p className={`${isTop ? 'heading-sm' : 'body-sm'} text-white/80 font-medium text-center mb-1`}>
+                        <p className={`${isTop ? 'title-sm font-bold text-white' : 'body-sm font-medium text-white/80'} text-center`}>
                           {demo.name}
                         </p>
                         <motion.p 
-                          className={`${isTop ? 'body-md' : 'body-sm'} text-white/70 text-center`}
+                          className={`body-sm text-white/70 font-medium text-center`}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: showPercentages ? 1 : 0 }}
                           transition={{ duration: 0.5 }}
@@ -3305,7 +3305,7 @@ export default function MALWrapped() {
                   })}
                 </motion.div>
                 <motion.p 
-                  className="body-sm text-white/70 text-center mt-8 max-w-md"
+                  className="body-sm text-white/70 text-center mt-4 max-w-md"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 2.7, duration: 0.5 }}
