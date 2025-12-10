@@ -3235,7 +3235,7 @@ export default function MALWrapped() {
                     const finalX = isTop 
                       ? 0 
                       : (otherIndices.indexOf(idx) - (otherIndices.length - 1) / 2) * 100;
-                    const finalY = isTop ? -80 : 80;
+                    const finalY = isTop ? -100 : 100;
                     
                     return (
                       <motion.div
@@ -3244,14 +3244,14 @@ export default function MALWrapped() {
                         initial={{ 
                           scale: 0, 
                           opacity: 0,
-                          x: 0,
-                          y: 0
+                          x: initialPos.x,
+                          y: initialPos.y
                         }}
                         animate={{
                           scale: [0, 1, isTop ? 1.25 : 0.9],
                           opacity: [0, 1, 1],
-                          x: [0, initialPos.x, finalX],
-                          y: [0, initialPos.y, finalY]
+                          x: [initialPos.x, initialPos.x, finalX],
+                          y: [initialPos.y, initialPos.y, finalY]
                         }}
                         transition={{
                           scale: {
@@ -3277,7 +3277,7 @@ export default function MALWrapped() {
                         }}
                       >
                         <div
-                          className={`relative rounded-full overflow-hidden mb-2 ${isTop ? 'w-36 h-36 md:w-44 md:h-44' : 'w-24 h-24 md:w-28 md:h-28'}`}
+                          className="relative rounded-full overflow-hidden mb-2 w-24 h-24 md:w-28 md:h-28"
                         >
                           <img
                             src={demographicCharacters[demo.name] || '/Mascot.webp'}
