@@ -3139,8 +3139,13 @@ export default function MALWrapped() {
         const DemographicContent = () => {
           const [showPercentages, setShowPercentages] = useState(false);
           const [useFlexLayout, setUseFlexLayout] = useState(false);
+          const [phase1Complete, setPhase1Complete] = useState(false);
           
           useEffect(() => {
+            // Mark phase 1 as complete after initial animation (0.5s)
+            const phase1Timer = setTimeout(() => {
+              setPhase1Complete(true);
+            }, 500);
             // Switch to flex layout after phase 1 completes (4s delay for longer phase 1)
             const flexTimer = setTimeout(() => {
               setUseFlexLayout(true);
@@ -3150,6 +3155,7 @@ export default function MALWrapped() {
               setShowPercentages(true);
             }, 5200);
             return () => {
+              clearTimeout(phase1Timer);
               clearTimeout(flexTimer);
               clearTimeout(percentageTimer);
             };
@@ -3268,7 +3274,13 @@ export default function MALWrapped() {
                         animate={{
                           scale: useFlexLayout 
                             ? (isTop ? 1.25 : 0.9)
-                            : [0, 1, 1.1, 0.95, 1.05, 1],
+                            : phase1Complete
+                              ? (isTop
+                                  ? [1, 1.3, 1, 1.25, 1]
+                                  : [1, 1.3, 0.8, 1.2, 1])
+                              : (isTop
+                                  ? [0, 1]
+                                  : [0, 1]),
                           opacity: [0, 1, 1, 1, 1, 1],
                           x: useFlexLayout ? finalX : initialPos.x,
                           y: useFlexLayout ? finalY : initialPos.y
@@ -3277,13 +3289,17 @@ export default function MALWrapped() {
                           scale: useFlexLayout ? {
                             duration: 1.2,
                             ease: smoothEase
-                          } : {
-                            duration: 4,
-                            delay: idx * 0.1,
-                            times: [0, 0.2, 0.4, 0.6, 0.8, 1],
+                          } : phase1Complete ? {
+                            duration: 3.5,
+                            times: isTop ? [0, 0.25, 0.5, 0.75, 1] : [0, 0.25, 0.5, 0.75, 1],
                             ease: "easeInOut",
                             repeat: Infinity,
-                            repeatDelay: 0
+                            repeatDelay: 0,
+                            repeatType: "loop"
+                          } : {
+                            duration: 0.5,
+                            delay: idx * 0.1,
+                            ease: "easeOut"
                           },
                           opacity: {
                             duration: 0.5,
@@ -3317,7 +3333,7 @@ export default function MALWrapped() {
                         {useFlexLayout && (
                           <>
                             <motion.p 
-                              className={`${isTop ? 'title-sm text-white font-bold' : 'body-sm text-white/80 font-medium'} text-center mb-1`}
+                              className={`${isTop ? 'title-sm text-white font-bold' : 'body-sm text-white/80 font-medium'} text-center`}
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ 
@@ -3335,8 +3351,8 @@ export default function MALWrapped() {
                               animate={{ opacity: showPercentages ? 1 : 0, y: 0 }}
                               transition={{ 
                                 delay: isTop 
-                                  ? 5.21 
-                                  : 5.21 + (allDemographics.filter(d => d.name !== topDemographic.name).findIndex(d => d.name === demo.name) * 0.1), 
+                                  ? 5.2 
+                                  : 5.2 + (allDemographics.filter(d => d.name !== topDemographic.name).findIndex(d => d.name === demo.name) * 0.1), 
                                 duration: 0.5 
                               }}
                             >
