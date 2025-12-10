@@ -3135,128 +3135,195 @@ export default function MALWrapped() {
           </SlideLayout>
         );
 
-      case 'demographic':
-        if (!stats.demographicDistribution || stats.demographicDistribution.length === 0) return null;
-        
-        const demographics = stats.demographicDistribution;
-        const topDemographic = demographics[0];
-        const otherDemographics = demographics.slice(1);
-        const allDemographics = demographics;
-        const demographicCharacters = {
-          'Shounen': '/demographics/shounen.webp',
-          'Seinen': '/demographics/seinen.webp',
-          'Shoujo': '/demographics/shoujo.webp',
-          'Josei': '/demographics/josei.webp'
-        };
-        
-        return (
-          <SlideLayout bgColor="pink">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Your demographic preference
-            </motion.h2>
-            <motion.div className="mt-8 flex flex-col items-center relative z-10 min-h-[50vh] justify-center" {...fadeSlideUp} data-framer-motion>
-              {/* Phase 1: All 4 circles floating and growing/shrinking asynchronously */}
-              <motion.div
-                className="relative w-full h-80 flex items-center justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                {allDemographics.map((demo, idx) => {
-                  const isTop = demo.name === topDemographic.name;
-                  // Initial floating positions (spread out)
-                  const initialPositions = [
-                    { x: -120, y: -50 },
-                    { x: 120, y: -50 },
-                    { x: -120, y: 50 },
-                    { x: 120, y: 50 }
-                  ];
-                  // Final positions (top centered, others in row below)
-                  const topIdx = allDemographics.findIndex(d => d.name === topDemographic.name);
-                  const otherIndices = allDemographics
-                    .map((d, i) => ({ d, i }))
-                    .filter(({ d }) => d.name !== topDemographic.name)
-                    .map(({ i }) => i);
-                  const finalX = isTop 
-                    ? 0 
-                    : (otherIndices.indexOf(idx) - (otherIndices.length - 1) / 2) * 100;
-                  const finalY = isTop ? -80 : 80;
-                  
-                  return (
-                    <motion.div
-                      key={demo.name}
-                      className="absolute flex flex-col items-center"
-                      initial={{ 
-                        scale: 0, 
-                        opacity: 0,
-                        x: 0,
-                        y: 0
-                      }}
-                      animate={{
-                        scale: [0, 1.2, 0.9, 1.1, 0.95, 1, isTop ? 1.4 : 0.9],
-                        opacity: [0, 1, 1, 1, 1, 1, 1],
-                        x: [0, initialPositions[idx]?.x || 0, initialPositions[idx]?.x || 0, initialPositions[idx]?.x || 0, initialPositions[idx]?.x || 0, initialPositions[idx]?.x || 0, finalX],
-                        y: [0, initialPositions[idx]?.y || 0, initialPositions[idx]?.y || 0, initialPositions[idx]?.y || 0, initialPositions[idx]?.y || 0, initialPositions[idx]?.y || 0, finalY]
-                      }}
-                      transition={{
-                        scale: {
-                          duration: 3,
-                          delay: idx * 0.15,
-                          times: [0, 0.15, 0.3, 0.45, 0.6, 0.75, 1],
-                          ease: "easeInOut"
-                        },
-                        opacity: {
-                          duration: 0.5,
-                          delay: idx * 0.15
-                        },
-                        x: {
-                          duration: 1.2,
-                          delay: 2.8,
-                          ease: smoothEase
-                        },
-                        y: {
-                          duration: 1.2,
-                          delay: 2.8,
-                          ease: smoothEase
-                        }
-                      }}
-                    >
+      case 'demographic': {
+        const DemographicContent = () => {
+          const [shouldStopAnimation, setShouldStopAnimation] = useState(false);
+          
+          useEffect(() => {
+            // Stop animation after reveal (2.8s + 1.2s transition = ~4s)
+            const timer = setTimeout(() => {
+              setShouldStopAnimation(true);
+            }, 4000);
+            return () => clearTimeout(timer);
+          }, []);
+          
+          if (!stats.demographicDistribution || stats.demographicDistribution.length === 0) return null;
+          
+          const demographics = stats.demographicDistribution;
+          const topDemographic = demographics[0];
+          const allDemographics = demographics;
+          const demographicCharacters = {
+            'Shounen': '/demographics/shounen.webp',
+            'Seinen': '/demographics/seinen.webp',
+            'Shoujo': '/demographics/shoujo.webp',
+            'Josei': '/demographics/josei.webp'
+          };
+          
+          // Helper to get percentage by name
+          const getPercentage = (name) => {
+            const demo = demographics.find(d => d.name === name);
+            return demo ? demo.percentage : 0;
+          };
+          
+          // Calculate footer text based on percentages
+          const getFooterText = () => {
+            const seinen = getPercentage('Seinen');
+            const shounen = getPercentage('Shounen');
+            const shoujo = getPercentage('Shoujo');
+            const josei = getPercentage('Josei');
+            
+            // Check in priority order
+            if (seinen >= 70 || shounen >= 70 || shoujo >= 70 || josei >= 70) {
+              return "You found your lane and stayed in it";
+            }
+            if (seinen >= 50) {
+              return "Complex narratives are your jam";
+            }
+            if (shounen >= 50) {
+              return "Classic battle arcs never gets old";
+            }
+            if (shoujo >= 50) {
+              return "Heart and feelings over action";
+            }
+            if (josei >= 50) {
+              return "Life's complexity resonates with you";
+            }
+            if (shounen >= 30 && seinen >= 30) {
+              return "From hype to depth, you want it all";
+            }
+            if (shoujo >= 30 && josei >= 30) {
+              return "Romance at every stage of life";
+            }
+            if (seinen < 40 && shounen < 40 && shoujo < 40 && josei < 40) {
+              return "You read across all demographics";
+            }
+            return "Your taste spans multiple worlds";
+          };
+          
+          // Initial grid positions (2x2 grid, evenly spaced, no overlap)
+          const gridPositions = [
+            { x: -100, y: -60 },  // Top left
+            { x: 100, y: -60 },   // Top right
+            { x: -100, y: 60 },   // Bottom left
+            { x: 100, y: 60 }     // Bottom right
+          ];
+          
+          // Final positions (top centered, others in row below)
+          const topIdx = allDemographics.findIndex(d => d.name === topDemographic.name);
+          const otherIndices = allDemographics
+            .map((d, i) => ({ d, i }))
+            .filter(({ d }) => d.name !== topDemographic.name)
+            .map(({ i }) => i);
+          
+          return (
+            <SlideLayout bgColor="pink">
+              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
+                Your demographic preference
+              </motion.h2>
+              <motion.div className="mt-8 flex flex-col items-center relative z-10 min-h-[50vh] justify-center" {...fadeSlideUp} data-framer-motion>
+                <motion.div
+                  className="relative w-full h-80 flex items-center justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  {allDemographics.map((demo, idx) => {
+                    const isTop = demo.name === topDemographic.name;
+                    const initialPos = gridPositions[idx] || { x: 0, y: 0 };
+                    const finalX = isTop 
+                      ? 0 
+                      : (otherIndices.indexOf(idx) - (otherIndices.length - 1) / 2) * 100;
+                    const finalY = isTop ? -80 : 80;
+                    
+                    return (
                       <motion.div
-                        className={`relative rounded-full overflow-hidden mb-2 ${isTop ? 'w-40 h-40 md:w-48 md:h-48' : 'w-24 h-24 md:w-28 md:h-28'}`}
+                        key={demo.name}
+                        className="absolute flex flex-col items-center"
+                        initial={{ 
+                          scale: 0, 
+                          opacity: 0,
+                          x: 0,
+                          y: 0
+                        }}
                         animate={{
-                          scale: [1, 1.15, 0.9, 1.1, 1],
-                          y: [0, -12, 6, -6, 0]
+                          scale: [0, 1, 1, 1, 1, 1, isTop ? 1.4 : 0.9],
+                          opacity: [0, 1, 1, 1, 1, 1, 1],
+                          x: [0, initialPos.x, initialPos.x, initialPos.x, initialPos.x, initialPos.x, finalX],
+                          y: [0, initialPos.y, initialPos.y, initialPos.y, initialPos.y, initialPos.y, finalY]
                         }}
                         transition={{
-                          duration: 2 + (idx * 0.3),
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                          delay: idx * 0.2
+                          scale: {
+                            duration: 3,
+                            delay: idx * 0.15,
+                            times: [0, 0.2, 0.4, 0.6, 0.8, 0.95, 1],
+                            ease: "easeInOut"
+                          },
+                          opacity: {
+                            duration: 0.5,
+                            delay: idx * 0.15
+                          },
+                          x: {
+                            duration: 1.2,
+                            delay: 2.8,
+                            ease: smoothEase
+                          },
+                          y: {
+                            duration: 1.2,
+                            delay: 2.8,
+                            ease: smoothEase
+                          }
                         }}
                       >
-                        <img
-                          src={demographicCharacters[demo.name] || '/Mascot.webp'}
-                          alt={demo.name}
-                          className="w-full h-full object-cover"
-                          crossOrigin="anonymous"
-                          onError={(e) => {
-                            e.target.src = '/Mascot.webp';
+                        <motion.div
+                          className={`relative rounded-full overflow-hidden mb-2 ${isTop ? 'w-40 h-40 md:w-48 md:h-48' : 'w-24 h-24 md:w-28 md:h-28'}`}
+                          animate={shouldStopAnimation ? {} : {
+                            scale: [1, 1.1, 0.95, 1.05, 1],
+                            y: [0, -8, 4, -4, 0]
                           }}
-                        />
+                          transition={shouldStopAnimation ? {} : {
+                            duration: 2 + (idx * 0.3),
+                            repeat: Infinity,
+                            repeatDelay: 0,
+                            ease: "easeInOut",
+                            delay: idx * 0.2,
+                            times: [0, 0.25, 0.5, 0.75, 1]
+                          }}
+                        >
+                          <img
+                            src={demographicCharacters[demo.name] || '/Mascot.webp'}
+                            alt={demo.name}
+                            className="w-full h-full object-cover"
+                            crossOrigin="anonymous"
+                            onError={(e) => {
+                              e.target.src = '/Mascot.webp';
+                            }}
+                          />
+                        </motion.div>
+                        <p className={`${isTop ? 'heading-sm' : 'body-sm'} text-white/80 font-medium text-center mb-1`}>
+                          {demo.name}
+                        </p>
+                        <p className={`${isTop ? 'body-md' : 'body-sm'} text-white/70 text-center`}>
+                          {demo.percentage}%
+                        </p>
                       </motion.div>
-                      <p className={`${isTop ? 'heading-sm' : 'body-sm'} text-white/80 font-medium text-center mb-1`}>
-                        {demo.name}
-                      </p>
-                      <p className={`${isTop ? 'body-md' : 'body-sm'} text-white/70 text-center`}>
-                        {demo.percentage}%
-                      </p>
-                    </motion.div>
-                  );
-                })}
+                    );
+                  })}
+                </motion.div>
+                <motion.p 
+                  className="body-sm text-white/70 text-center mt-8 max-w-md"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 4, duration: 0.5 }}
+                >
+                  {getFooterText()}
+                </motion.p>
               </motion.div>
-            </motion.div>
-          </SlideLayout>
-        );
+            </SlideLayout>
+          );
+        };
+        
+        return <DemographicContent />;
+      }
 
       case 'drumroll_anime': {
         const DrumrollContent = () => {
