@@ -53,6 +53,57 @@ const fadeIn = {
   transition: { duration: 0.6, ease: smoothEase }
 };
 
+// Genre to YouTube music mapping
+// User can provide either full YouTube URLs or just video IDs
+// Example: 'Action': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' OR 'Action': 'dQw4w9WgXcQ'
+// Add your YouTube links below:
+const genreMusicMap = {
+  // Action & Adventure
+  'Action': 'https://www.youtube.com/watch?v=FM3aJQzqV90',
+  'Adventure': 'https://www.youtube.com/watch?v=IHhNTt3oxtY',
+  'Martial Arts': 'YOUR_MARTIAL_ARTS_VIDEO_ID_OR_URL',
+  'Super Power': 'YOUR_SUPER_POWER_VIDEO_ID_OR_URL',
+  
+  // Comedy & Slice of Life
+  'Comedy': 'YOUR_COMEDY_VIDEO_ID_OR_URL',
+  'Slice of Life': 'YOUR_SLICE_OF_LIFE_VIDEO_ID_OR_URL',
+  'Parody': 'https://www.youtube.com/watch?v=rHwOE8R-gMA',
+  'School': 'YOUR_SCHOOL_VIDEO_ID_OR_URL',
+  
+  // Drama & Romance
+  'Drama': 'https://www.youtube.com/watch?v=c6rCRy6SrtU',
+  'Romance': 'https://www.youtube.com/watch?v=hoysCCR2TFA',
+  'Harem': 'YOUR_HAREM_VIDEO_ID_OR_URL',
+  'Ecchi': 'YOUR_ECCHI_VIDEO_ID_OR_URL',
+  
+  // Fantasy & Sci-Fi
+  'Fantasy': 'https://www.youtube.com/watch?v=6Y1swEeFwYo',
+  'Dark Fantasy': 'YOUR_DARK_FANTASY_VIDEO_ID_OR_URL',
+  'Sci-Fi': 'https://www.youtube.com/watch?v=ZGM90Bo3zH0',
+  'Space': 'https://www.youtube.com/watch?v=UFFa0QoHWvE',
+  'Mecha': 'https://www.youtube.com/watch?v=-RRWvHTQjPE',
+  'Isekai': 'https://www.youtube.com/watch?v=4a8XOwRzJC4',
+  
+  // Horror & Thriller
+  'Horror': 'YOUR_HORROR_VIDEO_ID_OR_URL',
+  'Thriller': 'YOUR_THRILLER_VIDEO_ID_OR_URL',
+  'Gore': 'YOUR_GORE_VIDEO_ID_OR_URL',
+  'Suspense': 'YOUR_SUSPENSE_VIDEO_ID_OR_URL',
+  
+  // Mystery & Psychological
+  'Mystery': 'YOUR_MYSTERY_VIDEO_ID_OR_URL',
+  'Psychological': 'YOUR_PSYCHOLOGICAL_VIDEO_ID_OR_URL',
+  
+  // Supernatural & Other
+  'Supernatural': 'YOUR_SUPERNATURAL_VIDEO_ID_OR_URL',
+  'Sports': 'https://www.youtube.com/watch?v=vyLpzI59-Cc',
+  'Music': 'YOUR_MUSIC_VIDEO_ID_OR_URL',
+  'Historical': 'https://www.youtube.com/watch?v=oomE4oltFRo',
+  'Military': 'https://www.youtube.com/watch?v=WAoPeG1LU1g',
+  
+  // Add more genres as needed
+};
+
 const fadeIn100 = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
@@ -249,58 +300,6 @@ export default function MALWrapped() {
     if (!videoId) return null;
     return `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0`;
   };
-  
-  // Genre to YouTube music mapping
-  // User can provide either full YouTube URLs or just video IDs
-  // Example: 'Action': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' OR 'Action': 'dQw4w9WgXcQ'
-  // Add your YouTube links below - uncomment and replace with your links:
-  const genreMusicMap = {
-    // Action & Adventure
-    'Action': 'https://www.youtube.com/watch?v=2B6nj38AdD0',
-    'Adventure': 'https://www.youtube.com/watch?v=FM3aJQzqV90',
-    'Martial Arts': 'YOUR_MARTIAL_ARTS_VIDEO_ID_OR_URL',
-    'Super Power': 'YOUR_SUPER_POWER_VIDEO_ID_OR_URL',
-    
-    // Comedy & Slice of Life
-    'Comedy': 'YOUR_COMEDY_VIDEO_ID_OR_URL',
-    'Slice of Life': 'YOUR_SLICE_OF_LIFE_VIDEO_ID_OR_URL',
-    'Parody': 'https://www.youtube.com/watch?v=rHwOE8R-gMA',
-    'School': 'YOUR_SCHOOL_VIDEO_ID_OR_URL',
-    
-    // Drama & Romance
-    'Drama': 'https://www.youtube.com/watch?v=c6rCRy6SrtU',
-    'Romance': 'https://www.youtube.com/watch?v=hoysCCR2TFA',
-    'Harem': 'YOUR_HAREM_VIDEO_ID_OR_URL',
-    'Ecchi': 'YOUR_ECCHI_VIDEO_ID_OR_URL',
-    
-    // Fantasy & Sci-Fi
-    'Fantasy': 'https://www.youtube.com/watch?v=6Y1swEeFwYo',
-    'Dark Fantasy': 'YOUR_DARK_FANTASY_VIDEO_ID_OR_URL',
-    'Sci-Fi': 'https://www.youtube.com/watch?v=ZGM90Bo3zH0',
-    'Space': 'https://www.youtube.com/watch?v=UFFa0QoHWvE',
-    'Mecha': 'https://www.youtube.com/watch?v=-RRWvHTQjPE',
-    'Isekai': 'https://www.youtube.com/watch?v=4a8XOwRzJC4',
-    
-    // Horror & Thriller
-    'Horror': 'YOUR_HORROR_VIDEO_ID_OR_URL',
-    'Thriller': 'YOUR_THRILLER_VIDEO_ID_OR_URL',
-    'Gore': 'YOUR_GORE_VIDEO_ID_OR_URL',
-    'Suspense': 'YOUR_SUSPENSE_VIDEO_ID_OR_URL',
-    
-    // Mystery & Psychological
-    'Mystery': 'YOUR_MYSTERY_VIDEO_ID_OR_URL',
-    'Psychological': 'YOUR_PSYCHOLOGICAL_VIDEO_ID_OR_URL',
-    
-    // Supernatural & Other
-    'Supernatural': 'YOUR_SUPERNATURAL_VIDEO_ID_OR_URL',
-    'Sports': 'YOUR_SPORTS_VIDEO_ID_OR_URL',
-    'Music': 'YOUR_MUSIC_VIDEO_ID_OR_URL',
-    'Historical': 'YOUR_HISTORICAL_VIDEO_ID_OR_URL',
-    'Military': 'YOUR_MILITARY_VIDEO_ID_OR_URL',
-    
-    // Add more genres as needed
-  };
-  
 
   const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
   const hasManga = stats && mangaList && mangaList.length > 0;
