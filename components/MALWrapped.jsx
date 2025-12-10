@@ -709,55 +709,47 @@ export default function MALWrapped() {
       .sort((a, b) => b.list_status.score - a.list_status.score)
       .slice(0, 5);
     
-    // Longest Manga Journey - find manga with most chapters read
+    // Longest Manga Journey
     let longestMangaJourney = null;
     const mangaChaptersMap = new Map();
     
-    filteredManga.forEach(item => {
-      const chapters = item.list_status?.num_chapters_read || 0;
-      const title = item.node?.title || '';
-      const mangaId = item.node?.id;
-      
-      if (chapters > 0 && title) {
-        if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < chapters) {
-          const startDate = item.list_status?.start_date;
-          let monthsActive = 0;
-          
-          // Calculate months based on when it was added that year and how many chapters finished
-          if (startDate) {
-            try {
-              const start = new Date(startDate);
-              if (!isNaN(start.getTime())) {
-                // If specific year selected, calculate from start of that year or start date (whichever is later)
-                const yearStart = currentYear === 'all' 
-                  ? new Date(start.getFullYear(), 0, 1)
-                  : new Date(currentYear, 0, 1);
-                const actualStart = start > yearStart ? start : yearStart;
-                const now = new Date();
-                const endDate = currentYear === 'all' ? now : new Date(currentYear, 11, 31);
-                const actualEnd = endDate > now ? now : endDate;
-                
-                const months = (actualEnd.getTime() - actualStart.getTime()) / (1000 * 60 * 60 * 24 * 30);
-                monthsActive = Math.max(1, Math.ceil(months));
-              }
-            } catch (e) {
-              // Invalid date, skip
-            }
-          } else {
-            // If no start date, assume 1 month minimum
-            monthsActive = 1;
+    if (currentYear === 'all') {
+      // For all time: find manga with most total chapters
+      filteredManga.forEach(item => {
+        const totalChapters = item.node?.num_chapters || 0;
+        const title = item.node?.title || '';
+        const mangaId = item.node?.id;
+        
+        if (totalChapters > 0 && title) {
+          if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < totalChapters) {
+            mangaChaptersMap.set(title, {
+              title,
+              chapters: totalChapters,
+              mangaId,
+              coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || ''
+            });
           }
-          
-          mangaChaptersMap.set(title, {
-            title,
-            chapters,
-            mangaId,
-            coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
-            monthsActive
-          });
         }
-      }
-    });
+      });
+    } else {
+      // For specific year: find manga with most chapters read in that year
+      filteredManga.forEach(item => {
+        const chapters = item.list_status?.num_chapters_read || 0;
+        const title = item.node?.title || '';
+        const mangaId = item.node?.id;
+        
+        if (chapters > 0 && title) {
+          if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < chapters) {
+            mangaChaptersMap.set(title, {
+              title,
+              chapters,
+              mangaId,
+              coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || ''
+            });
+          }
+        }
+      });
+    }
     
     // Find the manga with most chapters
     if (mangaChaptersMap.size > 0) {
@@ -1501,57 +1493,6 @@ export default function MALWrapped() {
       sum + (item.list_status?.num_chapters_read || 0), 0
     );
     
-    // Calculate reading pace (chapters per week)
-    // Average MAL user reads ~18 chapters per week
-    const averageChaptersPerWeek = 18;
-    let chaptersPerWeek = 0;
-    let readingPaceComparison = null;
-    
-    if (currentYear === 'all') {
-      // For "all time", estimate based on years of activity
-      // Find earliest start date from manga list
-      let earliestDate = null;
-      (manga || []).forEach(item => {
-        const startDate = item.list_status?.start_date;
-        if (startDate) {
-          try {
-            const date = new Date(startDate);
-            if (!isNaN(date.getTime()) && (!earliestDate || date < earliestDate)) {
-              earliestDate = date;
-            }
-          } catch (e) {
-            // Invalid date, skip
-          }
-        }
-      });
-      
-      if (earliestDate) {
-        const now = new Date();
-        const yearsActive = Math.max(1, (now - earliestDate) / (1000 * 60 * 60 * 24 * 365));
-        const totalWeeks = yearsActive * 52;
-        if (totalWeeks > 0) {
-          chaptersPerWeek = allTimeChapters / totalWeeks;
-        }
-      } else {
-        // Fallback: assume 2 years of activity
-        chaptersPerWeek = allTimeChapters / (2 * 52);
-      }
-    } else {
-      // For specific year: 52 weeks
-      const weeksInYear = 52;
-      chaptersPerWeek = totalChapters / weeksInYear;
-    }
-    
-    if (chaptersPerWeek > 0) {
-      const pacePercentage = Math.round((chaptersPerWeek / averageChaptersPerWeek) * 100);
-      readingPaceComparison = {
-        userChaptersPerWeek: Math.round(chaptersPerWeek * 10) / 10, // Round to 1 decimal
-        averageChaptersPerWeek: averageChaptersPerWeek,
-        percentage: pacePercentage,
-        isAboveAverage: chaptersPerWeek > averageChaptersPerWeek
-      };
-    }
-    
     const mangaComparison = {
       userChapters: totalChapters,
       averageChapters: averageChaptersPerYear,
@@ -1560,8 +1501,7 @@ export default function MALWrapped() {
       allTimeChapters: allTimeChapters,
       averageAllTime: averageChaptersAllTime,
       allTimePercentage: Math.round((allTimeChapters / averageChaptersAllTime) * 100),
-      isAboveAverageAllTime: allTimeChapters > averageChaptersAllTime,
-      readingPace: readingPaceComparison
+      isAboveAverageAllTime: allTimeChapters > averageChaptersAllTime
     };
 
     // Removed obscure studios calculation
@@ -3952,23 +3892,6 @@ export default function MALWrapped() {
                   </p>
                 </div>
               )}
-              {mangaComparison?.readingPace && (
-                <div className="text-center mt-6 w-full">
-                  <p className="body-sm text-white/70 font-regular mb-2">Your reading pace</p>
-                  <p className="number-md text-white font-semibold">
-                    {mangaComparison.readingPace.userChaptersPerWeek.toFixed(1)} chapters/week
-                  </p>
-                  {mangaComparison.readingPace.percentage > 0 && (
-                    <p className="body-sm text-white/70 font-regular mt-2 text-container">
-                      {mangaComparison.readingPace.isAboveAverage ? "That's " : "That's only "}
-                      <span className="text-white font-semibold">{mangaComparison.readingPace.percentage}%</span>
-                      {mangaComparison.readingPace.isAboveAverage 
-                        ? " of the average MAL reader's pace. You're a speed reader!" 
-                        : " of the average MAL reader's pace. Take your time and enjoy the journey!"}
-                    </p>
-                  )}
-                </div>
-              )}
             </motion.div>
           </SlideLayout>
         );
@@ -4636,14 +4559,11 @@ export default function MALWrapped() {
         
         const journey = stats.longestMangaJourney;
         const chaptersText = `${journey.chapters.toLocaleString()} chapters`;
-        const timeText = journey.monthsActive >= 12
-          ? `${Math.floor(journey.monthsActive / 12)} ${Math.floor(journey.monthsActive / 12) === 1 ? 'year' : 'years'}`
-          : `${journey.monthsActive} ${journey.monthsActive === 1 ? 'month' : 'months'}`;
         
         return (
           <SlideLayout bgColor="blue">
             <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Your longest commitment
+              {stats.selectedYear === 'all' ? 'Your longest manga' : 'Your most read manga'}
             </motion.h2>
             <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
               {journey.coverImage && (
@@ -4660,11 +4580,8 @@ export default function MALWrapped() {
               <p className="heading-lg text-white font-semibold text-center mb-2">
                 {journey.title}
               </p>
-              <p className="body-sm text-white/70 text-center text-container mb-2">
-                {chaptersText}
-              </p>
               <p className="body-sm text-white/70 text-center text-container">
-                You've been on this journey for {timeText}
+                {chaptersText}
               </p>
             </motion.div>
             <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
