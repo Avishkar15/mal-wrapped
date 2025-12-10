@@ -3137,20 +3137,14 @@ export default function MALWrapped() {
 
       case 'demographic': {
         const DemographicContent = () => {
-          const [shouldStopAnimation, setShouldStopAnimation] = useState(false);
           const [showPercentages, setShowPercentages] = useState(false);
           
           useEffect(() => {
-            // Stop animation after reveal (2.8s + 1.2s transition = ~4s)
-            const timer = setTimeout(() => {
-              setShouldStopAnimation(true);
-            }, 4000);
-            // Show percentages after reveal completes
+            // Show percentages after reveal completes (1.5s delay + 1.2s transition = ~2.7s)
             const percentageTimer = setTimeout(() => {
               setShowPercentages(true);
-            }, 4000);
+            }, 2700);
             return () => {
-              clearTimeout(timer);
               clearTimeout(percentageTimer);
             };
           }, []);
@@ -3243,16 +3237,10 @@ export default function MALWrapped() {
                       : (otherIndices.indexOf(idx) - (otherIndices.length - 1) / 2) * 100;
                     const finalY = isTop ? -80 : 80;
                     
-                    // Other genres should be on top (higher z-index) and positioned to cover the top one initially
-                    const zIndex = isTop ? 1 : 10;
-                    // If not top, start closer to center to cover the top one
-                    const adjustedInitialPos = isTop ? initialPos : { x: initialPos.x * 0.6, y: initialPos.y * 0.6 };
-                    
                     return (
                       <motion.div
                         key={demo.name}
                         className="absolute flex flex-col items-center"
-                        style={{ zIndex }}
                         initial={{ 
                           scale: 0, 
                           opacity: 0,
@@ -3260,48 +3248,36 @@ export default function MALWrapped() {
                           y: 0
                         }}
                         animate={{
-                          scale: [0, 1, 1, 1, 1, 1, 1, isTop ? 1.25 : 0.9],
-                          opacity: [0, 1, 1, 1, 1, 1, 1, 1],
-                          x: [0, adjustedInitialPos.x, adjustedInitialPos.x, adjustedInitialPos.x, adjustedInitialPos.x, adjustedInitialPos.x, adjustedInitialPos.x, finalX],
-                          y: [0, adjustedInitialPos.y, adjustedInitialPos.y, adjustedInitialPos.y, adjustedInitialPos.y, adjustedInitialPos.y, adjustedInitialPos.y, finalY]
+                          scale: [0, 1, isTop ? 1.25 : 0.9],
+                          opacity: [0, 1, 1],
+                          x: [0, initialPos.x, finalX],
+                          y: [0, initialPos.y, finalY]
                         }}
                         transition={{
                           scale: {
-                            duration: 4,
-                            delay: idx * 0.15,
-                            times: [0, 0.15, 0.3, 0.45, 0.6, 0.7, 0.7, 1],
+                            duration: 2.5,
+                            delay: idx * 0.1,
+                            times: [0, 0.4, 1],
                             ease: "easeInOut"
                           },
                           opacity: {
                             duration: 0.5,
-                            delay: idx * 0.15
+                            delay: idx * 0.1
                           },
                           x: {
                             duration: 1.2,
-                            delay: 2.8,
+                            delay: 1.5,
                             ease: smoothEase
                           },
                           y: {
                             duration: 1.2,
-                            delay: 2.8,
+                            delay: 1.5,
                             ease: smoothEase
                           }
                         }}
                       >
-                        <motion.div
+                        <div
                           className={`relative rounded-full overflow-hidden mb-2 ${isTop ? 'w-36 h-36 md:w-44 md:h-44' : 'w-24 h-24 md:w-28 md:h-28'}`}
-                          animate={shouldStopAnimation ? {} : {
-                            scale: [1, 1.1, 0.95, 1.05, 1],
-                            y: [0, -8, 4, -4, 0]
-                          }}
-                          transition={shouldStopAnimation ? {} : {
-                            duration: 2 + (idx * 0.3),
-                            repeat: Infinity,
-                            repeatDelay: 0,
-                            ease: "easeInOut",
-                            delay: idx * 0.2,
-                            times: [0, 0.25, 0.5, 0.75, 1]
-                          }}
                         >
                           <img
                             src={demographicCharacters[demo.name] || '/Mascot.webp'}
@@ -3312,7 +3288,7 @@ export default function MALWrapped() {
                               e.target.src = '/Mascot.webp';
                             }}
                           />
-                        </motion.div>
+                        </div>
                         <p className={`${isTop ? 'heading-sm' : 'body-sm'} text-white/80 font-medium text-center mb-1`}>
                           {demo.name}
                         </p>
@@ -3332,7 +3308,7 @@ export default function MALWrapped() {
                   className="body-sm text-white/70 text-center mt-8 max-w-md"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 4, duration: 0.5 }}
+                  transition={{ delay: 2.7, duration: 0.5 }}
                 >
                   {getFooterText()}
                 </motion.p>
