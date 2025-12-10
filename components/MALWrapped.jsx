@@ -3248,7 +3248,7 @@ export default function MALWrapped() {
                           y: initialPos.y
                         }}
                         animate={{
-                          scale: [0, 1, 0.8, 1, 0.8, isTop ? 1.25 : 0.8],
+                          scale: [0, 1, 0.8, 1, isTop ? 1.25 : 0.8],
                           opacity: [0, 1, 1],
                           x: [initialPos.x, initialPos.x, finalX],
                           y: [initialPos.y, initialPos.y, finalY]
@@ -3308,7 +3308,7 @@ export default function MALWrapped() {
                   })}
                 </motion.div>
                 <motion.p 
-                  className="body-sm text-white/70 text-center mt-4 max-w-md"
+                  className="body-sm text-white/70 text-center mt-8 max-w-md"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 2.7, duration: 0.5 }}
