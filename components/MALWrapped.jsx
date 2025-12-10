@@ -304,65 +304,6 @@ export default function MALWrapped() {
   const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
   const hasManga = stats && mangaList && mangaList.length > 0;
   
-  // Get top genre for music selection
-  const topAnimeGenre = stats?.topGenres && stats.topGenres.length > 0 ? stats.topGenres[0][0] : null;
-  const topMangaGenre = stats?.topMangaGenres && stats.topMangaGenres.length > 0 ? stats.topMangaGenres[0][0] : null;
-  
-  const currentMusicUrl = useMemo(() => {
-    if (!stats || !slides || slides.length === 0) return null;
-    
-    // Check if we're in manga section
-    const currentSlideId = slides[currentSlide]?.id;
-    const isMangaSection = currentSlideId && (
-      currentSlideId.includes('manga') || 
-      currentSlideId === 'anime_to_manga_transition' ||
-      currentSlideId === 'manga_count'
-    );
-    
-    // Use top manga genre for manga section, top anime genre for anime section
-    const selectedGenre = isMangaSection ? topMangaGenre : topAnimeGenre;
-    
-    let videoId = null;
-    
-    if (selectedGenre && genreMusicMap[selectedGenre]) {
-      videoId = getYouTubeVideoId(genreMusicMap[selectedGenre]);
-    } else if (Object.keys(genreMusicMap).length > 0) {
-      // Fallback to first available genre
-      videoId = getYouTubeVideoId(Object.values(genreMusicMap)[0]);
-    }
-    
-    return videoId ? createYouTubeEmbedUrl(videoId) : null;
-  }, [stats, slides, currentSlide, topAnimeGenre, topMangaGenre]);
-  
-  // Background music using YouTube iframe
-  useEffect(() => {
-    if (!currentMusicUrl || currentSlide === 0) return;
-    
-    // Remove old iframe if exists
-    if (youtubePlayerRef.current) {
-      youtubePlayerRef.current.remove();
-      youtubePlayerRef.current = null;
-    }
-    
-    // Create YouTube iframe for background music
-    const iframe = document.createElement('iframe');
-    iframe.src = currentMusicUrl;
-    iframe.style.display = 'none';
-    iframe.allow = 'autoplay; encrypted-media';
-    iframe.id = 'youtube-music-player';
-    document.body.appendChild(iframe);
-    youtubePlayerRef.current = iframe;
-    setIsMusicPlaying(true);
-    
-    return () => {
-      if (youtubePlayerRef.current) {
-        youtubePlayerRef.current.remove();
-        youtubePlayerRef.current = null;
-        setIsMusicPlaying(false);
-      }
-    };
-  }, [currentMusicUrl, currentSlide]);
-  
   const slides = useMemo(() => stats ? [
     { id: 'welcome' },
     { id: 'anime_count' },
@@ -394,6 +335,65 @@ export default function MALWrapped() {
     ...(stats.characterTwin ? [{ id: 'character_twin' }] : []),
     { id: 'finale' },
   ] : [], [stats, hasAnime, hasManga]);
+
+  // Get top genre for music selection
+  const topAnimeGenre = stats?.topGenres && stats.topGenres.length > 0 ? stats.topGenres[0][0] : null;
+  const topMangaGenre = stats?.topMangaGenres && stats.topMangaGenres.length > 0 ? stats.topMangaGenres[0][0] : null;
+  
+  const currentMusicUrl = useMemo(() => {
+    if (!stats || !slides || slides.length === 0) return null;
+    
+    // Check if we're in manga section
+    const currentSlideId = slides[currentSlide]?.id;
+    const isMangaSection = currentSlideId && (
+      currentSlideId.includes('manga') || 
+      currentSlideId === 'anime_to_manga_transition' ||
+      currentSlideId === 'manga_count'
+    );
+    
+    // Use top manga genre for manga section, top anime genre for anime section
+    const selectedGenre = isMangaSection ? topMangaGenre : topAnimeGenre;
+    
+    let videoId = null;
+    
+    if (selectedGenre && genreMusicMap[selectedGenre]) {
+      videoId = getYouTubeVideoId(genreMusicMap[selectedGenre]);
+    } else if (Object.keys(genreMusicMap).length > 0) {
+      // Fallback to first available genre
+      videoId = getYouTubeVideoId(Object.values(genreMusicMap)[0]);
+    }
+    
+    return videoId ? createYouTubeEmbedUrl(videoId) : null;
+  }, [stats, slides, currentSlide, topAnimeGenre, topMangaGenre]);
+
+  // Background music using YouTube iframe
+  useEffect(() => {
+    if (!currentMusicUrl || currentSlide === 0) return;
+    
+    // Remove old iframe if exists
+    if (youtubePlayerRef.current) {
+      youtubePlayerRef.current.remove();
+      youtubePlayerRef.current = null;
+    }
+    
+    // Create YouTube iframe for background music
+    const iframe = document.createElement('iframe');
+    iframe.src = currentMusicUrl;
+    iframe.style.display = 'none';
+    iframe.allow = 'autoplay; encrypted-media';
+    iframe.id = 'youtube-music-player';
+    document.body.appendChild(iframe);
+    youtubePlayerRef.current = iframe;
+    setIsMusicPlaying(true);
+    
+    return () => {
+      if (youtubePlayerRef.current) {
+        youtubePlayerRef.current.remove();
+        youtubePlayerRef.current = null;
+        setIsMusicPlaying(false);
+      }
+    };
+  }, [currentMusicUrl, currentSlide]);
 
   // Get website URL for watermark
   const websiteUrl = useMemo(() => {
