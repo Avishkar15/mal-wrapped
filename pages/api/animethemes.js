@@ -12,61 +12,24 @@ export default async function handler(req, res) {
   try {
     const themes = [];
     
-    // Query animethemes.moe GraphQL API for each anime
+    // Query animethemes.moe REST API for each anime
     for (const malId of malIds) {
       try {
-        // Query animethemes.moe GraphQL API
-        // Filter by external site (MAL) as per documentation: https://api-docs.animethemes.moe/graphql/examples/filter-by-external-site/
-        // Try the documented query structure first
-        const query = `
-          query GetAnimeThemes($malId: Int!) {
-            anime(
-              where: {
-                mappings: {
-                  some: {
-                    externalSite: {
-                      name: {
-                        eq: "myanimelist"
-                      }
-                    },
-                    externalId: {
-                      eq: $malId
-                    }
-                  }
-                }
-              }
-            ) {
-              name
-              slug
-              themes {
-                slug
-                type
-                sequence
-                entries {
-                  version
-                  videos {
-                    tags
-                    link
-                    basename
-                  }
-                }
-              }
-            }
-          }
-        `;
-        
         console.log(`Fetching themes for MAL ID: ${malId}`);
 
-        let response = await fetch('https://api.animethemes.moe/api/graphql', {
-          method: 'POST',
+        // Use REST API endpoint with filters for MAL ID
+        // Include themes, entries, and videos in the response
+        const url = new URL('https://api.animethemes.moe/api/anime');
+        url.searchParams.append('filter[has]', 'resources.mappings');
+        url.searchParams.append('filter[resources.mappings.externalSite]', 'myanimelist');
+        url.searchParams.append('filter[resources.mappings.externalId]', malId.toString());
+        url.searchParams.append('include', 'animethemes.animethemeentries.videos');
+
+        const response = await fetch(url.toString(), {
+          method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          body: JSON.stringify({
-            query,
-            variables: { malId: parseInt(malId) }
-          })
         });
 
         if (!response.ok) {
@@ -74,154 +37,38 @@ export default async function handler(req, res) {
           continue;
         }
 
-        let responseText = await response.text();
-        console.log(`Raw response for MAL ID ${malId}:`, responseText.substring(0, 500));
-
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (e) {
-          console.error(`Failed to parse JSON for MAL ID ${malId}:`, e);
-          console.error('Response text:', responseText);
-          continue;
-        }
+        const data = await response.json();
         
-        // If there are errors, try alternative query structures
-        if (data.errors) {
-          console.error(`GraphQL errors for MAL ID ${malId}:`, JSON.stringify(data.errors, null, 2));
-          
-          // Try simpler query structure without nested eq operators
-          console.log(`Trying simpler query structure for MAL ID ${malId}`);
-          const altQuery1 = `
-            query GetAnimeThemes($malId: Int!) {
-              anime(
-                where: {
-                  mappings: {
-                    some: {
-                      externalSite: {
-                        name: "myanimelist"
-                      },
-                      externalId: $malId
-                    }
-                  }
-                }
-              ) {
-                name
-                slug
-                themes {
-                  slug
-                  type
-                  sequence
-                  entries {
-                    version
-                    videos {
-                      tags
-                      link
-                      basename
-                    }
-                  }
-                }
-              }
-            }
-          `;
-          
-          response = await fetch('https://api.animethemes.moe/api/graphql', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-            },
-            body: JSON.stringify({
-              query: altQuery1,
-              variables: { malId: parseInt(malId) }
-            })
-          });
-          
-          if (response.ok) {
-            responseText = await response.text();
-            data = JSON.parse(responseText);
-            if (!data.errors) {
-              console.log(`Simpler query worked for MAL ID ${malId}`);
-            } else {
-              // Try even simpler structure
-              console.log(`Trying direct mapping query for MAL ID ${malId}`);
-              const altQuery2 = `
-                query GetAnimeThemes($malId: Int!) {
-                  anime(where: { mappings: { some: { externalSite: "myanimelist", externalId: $malId } } }) {
-                    name
-                    slug
-                    themes {
-                      slug
-                      type
-                      sequence
-                      entries {
-                        version
-                        videos {
-                          tags
-                          link
-                          basename
-                        }
-                      }
-                    }
-                  }
-                }
-              `;
-              
-              response = await fetch('https://api.animethemes.moe/api/graphql', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                  query: altQuery2,
-                  variables: { malId: parseInt(malId) }
-                })
-              });
-              
-              if (response.ok) {
-                responseText = await response.text();
-                data = JSON.parse(responseText);
-                if (data.errors) {
-                  console.error(`All query attempts failed for MAL ID ${malId}:`, data.errors);
-                  continue;
-                }
-              } else {
-                console.error(`Failed to fetch with alternative query for MAL ID ${malId}`);
-                continue;
-              }
-            }
-          } else {
-            console.error(`Alternative query request failed for MAL ID ${malId}`);
-            continue;
-          }
-        }
-
-        console.log(`Response for MAL ID ${malId}:`, JSON.stringify(data.data, null, 2));
-        
-        // Handle both array and single object responses
+        // Handle different possible response structures
+        // The API might return { anime: [...] } or { data: { anime: [...] } } or just an array
         let animeArray = [];
-        if (Array.isArray(data.data?.anime)) {
-          animeArray = data.data.anime;
+        if (Array.isArray(data)) {
+          animeArray = data;
+        } else if (data.anime) {
+          animeArray = Array.isArray(data.anime) ? data.anime : [data.anime];
         } else if (data.data?.anime) {
-          animeArray = [data.data.anime];
+          animeArray = Array.isArray(data.data.anime) ? data.data.anime : [data.data.anime];
         }
         
         if (animeArray.length === 0) {
           console.log(`No anime found for MAL ID ${malId}`);
           continue;
         }
-        
+
         const anime = animeArray[0];
-        console.log(`Found anime: ${anime.name}, themes count: ${anime.themes?.length || 0}`);
+        console.log(`Found anime: ${anime.name}, themes count: ${anime.animethemes?.length || 0}`);
 
         // Get OP (Opening) themes, prefer first one
-        const opThemes = anime.themes?.filter(t => t.type === 'OP') || [];
+        // Handle both animethemes (REST) and themes (GraphQL) property names
+        const themesList = anime.animethemes || anime.themes || [];
+        const opThemes = themesList.filter(t => t.type === 'OP') || [];
         console.log(`OP themes found: ${opThemes.length}`);
         
         if (opThemes.length > 0) {
           const theme = opThemes[0];
-          const entry = theme.entries?.[0];
+          // Handle both animethemeentries (REST) and entries (GraphQL) property names
+          const entries = theme.animethemeentries || theme.entries || [];
+          const entry = entries[0];
           
           if (!entry) {
             console.log(`No entries found for theme ${theme.slug}`);
@@ -231,7 +78,7 @@ export default async function handler(req, res) {
           console.log(`Entry videos count: ${entry.videos?.length || 0}`);
           
           // Try to find audio file first, then fallback to video
-          const audioFile = entry?.videos?.find(v => 
+          const audioFile = entry.videos?.find(v => 
             v.tags?.includes('audio') || 
             v.basename?.includes('.mp3') || 
             v.basename?.includes('.m4a') ||
@@ -239,8 +86,8 @@ export default async function handler(req, res) {
           );
           
           const video = audioFile || 
-            entry?.videos?.find(v => v.tags?.includes('720p') || v.tags?.includes('1080p')) || 
-            entry?.videos?.[0];
+            entry.videos?.find(v => v.tags?.includes('720p') || v.tags?.includes('1080p')) || 
+            entry.videos?.[0];
           
           if (video?.link) {
             console.log(`Adding theme for ${anime.name}: ${video.link}`);
@@ -272,4 +119,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to fetch anime themes' });
   }
 }
-
