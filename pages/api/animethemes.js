@@ -17,12 +17,11 @@ export default async function handler(req, res) {
       try {
         console.log(`Fetching themes for MAL ID: ${malId}`);
 
-        // Use REST API endpoint with filters for MAL ID
-        // Include themes, entries, and videos in the response
-        const url = new URL('https://api.animethemes.moe/api/anime');
-        url.searchParams.append('filter[has]', 'resources.mappings');
-        url.searchParams.append('filter[resources.mappings.externalSite]', 'myanimelist');
-        url.searchParams.append('filter[resources.mappings.externalId]', malId.toString());
+        // Use REST API endpoint with correct filters for MAL ID
+        const url = new URL('https://api.animethemes.moe/anime');
+        url.searchParams.append('filter[has]', 'resources');
+        url.searchParams.append('filter[site]', 'MyAnimeList');
+        url.searchParams.append('filter[external_id]', malId.toString());
         url.searchParams.append('include', 'animethemes.animethemeentries.videos');
 
         const response = await fetch(url.toString(), {
@@ -39,73 +38,79 @@ export default async function handler(req, res) {
 
         const data = await response.json();
         
-        // Handle different possible response structures
-        // The API might return { anime: [...] } or { data: { anime: [...] } } or just an array
-        let animeArray = [];
-        if (Array.isArray(data)) {
-          animeArray = data;
-        } else if (data.anime) {
-          animeArray = Array.isArray(data.anime) ? data.anime : [data.anime];
-        } else if (data.data?.anime) {
-          animeArray = Array.isArray(data.data.anime) ? data.data.anime : [data.data.anime];
-        }
-        
-        if (animeArray.length === 0) {
+        // The API returns { anime: [...] }
+        if (!data.anime || !Array.isArray(data.anime) || data.anime.length === 0) {
           console.log(`No anime found for MAL ID ${malId}`);
           continue;
         }
 
-        const anime = animeArray[0];
+        const anime = data.anime[0];
         console.log(`Found anime: ${anime.name}, themes count: ${anime.animethemes?.length || 0}`);
 
-        // Get OP (Opening) themes, prefer first one
-        // Handle both animethemes (REST) and themes (GraphQL) property names
-        const themesList = anime.animethemes || anime.themes || [];
-        const opThemes = themesList.filter(t => t.type === 'OP') || [];
+        // Get OP (Opening) themes
+        const opThemes = anime.animethemes?.filter(t => t.type === 'OP') || [];
         console.log(`OP themes found: ${opThemes.length}`);
         
-        if (opThemes.length > 0) {
-          const theme = opThemes[0];
-          // Handle both animethemeentries (REST) and entries (GraphQL) property names
-          const entries = theme.animethemeentries || theme.entries || [];
-          const entry = entries[0];
-          
-          if (!entry) {
-            console.log(`No entries found for theme ${theme.slug}`);
-            continue;
-          }
-          
-          console.log(`Entry videos count: ${entry.videos?.length || 0}`);
-          
-          // Try to find audio file first, then fallback to video
-          const audioFile = entry.videos?.find(v => 
-            v.tags?.includes('audio') || 
-            v.basename?.includes('.mp3') || 
-            v.basename?.includes('.m4a') ||
-            v.basename?.includes('.ogg')
-          );
-          
-          const video = audioFile || 
-            entry.videos?.find(v => v.tags?.includes('720p') || v.tags?.includes('1080p')) || 
-            entry.videos?.[0];
-          
-          if (video?.link) {
-            console.log(`Adding theme for ${anime.name}: ${video.link}`);
-            themes.push({
-              malId: parseInt(malId),
-              animeName: anime.name,
-              animeSlug: anime.slug,
-              themeSlug: theme.slug,
-              themeType: theme.type,
-              videoUrl: video.link,
-              basename: video.basename,
-              isAudio: !!audioFile
-            });
-          } else {
-            console.log(`No video link found for ${anime.name}`);
-          }
-        } else {
+        if (opThemes.length === 0) {
           console.log(`No OP themes found for ${anime.name}`);
+          continue;
+        }
+
+        // Prefer OP1 (first opening), then OP2, etc.
+        // Try to find a video with filename containing -OP1 first
+        let selectedVideo = null;
+        let selectedTheme = null;
+        
+        // First, try to find OP1 specifically
+        const op1Theme = opThemes.find(t => t.slug === 'OP1') || opThemes[0];
+        
+        if (op1Theme && op1Theme.animethemeentries) {
+          for (const entry of op1Theme.animethemeentries) {
+            if (entry.videos && entry.videos.length > 0) {
+              // Prefer video with filename containing -OP1, otherwise take first
+              selectedVideo = entry.videos.find(v => v.filename && v.filename.includes('-OP1')) || entry.videos[0];
+              if (selectedVideo) {
+                selectedTheme = op1Theme;
+                break;
+              }
+            }
+          }
+        }
+        
+        // If no video found, try other OP themes
+        if (!selectedVideo) {
+          for (const theme of opThemes) {
+            if (theme.animethemeentries) {
+              for (const entry of theme.animethemeentries) {
+                if (entry.videos && entry.videos.length > 0) {
+                  selectedVideo = entry.videos[0];
+                  selectedTheme = theme;
+                  break;
+                }
+              }
+              if (selectedVideo) break;
+            }
+          }
+        }
+        
+        if (selectedVideo && selectedVideo.filename) {
+          // Construct audio URL using filename
+          const audioUrl = `https://api.animethemes.moe/audio/${selectedVideo.filename}.ogg`;
+          
+          console.log(`Adding theme for ${anime.name}: ${audioUrl} (from ${selectedVideo.filename})`);
+          themes.push({
+            malId: parseInt(malId),
+            animeName: anime.name,
+            animeSlug: anime.slug,
+            themeSlug: selectedTheme.slug,
+            themeType: selectedTheme.type,
+            videoUrl: audioUrl,
+            basename: selectedVideo.basename,
+            filename: selectedVideo.filename,
+            isAudio: true
+          });
+        } else {
+          console.log(`No video with filename found for ${anime.name}`);
         }
       } catch (error) {
         console.error(`Error fetching themes for MAL ID ${malId}:`, error);
