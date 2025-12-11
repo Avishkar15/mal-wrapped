@@ -1856,11 +1856,30 @@ export default function MALWrapped() {
           for (const entry of entries) {
             const videos = entry.videos || [];
             if (videos.length > 0) {
-              // Prefer video with filename containing -OP1, otherwise take first
-              selectedVideo = videos.find(v => {
+              // Prefer videos with quality tags (like NCBD1080, BD1080) as they're more likely to have audio versions
+              // Sort by: quality tags first, then by resolution (higher is better)
+              const sortedVideos = [...videos].sort((a, b) => {
+                const aFilename = (a.filename || a.attributes?.filename || '').toLowerCase();
+                const bFilename = (b.filename || b.attributes?.filename || '').toLowerCase();
+                
+                // Prefer videos with quality tags (NCBD, BD, etc.)
+                const aHasQuality = aFilename.includes('-ncbd') || aFilename.includes('-bd') || aFilename.includes('-nc');
+                const bHasQuality = bFilename.includes('-ncbd') || bFilename.includes('-bd') || bFilename.includes('-nc');
+                
+                if (aHasQuality && !bHasQuality) return -1;
+                if (!aHasQuality && bHasQuality) return 1;
+                
+                // If both have or don't have quality tags, sort by resolution
+                const aRes = a.resolution || a.attributes?.resolution || 0;
+                const bRes = b.resolution || b.attributes?.resolution || 0;
+                return bRes - aRes; // Higher resolution first
+              });
+              
+              // Prefer video with filename containing -OP1, otherwise take first from sorted list
+              selectedVideo = sortedVideos.find(v => {
                 const filename = v.filename || v.attributes?.filename;
-                return filename && filename.includes('-OP1');
-              }) || videos[0];
+                return filename && filename.toLowerCase().includes('-op1');
+              }) || sortedVideos[0];
               
               if (selectedVideo) {
                 selectedTheme = op1Theme;
@@ -1876,7 +1895,23 @@ export default function MALWrapped() {
               for (const entry of entries) {
                 const videos = entry.videos || [];
                 if (videos.length > 0) {
-                  selectedVideo = videos[0];
+                  // Sort videos by quality tags and resolution
+                  const sortedVideos = [...videos].sort((a, b) => {
+                    const aFilename = (a.filename || a.attributes?.filename || '').toLowerCase();
+                    const bFilename = (b.filename || b.attributes?.filename || '').toLowerCase();
+                    
+                    const aHasQuality = aFilename.includes('-ncbd') || aFilename.includes('-bd') || aFilename.includes('-nc');
+                    const bHasQuality = bFilename.includes('-ncbd') || bFilename.includes('-bd') || bFilename.includes('-nc');
+                    
+                    if (aHasQuality && !bHasQuality) return -1;
+                    if (!aHasQuality && bHasQuality) return 1;
+                    
+                    const aRes = a.resolution || a.attributes?.resolution || 0;
+                    const bRes = b.resolution || b.attributes?.resolution || 0;
+                    return bRes - aRes;
+                  });
+                  
+                  selectedVideo = sortedVideos[0];
                   selectedTheme = theme;
                   break;
                 }
@@ -1892,10 +1927,56 @@ export default function MALWrapped() {
           const themeType = selectedTheme?.type || selectedTheme?.attributes?.type;
           
           if (selectedVideo && videoFilename) {
-            // Construct audio URL using filename
-            const audioUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
+            // Try to verify audio file exists by checking multiple videos
+            // Start with the selected video, then try others if needed
+            const videosToTry = [selectedVideo];
             
-            console.log(`Adding theme for ${animeName}: ${audioUrl} (from ${videoFilename})`);
+            // If we have multiple videos, add them as fallbacks
+            if (entries.length > 0) {
+              for (const entry of entries) {
+                const allVideos = entry.videos || [];
+                for (const video of allVideos) {
+                  if (video !== selectedVideo && videosToTry.length < 3) {
+                    videosToTry.push(video);
+                  }
+                }
+              }
+            }
+            
+            // Try each video's filename until we find one with audio
+            let audioUrl = null;
+            let confirmedFilename = null;
+            
+            for (const video of videosToTry) {
+              const filename = video.filename || video.attributes?.filename;
+              if (!filename) continue;
+              
+              const testUrl = `https://api.animethemes.moe/audio/${filename}.ogg`;
+              
+              try {
+                // Check if audio file exists with HEAD request
+                const headResponse = await fetch(testUrl, { method: 'HEAD' });
+                if (headResponse.ok) {
+                  audioUrl = testUrl;
+                  confirmedFilename = filename;
+                  console.log(`Found audio file for ${animeName}: ${testUrl}`);
+                  break;
+                }
+              } catch (error) {
+                // Continue to next video
+                continue;
+              }
+            }
+            
+            // If no audio found via HEAD check, use the selected video anyway
+            // (browser will handle 404 gracefully during playback)
+            if (!audioUrl) {
+              audioUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
+              confirmedFilename = videoFilename;
+              console.log(`Using ${audioUrl} for ${animeName} (not verified)`);
+            }
+            
+            console.log(`Adding theme for ${animeName}: ${audioUrl} (from ${confirmedFilename})`);
             themes.push({
               malId: parseInt(malId),
               animeName: animeName,
@@ -1904,7 +1985,7 @@ export default function MALWrapped() {
               themeType: themeType,
               videoUrl: audioUrl,
               basename: videoBasename,
-              filename: videoFilename,
+              filename: confirmedFilename,
               isAudio: true
             });
           }
