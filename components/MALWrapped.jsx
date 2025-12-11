@@ -59,26 +59,26 @@ const fadeIn = {
 // Add your YouTube links below:
 const genreMusicMap = {
   // Action & Adventure
-  'Action': 'https://www.youtube.com/watch?v=FM3aJQzqV90',
+  'Action': 'https://www.youtube.com/watch?v=mpJIBY6eg-8',
   'Adventure': 'https://www.youtube.com/watch?v=IHhNTt3oxtY',
-  'Martial Arts': 'YOUR_MARTIAL_ARTS_VIDEO_ID_OR_URL',
-  'Super Power': 'YOUR_SUPER_POWER_VIDEO_ID_OR_URL',
+  'Martial Arts': 'https://www.youtube.com/watch?v=PyQacNnXFnk',
+  'Super Power': 'https://www.youtube.com/watch?v=gUCmjNHIrcU',
   
   // Comedy & Slice of Life
-  'Comedy': 'YOUR_COMEDY_VIDEO_ID_OR_URL',
-  'Slice of Life': 'YOUR_SLICE_OF_LIFE_VIDEO_ID_OR_URL',
+  'Comedy': 'https://www.youtube.com/watch?v=G3qQtf7jahE',
+  'Slice of Life': 'https://www.youtube.com/watch?v=f7x7WXUtVrY',
   'Parody': 'https://www.youtube.com/watch?v=rHwOE8R-gMA',
   'School': 'YOUR_SCHOOL_VIDEO_ID_OR_URL',
   
   // Drama & Romance
-  'Drama': 'https://www.youtube.com/watch?v=c6rCRy6SrtU',
-  'Romance': 'https://www.youtube.com/watch?v=hoysCCR2TFA',
-  'Harem': 'YOUR_HAREM_VIDEO_ID_OR_URL',
-  'Ecchi': 'YOUR_ECCHI_VIDEO_ID_OR_URL',
+  'Drama': 'https://www.youtube.com/watch?v=FM3aJQzqV90',
+  'Romance': 'https://www.youtube.com/watch?v=fdNRh_PXbbo',
+  'Harem': 'https://www.youtube.com/watch?v=AW7_dqi9X7M',
+  'Ecchi': 'https://www.youtube.com/watch?v=UjZDDtPK4jM',
   
   // Fantasy & Sci-Fi
   'Fantasy': 'https://www.youtube.com/watch?v=6Y1swEeFwYo',
-  'Dark Fantasy': 'YOUR_DARK_FANTASY_VIDEO_ID_OR_URL',
+  'Dark Fantasy': 'https://www.youtube.com/watch?v=2B6nj38AdD0',
   'Sci-Fi': 'https://www.youtube.com/watch?v=ZGM90Bo3zH0',
   'Space': 'https://www.youtube.com/watch?v=UFFa0QoHWvE',
   'Mecha': 'https://www.youtube.com/watch?v=-RRWvHTQjPE',
@@ -86,18 +86,18 @@ const genreMusicMap = {
   
   // Horror & Thriller
   'Horror': 'YOUR_HORROR_VIDEO_ID_OR_URL',
-  'Thriller': 'YOUR_THRILLER_VIDEO_ID_OR_URL',
-  'Gore': 'YOUR_GORE_VIDEO_ID_OR_URL',
-  'Suspense': 'YOUR_SUSPENSE_VIDEO_ID_OR_URL',
+  'Thriller': 'https://www.youtube.com/watch?v=EtGhFQ88mjc',
+  'Gore': 'https://www.youtube.com/watch?v=NMinvWBxmGs',
+  'Suspense': 'https://www.youtube.com/watch?v=rxuR-52cyNw',
   
   // Mystery & Psychological
   'Mystery': 'YOUR_MYSTERY_VIDEO_ID_OR_URL',
-  'Psychological': 'YOUR_PSYCHOLOGICAL_VIDEO_ID_OR_URL',
+  'Psychological': 'https://www.youtube.com/watch?v=wt4af_R6iJk',
   
   // Supernatural & Other
-  'Supernatural': 'YOUR_SUPERNATURAL_VIDEO_ID_OR_URL',
+  'Supernatural': 'https://www.youtube.com/watch?v=sP86J1InpFY',
   'Sports': 'https://www.youtube.com/watch?v=vyLpzI59-Cc',
-  'Music': 'YOUR_MUSIC_VIDEO_ID_OR_URL',
+  'Music': 'https://www.youtube.com/watch?v=cWtgGTCAjYY',
   'Historical': 'https://www.youtube.com/watch?v=oomE4oltFRo',
   'Military': 'https://www.youtube.com/watch?v=WAoPeG1LU1g',
   
@@ -340,7 +340,8 @@ export default function MALWrapped() {
   const topAnimeGenre = stats?.topGenres && stats.topGenres.length > 0 ? stats.topGenres[0][0] : null;
   const topMangaGenre = stats?.topMangaGenres && stats.topMangaGenres.length > 0 ? stats.topMangaGenres[0][0] : null;
   
-  const currentMusicUrl = useMemo(() => {
+  // Determine which genre to use for music based on current section
+  const musicGenre = useMemo(() => {
     if (!stats || !slides || slides.length === 0) return null;
     
     // Check if we're in manga section
@@ -351,24 +352,45 @@ export default function MALWrapped() {
       currentSlideId === 'manga_count'
     );
     
-    // Use top manga genre for manga section, top anime genre for anime section
-    const selectedGenre = isMangaSection ? topMangaGenre : topAnimeGenre;
-    
-    let videoId = null;
-    
-    if (selectedGenre && genreMusicMap[selectedGenre]) {
-      videoId = getYouTubeVideoId(genreMusicMap[selectedGenre]);
-    } else if (Object.keys(genreMusicMap).length > 0) {
-      // Fallback to first available genre
-      videoId = getYouTubeVideoId(Object.values(genreMusicMap)[0]);
+    // Use top manga genre for manga section, top anime genre for anime section (including welcome)
+    return isMangaSection ? topMangaGenre : topAnimeGenre;
+  }, [stats, slides, currentSlide, topAnimeGenre, topMangaGenre]);
+  
+  const currentMusicUrl = useMemo(() => {
+    if (!musicGenre) {
+      // Fallback to first available genre if no top genre
+      if (Object.keys(genreMusicMap).length > 0) {
+        const fallbackVideoId = getYouTubeVideoId(Object.values(genreMusicMap)[0]);
+        return fallbackVideoId ? createYouTubeEmbedUrl(fallbackVideoId) : null;
+      }
+      return null;
     }
     
-    return videoId ? createYouTubeEmbedUrl(videoId) : null;
-  }, [stats, slides, currentSlide, topAnimeGenre, topMangaGenre]);
+    if (genreMusicMap[musicGenre]) {
+      const videoId = getYouTubeVideoId(genreMusicMap[musicGenre]);
+      return videoId ? createYouTubeEmbedUrl(videoId) : null;
+    }
+    
+    // Fallback to first available genre
+    if (Object.keys(genreMusicMap).length > 0) {
+      const fallbackVideoId = getYouTubeVideoId(Object.values(genreMusicMap)[0]);
+      return fallbackVideoId ? createYouTubeEmbedUrl(fallbackVideoId) : null;
+    }
+    
+    return null;
+  }, [musicGenre]);
 
   // Background music using YouTube iframe
+  // Only change music when URL changes (e.g., transitioning between anime/manga), not on every slide
+  const previousMusicUrlRef = useRef(null);
+  
   useEffect(() => {
-    if (!currentMusicUrl || currentSlide === 0) return;
+    if (!currentMusicUrl) return;
+    
+    // Only recreate iframe if music URL actually changed
+    if (previousMusicUrlRef.current === currentMusicUrl && youtubePlayerRef.current) {
+      return; // Keep playing the same music
+    }
     
     // Remove old iframe if exists
     if (youtubePlayerRef.current) {
@@ -384,8 +406,17 @@ export default function MALWrapped() {
     iframe.id = 'youtube-music-player';
     document.body.appendChild(iframe);
     youtubePlayerRef.current = iframe;
+    previousMusicUrlRef.current = currentMusicUrl;
     setIsMusicPlaying(true);
     
+    return () => {
+      // Only cleanup on unmount, not when URL changes
+      // This allows music to continue playing across slides
+    };
+  }, [currentMusicUrl]);
+  
+  // Cleanup on component unmount
+  useEffect(() => {
     return () => {
       if (youtubePlayerRef.current) {
         youtubePlayerRef.current.remove();
@@ -393,7 +424,7 @@ export default function MALWrapped() {
         setIsMusicPlaying(false);
       }
     };
-  }, [currentMusicUrl, currentSlide]);
+  }, []);
 
   // Get website URL for watermark
   const websiteUrl = useMemo(() => {
