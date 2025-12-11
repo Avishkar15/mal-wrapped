@@ -1808,7 +1808,12 @@ export default function MALWrapped() {
           });
 
           if (!response.ok) {
-            console.error(`Failed to fetch themes for MAL ID ${malId}: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
+            console.error(`URL: ${url.toString()}`);
+            if (errorText) {
+              console.error(`Error response: ${errorText.substring(0, 500)}`);
+            }
             continue;
           }
 
