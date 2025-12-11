@@ -1779,7 +1779,7 @@ export default function MALWrapped() {
     }
   }
 
-  // Fetch anime themes from animethemes.moe
+  // Fetch anime themes from animethemes.moe (client-side to avoid Cloudflare blocking)
   async function fetchAnimeThemes(topRatedAnime) {
     try {
       const malIds = topRatedAnime
@@ -1789,21 +1789,129 @@ export default function MALWrapped() {
       
       if (malIds.length === 0) return;
       
-      const response = await fetch('/api/animethemes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ malIds })
-      });
+      const themes = [];
       
-      if (!response.ok) {
-        console.error('Failed to fetch anime themes');
-        return;
+      // Fetch themes directly from animethemes.moe API (client-side)
+      for (const malId of malIds) {
+        try {
+          const url = new URL('https://api.animethemes.moe/anime');
+          url.searchParams.append('filter[has]', 'resources');
+          url.searchParams.append('filter[site]', 'MyAnimeList');
+          url.searchParams.append('filter[external_id]', malId.toString());
+          url.searchParams.append('include', 'animethemes.animethemeentries.videos');
+
+          const response = await fetch(url.toString(), {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            console.error(`Failed to fetch themes for MAL ID ${malId}: ${response.statusText}`);
+            continue;
+          }
+
+          const data = await response.json();
+          
+          // The API returns { anime: [...] }
+          if (!data.anime || !Array.isArray(data.anime) || data.anime.length === 0) {
+            console.log(`No anime found for MAL ID ${malId}`);
+            continue;
+          }
+
+          const anime = data.anime[0];
+          const animeName = anime.name || anime.attributes?.name;
+          const animeSlug = anime.slug || anime.attributes?.slug;
+
+          // Get OP (Opening) themes
+          const animethemes = anime.animethemes || [];
+          const opThemes = animethemes.filter(t => {
+            const type = t.type || t.attributes?.type;
+            return type === 'OP';
+          });
+          
+          if (opThemes.length === 0) {
+            console.log(`No OP themes found for ${animeName}`);
+            continue;
+          }
+
+          // Prefer OP1 (first opening)
+          let selectedVideo = null;
+          let selectedTheme = null;
+          
+          const op1Theme = opThemes.find(t => {
+            const slug = t.slug || t.attributes?.slug;
+            return slug === 'OP1';
+          }) || opThemes[0];
+          
+          // Get entries
+          const entries = op1Theme.animethemeentries || [];
+          
+          for (const entry of entries) {
+            const videos = entry.videos || [];
+            if (videos.length > 0) {
+              // Prefer video with filename containing -OP1, otherwise take first
+              selectedVideo = videos.find(v => {
+                const filename = v.filename || v.attributes?.filename;
+                return filename && filename.includes('-OP1');
+              }) || videos[0];
+              
+              if (selectedVideo) {
+                selectedTheme = op1Theme;
+                break;
+              }
+            }
+          }
+          
+          // If no video found in OP1, try other OP themes
+          if (!selectedVideo) {
+            for (const theme of opThemes) {
+              const entries = theme.animethemeentries || [];
+              for (const entry of entries) {
+                const videos = entry.videos || [];
+                if (videos.length > 0) {
+                  selectedVideo = videos[0];
+                  selectedTheme = theme;
+                  break;
+                }
+              }
+              if (selectedVideo) break;
+            }
+          }
+          
+          // Extract filename and construct audio URL
+          const videoFilename = selectedVideo?.filename || selectedVideo?.attributes?.filename;
+          const videoBasename = selectedVideo?.basename || selectedVideo?.attributes?.basename;
+          const themeSlug = selectedTheme?.slug || selectedTheme?.attributes?.slug;
+          const themeType = selectedTheme?.type || selectedTheme?.attributes?.type;
+          
+          if (selectedVideo && videoFilename) {
+            // Construct audio URL using filename
+            const audioUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
+            
+            console.log(`Adding theme for ${animeName}: ${audioUrl} (from ${videoFilename})`);
+            themes.push({
+              malId: parseInt(malId),
+              animeName: animeName,
+              animeSlug: animeSlug,
+              themeSlug: themeSlug,
+              themeType: themeType,
+              videoUrl: audioUrl,
+              basename: videoBasename,
+              filename: videoFilename,
+              isAudio: true
+            });
+          }
+        } catch (error) {
+          console.error(`Error fetching themes for MAL ID ${malId}:`, error);
+          continue;
+        }
       }
       
-      const data = await response.json();
-      console.log('Fetched themes:', data.themes);
-      if (data.themes && data.themes.length > 0) {
-        setPlaylist(data.themes);
+      console.log('Fetched themes:', themes);
+      if (themes.length > 0) {
+        setPlaylist(themes);
         // Don't auto-play - wait for user interaction
         // User can click play button to start music
       } else {
