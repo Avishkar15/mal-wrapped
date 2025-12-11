@@ -28,11 +28,15 @@ export default async function handler(req, res) {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           },
         });
 
         if (!response.ok) {
-          console.error(`Failed to fetch themes for MAL ID ${malId}: ${response.statusText}`);
+          const errorText = await response.text();
+          console.error(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
+          console.error(`Error response: ${errorText.substring(0, 500)}`);
+          console.error(`Request URL: ${url.toString()}`);
           continue;
         }
 
@@ -61,7 +65,7 @@ export default async function handler(req, res) {
           console.log(`No anime found for MAL ID ${malId}. Response keys:`, Object.keys(data));
           continue;
         }
-
+        
         const anime = animeArray[0];
         console.log(`Found anime: ${anime.name || anime.attributes?.name || 'Unknown'}, themes count: ${(anime.animethemes || anime.relationships?.animethemes?.data || []).length}`);
         console.log(`Anime keys:`, Object.keys(anime));
@@ -93,9 +97,9 @@ export default async function handler(req, res) {
         
         if (opThemes.length === 0) {
           console.log(`No OP themes found for ${anime.name}`);
-          continue;
-        }
-
+            continue;
+          }
+          
         // Prefer OP1 (first opening), then OP2, etc.
         // Try to find a video with filename containing -OP1 first
         let selectedVideo = null;
@@ -212,8 +216,8 @@ export default async function handler(req, res) {
           const audioUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
           
           console.log(`Adding theme for ${animeName}: ${audioUrl} (from ${videoFilename})`);
-          themes.push({
-            malId: parseInt(malId),
+            themes.push({
+              malId: parseInt(malId),
             animeName: animeName,
             animeSlug: animeSlug,
             themeSlug: themeSlug,
