@@ -224,6 +224,8 @@ export default function MALWrapped() {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [playlist, setPlaylist] = useState([]);
+  const [pendingMalIds, setPendingMalIds] = useState([]);
+  const [currentMalIdIndex, setCurrentMalIdIndex] = useState(0);
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
   const audioRef = useRef(null);
@@ -1779,8 +1781,244 @@ export default function MALWrapped() {
     }
   }
 
-  // Fetch anime themes from animethemes.moe (client-side to avoid Cloudflare blocking)
+  // Fetch a single anime theme (lazy loading to avoid rate limits)
+  async function fetchSingleAnimeTheme(malId) {
+    try {
+      const url = new URL('https://api.animethemes.moe/anime');
+      url.searchParams.append('filter[has]', 'resources');
+      url.searchParams.append('filter[site]', 'MyAnimeList');
+      url.searchParams.append('filter[external_id]', malId.toString());
+      url.searchParams.append('include', 'animethemes.animethemeentries.videos');
+
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
+        return null;
+      }
+
+      const data = await response.json();
+      
+      // The API returns { anime: [...] }
+      if (!data.anime || !Array.isArray(data.anime) || data.anime.length === 0) {
+        console.log(`No anime found for MAL ID ${malId}`);
+        return null;
+      }
+
+      const anime = data.anime[0];
+      const animeName = anime.name || anime.attributes?.name;
+      const animeSlug = anime.slug || anime.attributes?.slug;
+
+      // Get OP (Opening) themes
+      const animethemes = anime.animethemes || [];
+      const opThemes = animethemes.filter(t => {
+        const type = t.type || t.attributes?.type;
+        return type === 'OP';
+      });
+      
+      if (opThemes.length === 0) {
+        console.log(`No OP themes found for ${animeName}`);
+        return null;
+      }
+
+      // Prefer OP1 (first opening)
+      let selectedVideo = null;
+      let selectedTheme = null;
+      
+      const op1Theme = opThemes.find(t => {
+        const slug = t.slug || t.attributes?.slug;
+        return slug === 'OP1';
+      }) || opThemes[0];
+      
+      // Get entries
+      const entries = op1Theme.animethemeentries || [];
+      
+      for (const entry of entries) {
+        const videos = entry.videos || [];
+        if (videos.length > 0) {
+          // Prefer videos with quality tags (like NCBD1080, BD1080) as they're more likely to have audio versions
+          // Sort by: quality tags first, then by resolution (higher is better)
+          const sortedVideos = [...videos].sort((a, b) => {
+            const aFilename = (a.filename || a.attributes?.filename || '').toLowerCase();
+            const bFilename = (b.filename || b.attributes?.filename || '').toLowerCase();
+            
+            // Prefer videos with quality tags (NCBD, BD, etc.)
+            const aHasQuality = aFilename.includes('-ncbd') || aFilename.includes('-bd') || aFilename.includes('-nc');
+            const bHasQuality = bFilename.includes('-ncbd') || bFilename.includes('-bd') || bFilename.includes('-nc');
+            
+            if (aHasQuality && !bHasQuality) return -1;
+            if (!aHasQuality && bHasQuality) return 1;
+            
+            // If both have or don't have quality tags, sort by resolution
+            const aRes = a.resolution || a.attributes?.resolution || 0;
+            const bRes = b.resolution || b.attributes?.resolution || 0;
+            return bRes - aRes; // Higher resolution first
+          });
+          
+          // Prefer video with filename containing -OP1, otherwise take first from sorted list
+          selectedVideo = sortedVideos.find(v => {
+            const filename = v.filename || v.attributes?.filename;
+            return filename && filename.toLowerCase().includes('-op1');
+          }) || sortedVideos[0];
+          
+          if (selectedVideo) {
+            selectedTheme = op1Theme;
+            break;
+          }
+        }
+      }
+      
+      // If no video found in OP1, try other OP themes
+      if (!selectedVideo) {
+        for (const theme of opThemes) {
+          const entries = theme.animethemeentries || [];
+          for (const entry of entries) {
+            const videos = entry.videos || [];
+            if (videos.length > 0) {
+              // Sort videos by quality tags and resolution
+              const sortedVideos = [...videos].sort((a, b) => {
+                const aFilename = (a.filename || a.attributes?.filename || '').toLowerCase();
+                const bFilename = (b.filename || b.attributes?.filename || '').toLowerCase();
+                
+                const aHasQuality = aFilename.includes('-ncbd') || aFilename.includes('-bd') || aFilename.includes('-nc');
+                const bHasQuality = bFilename.includes('-ncbd') || bFilename.includes('-bd') || bFilename.includes('-nc');
+                
+                if (aHasQuality && !bHasQuality) return -1;
+                if (!aHasQuality && bHasQuality) return 1;
+                
+                const aRes = a.resolution || a.attributes?.resolution || 0;
+                const bRes = b.resolution || b.attributes?.resolution || 0;
+                return bRes - aRes;
+              });
+              
+              selectedVideo = sortedVideos[0];
+              selectedTheme = theme;
+              break;
+            }
+          }
+          if (selectedVideo) break;
+        }
+      }
+      
+      // Extract filename and construct audio URL
+      const videoFilename = selectedVideo?.filename || selectedVideo?.attributes?.filename;
+      const videoBasename = selectedVideo?.basename || selectedVideo?.attributes?.basename;
+      const themeSlug = selectedTheme?.slug || selectedTheme?.attributes?.slug;
+      const themeType = selectedTheme?.type || selectedTheme?.attributes?.type;
+      
+      if (selectedVideo && videoFilename) {
+        // Only use audio files (video files have CORS restrictions)
+        // Try audio file only for the selected video (one HEAD request max per anime)
+        let audioUrl = null;
+        let confirmedFilename = videoFilename;
+        
+        // Try audio file only for the selected video (to minimize API calls)
+        const testUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
+        
+        try {
+          // Single HEAD request to check if audio exists (rate limit friendly)
+          const headResponse = await fetch(testUrl, { method: 'HEAD' });
+          if (headResponse.ok && headResponse.headers.get('content-length')) {
+            const contentLength = parseInt(headResponse.headers.get('content-length') || '0');
+            if (contentLength > 0) {
+              audioUrl = testUrl;
+              console.log(`Found audio file for ${animeName}: ${testUrl}`);
+            }
+          }
+        } catch (error) {
+          // If HEAD request fails, audio file likely doesn't exist
+          console.log(`Audio file not available for ${animeName}`);
+        }
+        
+        // Only return theme if we found an audio file (skip if none available due to CORS)
+        if (!audioUrl) {
+          console.log(`Skipping ${animeName} - no audio file available`);
+          return null;
+        }
+        
+        console.log(`Found theme for ${animeName}: ${audioUrl} (from ${confirmedFilename})`);
+        
+        return {
+          malId: parseInt(malId),
+          animeName: animeName,
+          animeSlug: animeSlug,
+          themeSlug: themeSlug,
+          themeType: themeType,
+          videoUrl: audioUrl,
+          basename: videoBasename,
+          filename: confirmedFilename,
+          isAudio: true
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.error(`Error fetching theme for MAL ID ${malId}:`, error);
+      return null;
+    }
+  }
+
+  // Initialize and fetch first theme
   async function fetchAnimeThemes(topRatedAnime) {
+    try {
+      const malIds = topRatedAnime
+        .slice(0, 5)
+        .map(item => item.node?.id)
+        .filter(id => id != null);
+      
+      if (malIds.length === 0) return;
+      
+      // Store MAL IDs for lazy loading
+      setPendingMalIds(malIds);
+      setCurrentMalIdIndex(0);
+      
+      // Fetch first theme immediately
+      const firstTheme = await fetchSingleAnimeTheme(malIds[0]);
+      if (firstTheme) {
+        setPlaylist([firstTheme]);
+        // Auto-play first track after a short delay
+        setTimeout(() => {
+          playTrack(0, [firstTheme]);
+        }, 1000);
+      } else {
+        // If first theme failed, try next one
+        fetchNextTheme(1, malIds);
+      }
+    } catch (error) {
+      console.error('Error initializing anime themes:', error);
+    }
+  }
+
+  // Fetch next theme when current track ends
+  const fetchNextTheme = useCallback(async (nextIndex, malIds = null) => {
+    const idsToUse = malIds || pendingMalIds;
+    if (!idsToUse || idsToUse.length === 0) return null;
+    
+    if (nextIndex >= idsToUse.length) {
+      console.log('All themes fetched');
+      return null;
+    }
+    
+    // Small delay to avoid rate limiting
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const nextTheme = await fetchSingleAnimeTheme(idsToUse[nextIndex]);
+    if (nextTheme) {
+      return nextTheme;
+    } else {
+      // If this theme failed, try next one
+      return fetchNextTheme(nextIndex + 1, idsToUse);
+    }
+  }, [pendingMalIds]);
+  
+  // Original fetchAnimeThemes code (keeping for reference but not used)
+  async function fetchAnimeThemes_OLD(topRatedAnime) {
     try {
       const malIds = topRatedAnime
         .slice(0, 5)
@@ -1812,9 +2050,9 @@ export default function MALWrapped() {
             headers: {
               'Accept': 'application/json',
             },
-          });
-
-          if (!response.ok) {
+      });
+      
+      if (!response.ok) {
             const errorText = await response.text();
             console.error(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
             console.error(`URL: ${url.toString()}`);
@@ -1822,9 +2060,9 @@ export default function MALWrapped() {
               console.error(`Error response: ${errorText.substring(0, 500)}`);
             }
             continue;
-          }
-
-          const data = await response.json();
+      }
+      
+      const data = await response.json();
           
           // The API returns { anime: [...] }
           if (!data.anime || !Array.isArray(data.anime) || data.anime.length === 0) {
@@ -1934,46 +2172,33 @@ export default function MALWrapped() {
           const themeType = selectedTheme?.type || selectedTheme?.attributes?.type;
           
           if (selectedVideo && videoFilename) {
-            // Get the original video link (videos have audio tracks)
-            const originalVideoLink = selectedVideo?.link || selectedVideo?.attributes?.link;
-            
-            // To avoid rate limits, just use video file directly (it has audio tracks)
-            // Only try audio file for the selected video (one HEAD request max per anime)
+            // Only use audio files (video files have CORS restrictions)
+            // Try audio file only for the selected video (one HEAD request max per anime)
             let audioUrl = null;
             let confirmedFilename = videoFilename;
-            let usingAudioEndpoint = false;
             
             // Try audio file only for the selected video (to minimize API calls)
-            if (videoFilename) {
-              const testUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
-              
-              try {
-                // Single HEAD request to check if audio exists (rate limit friendly)
-                const headResponse = await fetch(testUrl, { method: 'HEAD' });
-                if (headResponse.ok && headResponse.headers.get('content-length')) {
-                  const contentLength = parseInt(headResponse.headers.get('content-length') || '0');
-                  if (contentLength > 0) {
-                    audioUrl = testUrl;
-                    usingAudioEndpoint = true;
-                    console.log(`Found audio file for ${animeName}: ${testUrl}`);
-                  }
+            const testUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
+            
+            try {
+              // Single HEAD request to check if audio exists (rate limit friendly)
+              const headResponse = await fetch(testUrl, { method: 'HEAD' });
+              if (headResponse.ok && headResponse.headers.get('content-length')) {
+                const contentLength = parseInt(headResponse.headers.get('content-length') || '0');
+                if (contentLength > 0) {
+                  audioUrl = testUrl;
+                  console.log(`Found audio file for ${animeName}: ${testUrl}`);
                 }
-              } catch (error) {
-                // If HEAD request fails, just use video (silent fallback)
-                console.log(`Audio check failed for ${animeName}, using video file`);
               }
+            } catch (error) {
+              // If HEAD request fails, audio file likely doesn't exist
+              console.log(`Audio file not available for ${animeName}`);
             }
             
-            // Fallback to video file (always works, has audio track)
-            if (!audioUrl && originalVideoLink) {
-              audioUrl = originalVideoLink;
-              usingAudioEndpoint = false;
-              console.log(`Using video file for ${animeName}: ${originalVideoLink}`);
-            } else if (!audioUrl) {
-              // Last resort: construct audio URL (will be tried during playback)
-              audioUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
-              usingAudioEndpoint = true;
-              console.log(`Using audio URL for ${animeName}: ${audioUrl}`);
+            // Only add theme if we found an audio file (skip if none available)
+            if (!audioUrl) {
+              console.log(`Skipping ${animeName} - no audio file available`);
+              continue; // Skip this anime
             }
             
             console.log(`Adding theme for ${animeName}: ${audioUrl} (from ${confirmedFilename})`);
@@ -1985,10 +2210,9 @@ export default function MALWrapped() {
               themeSlug: themeSlug,
               themeType: themeType,
               videoUrl: audioUrl,
-              originalVideoLink: originalVideoLink, // Store original video link for fallback
               basename: videoBasename,
               filename: confirmedFilename,
-              isAudio: usingAudioEndpoint // Only true if using audio endpoint
+              isAudio: true // Always true since we only use audio files
             });
           }
         } catch (error) {
@@ -2049,76 +2273,53 @@ export default function MALWrapped() {
       console.log('Media loaded:', track.animeName, isAudio ? '(audio)' : '(video)');
     });
     
-    mediaElement.addEventListener('ended', () => {
+    mediaElement.addEventListener('ended', async () => {
       // Play next track
-      const nextIndex = (index + 1) % tracksToUse.length;
-      playTrack(nextIndex, tracksToUse);
+      const nextIndex = index + 1;
+      
+      // If we have the next track in playlist, play it
+      if (nextIndex < tracksToUse.length) {
+        playTrack(nextIndex, tracksToUse);
+      } else {
+        // Need to fetch next theme
+        const idsToUse = pendingMalIds.length > 0 ? pendingMalIds : [];
+        if (idsToUse.length > nextIndex) {
+          console.log(`Fetching next theme (index ${nextIndex})...`);
+          // Fetch next theme
+          const nextTheme = await fetchNextTheme(nextIndex, idsToUse);
+          if (nextTheme) {
+            // Add to playlist and play
+            setPlaylist(prev => {
+              const newPlaylist = [...prev, nextTheme];
+              setTimeout(() => {
+                playTrack(nextIndex, newPlaylist);
+              }, 100);
+              return newPlaylist;
+            });
+          } else {
+            // No more tracks available
+            console.log('No more themes available');
+            setIsMusicPlaying(false);
+          }
+        } else {
+          // No more tracks, stop playback
+          console.log('Reached end of playlist');
+          setIsMusicPlaying(false);
+        }
+      }
     });
     
     mediaElement.addEventListener('error', (e) => {
       console.error('Media playback error:', e, track);
       console.error('Media element error details:', mediaElement.error);
       
-      // If audio failed and we have a video link, try using video instead
-      if (isAudio && track.originalVideoLink && mediaElement.error?.code === 4) {
-        console.log(`Audio playback failed for ${track.animeName}, trying video link instead`);
-        // Clean up failed audio element
-        if (mediaElement.parentNode) {
-          mediaElement.parentNode.removeChild(mediaElement);
-        }
-        
-        // Try video instead
-        const videoElement = document.createElement('video');
-        videoElement.src = track.originalVideoLink;
-        videoElement.volume = 0.3;
-        videoElement.crossOrigin = 'anonymous';
-        videoElement.preload = 'auto';
-        videoElement.style.display = 'none';
-        videoElement.muted = false; // Ensure audio plays
-        document.body.appendChild(videoElement);
-        
-        audioRef.current = videoElement;
-        
-        videoElement.addEventListener('canplay', () => {
-          videoElement.play().then(() => {
-            console.log('Playing video as audio:', track.animeName);
-            setIsMusicPlaying(true);
-          }).catch(err => {
-            console.error('Failed to play video:', err);
-            // Try next track
-            const nextIndex = (index + 1) % tracksToUse.length;
-            if (nextIndex !== index) {
-              playTrack(nextIndex, tracksToUse);
-            } else {
-              setIsMusicPlaying(false);
-            }
-          });
-        });
-        
-        videoElement.addEventListener('ended', () => {
-          const nextIndex = (index + 1) % tracksToUse.length;
-          playTrack(nextIndex, tracksToUse);
-        });
-        
-        videoElement.addEventListener('error', () => {
-          // Video also failed, try next track
-          const nextIndex = (index + 1) % tracksToUse.length;
-          if (nextIndex !== index) {
-            playTrack(nextIndex, tracksToUse);
-          } else {
-            setIsMusicPlaying(false);
-          }
-        });
-        
-        videoElement.load();
-        return;
-      }
-      
-      // Try next track on error
+      // Skip to next track on error (audio files only, no video fallback due to CORS)
       const nextIndex = (index + 1) % tracksToUse.length;
       if (nextIndex !== index) {
+        console.log(`Skipping to next track due to playback error`);
         playTrack(nextIndex, tracksToUse);
       } else {
+        console.log(`No more tracks available`);
         setIsMusicPlaying(false);
       }
     });
@@ -2144,7 +2345,7 @@ export default function MALWrapped() {
     
     // Start loading
     mediaElement.load();
-  }, [playlist]);
+  }, [playlist, pendingMalIds, fetchNextTheme]);
 
   // Toggle music play/pause
   const toggleMusic = useCallback(() => {
