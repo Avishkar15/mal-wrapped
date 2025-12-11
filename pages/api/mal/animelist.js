@@ -33,7 +33,8 @@ export default async function handler(req, res) {
         'title',
         'main_picture',
         'id',
-        'num_episodes'
+        'num_episodes',
+        'opening_themes'
       ].join(',');
       
       const response = await fetch(

@@ -273,6 +273,7 @@ export default function MALWrapped() {
   const [emailCopied, setEmailCopied] = useState(false);
   const [authorPhotos, setAuthorPhotos] = useState({});
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [openingThemeVideoId, setOpeningThemeVideoId] = useState(null);
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
   const backgroundMusicRef = useRef(null);
@@ -296,10 +297,84 @@ export default function MALWrapped() {
   };
   
   // Helper to create YouTube embed URL
-  const createYouTubeEmbedUrl = (videoId) => {
+  const createYouTubeEmbedUrl = (videoId, muted = false) => {
     if (!videoId) return null;
-    return `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&mute=0&enablejsapi=1`;
+    const muteParam = muted ? '1' : '0';
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&mute=${muteParam}&enablejsapi=1`;
   };
+  
+  // State to cache opening theme YouTube IDs
+  const openingThemeCacheRef = useRef(new Map());
+  const openingThemeLoadingRef = useRef(new Set());
+  
+  // Function to search YouTube for opening theme
+  const searchYouTubeOpening = async (openingName, animeTitle) => {
+    if (!openingName || !animeTitle) return null;
+    
+    const cacheKey = `${animeTitle}-${openingName}`;
+    
+    // Check cache first
+    if (openingThemeCacheRef.current.has(cacheKey)) {
+      return openingThemeCacheRef.current.get(cacheKey);
+    }
+    
+    // Prevent duplicate searches
+    if (openingThemeLoadingRef.current.has(cacheKey)) {
+      return null;
+    }
+    
+    try {
+      openingThemeLoadingRef.current.add(cacheKey);
+      
+      // Create search query: "anime title opening theme name"
+      const searchQuery = `${animeTitle} ${openingName} opening`.trim();
+      
+      // Call backend API to search YouTube
+      const response = await fetch(`/api/youtube/search?q=${encodeURIComponent(searchQuery)}`);
+      const data = await response.json();
+      
+      if (data.videoId) {
+        openingThemeCacheRef.current.set(cacheKey, data.videoId);
+        return data.videoId;
+      }
+      
+      return null;
+    } catch (error) {
+      return null;
+    } finally {
+      openingThemeLoadingRef.current.delete(cacheKey);
+    }
+  };
+  
+  // Function to get opening theme from top 5 anime
+  const getTop5OpeningTheme = useCallback(async () => {
+    if (!stats?.topRated || stats.topRated.length === 0) return null;
+    
+    const top5Anime = stats.topRated.slice(0, 5);
+    
+    // Try to find opening theme from top 5 anime
+    for (const animeItem of top5Anime) {
+      const anime = animeItem.node;
+      const animeTitle = anime?.title || '';
+      const openingThemes = anime?.opening_themes || [];
+      
+      if (openingThemes.length > 0) {
+        // Get first opening theme
+        const firstOpening = openingThemes[0];
+        // opening_themes can be an array of strings or objects with text property
+        const openingName = typeof firstOpening === 'string' ? firstOpening : (firstOpening?.text || firstOpening?.name || '');
+        
+        if (openingName && animeTitle) {
+          const videoId = await searchYouTubeOpening(openingName, animeTitle);
+          if (videoId) {
+            return videoId;
+          }
+        }
+      }
+    }
+    
+    return null;
+  }, [stats]);
 
   const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
   const hasManga = stats && mangaList && mangaList.length > 0;
@@ -361,8 +436,69 @@ export default function MALWrapped() {
   const lastGenreRef = useRef(null);
   const lastMusicUrlRef = useRef(null);
   
+  // Check if we're in manga section
+  const isMangaSection = useMemo(() => {
+    if (!stats || !slides || slides.length === 0) return false;
+    const currentSlideId = slides[currentSlide]?.id;
+    return currentSlideId && (
+      currentSlideId.includes('manga') || 
+      currentSlideId === 'anime_to_manga_transition' ||
+      currentSlideId === 'manga_count'
+    );
+  }, [stats, slides, currentSlide]);
+  
+  // Load opening theme from top 5 anime (only for anime section)
+  useEffect(() => {
+    if (isMangaSection || !stats?.topRated || stats.topRated.length === 0) {
+      if (openingThemeVideoId !== null) {
+        setOpeningThemeVideoId(null);
+      }
+      return;
+    }
+    
+    // Only load if we haven't loaded it yet
+    if (openingThemeVideoId === null) {
+      getTop5OpeningTheme().then(videoId => {
+        if (videoId) {
+          setOpeningThemeVideoId(videoId);
+        }
+      });
+    }
+  }, [stats?.topRated, isMangaSection, getTop5OpeningTheme, openingThemeVideoId]);
+  
   const currentMusicUrl = useMemo(() => {
-    // If genre hasn't changed, return the cached URL
+    // If we're in manga section, use genre-based music
+    if (isMangaSection) {
+      if (musicGenre === lastGenreRef.current && lastMusicUrlRef.current) {
+        return lastMusicUrlRef.current;
+      }
+      
+      let videoId = null;
+      if (musicGenre && genreMusicMap[musicGenre]) {
+        videoId = getYouTubeVideoId(genreMusicMap[musicGenre]);
+      }
+      
+      if (!videoId && Object.keys(genreMusicMap).length > 0) {
+        for (const [genre, url] of Object.entries(genreMusicMap)) {
+          if (url && url !== `YOUR_${genre.toUpperCase().replace(/\s+/g, '_')}_VIDEO_ID_OR_URL`) {
+            videoId = getYouTubeVideoId(url);
+            if (videoId) break;
+          }
+        }
+      }
+      
+      const musicUrl = videoId ? createYouTubeEmbedUrl(videoId) : null;
+      lastGenreRef.current = musicGenre;
+      lastMusicUrlRef.current = musicUrl;
+      return musicUrl;
+    }
+    
+    // For anime section: prioritize opening themes from top 5
+    if (openingThemeVideoId) {
+      return createYouTubeEmbedUrl(openingThemeVideoId);
+    }
+    
+    // Fallback to genre-based music
     if (musicGenre === lastGenreRef.current && lastMusicUrlRef.current) {
       return lastMusicUrlRef.current;
     }
@@ -391,7 +527,7 @@ export default function MALWrapped() {
     lastMusicUrlRef.current = musicUrl;
     
     return musicUrl;
-  }, [musicGenre]);
+  }, [musicGenre, isMangaSection, openingThemeVideoId]);
 
   // Background music using YouTube iframe
   // Only change music when URL changes (e.g., transitioning between anime/manga), not on every slide
@@ -405,16 +541,28 @@ export default function MALWrapped() {
         if (url && url !== `YOUR_${genre.toUpperCase().replace(/\s+/g, '_')}_VIDEO_ID_OR_URL`) {
           const fallbackVideoId = getYouTubeVideoId(url);
           if (fallbackVideoId) {
-            const fallbackUrl = createYouTubeEmbedUrl(fallbackVideoId);
             const iframe = document.createElement('iframe');
-            iframe.src = fallbackUrl;
+            iframe.src = createYouTubeEmbedUrl(fallbackVideoId, true); // Start muted
             iframe.style.display = 'none';
             iframe.allow = 'autoplay; encrypted-media';
             iframe.id = 'youtube-music-player';
             document.body.appendChild(iframe);
             youtubePlayerRef.current = iframe;
-            previousMusicUrlRef.current = fallbackUrl;
+            previousMusicUrlRef.current = createYouTubeEmbedUrl(fallbackVideoId, false);
             setIsMusicPlaying(true);
+            
+            // Unmute after iframe loads
+            const unmuteTimer = setTimeout(() => {
+              try {
+                if (iframe.contentWindow && iframe.contentWindow.postMessage) {
+                  iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":[]}', '*');
+                  iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[50]}', '*');
+                }
+              } catch (e) {
+                iframe.src = createYouTubeEmbedUrl(fallbackVideoId, false);
+              }
+            }, 2000);
+            iframe._unmuteTimer = unmuteTimer;
             break;
           }
         }
@@ -435,9 +583,27 @@ export default function MALWrapped() {
       youtubePlayerRef.current = null;
     }
     
-    // Create YouTube iframe for background music
+    // Extract video ID from URL to create muted version for autoplay
+    const videoIdMatch = currentMusicUrl.match(/embed\/([a-zA-Z0-9_-]+)/);
+    if (!videoIdMatch || !videoIdMatch[1]) {
+      // Fallback: use URL directly (might not autoplay)
+      const iframe = document.createElement('iframe');
+      iframe.src = currentMusicUrl;
+      iframe.style.display = 'none';
+      iframe.allow = 'autoplay; encrypted-media';
+      iframe.id = 'youtube-music-player';
+      document.body.appendChild(iframe);
+      youtubePlayerRef.current = iframe;
+      previousMusicUrlRef.current = currentMusicUrl;
+      setIsMusicPlaying(true);
+      return;
+    }
+    
+    const videoId = videoIdMatch[1];
+    
+    // Create YouTube iframe for background music - start muted for autoplay
     const iframe = document.createElement('iframe');
-    iframe.src = currentMusicUrl;
+    iframe.src = createYouTubeEmbedUrl(videoId, true); // Start muted
     iframe.style.display = 'none';
     iframe.allow = 'autoplay; encrypted-media';
     iframe.id = 'youtube-music-player';
@@ -446,12 +612,57 @@ export default function MALWrapped() {
     previousMusicUrlRef.current = currentMusicUrl;
     setIsMusicPlaying(true);
     
+    // Unmute after iframe loads (allows autoplay, then unmutes)
+    const unmuteTimer = setTimeout(() => {
+      try {
+        if (iframe.contentWindow && iframe.contentWindow.postMessage) {
+          // Unmute using YouTube IFrame API
+          iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":[]}', '*');
+          iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[50]}', '*');
+        }
+      } catch (e) {
+        // If API doesn't work, try updating src to unmuted version
+        iframe.src = createYouTubeEmbedUrl(videoId, false);
+      }
+    }, 2000); // Wait 2 seconds for iframe to load
+    
+    // Store timer for cleanup
+    iframe._unmuteTimer = unmuteTimer;
+    
     return () => {
+      // Cleanup unmute timer if it exists
+      if (iframe._unmuteTimer) {
+        clearTimeout(iframe._unmuteTimer);
+        iframe._unmuteTimer = null;
+      }
       // Only cleanup on unmount, not when URL changes
       // This allows music to continue playing across slides
     };
   }, [currentMusicUrl, stats]);
   
+  // Adjust volume based on current slide (reduce on drumroll slides)
+  useEffect(() => {
+    if (!youtubePlayerRef.current || !stats || !slides || slides.length === 0) return;
+    
+    const currentSlideId = slides[currentSlide]?.id;
+    const isDrumrollSlide = currentSlideId === 'drumroll_anime' || currentSlideId === 'drumroll_manga';
+    
+    try {
+      const iframe = youtubePlayerRef.current;
+      if (iframe.contentWindow && iframe.contentWindow.postMessage) {
+        if (isDrumrollSlide) {
+          // Reduce volume to 20% on drumroll slides
+          iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[20]}', '*');
+        } else {
+          // Restore volume to 50% on other slides
+          iframe.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[50]}', '*');
+        }
+      }
+    } catch (e) {
+      // Ignore errors
+    }
+  }, [currentSlide, stats, slides]);
+
   // Cleanup on component unmount
   useEffect(() => {
     return () => {
