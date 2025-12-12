@@ -1770,10 +1770,8 @@ export default function MALWrapped() {
     
     setStats(statsData);
     
-    // Fetch anime themes for top 5 anime
-    if (statsData.topRated && statsData.topRated.length > 0) {
-      fetchAnimeThemes(statsData.topRated);
-    }
+    // Don't fetch themes here - wait until after welcome screen to avoid rate limiting
+    // Themes will be fetched when user moves past welcome screen
     
     // Fetch character image if we have an anime ID
     if (characterTwin && characterTwin.animeId && characterTwin.characterName) {
@@ -2344,17 +2342,69 @@ export default function MALWrapped() {
     }
   }, [playlist, currentTrackIndex, isMusicPlaying, playTrack]);
 
-  // Adjust volume based on current slide
+  // Fetch themes when user moves past welcome screen
   useEffect(() => {
-    if (!audioRef.current || !stats || !slides || slides.length === 0) return;
+    if (currentSlide > 0 && stats && stats.topRated && stats.topRated.length > 0 && playlist.length === 0 && !pendingMalIds.length) {
+      console.log('Fetching themes after welcome screen');
+      fetchAnimeThemes(stats.topRated);
+    }
+  }, [currentSlide, stats, playlist.length, pendingMalIds.length]);
+
+  // Change tracks based on slide numbers and adjust volume
+  useEffect(() => {
+    if (!audioRef.current || !stats || !slides || slides.length === 0 || !playlist || playlist.length === 0) return;
     
     const currentSlideId = slides[currentSlide]?.id;
     const isDrumrollSlide = currentSlideId === 'drumroll_anime' || currentSlideId === 'drumroll_manga';
     
+    // Track mapping: 5th anime (index 4): slides 1-6, 1st anime (index 0): slides 7-12, 
+    // 4th anime (index 3): slides 13-17, 2nd anime (index 1): slides 17-21, 3rd anime (index 2): slides 22-25
+    // Note: slide 0 is welcome, so we use currentSlide + 1 for mapping
+    const slideNumber = currentSlide + 1;
+    let targetTrackIndex = null;
+    
+    if (slideNumber >= 1 && slideNumber <= 6) {
+      // 5th anime (index 4 in playlist, which corresponds to 5th in topRated)
+      targetTrackIndex = Math.min(4, playlist.length - 1);
+    } else if (slideNumber >= 7 && slideNumber <= 12) {
+      // 1st anime (index 0 in playlist, which corresponds to 1st in topRated)
+      targetTrackIndex = 0;
+    } else if (slideNumber >= 13 && slideNumber <= 17) {
+      // 4th anime (index 3 in playlist, which corresponds to 4th in topRated)
+      targetTrackIndex = Math.min(3, playlist.length - 1);
+    } else if (slideNumber >= 17 && slideNumber <= 21) {
+      // 2nd anime (index 1 in playlist, which corresponds to 2nd in topRated)
+      targetTrackIndex = Math.min(1, playlist.length - 1);
+    } else if (slideNumber >= 22 && slideNumber <= 25) {
+      // 3rd anime (index 2 in playlist, which corresponds to 3rd in topRated)
+      targetTrackIndex = Math.min(2, playlist.length - 1);
+    }
+    
+    // Only change track if we have a valid target and we're not already playing it
+    if (targetTrackIndex !== null && targetTrackIndex < playlist.length && 
+        currentTrackIndex !== targetTrackIndex && audioRef.current) {
+      console.log(`Changing track from ${currentTrackIndex} to ${targetTrackIndex} for slide ${slideNumber}`);
+      // Only play if music is already playing, otherwise just set the track index
+      if (isMusicPlaying) {
+        playTrack(targetTrackIndex, playlist);
+      } else {
+        setCurrentTrackIndex(targetTrackIndex);
+      }
+    }
+    
+    // Adjust volume
     if (audioRef.current) {
       audioRef.current.volume = isDrumrollSlide ? 0.1 : 0.3;
     }
-  }, [currentSlide, stats, slides]);
+  }, [currentSlide, stats, slides, playlist, currentTrackIndex, isMusicPlaying, playTrack]);
+
+  // Fetch themes when user moves past welcome screen
+  useEffect(() => {
+    if (currentSlide > 0 && stats && stats.topRated && stats.topRated.length > 0 && playlist.length === 0 && pendingMalIds.length === 0) {
+      console.log('Fetching themes after welcome screen');
+      fetchAnimeThemes(stats.topRated);
+    }
+  }, [currentSlide, stats, playlist.length, pendingMalIds.length]);
 
   // Cleanup audio/video on unmount
   useEffect(() => {
@@ -3532,6 +3582,29 @@ export default function MALWrapped() {
                     </h2>
                   </div>
                   <p className="body-md font-regular text-white mt-8 text-center text-container max-w-2xl mx-auto">A look back at your {stats.selectedYear === 'all' ? 'journey' : stats.selectedYear}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
+                  
+                  {/* Year Picker */}
+                  <motion.div {...fadeIn} data-framer-motion className="mt-8 flex flex-col items-center gap-4">
+                    <label className="body-sm text-white/80">Select Year:</label>
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => {
+                        const newYear = e.target.value;
+                        setSelectedYear(newYear);
+                        // Recalculate stats with new year
+                        if (animeList.length > 0 || mangaList.length > 0) {
+                          calculateStats(animeList, mangaList, userData, newYear);
+                        }
+                      }}
+                      className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-white/50 min-w-[120px]"
+                    >
+                      <option value="all">All Time</option>
+                      {Array.from({ length: new Date().getFullYear() - 2019 }, (_, i) => {
+                        const year = new Date().getFullYear() - i;
+                        return <option key={year} value={year}>{year}</option>;
+                      })}
+                    </select>
+                  </motion.div>
               </motion.div>
               <motion.div 
                 className="mt-4 w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
@@ -6129,10 +6202,19 @@ export default function MALWrapped() {
 
                 <div className="flex items-center gap-2">
                   {currentSlide === slides.length - 1 && (
-                    <div className="relative" ref={shareMenuRef}>
+                    <>
                       <motion.button
                         type="button"
-                        onClick={handleShareButtonClick}
+                        onClick={() => {
+                          setCurrentSlide(0);
+                          // Reset playlist and fetch themes again if needed
+                          setPlaylist([]);
+                          setPendingMalIds([]);
+                          setCurrentMalIdIndex(0);
+                          if (stats && stats.topRated && stats.topRated.length > 0) {
+                            fetchAnimeThemes(stats.topRated);
+                          }
+                        }}
                         className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
                         whileHover={{ 
                           scale: 1.1, 
@@ -6142,9 +6224,24 @@ export default function MALWrapped() {
                         whileTap={{ scale: 0.9 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
-                        <span className="text-xs sm:text-sm font-medium">Share</span>
+                        <span className="text-xs sm:text-sm font-medium">Restart</span>
                       </motion.button>
+                      <div className="relative" ref={shareMenuRef}>
+                        <motion.button
+                          type="button"
+                          onClick={handleShareButtonClick}
+                          className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
+                          whileHover={{ 
+                            scale: 1.1, 
+                            backgroundColor: 'rgba(64, 101, 204, 0.8)',
+                            borderColor: 'rgba(64, 101, 204, 0.8)'
+                          }}
+                          whileTap={{ scale: 0.9 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                          <span className="text-xs sm:text-sm font-medium">Share</span>
+                        </motion.button>
 
                       {showShareMenu && (
                         <motion.div
@@ -6199,6 +6296,7 @@ export default function MALWrapped() {
                         </motion.div>
                       )}
                     </div>
+                    </>
                   )}
 
                   <motion.button
