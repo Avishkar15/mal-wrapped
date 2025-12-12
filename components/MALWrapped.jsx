@@ -1914,13 +1914,29 @@ export default function MALWrapped() {
       
       if (selectedVideo && videoFilename) {
         // Only use audio files (video files have CORS restrictions)
-        // Construct audio URL - we'll try it and let playback handle errors
-        const audioUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
-        const confirmedFilename = videoFilename;
+        // Fetch metadata to get the actual audio link
+        const metadataUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
+        let audioUrl = null;
         
-        // Skip HEAD check to avoid rate limiting - just try the audio URL directly
-        // The browser will handle 404s gracefully during playback
-        console.log(`Found theme for ${animeName}: ${audioUrl}`);
+        try {
+          // Fetch metadata to get the actual audio file link
+          const metadataResponse = await fetch(metadataUrl);
+          if (metadataResponse.ok) {
+            const metadata = await metadataResponse.json();
+            if (metadata.audio && metadata.audio.link) {
+              audioUrl = metadata.audio.link; // Use the actual audio file link (a.animethemes.moe)
+              console.log(`Found audio file for ${animeName}: ${audioUrl}`);
+            }
+          }
+        } catch (error) {
+          console.log(`Failed to fetch audio metadata for ${animeName}:`, error);
+        }
+        
+        // If metadata fetch failed, construct the direct link (a.animethemes.moe)
+        if (!audioUrl) {
+          audioUrl = `https://a.animethemes.moe/${videoFilename}.ogg`;
+          console.log(`Using direct audio URL for ${animeName}: ${audioUrl}`);
+        }
         
         return {
           malId: parseInt(malId),
@@ -1930,7 +1946,7 @@ export default function MALWrapped() {
           themeType: themeType,
           videoUrl: audioUrl,
           basename: videoBasename,
-          filename: confirmedFilename,
+          filename: videoFilename,
           isAudio: true
         };
       }
@@ -2151,9 +2167,29 @@ export default function MALWrapped() {
           
           if (selectedVideo && videoFilename) {
             // Only use audio files (video files have CORS restrictions)
-            // Skip HEAD check to avoid rate limiting - just construct the URL
-            // The browser will handle 404s gracefully during playback
-            const audioUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
+            // Fetch metadata to get the actual audio link
+            const metadataUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
+            let audioUrl = null;
+            
+            try {
+              // Fetch metadata to get the actual audio file link
+              const metadataResponse = await fetch(metadataUrl);
+              if (metadataResponse.ok) {
+                const metadata = await metadataResponse.json();
+                if (metadata.audio && metadata.audio.link) {
+                  audioUrl = metadata.audio.link; // Use the actual audio file link
+                  console.log(`Found audio file for ${animeName}: ${audioUrl}`);
+                }
+              }
+            } catch (error) {
+              console.log(`Failed to fetch audio metadata for ${animeName}:`, error);
+            }
+            
+            // If metadata fetch failed, construct the direct link (a.animethemes.moe)
+            if (!audioUrl) {
+              audioUrl = `https://a.animethemes.moe/${videoFilename}.ogg`;
+              console.log(`Using direct audio URL for ${animeName}: ${audioUrl}`);
+            }
             
             console.log(`Adding theme for ${animeName}: ${audioUrl}`);
             
