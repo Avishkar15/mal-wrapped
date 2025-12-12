@@ -2265,7 +2265,7 @@ export default function MALWrapped() {
     
     // Start loading
     mediaElement.load();
-  }, [playlist, pendingMalIds, fetchNextTheme]);
+  }, [playlist]);
 
   // Toggle music play/pause
   const toggleMusic = useCallback(() => {
