@@ -218,6 +218,7 @@ export default function MALWrapped() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState(null);
   const [selectedYear, setSelectedYear] = useState(2025);
+  const [shouldStartMusic, setShouldStartMusic] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
   const [authorPhotos, setAuthorPhotos] = useState({});
@@ -2393,6 +2394,17 @@ export default function MALWrapped() {
     }
   }, [currentSlide]);
 
+  // Start music when playlist is ready and button was clicked
+  useEffect(() => {
+    if (shouldStartMusic && playlist.length > 0 && currentSlide === 0) {
+      // Start with 3rd anime (index 2) for slides 1-5
+      const initialTrackIndex = Math.min(2, playlist.length - 1);
+      setCurrentTrackIndex(initialTrackIndex);
+      playTrack(initialTrackIndex, playlist);
+      setShouldStartMusic(false);
+    }
+  }, [shouldStartMusic, playlist, currentSlide, playTrack]);
+
   // Fetch themes when user moves past welcome screen
   useEffect(() => {
     if (currentSlide > 0 && stats && stats.topRated && stats.topRated.length > 0 && playlist.length === 0 && pendingMalIds.length === 0) {
@@ -2406,26 +2418,20 @@ export default function MALWrapped() {
   useEffect(() => {
     if (!audioRef.current || !stats || !slides || slides.length === 0 || !playlist || playlist.length === 0 || currentSlide === 0) return;
     
-    // Track mapping: 1-5 (5th), 6-10 (1st), 11-15 (4th), 16-20 (2nd), 21-25 (3rd)
+    // Track mapping: 1-5 (3rd), 6-15 (1st), 16-25 (2nd)
     // Note: slide 0 is welcome, so we use currentSlide + 1 for mapping
     const slideNumber = currentSlide + 1;
     let targetTrackIndex = null;
     
     if (slideNumber >= 1 && slideNumber <= 5) {
-      // 5th anime (index 4 in playlist) - slides 1-5
-      targetTrackIndex = Math.min(4, playlist.length - 1);
-    } else if (slideNumber >= 6 && slideNumber <= 10) {
-      // 1st anime (index 0 in playlist) - slides 6-10
-      targetTrackIndex = 0;
-    } else if (slideNumber >= 11 && slideNumber <= 15) {
-      // 4th anime (index 3 in playlist) - slides 11-15
-      targetTrackIndex = Math.min(3, playlist.length - 1);
-    } else if (slideNumber >= 16 && slideNumber <= 20) {
-      // 2nd anime (index 1 in playlist) - slides 16-20
-      targetTrackIndex = Math.min(1, playlist.length - 1);
-    } else if (slideNumber >= 21 && slideNumber <= 25) {
-      // 3rd anime (index 2 in playlist) - slides 21-25
+      // 3rd anime (index 2 in playlist) - slides 1-5
       targetTrackIndex = Math.min(2, playlist.length - 1);
+    } else if (slideNumber >= 6 && slideNumber <= 15) {
+      // 1st anime (index 0 in playlist) - slides 6-15
+      targetTrackIndex = 0;
+    } else if (slideNumber >= 16 && slideNumber <= 25) {
+      // 2nd anime (index 1 in playlist) - slides 16-25
+      targetTrackIndex = Math.min(1, playlist.length - 1);
     }
     
     // Only change track if we have a valid target and we're not already playing it
@@ -2454,14 +2460,6 @@ export default function MALWrapped() {
     }
   }, [currentSlide, stats, playlist.length, pendingMalIds.length]);
 
-  // On slide 7, skip to top 1 song (index 0)
-  useEffect(() => {
-    if (currentSlide === 6 && playlist.length > 0 && audioRef.current && isMusicPlaying) {
-      // Slide 7 (index 6) - skip to top 1 song
-      console.log('Slide 7 reached - skipping to top 1 song');
-      playTrack(0, playlist);
-    }
-  }, [currentSlide, playlist, isMusicPlaying, playTrack]);
 
   // Cleanup audio/video on unmount
   useEffect(() => {
@@ -3630,6 +3628,33 @@ export default function MALWrapped() {
               
               <div className="relative z-20 w-full flex flex-col items-center justify-center">
               <motion.div {...fadeIn} data-framer-motion className="mt-16 w-full flex flex-col items-center">
+                  {/* User Picture - moved above MyAnimeList */}
+                  <motion.div 
+                    className="mb-8 w-full flex items-center justify-center relative z-20"
+                    variants={staggerItem}
+                    {...fadeIn}
+                    data-framer-motion
+                  >
+                    <div className="relative w-32 h-32 flex items-center justify-center flex-shrink-0 z-20">
+                      <motion.a
+                        href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
+                        {...fadeSlideUp}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <img 
+                          src={userImage} 
+                          alt={username || 'User'} 
+                          className="w-full h-full object-cover"
+                          crossOrigin="anonymous"
+                        />
+                      </motion.a>
+                    </div>
+                  </motion.div>
+                  
                   <div className="relative inline-block text-center">
                     <h1 className="wrapped-brand text-white/70 relative z-10 text-center">
                       {stats.selectedYear === 'all' ? 'MyAnimeList' : 'MyAnimeList ' + stats.selectedYear}
@@ -3674,30 +3699,28 @@ export default function MALWrapped() {
                         </svg>
                       </div>
                     </div>
+                    
+                    {/* Connect to MAL button */}
+                    <motion.button
+                      onClick={() => {
+                        // Fetch themes and mark that we should start music
+                        if (stats && stats.topRated && stats.topRated.length > 0) {
+                          setShouldStartMusic(true);
+                          fetchAnimeThemes(stats.topRated);
+                        }
+                      }}
+                      className="px-6 sm:px-8 py-2 sm:py-2.5 text-white rounded-full border transition-all rounded-lg text-xs sm:text-sm font-medium tracking-wider focus:outline-none hover:scale-105 active:scale-95"
+                      style={{ 
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        color: '#ffffff',
+                        background: 'rgba(255, 255, 255, 0.15)'
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Connect to MAL
+                    </motion.button>
                   </motion.div>
-              </motion.div>
-              <motion.div 
-                className="mt-4 w-full max-w-3xl flex items-center justify-center gap-6 sm:gap-8 mb-6 sm:mb-8 relative z-20"
-                variants={staggerItem}
-              >
-                <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 z-20">
-                  <motion.a
-                    href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
-                    {...fadeSlideUp}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <img 
-                      src={userImage} 
-                      alt={username || 'User'} 
-                      className="w-full h-full object-cover"
-                      crossOrigin="anonymous"
-                    />
-                  </motion.a>
-                </div>
               </motion.div>
               </div>
             </div>
@@ -3979,7 +4002,7 @@ export default function MALWrapped() {
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Though your {isAnime ? 'watching' : 'reading'} taste leans towards...
               </motion.h2>
-              <motion.div className="mt-4 md:mt-4 flex flex-col items-center relative z-10 min-h-[50vh] justify-center" {...fadeSlideUp} data-framer-motion>
+              <motion.div className="mt-4 md:mt-4 flex flex-col items-center relative z-10 min-h-[50vh] md:min-h-[40vh] justify-center" {...fadeSlideUp} data-framer-motion>
                 <motion.div
                   className="relative w-full h-64 md:h-80 flex items-center justify-center"
                   initial={{ opacity: 0 }}
@@ -4049,7 +4072,7 @@ export default function MALWrapped() {
                             }}
                           />
                         </div>
-                        <motion.p className={`${isTop ? 'title-sm text-white' : 'body-sm text-white/80'} font-semibold text-center`}
+                        <motion.p className={`${isTop ? 'title-sm text-white' : 'body-md text-white/80'} font-semibold text-center`}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: showPercentages ? 1 : 0 }}
                         transition={{ duration: 0.5 }}>
