@@ -184,13 +184,13 @@ function getComparisonCopy(percentage, nounPlural) {
   if (isAboveAverage) {
     const aboveBy = percentage - 100;
   return {
-      prefix: "You're ",
-      suffix: `% above the average MAL user!`
+      prefix: "That's ",
+      suffix: ` more than the average MAL user! You’re leaving the crowd behind!`
     };
   } else {
     return {
-      prefix: "You're at ",
-      suffix: `% of the average MAL user.`
+      prefix: "That's only ",
+      suffix: ` of the average MAL user. Don’t worry, every hero has a slow arc!`
     };
   }
 }
