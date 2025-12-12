@@ -3667,6 +3667,7 @@ export default function MALWrapped() {
                   
                   {/* Year Picker - moved from top nav */}
                   <motion.div {...fadeIn} data-framer-motion className="mt-8 flex flex-col items-center gap-4">
+                    <p className="body-sm font-regular text-white/70 text-center mb-2">Select a year to view your stats</p>
                     <div className="relative min-w-[120px] sm:min-w-[140px]">
                       <select
                         id="year-selector"
@@ -3703,22 +3704,21 @@ export default function MALWrapped() {
                     {/* Connect to MAL button */}
                     <motion.button
                       onClick={() => {
-                        // Fetch themes and mark that we should start music
+                        // Fetch themes and move to next slide
                         if (stats && stats.topRated && stats.topRated.length > 0) {
                           setShouldStartMusic(true);
                           fetchAnimeThemes(stats.topRated);
+                          // Move to next slide
+                          setCurrentSlide(1);
                         }
                       }}
-                      className="px-6 sm:px-8 py-2 sm:py-2.5 text-white rounded-full border transition-all rounded-lg text-xs sm:text-sm font-medium tracking-wider focus:outline-none hover:scale-105 active:scale-95"
-                      style={{ 
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        color: '#ffffff',
-                        background: 'rgba(255, 255, 255, 0.15)'
-                      }}
-                      whileHover={{ scale: 1.05 }}
+                      className="bg-white text-black font-medium text-lg px-8 py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={!stats || !stats.topRated || stats.topRated.length === 0}
+                      whileHover={{ scale: 1.05, backgroundColor: '#f5f5f5' }}
                       whileTap={{ scale: 0.95 }}
+                      transition={{ duration: 0.2, ease: smoothEase }}
                     >
-                      Connect to MAL
+                      Let's Get Wrapped
                     </motion.button>
                   </motion.div>
               </motion.div>
