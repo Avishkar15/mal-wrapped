@@ -1988,6 +1988,17 @@ export default function MALWrapped() {
     // Don't play if playlist is for a different year (only check when using default playlist)
     if (tracks === null && playlistYear !== null && playlistYear !== selectedYear) {
       devLog('Playlist is for different year, not playing');
+      // Stop any currently playing audio
+      if (audioRef.current) {
+        try {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+          audioRef.current.load();
+        } catch (e) {
+          devError('Error stopping audio:', e);
+        }
+      }
+      setIsMusicPlaying(false);
       return;
     }
     
@@ -2149,6 +2160,12 @@ export default function MALWrapped() {
     }
     
     newMediaElement.addEventListener('ended', () => {
+      // Check if playlist is still valid for current year before playing next
+      if (tracks === null && playlistYear !== null && playlistYear !== selectedYear) {
+        setIsMusicPlaying(false);
+        return;
+      }
+      
       // Play next track in sequence (5th→4th→3rd→2nd→1st, backwards)
       // Don't loop - just stop if we reach the end
       if (index > 0) {
@@ -2213,11 +2230,13 @@ export default function MALWrapped() {
     }
   }, [playlist, currentTrackIndex, isMusicPlaying, playTrack]);
 
-  // Stop music and clear playlist when returning to welcome slide
+  // Stop music and clear playlist when returning to welcome slide or when year changes
   useEffect(() => {
     if (currentSlide === 0) {
       if (audioRef.current) {
         audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current.load();
         try {
           if (audioRef.current.parentNode) {
             audioRef.current.parentNode.removeChild(audioRef.current);
@@ -2227,6 +2246,20 @@ export default function MALWrapped() {
         }
         audioRef.current = null;
       }
+      // Also remove any other audio/video elements
+      const allMediaElements = document.querySelectorAll('audio, video');
+      allMediaElements.forEach(el => {
+        try {
+          el.pause();
+          el.src = '';
+          el.load();
+          if (el.parentNode) {
+            el.parentNode.removeChild(el);
+          }
+        } catch (err) {
+          // Ignore errors
+        }
+      });
       setIsMusicPlaying(false);
       setPlaylist([]);
       setPlaylistYear(null); // Clear playlist year
@@ -2235,7 +2268,7 @@ export default function MALWrapped() {
       isSwitchingTrackRef.current = false;
       isFetchingThemesRef.current = false; // Reset fetching flag
     }
-  }, [currentSlide]);
+  }, [currentSlide, selectedYear]); // Also trigger when year changes
 
   // Clear fetched songs when welcome page loads (initial mount)
   useEffect(() => {
@@ -3516,37 +3549,6 @@ export default function MALWrapped() {
 
     switch (slide.id) {
       case 'welcome':
-        // Show loading screen only when actively loading songs
-        if (isLoadingSongs) {
-          return (
-            <SlideLayout bgColor="pink">
-              <div className="text-center relative w-full h-full flex flex-col items-center justify-center">
-                <motion.div 
-                  {...fadeIn} 
-                  data-framer-motion 
-                  className="flex flex-col items-center justify-center gap-4"
-                >
-                  <div className="relative w-16 h-16">
-                    <div className="absolute inset-0 border-4 border-white/20 rounded-full"></div>
-                    <motion.div
-                      className="absolute inset-0 border-4 border-white border-t-transparent rounded-full"
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: "linear"
-                      }}
-                    />
-                  </div>
-                  <p className="body-md font-regular text-white/70 text-center">
-                    Loading your top songs...
-                  </p>
-                </motion.div>
-              </div>
-            </SlideLayout>
-          );
-        }
-        
         return (
           <SlideLayout bgColor="pink">
             <div className="text-center relative w-full h-full flex flex-col items-center justify-center">
@@ -5985,7 +5987,7 @@ export default function MALWrapped() {
             </div>
           )}
 
-          {isLoading && (
+          {(isLoading || isLoadingSongs) && (
             <div className="text-center w-full max-w-2xl mx-auto px-4">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -5998,7 +6000,7 @@ export default function MALWrapped() {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                  {loadingProgress || 'Generating your report...'}
+                  {isLoadingSongs ? 'Loading your top songs...' : (loadingProgress || 'Generating your report...')}
                 </motion.h1>
 
                 {/* Progress bar */}
@@ -6009,7 +6011,7 @@ export default function MALWrapped() {
                       background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 200, 255, 0.8) 100%)'
                     }}
                     initial={{ width: "0%" }}
-                    animate={{ width: `${loadingProgressPercent}%` }}
+                    animate={{ width: isLoadingSongs ? "100%" : `${loadingProgressPercent}%` }}
                     transition={{
                       duration: 0.3,
                       ease: smoothEase
@@ -6020,7 +6022,7 @@ export default function MALWrapped() {
             </div>
           )}
 
-          {!isAuthenticated && !isLoading && (
+          {!isAuthenticated && !isLoading && !isLoadingSongs && (
             <div className="text-center p-4 relative w-full h-full flex flex-col items-center justify-center">
               {/* Colorful abstract shapes background */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
