@@ -2181,6 +2181,28 @@ export default function MALWrapped() {
     }
   }, [currentSlide]);
 
+  // Clear fetched songs when welcome page loads (initial mount)
+  useEffect(() => {
+    // Clear playlist on initial load
+    setPlaylist([]);
+    setPendingMalIds([]);
+    setCurrentTrackIndex(0);
+    setIsMusicPlaying(false);
+    isFetchingThemesRef.current = false;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      try {
+        if (audioRef.current.parentNode) {
+          audioRef.current.parentNode.removeChild(audioRef.current);
+        }
+      } catch (e) {
+        devError('Error removing audio element:', e);
+      }
+      audioRef.current = null;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
+
   // Start music when playlist is ready and button was clicked
   useEffect(() => {
     if (shouldStartMusic && playlist.length > 0 && currentSlide >= 1) {
@@ -2192,15 +2214,18 @@ export default function MALWrapped() {
     }
   }, [shouldStartMusic, playlist, currentSlide, playTrack]);
 
-  // Fetch themes when needed (on welcome screen or when moving past it)
+  // Fetch themes when on welcome page and stats are ready
   useEffect(() => {
+    // Only fetch when on welcome page (currentSlide === 0)
+    if (currentSlide !== 0) return;
+    
     const topRatedLength = stats?.topRated?.length || 0;
     if (topRatedLength > 0 && playlist.length === 0 && pendingMalIds.length === 0 && !isFetchingThemesRef.current) {
-      devLog('Fetching themes');
+      devLog('Fetching themes for welcome page');
       fetchAnimeThemes(stats.topRated);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSlide, stats?.topRated?.length, playlist.length, pendingMalIds.length]);
+  }, [currentSlide, stats?.topRated?.length, selectedYear, playlist.length, pendingMalIds.length]);
 
 
   // Change tracks based on slide numbers
@@ -3465,7 +3490,7 @@ export default function MALWrapped() {
                           e.preventDefault();
                           const newYear = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
                           setSelectedYear(newYear);
-                          // Clear playlist and pending MAL IDs to trigger refetch
+                          // Clear current year song list
                           setPlaylist([]);
                           setPendingMalIds([]);
                           setCurrentTrackIndex(0);
@@ -3483,6 +3508,8 @@ export default function MALWrapped() {
                             }
                             audioRef.current = null;
                           }
+                          // Stats will be recalculated by the useEffect that watches selectedYear
+                          // The fetch will happen automatically when stats.topRated updates
                         }}
                         className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-white rounded-full border-box-cyan transition-all rounded-lg text-xs sm:text-sm font-medium tracking-wider focus:outline-none appearance-none pr-8 sm:pr-10"
                         style={{ 
