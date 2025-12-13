@@ -338,7 +338,8 @@ export default function MALWrapped() {
     setIsLoading(true);
     setError('');
     setLoadingProgress('Connecting to MAL...');
-    setLoadingProgressPercent(10);
+    // Ensure progress only increases, never decreases
+    setLoadingProgressPercent(prev => Math.max(prev, 10));
     
     try {
       const redirectUri = getRedirectUri();
@@ -371,7 +372,8 @@ export default function MALWrapped() {
   async function fetchUserData(accessToken) {
     setIsLoading(true);
     setLoadingProgress('Fetching your profile...');
-    setLoadingProgressPercent(20);
+    // Ensure progress only increases, never decreases
+    setLoadingProgressPercent(prev => Math.max(prev, 20));
     
     try {
       const response = await fetch('/api/mal/user', {
@@ -398,7 +400,8 @@ export default function MALWrapped() {
 
   async function fetchAnimeList(accessToken) {
     setLoadingProgress('Loading your anime list...');
-    setLoadingProgressPercent(25);
+    // Ensure progress only increases, never decreases
+    setLoadingProgressPercent(prev => Math.max(prev, 25));
     try {
       let allAnime = [];
       let offset = 0;
@@ -423,9 +426,11 @@ export default function MALWrapped() {
           // Use a logarithmic scale to slow down as we approach the end
           const estimatedProgress = Math.min(0.95, 1 - Math.pow(0.9, allAnime.length / 100));
           const animeProgress = 25 + (35 * estimatedProgress);
-          setLoadingProgressPercent(Math.min(animeProgress, 60));
+          // Ensure progress only increases, never decreases
+          setLoadingProgressPercent(prev => Math.max(prev, Math.min(animeProgress, 60)));
         } else {
-          setLoadingProgressPercent(60);
+          // Ensure progress only increases, never decreases
+          setLoadingProgressPercent(prev => Math.max(prev, 60));
         }
         
         if (!data.paging?.next) break;
@@ -445,7 +450,8 @@ export default function MALWrapped() {
 
   async function fetchMangaList(accessToken, animeData = []) {
     setLoadingProgress('Loading your manga list...');
-    setLoadingProgressPercent(65);
+    // Ensure progress only increases, never decreases
+    setLoadingProgressPercent(prev => Math.max(prev, 65));
     try {
       let allManga = [];
       let offset = 0;
@@ -469,9 +475,11 @@ export default function MALWrapped() {
           // Use a logarithmic scale to slow down as we approach the end
           const estimatedProgress = Math.min(0.95, 1 - Math.pow(0.9, allManga.length / 100));
           const mangaProgress = 65 + (30 * estimatedProgress);
-          setLoadingProgressPercent(Math.min(mangaProgress, 95));
+          // Ensure progress only increases, never decreases
+          setLoadingProgressPercent(prev => Math.max(prev, Math.min(mangaProgress, 95)));
         } else {
-          setLoadingProgressPercent(95);
+          // Ensure progress only increases, never decreases
+          setLoadingProgressPercent(prev => Math.max(prev, 95));
         }
         
         if (!data.paging?.next) break;
@@ -6068,7 +6076,7 @@ export default function MALWrapped() {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
                   >
-                    {loadingProgress || (isLoadingSongs ? 'Loading your top songs...' : 'Generating your report...')}
+                    {loadingProgress || ('Generating your wrapped...')}
                   </motion.h1>
 
                   {/* Progress bar */}
