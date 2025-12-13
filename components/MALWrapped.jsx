@@ -1977,199 +1977,6 @@ export default function MALWrapped() {
       console.error('Error fetching anime themes:', error);
     }
   }
-  
-  // Original fetchAnimeThemes code (keeping for reference but not used)
-  async function fetchAnimeThemes_OLD(topRatedAnime) {
-    try {
-      const malIds = topRatedAnime
-        .slice(0, 5)
-        .map(item => item.node?.id)
-        .filter(id => id != null);
-      
-      if (malIds.length === 0) return;
-      
-      const themes = [];
-      
-      // Fetch themes directly from animethemes.moe API (client-side)
-      for (let i = 0; i < malIds.length; i++) {
-        const malId = malIds[i];
-        
-        // Add small delay between requests to avoid rate limiting (except first request)
-        if (i > 0) {
-          await new Promise(resolve => setTimeout(resolve, 200)); // 200ms delay
-        }
-        
-        try {
-          const url = new URL('https://api.animethemes.moe/anime');
-          url.searchParams.append('filter[has]', 'resources');
-          url.searchParams.append('filter[site]', 'MyAnimeList');
-          url.searchParams.append('filter[external_id]', malId.toString());
-          url.searchParams.append('include', 'animethemes.animethemeentries.videos');
-
-          const response = await fetch(url.toString(), {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-            },
-      });
-      
-      if (!response.ok) {
-            const errorText = await response.text();
-            console.error(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
-            console.error(`URL: ${url.toString()}`);
-            if (errorText) {
-              console.error(`Error response: ${errorText.substring(0, 500)}`);
-            }
-            continue;
-      }
-      
-      const data = await response.json();
-          
-          // The API returns { anime: [...] }
-          if (!data.anime || !Array.isArray(data.anime) || data.anime.length === 0) {
-            console.log(`No anime found for MAL ID ${malId}`);
-            continue;
-          }
-
-          const anime = data.anime[0];
-          const animeName = anime.name || anime.attributes?.name;
-          const animeSlug = anime.slug || anime.attributes?.slug;
-
-          // Get OP (Opening) themes
-          const animethemes = anime.animethemes || [];
-          const opThemes = animethemes.filter(t => {
-            const type = t.type || t.attributes?.type;
-            return type === 'OP';
-          });
-          
-          if (opThemes.length === 0) {
-            console.log(`No OP themes found for ${animeName}`);
-            continue;
-          }
-
-          // Prefer OP1 (first opening)
-          let selectedVideo = null;
-          let selectedTheme = null;
-          
-          const op1Theme = opThemes.find(t => {
-            const slug = t.slug || t.attributes?.slug;
-            return slug === 'OP1';
-          }) || opThemes[0];
-          
-          // Get entries
-          const entries = op1Theme.animethemeentries || [];
-          
-          for (const entry of entries) {
-            const videos = entry.videos || [];
-            if (videos.length > 0) {
-              // Prefer videos with quality tags (like NCBD1080, BD1080) as they're more likely to have audio versions
-              // Sort by: quality tags first, then by resolution (higher is better)
-              const sortedVideos = [...videos].sort((a, b) => {
-                const aFilename = (a.filename || a.attributes?.filename || '').toLowerCase();
-                const bFilename = (b.filename || b.attributes?.filename || '').toLowerCase();
-                
-                // Prefer videos with quality tags (NCBD, BD, etc.)
-                const aHasQuality = aFilename.includes('-ncbd') || aFilename.includes('-bd') || aFilename.includes('-nc');
-                const bHasQuality = bFilename.includes('-ncbd') || bFilename.includes('-bd') || bFilename.includes('-nc');
-                
-                if (aHasQuality && !bHasQuality) return -1;
-                if (!aHasQuality && bHasQuality) return 1;
-                
-                // If both have or don't have quality tags, sort by resolution
-                const aRes = a.resolution || a.attributes?.resolution || 0;
-                const bRes = b.resolution || b.attributes?.resolution || 0;
-                return bRes - aRes; // Higher resolution first
-              });
-              
-              // Prefer video with filename containing -OP1, otherwise take first from sorted list
-              selectedVideo = sortedVideos.find(v => {
-                const filename = v.filename || v.attributes?.filename;
-                return filename && filename.toLowerCase().includes('-op1');
-              }) || sortedVideos[0];
-              
-              if (selectedVideo) {
-                selectedTheme = op1Theme;
-                break;
-              }
-            }
-          }
-          
-          // If no video found in OP1, try other OP themes
-          if (!selectedVideo) {
-            for (const theme of opThemes) {
-              const entries = theme.animethemeentries || [];
-              for (const entry of entries) {
-                const videos = entry.videos || [];
-                if (videos.length > 0) {
-                  // Sort videos by quality tags and resolution
-                  const sortedVideos = [...videos].sort((a, b) => {
-                    const aFilename = (a.filename || a.attributes?.filename || '').toLowerCase();
-                    const bFilename = (b.filename || b.attributes?.filename || '').toLowerCase();
-                    
-                    const aHasQuality = aFilename.includes('-ncbd') || aFilename.includes('-bd') || aFilename.includes('-nc');
-                    const bHasQuality = bFilename.includes('-ncbd') || bFilename.includes('-bd') || bFilename.includes('-nc');
-                    
-                    if (aHasQuality && !bHasQuality) return -1;
-                    if (!aHasQuality && bHasQuality) return 1;
-                    
-                    const aRes = a.resolution || a.attributes?.resolution || 0;
-                    const bRes = b.resolution || b.attributes?.resolution || 0;
-                    return bRes - aRes;
-                  });
-                  
-                  selectedVideo = sortedVideos[0];
-                  selectedTheme = theme;
-                  break;
-                }
-              }
-              if (selectedVideo) break;
-            }
-          }
-          
-          // Extract filename and construct audio URL
-          const videoFilename = selectedVideo?.filename || selectedVideo?.attributes?.filename;
-          const videoBasename = selectedVideo?.basename || selectedVideo?.attributes?.basename;
-          const themeSlug = selectedTheme?.slug || selectedTheme?.attributes?.slug;
-          const themeType = selectedTheme?.type || selectedTheme?.attributes?.type;
-          
-          if (selectedVideo && videoFilename) {
-            // Only use audio files (video files have CORS restrictions)
-            // Use our proxy API to bypass CORS restrictions
-            // The proxy fetches the audio server-side and streams it to the client
-            const audioUrl = `/api/audio-proxy?filename=${encodeURIComponent(videoFilename + '.ogg')}`;
-            
-            console.log(`Adding theme for ${animeName}: ${audioUrl}`);
-            
-            themes.push({
-              malId: parseInt(malId),
-              animeName: animeName,
-              animeSlug: animeSlug,
-              themeSlug: themeSlug,
-              themeType: themeType,
-              videoUrl: audioUrl,
-              basename: videoBasename,
-              filename: videoFilename,
-              isAudio: true // Always true since we only use audio files
-            });
-          }
-        } catch (error) {
-          console.error(`Error fetching themes for MAL ID ${malId}:`, error);
-          continue;
-        }
-      }
-      
-      console.log('Fetched themes:', themes);
-      if (themes.length > 0) {
-        setPlaylist(themes);
-        // Don't auto-play - wait for user interaction
-        // User can click play button to start music
-      } else {
-        console.warn('No themes found for top 5 anime');
-      }
-    } catch (error) {
-      console.error('Error fetching anime themes:', error);
-    }
-  }
 
   // Play a track from the playlist with crossfade
   const playTrack = useCallback((index, tracks = null) => {
@@ -2413,21 +2220,15 @@ export default function MALWrapped() {
     }
   }, [shouldStartMusic, playlist, currentSlide, playTrack]);
 
-  // Fetch themes on welcome screen so they're ready when user clicks "Let's Go"
+  // Fetch themes when needed (on welcome screen or when moving past it)
   useEffect(() => {
-    if (currentSlide === 0 && stats && stats.topRated && stats.topRated.length > 0 && playlist.length === 0 && pendingMalIds.length === 0) {
-      console.log('Fetching themes on welcome screen');
+    const topRatedLength = stats?.topRated?.length || 0;
+    if (topRatedLength > 0 && playlist.length === 0 && pendingMalIds.length === 0) {
+      console.log('Fetching themes');
       fetchAnimeThemes(stats.topRated);
     }
-  }, [currentSlide, stats, playlist.length, pendingMalIds.length]);
-
-  // Fetch themes when user moves past welcome screen (fallback)
-  useEffect(() => {
-    if (currentSlide > 0 && stats && stats.topRated && stats.topRated.length > 0 && playlist.length === 0 && pendingMalIds.length === 0) {
-      console.log('Fetching themes after welcome screen');
-      fetchAnimeThemes(stats.topRated);
-    }
-  }, [currentSlide, stats, playlist.length, pendingMalIds.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSlide, stats?.topRated?.length, playlist.length, pendingMalIds.length]);
 
 
   // Change tracks based on slide numbers
@@ -2474,13 +2275,6 @@ export default function MALWrapped() {
     }
   }, [currentSlide, stats, slides, playlist, currentTrackIndex, isMusicPlaying, playTrack]);
 
-  // Fetch themes when user moves past welcome screen
-  useEffect(() => {
-    if (currentSlide > 0 && stats && stats.topRated && stats.topRated.length > 0 && playlist.length === 0 && pendingMalIds.length === 0) {
-      console.log('Fetching themes after welcome screen');
-      fetchAnimeThemes(stats.topRated);
-    }
-  }, [currentSlide, stats, playlist.length, pendingMalIds.length]);
 
 
   // Cleanup audio/video on unmount
@@ -3744,13 +3538,9 @@ export default function MALWrapped() {
                     {/* Connect to MAL button */}
                     <motion.button
                       onClick={() => {
-                        // Move to next slide and start music (themes should already be fetched)
+                        // Move to next slide and start music (themes should already be fetched by useEffect)
                         if (stats && stats.topRated && stats.topRated.length > 0) {
                           setShouldStartMusic(true);
-                          // If themes aren't fetched yet, fetch them now
-                          if (playlist.length === 0) {
-                            fetchAnimeThemes(stats.topRated);
-                          }
                           // Move to next slide
                           setCurrentSlide(1);
                         }
@@ -6292,13 +6082,8 @@ export default function MALWrapped() {
                         type="button"
                         onClick={() => {
                           setCurrentSlide(0);
-                          // Reset playlist and fetch themes again if needed
-                          setPlaylist([]);
-                          setPendingMalIds([]);
-                          setCurrentMalIdIndex(0);
-                          if (stats && stats.topRated && stats.topRated.length > 0) {
-                            fetchAnimeThemes(stats.topRated);
-                          }
+                          // Playlist will be cleared by the welcome slide useEffect
+                          // Themes will be refetched automatically by the fetch themes useEffect
                         }}
                         className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
                         whileHover={{ 
