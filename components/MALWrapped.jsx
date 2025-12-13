@@ -478,7 +478,8 @@ export default function MALWrapped() {
         offset += limit;
       }
       
-      setLoadingProgressPercent(100);
+      setLoadingProgress('Processing genres, characters, authors...');
+      setLoadingProgressPercent(80);
 
       setMangaList(allManga);
       // Recalculate stats with both anime and manga
@@ -486,6 +487,9 @@ export default function MALWrapped() {
       const animeToUse = animeData.length > 0 ? animeData : animeList;
       // Recalculate with current year selection
       calculateStats(animeToUse, allManga);
+      
+      // Stats calculation is done, but songs will be loaded separately
+      // Don't set to 100% yet - wait for songs
     } catch (err) {
       // Error fetching manga list
     }
@@ -1946,11 +1950,17 @@ export default function MALWrapped() {
       if (malIds.length === 0) {
         isFetchingThemesRef.current = false;
         setIsLoadingSongs(false);
+        setLoadingProgress('');
+        setLoadingProgressPercent(100);
         return;
       }
       
       // Store MAL IDs (but don't update during fetch to avoid re-renders)
       setPendingMalIds(malIds);
+      
+      // Update loading progress to show we're fetching songs
+      setLoadingProgress('Loading your top songs...');
+      setLoadingProgressPercent(85);
       
       // Fetch all themes with delays to avoid rate limiting (500ms between requests)
       const themes = [];
@@ -1961,8 +1971,15 @@ export default function MALWrapped() {
           setPendingMalIds([]);
           isFetchingThemesRef.current = false;
           setIsLoadingSongs(false);
+          setLoadingProgress('');
           return;
         }
+        
+        // Update progress for each song
+        const progressBase = 85;
+        const progressStep = 15 / malIds.length; // 15% for songs (85% to 100%)
+        setLoadingProgress(`Loading song ${i + 1} of ${malIds.length}...`);
+        setLoadingProgressPercent(Math.min(progressBase + (progressStep * (i + 1)), 100));
         
         if (i > 0) {
           // Add delay between requests to prevent rate limiting
@@ -1982,6 +1999,8 @@ export default function MALWrapped() {
         setPlaylistYear(year);
         // Start with 5th anime song (index 4) - will play 4→3→2→1→0 freely
         setCurrentTrackIndex(Math.min(4, themes.length - 1));
+        setLoadingProgress('Complete!');
+        setLoadingProgressPercent(100);
       } else if (year !== selectedYear) {
         devLog(`Year changed after fetch from ${year} to ${selectedYear}, discarding results`);
       }
@@ -1991,12 +2010,18 @@ export default function MALWrapped() {
     } catch (error) {
       devError('Error fetching anime themes:', error);
       setPendingMalIds([]);
+      setLoadingProgress('');
     } finally {
       isFetchingThemesRef.current = false;
       // Only clear loading after fetch is completely done
       // Use a small delay to ensure state updates are processed
       setTimeout(() => {
         setIsLoadingSongs(false);
+        // Clear loading progress after a brief moment
+        setTimeout(() => {
+          setLoadingProgress('');
+          setLoadingProgressPercent(0);
+        }, 500);
       }, 100);
     }
   }
@@ -6033,37 +6058,39 @@ export default function MALWrapped() {
           )}
 
           {(isLoading || isLoadingSongs) && (
-            <div className="text-center w-full max-w-2xl mx-auto px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: smoothEase }}
-              >
-                <motion.h1 
-                  className="body-lg font-medium text-white mb-4 tracking-tight"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black/95 backdrop-blur-sm">
+              <div className="text-center w-full max-w-2xl mx-auto px-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: smoothEase }}
                 >
-                  {isLoadingSongs ? 'Loading your top songs...' : (loadingProgress || 'Generating your report...')}
-                </motion.h1>
+                  <motion.h1 
+                    className="body-lg font-medium text-white mb-4 tracking-tight"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  >
+                    {loadingProgress || (isLoadingSongs ? 'Loading your top songs...' : 'Generating your report...')}
+                  </motion.h1>
 
-                {/* Progress bar */}
-                <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full"
-                    style={{
-                      background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 200, 255, 0.8) 100%)'
-                    }}
-                    initial={{ width: "0%" }}
-                    animate={{ width: isLoadingSongs ? "100%" : `${loadingProgressPercent}%` }}
-                    transition={{
-                      duration: 0.3,
-                      ease: smoothEase
-                    }}
-                  />
-                </div>
-              </motion.div>
+                  {/* Progress bar */}
+                  <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full"
+                      style={{
+                        background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 200, 255, 0.8) 100%)'
+                      }}
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${loadingProgressPercent}%` }}
+                      transition={{
+                        duration: 0.3,
+                        ease: smoothEase
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              </div>
             </div>
           )}
 
