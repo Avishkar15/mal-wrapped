@@ -245,6 +245,7 @@ export default function MALWrapped() {
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [playlist, setPlaylist] = useState([]);
+  const [playlistYear, setPlaylistYear] = useState(null); // Track which year the playlist belongs to
   const [pendingMalIds, setPendingMalIds] = useState([]);
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
@@ -252,7 +253,6 @@ export default function MALWrapped() {
   const isSwitchingTrackRef = useRef(false);
   const lastForcedSlideRef = useRef(null);
   const isFetchingThemesRef = useRef(false);
-  const currentFetchYearRef = useRef(null); // Track which year we're fetching for
   
   // Dev-only logger
   const devLog = process.env.NODE_ENV === 'development' ? console.log : () => {};
@@ -1920,22 +1920,14 @@ export default function MALWrapped() {
     }
   }
 
-  // Fetch all 5 themes together
-  async function fetchAnimeThemes(topRatedAnime, year = null) {
+  // Fetch all 5 themes together - simplified version
+  async function fetchAnimeThemes(topRatedAnime, year) {
     if (isFetchingThemesRef.current) {
       devLog('Already fetching themes, skipping duplicate call');
       return;
     }
     
-    // Check if year has changed since we started fetching
-    const targetYear = year !== null ? year : selectedYear;
-    if (currentFetchYearRef.current !== null && currentFetchYearRef.current !== targetYear) {
-      devLog('Year changed during fetch, aborting');
-      return;
-    }
-    
     isFetchingThemesRef.current = true;
-    currentFetchYearRef.current = targetYear;
     
     try {
       const malIds = topRatedAnime
@@ -1945,38 +1937,30 @@ export default function MALWrapped() {
       
       if (malIds.length === 0) {
         isFetchingThemesRef.current = false;
-        currentFetchYearRef.current = null;
         return;
       }
       
       // Store MAL IDs
       setPendingMalIds(malIds);
       
-      // Fetch all themes together with delays to avoid rate limiting
+      // Fetch all themes with delays to avoid rate limiting (500ms between requests)
       const themes = [];
       for (let i = 0; i < malIds.length; i++) {
-        // Check again if year changed during fetch
-        if (currentFetchYearRef.current !== targetYear) {
-          devLog('Year changed during theme fetch, aborting');
-          setPendingMalIds([]);
-          isFetchingThemesRef.current = false;
-          currentFetchYearRef.current = null;
-          return;
+        if (i > 0) {
+          // Add delay between requests to prevent rate limiting
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
         
-        if (i > 0) {
-          // Add delay between requests
-          await new Promise(resolve => setTimeout(resolve, 300));
-        }
         const theme = await fetchSingleAnimeTheme(malIds[i]);
         if (theme) {
           themes.push(theme);
         }
       }
       
-      // Final check before setting playlist
-      if (currentFetchYearRef.current === targetYear && themes.length > 0) {
+      // Only set playlist if we still have the same year (prevent race conditions)
+      if (themes.length > 0) {
         setPlaylist(themes);
+        setPlaylistYear(year);
         // Start with 5th anime song (index 4) - will play 4→3→2→1→0 freely
         setCurrentTrackIndex(Math.min(4, themes.length - 1));
       }
@@ -1988,7 +1972,6 @@ export default function MALWrapped() {
       setPendingMalIds([]);
     } finally {
       isFetchingThemesRef.current = false;
-      currentFetchYearRef.current = null;
     }
   }
 
@@ -1996,6 +1979,12 @@ export default function MALWrapped() {
   const playTrack = useCallback((index, tracks = null) => {
     const tracksToUse = tracks || playlist;
     if (!tracksToUse || tracksToUse.length === 0 || index < 0 || index >= tracksToUse.length) return;
+    
+    // Don't play if playlist is for a different year (only check when using default playlist)
+    if (tracks === null && playlistYear !== null && playlistYear !== selectedYear) {
+      devLog('Playlist is for different year, not playing');
+      return;
+    }
     
     // Prevent concurrent calls
     if (isSwitchingTrackRef.current) {
@@ -2192,7 +2181,7 @@ export default function MALWrapped() {
     
     // Start loading immediately
     newMediaElement.load();
-  }, [playlist]);
+  }, [playlist, playlistYear, selectedYear]);
 
   // Toggle music play/pause
   const toggleMusic = useCallback(() => {
@@ -2235,6 +2224,7 @@ export default function MALWrapped() {
       }
       setIsMusicPlaying(false);
       setPlaylist([]);
+      setPlaylistYear(null); // Clear playlist year
       setPendingMalIds([]);
       setCurrentTrackIndex(0);
       isSwitchingTrackRef.current = false;
@@ -2250,6 +2240,7 @@ export default function MALWrapped() {
     if (isMounted) {
       // Clear playlist on initial load
       setPlaylist([]);
+      setPlaylistYear(null); // Clear playlist year
       setPendingMalIds([]);
       setCurrentTrackIndex(0);
       setIsMusicPlaying(false);
@@ -2295,7 +2286,6 @@ export default function MALWrapped() {
     if (isFetchingThemesRef.current) return;
     
     // Only fetch if playlist is empty or if it's for a different year
-    const playlistYear = currentFetchYearRef.current;
     if (playlist.length > 0 && playlistYear === selectedYear) {
       return; // Already have songs for this year
     }
@@ -2311,7 +2301,7 @@ export default function MALWrapped() {
       return () => clearTimeout(timeoutId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSlide, stats?.topRated?.length, selectedYear, playlist.length]);
+  }, [currentSlide, stats?.topRated?.length, selectedYear, playlist.length, playlistYear]);
 
 
   // Change tracks based on slide numbers
@@ -3606,16 +3596,16 @@ export default function MALWrapped() {
                             }
                           });
                           
-                          // Clear all state
+                          // Clear all state and playlist
                           setPlaylist([]);
+                          setPlaylistYear(null); // Clear playlist year
                           setPendingMalIds([]);
                           setCurrentTrackIndex(0);
                           setIsMusicPlaying(false);
                           isSwitchingTrackRef.current = false;
                           isFetchingThemesRef.current = false; // Reset fetching flag
-                          currentFetchYearRef.current = null; // Clear fetch year ref
                           
-                          // Update year - this will trigger stats recalculation
+                          // Update year - this will trigger stats recalculation and new fetch
                           setSelectedYear(newYear);
                           // Stats will be recalculated by the useEffect that watches selectedYear
                           // The fetch will happen automatically when stats.topRated updates
