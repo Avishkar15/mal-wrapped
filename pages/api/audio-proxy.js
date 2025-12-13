@@ -15,15 +15,33 @@ export default async function handler(req, res) {
     let audioUrl = null;
 
     try {
-      const metadataResponse = await fetch(metadataUrl);
+      // Create abort controller for timeout
+      const metadataController = new AbortController();
+      const metadataTimeout = setTimeout(() => metadataController.abort(), 10000);
+      
+      const metadataResponse = await fetch(metadataUrl, {
+        headers: {
+          'User-Agent': 'MAL-Wrapped/1.0',
+        },
+        signal: metadataController.signal
+      });
+      
+      clearTimeout(metadataTimeout);
+      
       if (metadataResponse.ok) {
         const metadata = await metadataResponse.json();
         if (metadata.audio && metadata.audio.link) {
           audioUrl = metadata.audio.link;
         }
+      } else {
+        console.error(`Metadata fetch failed: ${metadataResponse.status} ${metadataResponse.statusText}`);
       }
     } catch (error) {
-      console.error('Failed to fetch metadata:', error);
+      if (error.name === 'AbortError') {
+        console.error('Metadata fetch timeout:', error);
+      } else {
+        console.error('Failed to fetch metadata:', error);
+      }
     }
 
     // Fallback to direct URL if metadata fetch failed
@@ -32,11 +50,24 @@ export default async function handler(req, res) {
     }
 
     // Fetch the audio file from animethemes.moe (server-side, no CORS)
-    const audioResponse = await fetch(audioUrl);
+    const audioController = new AbortController();
+    const audioTimeout = setTimeout(() => audioController.abort(), 30000);
+    
+    const audioResponse = await fetch(audioUrl, {
+      headers: {
+        'User-Agent': 'MAL-Wrapped/1.0',
+      },
+      signal: audioController.signal
+    });
+    
+    clearTimeout(audioTimeout);
 
     if (!audioResponse.ok) {
+      console.error(`Audio fetch failed: ${audioResponse.status} ${audioResponse.statusText} for ${audioUrl}`);
       return res.status(audioResponse.status).json({ 
-        error: `Failed to fetch audio: ${audioResponse.statusText}` 
+        error: `Failed to fetch audio: ${audioResponse.statusText}`,
+        filename: filename,
+        url: audioUrl
       });
     }
 
@@ -57,7 +88,18 @@ export default async function handler(req, res) {
     const audioBuffer = await audioResponse.arrayBuffer();
     res.status(200).send(Buffer.from(audioBuffer));
   } catch (error) {
+    if (error.name === 'AbortError') {
+      console.error('Audio fetch timeout:', error);
+      return res.status(504).json({ 
+        error: 'Request timeout - audio file took too long to load',
+        filename: filename
+      });
+    }
     console.error('Error proxying audio:', error);
-    return res.status(500).json({ error: 'Failed to proxy audio file' });
+    return res.status(500).json({ 
+      error: 'Failed to proxy audio file',
+      message: error.message,
+      filename: filename
+    });
   }
 }

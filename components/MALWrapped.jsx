@@ -1996,9 +1996,14 @@ export default function MALWrapped() {
     // Ensure URL is properly set
     const audioUrl = track.videoUrl;
     if (!audioUrl || audioUrl.trim() === '') {
+      devError('Empty audio URL for track:', track);
       isSwitchingTrackRef.current = false;
       return;
     }
+    
+    // Log audio loading attempt (helpful for mobile debugging)
+    devLog(`Loading audio: ${track.animeName || 'Unknown'} - ${audioUrl}`);
+    
     newMediaElement.src = audioUrl;
     newMediaElement.volume = 0; // Start at 0 for crossfade
     newMediaElement.crossOrigin = 'anonymous';
@@ -2106,7 +2111,40 @@ export default function MALWrapped() {
     });
     
     newMediaElement.addEventListener('error', (e) => {
-      devError('Media playback error:', e, track);
+      const mediaError = newMediaElement.error;
+      let errorMessage = 'Unknown error';
+      let errorCode = 'UNKNOWN';
+      
+      if (mediaError) {
+        switch (mediaError.code) {
+          case mediaError.MEDIA_ERR_ABORTED:
+            errorMessage = 'Loading aborted';
+            errorCode = 'ABORTED';
+            break;
+          case mediaError.MEDIA_ERR_NETWORK:
+            errorMessage = 'Network error - failed to load audio';
+            errorCode = 'NETWORK';
+            break;
+          case mediaError.MEDIA_ERR_DECODE:
+            errorMessage = 'Decode error - audio format not supported';
+            errorCode = 'DECODE';
+            break;
+          case mediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+            errorMessage = 'Audio format not supported';
+            errorCode = 'SRC_NOT_SUPPORTED';
+            break;
+          default:
+            errorMessage = mediaError.message || 'Unknown media error';
+        }
+      }
+      
+      devError(`Media playback error [${errorCode}]: ${errorMessage}`, {
+        track: track?.animeName || 'Unknown',
+        url: audioUrl,
+        error: mediaError,
+        userAgent: navigator.userAgent
+      });
+      
       isSwitchingTrackRef.current = false;
       
       // Clean up
@@ -2118,16 +2156,36 @@ export default function MALWrapped() {
         devError('Error cleaning up error media element:', cleanupErr);
       }
       
-      // Skip to next track on error
-      const nextIndex = (index + 1) % tracksToUse.length;
-      if (nextIndex !== index) {
+      // Skip to next track on error (only if not the last track)
+      if (index < tracksToUse.length - 1) {
+        const nextIndex = index + 1;
         setTimeout(() => {
           playTrack(nextIndex, tracksToUse);
-        }, 100);
+        }, 500); // Slightly longer delay on mobile
       } else {
         setIsMusicPlaying(false);
       }
     });
+    
+    // Add timeout for loading (especially important on mobile)
+    const loadTimeout = setTimeout(() => {
+      if (newMediaElement.readyState === 0) {
+        devError('Audio load timeout - taking too long to load', {
+          track: track?.animeName || 'Unknown',
+          url: audioUrl
+        });
+        newMediaElement.dispatchEvent(new Event('error'));
+      }
+    }, 15000); // 15 second timeout
+    
+    // Clear timeout when loaded
+    newMediaElement.addEventListener('canplay', () => {
+      clearTimeout(loadTimeout);
+    }, { once: true });
+    
+    newMediaElement.addEventListener('error', () => {
+      clearTimeout(loadTimeout);
+    }, { once: true });
     
     // Start loading immediately
     newMediaElement.load();
