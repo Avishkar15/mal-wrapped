@@ -11,37 +11,6 @@ const MyAnimeListIcon = ({ size = 20, className = '' }) => (
 
 const smoothEase = [0.25, 0.1, 0.25, 1];
 
-// Watermark map - moved outside component to avoid recreation
-const WATERMARK_MAP = {
-  'welcome': 'MAL-WRAPPED.VERCEL.APP',
-  'anime_count': 'My Anime Journey',
-  'anime_time': 'My Anime Watchtime',
-  'top_genre': 'My Most Watched Genres',
-  'demographic_anime': 'My Anime Demographics',
-  'demographic_manga': 'My Manga Demographics',
-  'drumroll_anime': 'My Top Anime',
-  'top_5_anime': 'My Top 5 Anime',
-  'top_studio': 'My Favorite Studios',
-  'seasonal_highlights': 'My Seasonal Highlights',
-  'hidden_gems_anime': 'My Hidden Anime Gems',
-  'planned_anime': 'My Planned-to-Watch Anime',
-  'milestones': 'My Milestones',
-  'anime_to_manga_transition': 'MAL-WRAPPED.VERCEL.APP',
-  'manga_count': 'My Manga Journey',
-  'manga_time': 'My Manga Reading Time',
-  'top_manga_genre': 'My Most Read Genres',
-  'drumroll_manga': 'My Top Manga',
-  'top_5_manga': 'My Top 5 Manga',
-  'top_author': 'My Favorite Authors',
-  'hidden_gems_manga': 'My Hidden Manga Gems',
-  'longest_manga': 'My Longest Manga Journey',
-  'planned_manga': 'My Planned-to-Read Manga',
-  'badges': 'My Badges',
-  'character_twin': 'My Character Match',
-  'rating_style': 'My Rating Style',
-  'finale': 'MAL-WRAPPED.VERCEL.APP'
-};
-
 // Helper function to get MAL URL for anime/manga
 const getMALUrl = (item) => {
   if (item?.malId) {
@@ -301,7 +270,38 @@ export default function MALWrapped() {
   // Get slide-specific watermark text
   const getWatermarkText = useCallback((slideId) => {
     if (!slideId) return websiteUrl;
-    return WATERMARK_MAP[slideId] || websiteUrl;
+    
+    const watermarkMap = {
+      'welcome': 'MAL-WRAPPED.VERCEL.APP',
+      'anime_count': 'My Anime Journey',
+      'anime_time': 'My Anime Watchtime',
+      'top_genre': 'My Most Watched Genres',
+      'demographic_anime': 'My Anime Demographics',
+      'demographic_manga': 'My Manga Demographics',
+      'drumroll_anime': 'My Top Anime',
+      'top_5_anime': 'My Top 5 Anime',
+      'top_studio': 'My Favorite Studios',
+      'seasonal_highlights': 'My Seasonal Highlights',
+      'hidden_gems_anime': 'My Hidden Anime Gems',
+      'planned_anime': 'My Planned-to-Watch Anime',
+      'milestones': 'My Milestones',
+      'anime_to_manga_transition': 'MAL-WRAPPED.VERCEL.APP',
+      'manga_count': 'My Manga Journey',
+      'manga_time': 'My Manga Reading Time',
+      'top_manga_genre': 'My Most Read Genres',
+      'drumroll_manga': 'My Top Manga',
+      'top_5_manga': 'My Top 5 Manga',
+      'top_author': 'My Favorite Authors',
+      'hidden_gems_manga': 'My Hidden Manga Gems',
+      'longest_manga': 'My Longest Manga Journey',
+      'planned_manga': 'My Planned-to-Read Manga',
+      'badges': 'My Badges',
+      'character_twin': 'My Character Match',
+      'rating_style': 'My Rating Style',
+      'finale': 'MAL-WRAPPED.VERCEL.APP'
+    };
+    
+    return watermarkMap[slideId] || websiteUrl;
   }, [websiteUrl]);
 
   useEffect(() => {
@@ -1775,26 +1775,6 @@ export default function MALWrapped() {
     }
   }
 
-  // Helper function to sort videos by quality and resolution
-  const sortVideosByQuality = (videos) => {
-    return [...videos].sort((a, b) => {
-      const aFilename = (a.filename || a.attributes?.filename || '').toLowerCase();
-      const bFilename = (b.filename || b.attributes?.filename || '').toLowerCase();
-      
-      // Prefer videos with quality tags (NCBD, BD, etc.)
-      const aHasQuality = aFilename.includes('-ncbd') || aFilename.includes('-bd') || aFilename.includes('-nc');
-      const bHasQuality = bFilename.includes('-ncbd') || bFilename.includes('-bd') || bFilename.includes('-nc');
-      
-      if (aHasQuality && !bHasQuality) return -1;
-      if (!aHasQuality && bHasQuality) return 1;
-      
-      // If both have or don't have quality tags, sort by resolution (higher is better)
-      const aRes = a.resolution || a.attributes?.resolution || 0;
-      const bRes = b.resolution || b.attributes?.resolution || 0;
-      return bRes - aRes;
-    });
-  };
-
   // Fetch a single anime theme (lazy loading to avoid rate limits)
   async function fetchSingleAnimeTheme(malId) {
     try {
@@ -1854,7 +1834,24 @@ export default function MALWrapped() {
       for (const entry of entries) {
         const videos = entry.videos || [];
         if (videos.length > 0) {
-          const sortedVideos = sortVideosByQuality(videos);
+          // Prefer videos with quality tags (like NCBD1080, BD1080) as they're more likely to have audio versions
+          // Sort by: quality tags first, then by resolution (higher is better)
+          const sortedVideos = [...videos].sort((a, b) => {
+            const aFilename = (a.filename || a.attributes?.filename || '').toLowerCase();
+            const bFilename = (b.filename || b.attributes?.filename || '').toLowerCase();
+            
+            // Prefer videos with quality tags (NCBD, BD, etc.)
+            const aHasQuality = aFilename.includes('-ncbd') || aFilename.includes('-bd') || aFilename.includes('-nc');
+            const bHasQuality = bFilename.includes('-ncbd') || bFilename.includes('-bd') || bFilename.includes('-nc');
+            
+            if (aHasQuality && !bHasQuality) return -1;
+            if (!aHasQuality && bHasQuality) return 1;
+            
+            // If both have or don't have quality tags, sort by resolution
+            const aRes = a.resolution || a.attributes?.resolution || 0;
+            const bRes = b.resolution || b.attributes?.resolution || 0;
+            return bRes - aRes; // Higher resolution first
+          });
           
           // Prefer video with filename containing -OP1, otherwise take first from sorted list
           selectedVideo = sortedVideos.find(v => {
@@ -1874,9 +1871,23 @@ export default function MALWrapped() {
         for (const theme of opThemes) {
           const entries = theme.animethemeentries || [];
           for (const entry of entries) {
-              const videos = entry.videos || [];
-              if (videos.length > 0) {
-                const sortedVideos = sortVideosByQuality(videos);
+            const videos = entry.videos || [];
+            if (videos.length > 0) {
+              // Sort videos by quality tags and resolution
+              const sortedVideos = [...videos].sort((a, b) => {
+                const aFilename = (a.filename || a.attributes?.filename || '').toLowerCase();
+                const bFilename = (b.filename || b.attributes?.filename || '').toLowerCase();
+                
+                const aHasQuality = aFilename.includes('-ncbd') || aFilename.includes('-bd') || aFilename.includes('-nc');
+                const bHasQuality = bFilename.includes('-ncbd') || bFilename.includes('-bd') || bFilename.includes('-nc');
+                
+                if (aHasQuality && !bHasQuality) return -1;
+                if (!aHasQuality && bHasQuality) return 1;
+                
+                const aRes = a.resolution || a.attributes?.resolution || 0;
+                const bRes = b.resolution || b.attributes?.resolution || 0;
+                return bRes - aRes;
+              });
               
               selectedVideo = sortedVideos[0];
               selectedTheme = theme;
@@ -2025,7 +2036,7 @@ export default function MALWrapped() {
                     oldMediaElement.parentNode.removeChild(oldMediaElement);
                   }
                 } catch (e) {
-                  devError('Error cleaning up old media element:', e);
+                  console.error('Error cleaning up old media element:', e);
                 }
               }
               
@@ -2052,7 +2063,7 @@ export default function MALWrapped() {
                 oldMediaElement.parentNode.removeChild(oldMediaElement);
               }
             } catch (e) {
-              devError('Error cleaning up old media element:', e);
+              console.error('Error cleaning up old media element:', e);
             }
           }
           
@@ -2062,11 +2073,11 @@ export default function MALWrapped() {
           isSwitchingTrackRef.current = false;
         }).catch(err => {
           if (err.name === 'NotAllowedError') {
-            devLog('Autoplay prevented - waiting for user interaction');
+            console.log('Autoplay prevented - waiting for user interaction');
             setIsMusicPlaying(false);
             isSwitchingTrackRef.current = false;
           } else {
-            devError('Failed to play media:', err, track);
+            console.error('Failed to play media:', err, track);
             setIsMusicPlaying(false);
             isSwitchingTrackRef.current = false;
           }
@@ -2152,7 +2163,7 @@ export default function MALWrapped() {
             audioRef.current.parentNode.removeChild(audioRef.current);
           }
         } catch (e) {
-          devError('Error removing audio element:', e);
+          console.error('Error removing audio element:', e);
         }
         audioRef.current = null;
       }
@@ -2179,7 +2190,6 @@ export default function MALWrapped() {
   useEffect(() => {
     const topRatedLength = stats?.topRated?.length || 0;
     if (topRatedLength > 0 && playlist.length === 0 && pendingMalIds.length === 0) {
-      devLog('Fetching themes');
       fetchAnimeThemes(stats.topRated);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2216,7 +2226,7 @@ export default function MALWrapped() {
     // Only change track if we have a forced change and we're not already playing it
     if (shouldForceChange && targetTrackIndex !== null && targetTrackIndex < playlist.length && 
         currentTrackIndex !== targetTrackIndex && audioRef.current) {
-      devLog(`Forcing track change from ${currentTrackIndex} to ${targetTrackIndex} for slide ${slideNumber}`);
+      console.log(`Forcing track change from ${currentTrackIndex} to ${targetTrackIndex} for slide ${slideNumber}`);
       if (isMusicPlaying) {
         playTrack(targetTrackIndex, playlist);
       } else {
@@ -3462,7 +3472,7 @@ export default function MALWrapped() {
                                 audioRef.current.parentNode.removeChild(audioRef.current);
                               }
                             } catch (e) {
-                              devError('Error removing audio element:', e);
+                              console.error('Error removing audio element:', e);
                             }
                             audioRef.current = null;
                           }
