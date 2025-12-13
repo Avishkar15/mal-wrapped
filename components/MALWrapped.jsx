@@ -252,6 +252,7 @@ export default function MALWrapped() {
   const isSwitchingTrackRef = useRef(false);
   const lastForcedSlideRef = useRef(null);
   const isFetchingThemesRef = useRef(false);
+  const currentFetchYearRef = useRef(null); // Track which year we're fetching for
   
   // Dev-only logger
   const devLog = process.env.NODE_ENV === 'development' ? console.log : () => {};
@@ -1920,13 +1921,22 @@ export default function MALWrapped() {
   }
 
   // Fetch all 5 themes together
-  async function fetchAnimeThemes(topRatedAnime) {
+  async function fetchAnimeThemes(topRatedAnime, year = null) {
     if (isFetchingThemesRef.current) {
       devLog('Already fetching themes, skipping duplicate call');
       return;
     }
     
+    // Check if year has changed since we started fetching
+    const targetYear = year !== null ? year : selectedYear;
+    if (currentFetchYearRef.current !== null && currentFetchYearRef.current !== targetYear) {
+      devLog('Year changed during fetch, aborting');
+      return;
+    }
+    
     isFetchingThemesRef.current = true;
+    currentFetchYearRef.current = targetYear;
+    
     try {
       const malIds = topRatedAnime
         .slice(0, 5)
@@ -1935,6 +1945,7 @@ export default function MALWrapped() {
       
       if (malIds.length === 0) {
         isFetchingThemesRef.current = false;
+        currentFetchYearRef.current = null;
         return;
       }
       
@@ -1944,6 +1955,15 @@ export default function MALWrapped() {
       // Fetch all themes together with delays to avoid rate limiting
       const themes = [];
       for (let i = 0; i < malIds.length; i++) {
+        // Check again if year changed during fetch
+        if (currentFetchYearRef.current !== targetYear) {
+          devLog('Year changed during theme fetch, aborting');
+          setPendingMalIds([]);
+          isFetchingThemesRef.current = false;
+          currentFetchYearRef.current = null;
+          return;
+        }
+        
         if (i > 0) {
           // Add delay between requests
           await new Promise(resolve => setTimeout(resolve, 300));
@@ -1954,7 +1974,8 @@ export default function MALWrapped() {
         }
       }
       
-      if (themes.length > 0) {
+      // Final check before setting playlist
+      if (currentFetchYearRef.current === targetYear && themes.length > 0) {
         setPlaylist(themes);
         // Start with 5th anime song (index 4) - will play 4→3→2→1→0 freely
         setCurrentTrackIndex(Math.min(4, themes.length - 1));
@@ -1967,6 +1988,7 @@ export default function MALWrapped() {
       setPendingMalIds([]);
     } finally {
       isFetchingThemesRef.current = false;
+      currentFetchYearRef.current = null;
     }
   }
 
@@ -2003,6 +2025,9 @@ export default function MALWrapped() {
     newMediaElement.volume = 0; // Start at 0 for crossfade
     newMediaElement.crossOrigin = 'anonymous';
     newMediaElement.preload = 'auto';
+    newMediaElement.playsInline = true; // Required for iOS
+    newMediaElement.setAttribute('playsinline', 'true'); // iOS compatibility
+    newMediaElement.setAttribute('webkit-playsinline', 'true'); // Older iOS
     newMediaElement.style.display = 'none';
     document.body.appendChild(newMediaElement);
     
@@ -2090,8 +2115,44 @@ export default function MALWrapped() {
       }
     };
     
-    newMediaElement.addEventListener('canplay', handleCanPlay, { once: true });
-    newMediaElement.addEventListener('loadedmetadata', handleCanPlay, { once: true });
+    // For iOS, try to play immediately if possible (must be within user gesture)
+    // iOS requires play() to be called synchronously within user interaction
+    const tryImmediatePlay = () => {
+      // Only try immediate play if we're on the first track and no old element exists
+      if (!oldMediaElement && newMediaElement.readyState >= 2) { // HAVE_CURRENT_DATA
+        newMediaElement.volume = targetVolume;
+        const playPromise = newMediaElement.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            audioRef.current = newMediaElement;
+            setCurrentTrackIndex(index);
+            setIsMusicPlaying(true);
+            isSwitchingTrackRef.current = false;
+          }).catch(err => {
+            // If immediate play fails, fall back to canplay handler
+            devLog('Immediate play failed, waiting for canplay:', err);
+            newMediaElement.addEventListener('canplay', handleCanPlay, { once: true });
+            newMediaElement.addEventListener('loadedmetadata', handleCanPlay, { once: true });
+            newMediaElement.load(); // Trigger load
+          });
+        }
+      } else {
+        // Use normal canplay handler
+        newMediaElement.addEventListener('canplay', handleCanPlay, { once: true });
+        newMediaElement.addEventListener('loadedmetadata', handleCanPlay, { once: true });
+      }
+    };
+    
+    // Try immediate play for iOS compatibility
+    if (newMediaElement.readyState >= 2) {
+      tryImmediatePlay();
+    } else {
+      // Wait for metadata to load
+      newMediaElement.addEventListener('loadedmetadata', () => {
+        tryImmediatePlay();
+      }, { once: true });
+      newMediaElement.addEventListener('canplay', handleCanPlay, { once: true });
+    }
     
     newMediaElement.addEventListener('ended', () => {
       // Play next track in sequence (5th→4th→3rd→2nd→1st, backwards)
@@ -2183,23 +2244,34 @@ export default function MALWrapped() {
 
   // Clear fetched songs when welcome page loads (initial mount)
   useEffect(() => {
-    // Clear playlist on initial load
-    setPlaylist([]);
-    setPendingMalIds([]);
-    setCurrentTrackIndex(0);
-    setIsMusicPlaying(false);
-    isFetchingThemesRef.current = false;
-    if (audioRef.current) {
-      audioRef.current.pause();
-      try {
-        if (audioRef.current.parentNode) {
-          audioRef.current.parentNode.removeChild(audioRef.current);
+    // Only clear on initial mount, not on every render
+    let isMounted = true;
+    
+    if (isMounted) {
+      // Clear playlist on initial load
+      setPlaylist([]);
+      setPendingMalIds([]);
+      setCurrentTrackIndex(0);
+      setIsMusicPlaying(false);
+      isFetchingThemesRef.current = false;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current.load();
+        try {
+          if (audioRef.current.parentNode) {
+            audioRef.current.parentNode.removeChild(audioRef.current);
+          }
+        } catch (e) {
+          devError('Error removing audio element:', e);
         }
-      } catch (e) {
-        devError('Error removing audio element:', e);
+        audioRef.current = null;
       }
-      audioRef.current = null;
     }
+    
+    return () => {
+      isMounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
 
@@ -2219,13 +2291,27 @@ export default function MALWrapped() {
     // Only fetch when on welcome page (currentSlide === 0)
     if (currentSlide !== 0) return;
     
+    // Don't fetch if we're already fetching
+    if (isFetchingThemesRef.current) return;
+    
+    // Only fetch if playlist is empty or if it's for a different year
+    const playlistYear = currentFetchYearRef.current;
+    if (playlist.length > 0 && playlistYear === selectedYear) {
+      return; // Already have songs for this year
+    }
+    
     const topRatedLength = stats?.topRated?.length || 0;
-    if (topRatedLength > 0 && playlist.length === 0 && pendingMalIds.length === 0 && !isFetchingThemesRef.current) {
-      devLog('Fetching themes for welcome page');
-      fetchAnimeThemes(stats.topRated);
+    if (topRatedLength > 0 && pendingMalIds.length === 0) {
+      devLog(`Fetching themes for welcome page (year: ${selectedYear})`);
+      // Use setTimeout to defer the fetch and prevent blocking render
+      const timeoutId = setTimeout(() => {
+        fetchAnimeThemes(stats.topRated, selectedYear);
+      }, 0);
+      
+      return () => clearTimeout(timeoutId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSlide, stats?.topRated?.length, selectedYear, playlist.length, pendingMalIds.length]);
+  }, [currentSlide, stats?.topRated?.length, selectedYear, playlist.length]);
 
 
   // Change tracks based on slide numbers
@@ -3486,20 +3572,16 @@ export default function MALWrapped() {
                         id="year-selector"
                         name="year-selector"
                         value={selectedYear}
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           e.preventDefault();
                           const newYear = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
-                          setSelectedYear(newYear);
-                          // Clear current year song list
-                          setPlaylist([]);
-                          setPendingMalIds([]);
-                          setCurrentTrackIndex(0);
-                          setIsMusicPlaying(false);
-                          isFetchingThemesRef.current = false; // Reset fetching flag
-                          // Stop current audio if playing
+                          
+                          // Stop and remove all audio elements immediately
                           if (audioRef.current) {
                             try {
                               audioRef.current.pause();
+                              audioRef.current.src = '';
+                              audioRef.current.load();
                               if (audioRef.current.parentNode) {
                                 audioRef.current.parentNode.removeChild(audioRef.current);
                               }
@@ -3508,6 +3590,33 @@ export default function MALWrapped() {
                             }
                             audioRef.current = null;
                           }
+                          
+                          // Also remove any other audio/video elements that might be in the DOM
+                          const allMediaElements = document.querySelectorAll('audio, video');
+                          allMediaElements.forEach(el => {
+                            try {
+                              el.pause();
+                              el.src = '';
+                              el.load();
+                              if (el.parentNode) {
+                                el.parentNode.removeChild(el);
+                              }
+                            } catch (err) {
+                              // Ignore errors
+                            }
+                          });
+                          
+                          // Clear all state
+                          setPlaylist([]);
+                          setPendingMalIds([]);
+                          setCurrentTrackIndex(0);
+                          setIsMusicPlaying(false);
+                          isSwitchingTrackRef.current = false;
+                          isFetchingThemesRef.current = false; // Reset fetching flag
+                          currentFetchYearRef.current = null; // Clear fetch year ref
+                          
+                          // Update year - this will trigger stats recalculation
+                          setSelectedYear(newYear);
                           // Stats will be recalculated by the useEffect that watches selectedYear
                           // The fetch will happen automatically when stats.topRated updates
                         }}
@@ -3532,10 +3641,53 @@ export default function MALWrapped() {
                     
                     {/* Connect to MAL button */}
                     <motion.button
-                      onClick={() => {
+                      onClick={(e) => {
                         // Move to next slide and start music (themes should already be fetched by useEffect)
                         if (stats && stats.topRated && stats.topRated.length > 0) {
-                          setShouldStartMusic(true);
+                          // For iOS compatibility, start audio directly from user interaction
+                          // iOS requires play() to be called synchronously within user gesture
+                          if (playlist.length > 0) {
+                            // Start playing immediately from user gesture (required for iOS)
+                            const initialTrackIndex = Math.min(4, playlist.length - 1);
+                            const track = playlist[initialTrackIndex];
+                            
+                            if (track && track.videoUrl) {
+                              // Create and play audio element synchronously within user gesture (iOS requirement)
+                              const isAudio = track.isAudio || track.videoUrl.match(/\.(mp3|m4a|ogg|wav|aac)(\?|$)/i);
+                              const mediaElement = isAudio 
+                                ? document.createElement('audio')
+                                : document.createElement('video');
+                              
+                              mediaElement.src = track.videoUrl;
+                              mediaElement.volume = 0.3;
+                              mediaElement.crossOrigin = 'anonymous';
+                              mediaElement.playsInline = true;
+                              mediaElement.setAttribute('playsinline', 'true');
+                              mediaElement.setAttribute('webkit-playsinline', 'true');
+                              mediaElement.style.display = 'none';
+                              document.body.appendChild(mediaElement);
+                              
+                              // Call play() immediately within user gesture (required for iOS)
+                              const playPromise = mediaElement.play();
+                              if (playPromise !== undefined) {
+                                playPromise.then(() => {
+                                  audioRef.current = mediaElement;
+                                  setCurrentTrackIndex(initialTrackIndex);
+                                  setIsMusicPlaying(true);
+                                }).catch(err => {
+                                  devError('Failed to play on button click:', err);
+                                  // Fall back to normal playTrack
+                                  playTrack(initialTrackIndex, playlist);
+                                });
+                              }
+                            } else {
+                              // Fall back to normal playTrack
+                              playTrack(initialTrackIndex, playlist);
+                            }
+                          } else {
+                            // If playlist not ready, use the flag (fallback for other platforms)
+                            setShouldStartMusic(true);
+                          }
                           // Move to next slide
                           setCurrentSlide(1);
                         }
