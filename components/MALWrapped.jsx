@@ -246,7 +246,6 @@ export default function MALWrapped() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [playlist, setPlaylist] = useState([]);
   const [pendingMalIds, setPendingMalIds] = useState([]);
-  const [isFetchingThemes, setIsFetchingThemes] = useState(false);
   const shareMenuRef = useRef(null);
   const slideRef = useRef(null);
   const audioRef = useRef(null);
@@ -1805,33 +1804,16 @@ export default function MALWrapped() {
       url.searchParams.append('filter[external_id]', malId.toString());
       url.searchParams.append('include', 'animethemes.animethemeentries.videos');
 
-      // Add timeout for mobile devices (15 seconds)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const response = await fetch(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
 
-      let response;
-      try {
-        response = await fetch(url.toString(), {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          },
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          devError(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
-          return null;
-        }
-      } catch (fetchError) {
-        clearTimeout(timeoutId);
-        if (fetchError.name === 'AbortError') {
-          devError(`Timeout fetching themes for MAL ID ${malId} (15s timeout)`);
-        } else {
-          devError(`Network error fetching themes for MAL ID ${malId}:`, fetchError);
-        }
+      if (!response.ok) {
+        const errorText = await response.text();
+        devError(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
         return null;
       }
 
@@ -1944,60 +1926,31 @@ export default function MALWrapped() {
         .map(item => item.node?.id)
         .filter(id => id != null);
       
-      if (malIds.length === 0) {
-        setIsFetchingThemes(false);
-        return;
-      }
+      if (malIds.length === 0) return;
       
-      setIsFetchingThemes(true);
       // Store MAL IDs
       setPendingMalIds(malIds);
       
       // Fetch all themes together with delays to avoid rate limiting
-      // Add overall timeout (90 seconds for 5 requests with delays)
-      const overallTimeout = setTimeout(() => {
-        devError('Overall timeout: Theme fetching took too long, stopping...');
-        setIsFetchingThemes(false);
-        setPendingMalIds([]);
-      }, 90000);
-      
       const themes = [];
-      try {
-        for (let i = 0; i < malIds.length; i++) {
-          if (i > 0) {
-            // Add delay between requests
-            await new Promise(resolve => setTimeout(resolve, 300));
-          }
-          try {
-            const theme = await fetchSingleAnimeTheme(malIds[i]);
-            if (theme) {
-              themes.push(theme);
-              devLog(`Successfully fetched theme ${i + 1}/${malIds.length} for MAL ID ${malIds[i]}`);
-            } else {
-              devWarn(`No theme found for MAL ID ${malIds[i]}`);
-            }
-          } catch (error) {
-            devError(`Error fetching theme for MAL ID ${malIds[i]}:`, error);
-          }
+      for (let i = 0; i < malIds.length; i++) {
+        if (i > 0) {
+          // Add delay between requests
+          await new Promise(resolve => setTimeout(resolve, 300));
         }
-      } finally {
-        clearTimeout(overallTimeout);
-        setIsFetchingThemes(false);
-        setPendingMalIds([]);
+        const theme = await fetchSingleAnimeTheme(malIds[i]);
+        if (theme) {
+          themes.push(theme);
+        }
       }
       
       if (themes.length > 0) {
         setPlaylist(themes);
         // Start with 5th anime song (index 4) - will play 4→3→2→1→0 freely
         setCurrentTrackIndex(Math.min(4, themes.length - 1));
-        devLog(`Successfully loaded ${themes.length} themes into playlist`);
-      } else {
-        devWarn('No themes were successfully fetched');
       }
     } catch (error) {
       devError('Error fetching anime themes:', error);
-      setIsFetchingThemes(false);
-      setPendingMalIds([]);
     }
   }
 
@@ -2229,7 +2182,6 @@ export default function MALWrapped() {
       setPlaylist([]);
       setPendingMalIds([]);
       setCurrentTrackIndex(0);
-      setIsFetchingThemes(false);
       isSwitchingTrackRef.current = false;
     }
   }, [currentSlide]);
@@ -3526,7 +3478,6 @@ export default function MALWrapped() {
                           // Clear playlist and pending MAL IDs to trigger refetch
                           setPlaylist([]);
                           setPendingMalIds([]);
-                          setIsFetchingThemes(false);
                           setCurrentMalIdIndex(0);
                           setCurrentTrackIndex(0);
                           setIsMusicPlaying(false);
@@ -5987,42 +5938,24 @@ export default function MALWrapped() {
               {/* Top Bar - Download, Share, Logout (Year picker moved to welcome screen) */}
               <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 pt-3 pb-2 flex items-center justify-between gap-2 sm:gap-3" data-exclude-from-screenshot>
                 <div className="flex items-center gap-2 sm:gap-3">
-                  {(playlist.length > 0 || isFetchingThemes || pendingMalIds.length > 0) && (
+                  {playlist.length > 0 && (
                     <motion.button 
                       onClick={toggleMusic} 
                       className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2" 
-                      title={
-                        isFetchingThemes || pendingMalIds.length > 0 
-                          ? "Loading music..." 
-                          : isMusicPlaying 
-                            ? "Pause Music" 
-                            : "Play Music"
-                      }
-                      disabled={isFetchingThemes || pendingMalIds.length > 0 || playlist.length === 0}
+                      title={isMusicPlaying ? "Pause Music" : "Play Music"}  
                       style={{ 
                         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        opacity: (isFetchingThemes || pendingMalIds.length > 0 || playlist.length === 0) ? 0.5 : 1
+                        border: '1px solid rgba(255, 255, 255, 0.1)'
                       }}
                       whileHover={{ 
-                        scale: (isFetchingThemes || pendingMalIds.length > 0 || playlist.length === 0) ? 1 : 1.1, 
-                        backgroundColor: (isFetchingThemes || pendingMalIds.length > 0 || playlist.length === 0) 
-                          ? 'rgba(255, 255, 255, 0.05)' 
-                          : 'rgba(139, 92, 246, 0.8)',
-                        borderColor: (isFetchingThemes || pendingMalIds.length > 0 || playlist.length === 0) 
-                          ? 'rgba(255, 255, 255, 0.1)' 
-                          : 'rgba(139, 92, 246, 0.8)'
+                        scale: 1.1, 
+                        backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                        borderColor: 'rgba(139, 92, 246, 0.8)'
                       }}
                       whileTap={{ scale: 0.9 }}
                       transition={{ duration: 0.2 }}
                     >
-                      {isFetchingThemes || pendingMalIds.length > 0 ? (
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                          className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full"
-                        />
-                      ) : isMusicPlaying ? (
+                      {isMusicPlaying ? (
                         <Volume2 className="w-4 h-4 sm:w-5 sm:h-5" />
                       ) : (
                         <VolumeX className="w-4 h-4 sm:w-5 sm:h-5" />
