@@ -1943,7 +1943,7 @@ export default function MALWrapped() {
         return;
       }
       
-      // Store MAL IDs
+      // Store MAL IDs (but don't update during fetch to avoid re-renders)
       setPendingMalIds(malIds);
       
       // Fetch all themes with delays to avoid rate limiting (500ms between requests)
@@ -1958,9 +1958,7 @@ export default function MALWrapped() {
         if (theme) {
           themes.push(theme);
         }
-        
-        // Update pending IDs to show progress (remove fetched ones)
-        setPendingMalIds(prev => prev.filter(id => id !== malIds[i]));
+        // Don't update state during loop to prevent re-renders
       }
       
       // Only set playlist if we still have the same year (prevent race conditions)
@@ -2300,10 +2298,13 @@ export default function MALWrapped() {
     }
     
     const topRatedLength = stats?.topRated?.length || 0;
-    if (topRatedLength > 0 && pendingMalIds.length === 0 && !isLoadingSongs) {
+    if (topRatedLength > 0 && pendingMalIds.length === 0) {
       devLog(`Fetching themes for welcome page (year: ${selectedYear})`);
       // Start fetch immediately
       fetchAnimeThemes(stats.topRated, selectedYear);
+    } else if (topRatedLength === 0) {
+      // No songs to fetch, make sure loading is off
+      setIsLoadingSongs(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSlide, stats?.topRated, selectedYear, playlist.length, playlistYear]);
@@ -3515,8 +3516,8 @@ export default function MALWrapped() {
 
     switch (slide.id) {
       case 'welcome':
-        // Show loading screen while fetching songs
-        if (isLoadingSongs || (isFetchingThemesRef.current && playlist.length === 0)) {
+        // Show loading screen only when actively loading songs
+        if (isLoadingSongs) {
           return (
             <SlideLayout bgColor="pink">
               <div className="text-center relative w-full h-full flex flex-col items-center justify-center">
@@ -3540,11 +3541,6 @@ export default function MALWrapped() {
                   <p className="body-md font-regular text-white/70 text-center">
                     Loading your top songs...
                   </p>
-                  {pendingMalIds.length > 0 && (
-                    <p className="body-sm font-regular text-white/50 text-center">
-                      {pendingMalIds.length} song{pendingMalIds.length > 1 ? 's' : ''} remaining
-                    </p>
-                  )}
                 </motion.div>
               </div>
             </SlideLayout>
