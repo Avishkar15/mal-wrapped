@@ -1799,13 +1799,8 @@ export default function MALWrapped() {
   // Fetch a single anime theme (lazy loading to avoid rate limits)
   async function fetchSingleAnimeTheme(malId) {
     try {
-      const url = new URL('https://api.animethemes.moe/anime');
-      url.searchParams.append('filter[has]', 'resources');
-      url.searchParams.append('filter[site]', 'MyAnimeList');
-      url.searchParams.append('filter[external_id]', malId.toString());
-      url.searchParams.append('include', 'animethemes.animethemeentries.videos');
-
-      const response = await fetch(url.toString(), {
+      // Use Next.js API route to avoid CORS issues
+      const response = await fetch(`/api/animethemes?malId=${encodeURIComponent(malId)}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -1818,101 +1813,15 @@ export default function MALWrapped() {
         return null;
       }
 
-      const data = await response.json();
+      const theme = await response.json();
       
-      // The API returns { anime: [...] }
-      if (!data.anime || !Array.isArray(data.anime) || data.anime.length === 0) {
+      // API returns null if no theme found
+      if (!theme) {
         return null;
       }
-
-      const anime = data.anime[0];
-      const animeName = anime.name || anime.attributes?.name;
-      const animeSlug = anime.slug || anime.attributes?.slug;
-
-      // Get OP (Opening) themes
-      const animethemes = anime.animethemes || [];
-      const opThemes = animethemes.filter(t => {
-        const type = t.type || t.attributes?.type;
-        return type === 'OP';
-      });
       
-      if (opThemes.length === 0) {
-        return null;
-      }
-
-      // Prefer OP1 (first opening)
-      let selectedVideo = null;
-      let selectedTheme = null;
-      
-      const op1Theme = opThemes.find(t => {
-        const slug = t.slug || t.attributes?.slug;
-        return slug === 'OP1';
-      }) || opThemes[0];
-      
-      // Get entries
-      const entries = op1Theme.animethemeentries || [];
-      
-      for (const entry of entries) {
-        const videos = entry.videos || [];
-        if (videos.length > 0) {
-          const sortedVideos = sortVideosByQuality(videos);
-          
-          // Prefer video with filename containing -OP1, otherwise take first from sorted list
-          selectedVideo = sortedVideos.find(v => {
-            const filename = v.filename || v.attributes?.filename;
-            return filename && filename.toLowerCase().includes('-op1');
-          }) || sortedVideos[0];
-          
-          if (selectedVideo) {
-            selectedTheme = op1Theme;
-            break;
-          }
-        }
-      }
-      
-      // If no video found in OP1, try other OP themes
-      if (!selectedVideo) {
-        for (const theme of opThemes) {
-          const entries = theme.animethemeentries || [];
-          for (const entry of entries) {
-              const videos = entry.videos || [];
-              if (videos.length > 0) {
-                const sortedVideos = sortVideosByQuality(videos);
-              
-              selectedVideo = sortedVideos[0];
-              selectedTheme = theme;
-              break;
-            }
-          }
-          if (selectedVideo) break;
-        }
-      }
-      
-      // Extract filename and construct audio URL
-      const videoFilename = selectedVideo?.filename || selectedVideo?.attributes?.filename;
-      const videoBasename = selectedVideo?.basename || selectedVideo?.attributes?.basename;
-      const themeSlug = selectedTheme?.slug || selectedTheme?.attributes?.slug;
-      const themeType = selectedTheme?.type || selectedTheme?.attributes?.type;
-      
-      if (selectedVideo && videoFilename) {
-        // Use our proxy API to bypass CORS restrictions
-        // The proxy fetches the audio server-side and streams it to the client
-        const audioUrl = `/api/audio-proxy?filename=${encodeURIComponent(videoFilename + '.ogg')}`;
-        
-        return {
-          malId: parseInt(malId),
-          animeName: animeName,
-          animeSlug: animeSlug,
-          themeSlug: themeSlug,
-          themeType: themeType,
-          videoUrl: audioUrl,
-          basename: videoBasename,
-          filename: videoFilename,
-          isAudio: true
-        };
-      }
-      
-      return null;
+      // API route already returns the proxy URL, so we can use it directly
+      return theme;
     } catch (error) {
       devError(`Error fetching theme for MAL ID ${malId}:`, error);
       return null;
