@@ -71,6 +71,32 @@ function pkceChallenge(verifier) {
 const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
 const AUTH_URL = 'https://myanimelist.net/v1/oauth2/authorize';
 
+// Dev-only loggers - created once outside component
+const devLog = process.env.NODE_ENV === 'development' ? console.log : () => {};
+const devError = process.env.NODE_ENV === 'development' ? console.error : () => {};
+const devWarn = process.env.NODE_ENV === 'development' ? console.warn : () => {};
+
+// Helper function to clean up media elements - prevents code duplication
+const cleanupMediaElement = (element) => {
+  if (!element) return;
+  try {
+    element.pause();
+    element.src = '';
+    element.load();
+    if (element.parentNode) {
+      element.parentNode.removeChild(element);
+    }
+  } catch (err) {
+    // Ignore cleanup errors
+  }
+};
+
+// Helper function to clean up all media elements in DOM
+const cleanupAllMediaElements = () => {
+  const allMediaElements = document.querySelectorAll('audio, video');
+  allMediaElements.forEach(cleanupMediaElement);
+};
+
 // Framer Motion Animation Variants
 const fadeSlideUp = {
   initial: { opacity: 0, y: 20 },
@@ -256,13 +282,15 @@ export default function MALWrapped() {
   const isFetchingThemesRef = useRef(false);
   const currentTrackIndexRef = useRef(0);
   
-  // Dev-only logger
-  const devLog = process.env.NODE_ENV === 'development' ? console.log : () => {};
-  const devError = process.env.NODE_ENV === 'development' ? console.error : () => {};
-  const devWarn = process.env.NODE_ENV === 'development' ? console.warn : () => {};
-
-  const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
-  const hasManga = stats && mangaList && mangaList.length > 0;
+  // Memoize hasAnime and hasManga to prevent unnecessary recalculations
+  const hasAnime = useMemo(() => 
+    stats?.thisYearAnime?.length > 0, 
+    [stats?.thisYearAnime]
+  );
+  const hasManga = useMemo(() => 
+    mangaList?.length > 0, 
+    [mangaList]
+  );
   
   const slides = useMemo(() => stats ? [
     { id: 'welcome' },
@@ -296,11 +324,11 @@ export default function MALWrapped() {
     { id: 'finale' },
   ] : [], [stats, hasAnime, hasManga]);
 
-  // Get website URL for watermark
+  // Get website URL for watermark - memoized once
   const websiteUrl = useMemo(() => {
     if (typeof window === 'undefined') return 'MAL-WRAPPED.VERCEL.APP';
     return window.location.origin.replace(/^https?:\/\//, '').toUpperCase();
-  }, []);
+  }, []); // Empty deps - only compute once on mount
 
   // Get slide-specific watermark text
   const getWatermarkText = useCallback((slideId) => {
@@ -362,7 +390,7 @@ export default function MALWrapped() {
       window.history.replaceState({}, document.title, window.location.pathname);
 
       await fetchUserData(data.access_token);
-      setIsAuthenticated(true);
+      // setIsAuthenticated is set inside fetchUserData, no need to set it here
     } catch (err) {
       setError(err.message);
     } finally {
@@ -1969,7 +1997,7 @@ export default function MALWrapped() {
       setPendingMalIds(malIds);
       
       // Update loading progress to show we're fetching songs
-      setLoadingProgress('Loading your top songs...');
+      setLoadingProgress('Generating your Wrapped...');
       // Ensure progress only increases, never decreases
       setLoadingProgressPercent(prev => Math.max(prev, 85));
       
@@ -2118,16 +2146,7 @@ export default function MALWrapped() {
               clearInterval(fadeIntervalId);
               
               // Clean up old element
-              if (oldMediaElement) {
-                try {
-                  oldMediaElement.pause();
-                  if (oldMediaElement.parentNode) {
-                    oldMediaElement.parentNode.removeChild(oldMediaElement);
-                  }
-                } catch (e) {
-                  devError('Error cleaning up old media element:', e);
-                }
-              }
+              cleanupMediaElement(oldMediaElement);
               
               newMediaElement.volume = targetVolume;
               audioRef.current = newMediaElement;
@@ -2146,16 +2165,7 @@ export default function MALWrapped() {
         newMediaElement.volume = targetVolume;
         newMediaElement.play().then(() => {
           // Clean up old element if it exists
-          if (oldMediaElement) {
-            try {
-              oldMediaElement.pause();
-              if (oldMediaElement.parentNode) {
-                oldMediaElement.parentNode.removeChild(oldMediaElement);
-              }
-            } catch (e) {
-              devError('Error cleaning up old media element:', e);
-            }
-          }
+          cleanupMediaElement(oldMediaElement);
           
           audioRef.current = newMediaElement;
           setCurrentTrackIndex(index);
@@ -2240,13 +2250,7 @@ export default function MALWrapped() {
       isSwitchingTrackRef.current = false;
       
       // Clean up
-      try {
-        if (newMediaElement.parentNode) {
-          newMediaElement.parentNode.removeChild(newMediaElement);
-        }
-      } catch (cleanupErr) {
-        devError('Error cleaning up error media element:', cleanupErr);
-      }
+      cleanupMediaElement(newMediaElement);
       
       // Skip to next track on error
       const nextIndex = (index + 1) % tracksToUse.length;
@@ -2291,43 +2295,19 @@ export default function MALWrapped() {
   // Stop music and clear playlist when returning to welcome slide or when year changes
   useEffect(() => {
     if (currentSlide === 0) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current.load();
-        try {
-          if (audioRef.current.parentNode) {
-            audioRef.current.parentNode.removeChild(audioRef.current);
-          }
-        } catch (e) {
-          devError('Error removing audio element:', e);
-        }
-        audioRef.current = null;
-      }
-      // Also remove any other audio/video elements
-      const allMediaElements = document.querySelectorAll('audio, video');
-      allMediaElements.forEach(el => {
-        try {
-          el.pause();
-          el.src = '';
-          el.load();
-          if (el.parentNode) {
-            el.parentNode.removeChild(el);
-          }
-        } catch (err) {
-          // Ignore errors
-        }
-      });
+      cleanupMediaElement(audioRef.current);
+      audioRef.current = null;
+      cleanupAllMediaElements();
       setIsMusicPlaying(false);
       setPlaylist([]);
-      setPlaylistYear(null); // Clear playlist year
+      setPlaylistYear(null);
       setPendingMalIds([]);
       setCurrentTrackIndex(0);
       currentTrackIndexRef.current = 0;
       isSwitchingTrackRef.current = false;
-      isFetchingThemesRef.current = false; // Reset fetching flag
+      isFetchingThemesRef.current = false;
     }
-  }, [currentSlide, selectedYear]); // Also trigger when year changes
+  }, [currentSlide, selectedYear]);
 
   // Clear fetched songs when welcome page loads (initial mount)
   useEffect(() => {
@@ -2344,19 +2324,8 @@ export default function MALWrapped() {
       setIsMusicPlaying(false);
       setIsLoadingSongs(false); // Don't show loading on initial mount
       isFetchingThemesRef.current = false;
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current.load();
-        try {
-          if (audioRef.current.parentNode) {
-            audioRef.current.parentNode.removeChild(audioRef.current);
-          }
-        } catch (e) {
-          devError('Error removing audio element:', e);
-        }
-        audioRef.current = null;
-      }
+      cleanupMediaElement(audioRef.current);
+      audioRef.current = null;
     }
     
     return () => {
@@ -2480,14 +2449,8 @@ export default function MALWrapped() {
   // Cleanup audio/video on unmount
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        if (audioRef.current.parentNode) {
-          audioRef.current.parentNode.removeChild(audioRef.current);
-        }
-        audioRef.current = null;
-      }
+      cleanupMediaElement(audioRef.current);
+      audioRef.current = null;
     };
   }, []);
 
@@ -3694,34 +3657,9 @@ export default function MALWrapped() {
                           const newYear = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
                           
                           // Stop and remove all audio elements immediately
-                          if (audioRef.current) {
-                            try {
-                              audioRef.current.pause();
-                              audioRef.current.src = '';
-                              audioRef.current.load();
-                              if (audioRef.current.parentNode) {
-                                audioRef.current.parentNode.removeChild(audioRef.current);
-                              }
-                            } catch (e) {
-                              devError('Error removing audio element:', e);
-                            }
-                            audioRef.current = null;
-                          }
-                          
-                          // Also remove any other audio/video elements that might be in the DOM
-                          const allMediaElements = document.querySelectorAll('audio, video');
-                          allMediaElements.forEach(el => {
-                            try {
-                              el.pause();
-                              el.src = '';
-                              el.load();
-                              if (el.parentNode) {
-                                el.parentNode.removeChild(el);
-                              }
-                            } catch (err) {
-                              // Ignore errors
-                            }
-                          });
+                          cleanupMediaElement(audioRef.current);
+                          audioRef.current = null;
+                          cleanupAllMediaElements();
                           
                           // Clear all state and playlist
                           setPlaylist([]);
