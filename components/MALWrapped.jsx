@@ -1928,6 +1928,12 @@ export default function MALWrapped() {
       return;
     }
     
+    // Validate year matches current selected year before starting
+    if (year !== selectedYear) {
+      devLog(`Year mismatch: requested ${year}, current ${selectedYear}, aborting fetch`);
+      return;
+    }
+    
     isFetchingThemesRef.current = true;
     setIsLoadingSongs(true);
     
@@ -1949,6 +1955,15 @@ export default function MALWrapped() {
       // Fetch all themes with delays to avoid rate limiting (500ms between requests)
       const themes = [];
       for (let i = 0; i < malIds.length; i++) {
+        // Check if year changed during fetch
+        if (year !== selectedYear) {
+          devLog(`Year changed during fetch from ${year} to ${selectedYear}, aborting`);
+          setPendingMalIds([]);
+          isFetchingThemesRef.current = false;
+          setIsLoadingSongs(false);
+          return;
+        }
+        
         if (i > 0) {
           // Add delay between requests to prevent rate limiting
           await new Promise(resolve => setTimeout(resolve, 500));
@@ -1961,12 +1976,14 @@ export default function MALWrapped() {
         // Don't update state during loop to prevent re-renders
       }
       
-      // Only set playlist if we still have the same year (prevent race conditions)
-      if (themes.length > 0) {
+      // Final validation: only set playlist if year still matches
+      if (year === selectedYear && themes.length > 0) {
         setPlaylist(themes);
         setPlaylistYear(year);
         // Start with 5th anime song (index 4) - will play 4→3→2→1→0 freely
         setCurrentTrackIndex(Math.min(4, themes.length - 1));
+      } else if (year !== selectedYear) {
+        devLog(`Year changed after fetch from ${year} to ${selectedYear}, discarding results`);
       }
       
       // Clear pending IDs after successful fetch
@@ -1976,7 +1993,11 @@ export default function MALWrapped() {
       setPendingMalIds([]);
     } finally {
       isFetchingThemesRef.current = false;
-      setIsLoadingSongs(false);
+      // Only clear loading after fetch is completely done
+      // Use a small delay to ensure state updates are processed
+      setTimeout(() => {
+        setIsLoadingSongs(false);
+      }, 100);
     }
   }
 
@@ -2319,28 +2340,51 @@ export default function MALWrapped() {
   // Fetch themes when on welcome page and stats are ready
   useEffect(() => {
     // Only fetch when on welcome page (currentSlide === 0)
-    if (currentSlide !== 0) return;
+    if (currentSlide !== 0) {
+      // Only clear loading if we're not on welcome page and not fetching
+      if (!isFetchingThemesRef.current) {
+        setIsLoadingSongs(false);
+      }
+      return;
+    }
     
     // Don't fetch if we're already fetching
-    if (isFetchingThemesRef.current) return;
+    if (isFetchingThemesRef.current) {
+      // Keep loading visible while fetching
+      setIsLoadingSongs(true);
+      return;
+    }
     
     // Only fetch if playlist is empty or if it's for a different year
     if (playlist.length > 0 && playlistYear === selectedYear) {
-      setIsLoadingSongs(false); // Make sure loading is off if we have songs
+      // Only clear loading if we have songs and they're for the current year
+      setIsLoadingSongs(false);
       return; // Already have songs for this year
+    }
+    
+    // Make sure stats are for the current selected year
+    // Check if stats.selectedYear matches selectedYear to ensure stats are recalculated
+    if (stats?.selectedYear !== selectedYear) {
+      devLog(`Stats not yet recalculated for year ${selectedYear}, waiting...`);
+      // Keep loading visible while waiting for stats
+      setIsLoadingSongs(true);
+      return; // Wait for stats to be recalculated
     }
     
     const topRatedLength = stats?.topRated?.length || 0;
     if (topRatedLength > 0 && pendingMalIds.length === 0) {
-      devLog(`Fetching themes for welcome page (year: ${selectedYear})`);
-      // Start fetch immediately
+      devLog(`Fetching themes for welcome page (year: ${selectedYear}, stats year: ${stats.selectedYear})`);
+      // Start fetch immediately - loading will be set in fetchAnimeThemes
       fetchAnimeThemes(stats.topRated, selectedYear);
     } else if (topRatedLength === 0) {
       // No songs to fetch, make sure loading is off
       setIsLoadingSongs(false);
+    } else {
+      // Still have pending IDs, keep loading visible
+      setIsLoadingSongs(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSlide, stats?.topRated, selectedYear, playlist.length, playlistYear]);
+  }, [currentSlide, stats?.topRated, stats?.selectedYear, selectedYear, playlist.length, playlistYear, pendingMalIds.length]);
 
 
   // Change tracks based on slide numbers
@@ -3641,7 +3685,8 @@ export default function MALWrapped() {
                           setPendingMalIds([]);
                           setCurrentTrackIndex(0);
                           setIsMusicPlaying(false);
-                          setIsLoadingSongs(true); // Show loading when year changes
+                          // Keep loading visible - it will stay until new songs are fetched
+                          setIsLoadingSongs(true);
                           isSwitchingTrackRef.current = false;
                           isFetchingThemesRef.current = false; // Reset fetching flag
                           
