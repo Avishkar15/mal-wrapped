@@ -232,6 +232,7 @@ export default function MALWrapped() {
   const audioRef = useRef(null);
   const isSwitchingTrackRef = useRef(false);
   const slide7ProcessedRef = useRef(false);
+  const lastForcedSlideRef = useRef(null);
 
   const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
   const hasManga = stats && mangaList && mangaList.length > 0;
@@ -1969,7 +1970,7 @@ export default function MALWrapped() {
       if (themes.length > 0) {
         setPlaylist(themes);
         console.log(`Fetched ${themes.length} themes, starting with 5th anime (index 4)`);
-        // Start with 5th anime song (index 4)
+        // Start with 5th anime song (index 4) - will play 4→3→2→1→0 freely
         setCurrentTrackIndex(Math.min(4, themes.length - 1));
       }
     } catch (error) {
@@ -2304,9 +2305,16 @@ export default function MALWrapped() {
     newMediaElement.addEventListener('loadedmetadata', handleCanPlay, { once: true });
     
     newMediaElement.addEventListener('ended', () => {
-      // Play next track (loop back to start if at end)
-      const nextIndex = (index + 1) % tracksToUse.length;
-      playTrack(nextIndex, tracksToUse);
+      // Play next track in sequence (5th→4th→3rd→2nd→1st, backwards)
+      // Don't loop - just stop if we reach the end
+      if (index > 0) {
+        const nextIndex = index - 1; // Go backwards: 4→3→2→1→0
+        playTrack(nextIndex, tracksToUse);
+      } else {
+        // Reached the end (index 0), stop playback
+        console.log('Reached end of playlist');
+        setIsMusicPlaying(false);
+      }
     });
     
     newMediaElement.addEventListener('error', (e) => {
@@ -2397,8 +2405,8 @@ export default function MALWrapped() {
   // Start music when playlist is ready and button was clicked
   useEffect(() => {
     if (shouldStartMusic && playlist.length > 0 && currentSlide >= 1) {
-      // Start with 3rd anime (index 2) for slides 1-5
-      const initialTrackIndex = Math.min(2, playlist.length - 1);
+      // Start with 5th anime (index 4) - will play freely 4→3→2→1→0
+      const initialTrackIndex = Math.min(4, playlist.length - 1);
       setCurrentTrackIndex(initialTrackIndex);
       playTrack(initialTrackIndex, playlist);
       setShouldStartMusic(false);
@@ -2423,30 +2431,36 @@ export default function MALWrapped() {
 
 
   // Change tracks based on slide numbers
+  // On slides 1-5: let music play freely (5th→4th→3rd→2nd→1st)
+  // On slide 6: force to top 1 (index 0)
+  // On slide 16: force to top 2 (index 1)
   useEffect(() => {
     if (!audioRef.current || !stats || !slides || slides.length === 0 || !playlist || playlist.length === 0 || currentSlide === 0) return;
     
-    // Track mapping: 1-5 (3rd), 6-15 (1st), 16-25 (2nd)
-    // Note: slide 0 is welcome, so we use currentSlide + 1 for mapping
     const slideNumber = currentSlide + 1;
     let targetTrackIndex = null;
+    let shouldForceChange = false;
     
-    if (slideNumber >= 1 && slideNumber <= 5) {
-      // 3rd anime (index 2 in playlist) - slides 1-5
-      targetTrackIndex = Math.min(2, playlist.length - 1);
-    } else if (slideNumber >= 6 && slideNumber <= 15) {
-      // 1st anime (index 0 in playlist) - slides 6-15
+    // Only force track changes on specific slides when slide actually changes
+    if (slideNumber === 6 && lastForcedSlideRef.current !== 6) {
+      // Slide 6: force to top 1 (index 0) - only on slide change
       targetTrackIndex = 0;
-    } else if (slideNumber >= 16 && slideNumber <= 25) {
-      // 2nd anime (index 1 in playlist) - slides 16-25
+      shouldForceChange = true;
+      lastForcedSlideRef.current = 6;
+    } else if (slideNumber === 16 && lastForcedSlideRef.current !== 16) {
+      // Slide 16: force to top 2 (index 1) - only on slide change
       targetTrackIndex = Math.min(1, playlist.length - 1);
+      shouldForceChange = true;
+      lastForcedSlideRef.current = 16;
+    } else if (slideNumber !== 6 && slideNumber !== 16) {
+      // Reset the ref when we're not on a forced slide
+      lastForcedSlideRef.current = null;
     }
     
-    // Only change track if we have a valid target and we're not already playing it
-    if (targetTrackIndex !== null && targetTrackIndex < playlist.length && 
+    // Only change track if we have a forced change and we're not already playing it
+    if (shouldForceChange && targetTrackIndex !== null && targetTrackIndex < playlist.length && 
         currentTrackIndex !== targetTrackIndex && audioRef.current) {
-      console.log(`Changing track from ${currentTrackIndex} to ${targetTrackIndex} for slide ${slideNumber}`);
-      // Only play if music is already playing, otherwise just set the track index
+      console.log(`Forcing track change from ${currentTrackIndex} to ${targetTrackIndex} for slide ${slideNumber}`);
       if (isMusicPlaying) {
         playTrack(targetTrackIndex, playlist);
       } else {
@@ -3685,6 +3699,24 @@ export default function MALWrapped() {
                           e.preventDefault();
                           const newYear = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
                           setSelectedYear(newYear);
+                          // Clear playlist and pending MAL IDs to trigger refetch
+                          setPlaylist([]);
+                          setPendingMalIds([]);
+                          setCurrentMalIdIndex(0);
+                          setCurrentTrackIndex(0);
+                          setIsMusicPlaying(false);
+                          // Stop current audio if playing
+                          if (audioRef.current) {
+                            try {
+                              audioRef.current.pause();
+                              if (audioRef.current.parentNode) {
+                                audioRef.current.parentNode.removeChild(audioRef.current);
+                              }
+                            } catch (e) {
+                              console.error('Error removing audio element:', e);
+                            }
+                            audioRef.current = null;
+                          }
                           // Recalculate stats with new year
                           if (animeList.length > 0 || mangaList.length > 0) {
                             calculateStats(animeList, mangaList, userData, newYear);
@@ -4013,7 +4045,7 @@ export default function MALWrapped() {
               <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                 Though your {isAnime ? 'watching' : 'reading'} taste leans towards...
               </motion.h2>
-              <motion.div className="mt-4 md:mt-4 flex flex-col items-center relative z-10 min-h-[50vh] md:min-h-[40vh] justify-center" {...fadeSlideUp} data-framer-motion>
+              <motion.div className="mt-4 md:mt-4 flex flex-col items-center relative z-10 min-h-[50vh] justify-center" {...fadeSlideUp} data-framer-motion>
                 <motion.div
                   className="relative w-full h-64 md:h-80 flex items-center justify-center"
                   initial={{ opacity: 0 }}
