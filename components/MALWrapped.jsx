@@ -363,6 +363,45 @@ export default function MALWrapped() {
     }
   }, []);
 
+  // Handle page visibility changes (fixes mobile Safari black screen issue)
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const handleVisibilityChange = () => {
+      // When page becomes visible again, ensure UI is properly rendered
+      if (!document.hidden) {
+        // Force a small re-render to fix any rendering issues
+        // This fixes the black screen issue on mobile Safari when returning from a new tab
+        requestAnimationFrame(() => {
+          // Trigger a minimal state update to refresh the UI
+          if (slideRef.current) {
+            slideRef.current.style.display = 'none';
+            requestAnimationFrame(() => {
+              if (slideRef.current) {
+                slideRef.current.style.display = '';
+              }
+            });
+          }
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // Also handle pageshow for iOS Safari
+    const handlePageShow = (event) => {
+      if (event.persisted) {
+        // Page was loaded from cache, refresh UI
+        handleVisibilityChange();
+      }
+    };
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, []);
+
   async function exchangeCodeForToken(code, verifier) {
     setIsLoading(true);
     setError('');
@@ -515,7 +554,7 @@ export default function MALWrapped() {
         offset += limit;
       }
       
-      setLoadingProgress('Processing genres, characters, authors...');
+      setLoadingProgress('Loading characters and authors...');
       // Ensure progress only increases, never decreases (manga loading might have reached 95%)
       setLoadingProgressPercent(prev => Math.max(prev, 80));
 
@@ -1841,6 +1880,7 @@ export default function MALWrapped() {
   };
 
   // Fetch a single anime theme (lazy loading to avoid rate limits)
+  // Added timeout and better error handling for iOS
   async function fetchSingleAnimeTheme(malId) {
     try {
       const url = new URL('https://api.animethemes.moe/anime');
@@ -1849,12 +1889,19 @@ export default function MALWrapped() {
       url.searchParams.append('filter[external_id]', malId.toString());
       url.searchParams.append('include', 'animethemes.animethemeentries.videos');
 
+      // Add timeout for iOS (10 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
         },
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -1958,7 +2005,14 @@ export default function MALWrapped() {
       
       return null;
     } catch (error) {
-      devError(`Error fetching theme for MAL ID ${malId}:`, error);
+      // Handle timeout and network errors gracefully (especially for iOS)
+      if (error.name === 'AbortError') {
+        devError(`Timeout fetching theme for MAL ID ${malId} (iOS may have network restrictions)`);
+      } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+        devError(`Network error fetching theme for MAL ID ${malId} (iOS network issue)`);
+      } else {
+        devError(`Error fetching theme for MAL ID ${malId}:`, error);
+      }
       return null;
     }
   }
@@ -2347,6 +2401,11 @@ export default function MALWrapped() {
   }, [shouldStartMusic, playlist, currentSlide, playTrack]);
 
   // Fetch themes when on welcome page and stats are ready
+  // Use refs to track previous values to prevent infinite loops on iOS
+  const prevStatsYearRef = useRef(null);
+  const prevSelectedYearRef = useRef(null);
+  const prevPlaylistLengthRef = useRef(0);
+  
   useEffect(() => {
     // Only fetch when on welcome page (currentSlide === 0)
     if (currentSlide !== 0) {
@@ -2368,32 +2427,54 @@ export default function MALWrapped() {
     if (playlist.length > 0 && playlistYear === selectedYear) {
       // Only clear loading if we have songs and they're for the current year
       setIsLoadingSongs(false);
+      prevPlaylistLengthRef.current = playlist.length;
       return; // Already have songs for this year
     }
     
     // Make sure stats are for the current selected year
     // Check if stats.selectedYear matches selectedYear to ensure stats are recalculated
     if (stats?.selectedYear !== selectedYear) {
-      devLog(`Stats not yet recalculated for year ${selectedYear}, waiting...`);
+      // Only log if values actually changed (prevents spam on iOS)
+      if (prevStatsYearRef.current !== stats?.selectedYear || prevSelectedYearRef.current !== selectedYear) {
+        devLog(`Stats not yet recalculated for year ${selectedYear}, waiting...`);
+        prevStatsYearRef.current = stats?.selectedYear;
+        prevSelectedYearRef.current = selectedYear;
+      }
       // Keep loading visible while waiting for stats
       setIsLoadingSongs(true);
       return; // Wait for stats to be recalculated
     }
     
+    // Check if we've already processed this combination (prevents infinite loops)
+    const statsYear = stats?.selectedYear;
+    const hasStatsChanged = prevStatsYearRef.current !== statsYear || prevSelectedYearRef.current !== selectedYear;
+    const hasPlaylistChanged = prevPlaylistLengthRef.current !== playlist.length;
+    
+    // Only proceed if something actually changed
+    if (!hasStatsChanged && !hasPlaylistChanged && playlist.length > 0) {
+      return;
+    }
+    
     const topRatedLength = stats?.topRated?.length || 0;
     if (topRatedLength > 0 && pendingMalIds.length === 0) {
       devLog(`Fetching themes for welcome page (year: ${selectedYear}, stats year: ${stats.selectedYear})`);
+      // Update refs before fetching
+      prevStatsYearRef.current = statsYear;
+      prevSelectedYearRef.current = selectedYear;
+      prevPlaylistLengthRef.current = playlist.length;
       // Start fetch immediately - loading will be set in fetchAnimeThemes
       fetchAnimeThemes(stats.topRated, selectedYear);
     } else if (topRatedLength === 0) {
       // No songs to fetch, make sure loading is off
       setIsLoadingSongs(false);
+      prevStatsYearRef.current = statsYear;
+      prevSelectedYearRef.current = selectedYear;
     } else {
       // Still have pending IDs, keep loading visible
       setIsLoadingSongs(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSlide, stats?.topRated, stats?.selectedYear, selectedYear, playlist.length, playlistYear, pendingMalIds.length]);
+  }, [currentSlide, stats?.topRated?.length, stats?.selectedYear, selectedYear, playlist.length, playlistYear, pendingMalIds.length]);
 
 
   // Change tracks based on slide numbers
@@ -6030,7 +6111,7 @@ export default function MALWrapped() {
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.8, delay: 0.2 }}
                   >
-                    {loadingProgress || ('Generating your Wrapped...')}
+                    {loadingProgress || ('Loading genres and openings...')}
                   </motion.h1>
 
                   {/* Progress bar */}
