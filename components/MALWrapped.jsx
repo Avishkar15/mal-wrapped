@@ -2405,7 +2405,15 @@ export default function MALWrapped() {
     }
   }, [shouldStartMusic, playlist, currentSlide, playTrack]);
 
-  // Fetch themes when user moves past welcome screen
+  // Fetch themes on welcome screen so they're ready when user clicks "Let's Go"
+  useEffect(() => {
+    if (currentSlide === 0 && stats && stats.topRated && stats.topRated.length > 0 && playlist.length === 0 && pendingMalIds.length === 0) {
+      console.log('Fetching themes on welcome screen');
+      fetchAnimeThemes(stats.topRated);
+    }
+  }, [currentSlide, stats, playlist.length, pendingMalIds.length]);
+
+  // Fetch themes when user moves past welcome screen (fallback)
   useEffect(() => {
     if (currentSlide > 0 && stats && stats.topRated && stats.topRated.length > 0 && playlist.length === 0 && pendingMalIds.length === 0) {
       console.log('Fetching themes after welcome screen');
@@ -3704,10 +3712,13 @@ export default function MALWrapped() {
                     {/* Connect to MAL button */}
                     <motion.button
                       onClick={() => {
-                        // Fetch themes and move to next slide
+                        // Move to next slide and start music (themes should already be fetched)
                         if (stats && stats.topRated && stats.topRated.length > 0) {
                           setShouldStartMusic(true);
-                          fetchAnimeThemes(stats.topRated);
+                          // If themes aren't fetched yet, fetch them now
+                          if (playlist.length === 0) {
+                            fetchAnimeThemes(stats.topRated);
+                          }
                           // Move to next slide
                           setCurrentSlide(1);
                         }
@@ -4583,7 +4594,7 @@ export default function MALWrapped() {
             )}
             {plannedAnimeItems.length > 0 ? (
               <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <ImageCarousel items={plannedAnimeItems} maxItems={plannedAnimeItems.length} showHover={true} showNames={false} />
+                <ImageCarousel items={plannedAnimeItems} maxItems={10} showHover={true} showNames={false} />
                 <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
                   One day you'll get to them… probably
                 </motion.h3>
@@ -5491,7 +5502,7 @@ export default function MALWrapped() {
             )}
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
-                <ImageCarousel items={plannedMangaItems} maxItems={plannedMangaItems.length} showHover={true} showNames={false} />
+                <ImageCarousel items={plannedMangaItems} maxItems={10} showHover={true} showNames={false} />
                 <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
                   Later just never quite arrived...
             </motion.h3>
