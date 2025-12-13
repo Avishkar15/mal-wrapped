@@ -23,7 +23,7 @@ export default async function handler(req, res) {
         }
       }
     } catch (error) {
-      // Failed to fetch metadata - will use fallback URL
+      console.error('Failed to fetch metadata:', error);
     }
 
     // Fallback to direct URL if metadata fetch failed
@@ -53,17 +53,11 @@ export default async function handler(req, res) {
     }
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
 
-    // Stream the audio file to the client efficiently
-    const reader = audioResponse.body.getReader();
-    
-    // Stream chunks directly to response
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      res.write(Buffer.from(value));
-    }
-    res.end();
+    // Stream the audio file to the client
+    const audioBuffer = await audioResponse.arrayBuffer();
+    res.status(200).send(Buffer.from(audioBuffer));
   } catch (error) {
+    console.error('Error proxying audio:', error);
     return res.status(500).json({ error: 'Failed to proxy audio file' });
   }
 }

@@ -222,7 +222,9 @@ export default function MALWrapped() {
   const lastForcedSlideRef = useRef(null);
   
   // Dev-only logger
+  const devLog = process.env.NODE_ENV === 'development' ? console.log : () => {};
   const devError = process.env.NODE_ENV === 'development' ? console.error : () => {};
+  const devWarn = process.env.NODE_ENV === 'development' ? console.warn : () => {};
 
   const hasAnime = stats && stats.thisYearAnime && stats.thisYearAnime.length > 0;
   const hasManga = stats && mangaList && mangaList.length > 0;
@@ -2034,7 +2036,7 @@ export default function MALWrapped() {
                     oldMediaElement.parentNode.removeChild(oldMediaElement);
                   }
                 } catch (e) {
-                  devError('Error cleaning up old media element:', e);
+                  console.error('Error cleaning up old media element:', e);
                 }
               }
               
@@ -2061,7 +2063,7 @@ export default function MALWrapped() {
                 oldMediaElement.parentNode.removeChild(oldMediaElement);
               }
             } catch (e) {
-              devError('Error cleaning up old media element:', e);
+              console.error('Error cleaning up old media element:', e);
             }
           }
           
@@ -2071,11 +2073,11 @@ export default function MALWrapped() {
           isSwitchingTrackRef.current = false;
         }).catch(err => {
           if (err.name === 'NotAllowedError') {
-            // Autoplay prevented - waiting for user interaction
+            console.log('Autoplay prevented - waiting for user interaction');
             setIsMusicPlaying(false);
             isSwitchingTrackRef.current = false;
           } else {
-            devError('Failed to play media:', err, track);
+            console.error('Failed to play media:', err, track);
             setIsMusicPlaying(false);
             isSwitchingTrackRef.current = false;
           }
@@ -2161,7 +2163,7 @@ export default function MALWrapped() {
             audioRef.current.parentNode.removeChild(audioRef.current);
           }
         } catch (e) {
-          devError('Error removing audio element:', e);
+          console.error('Error removing audio element:', e);
         }
         audioRef.current = null;
       }
@@ -2224,6 +2226,7 @@ export default function MALWrapped() {
     // Only change track if we have a forced change and we're not already playing it
     if (shouldForceChange && targetTrackIndex !== null && targetTrackIndex < playlist.length && 
         currentTrackIndex !== targetTrackIndex && audioRef.current) {
+      console.log(`Forcing track change from ${currentTrackIndex} to ${targetTrackIndex} for slide ${slideNumber}`);
       if (isMusicPlaying) {
         playTrack(targetTrackIndex, playlist);
       } else {
@@ -3458,6 +3461,7 @@ export default function MALWrapped() {
                           // Clear playlist and pending MAL IDs to trigger refetch
                           setPlaylist([]);
                           setPendingMalIds([]);
+                          setCurrentMalIdIndex(0);
                           setCurrentTrackIndex(0);
                           setIsMusicPlaying(false);
                           // Stop current audio if playing
@@ -3468,7 +3472,7 @@ export default function MALWrapped() {
                                 audioRef.current.parentNode.removeChild(audioRef.current);
                               }
                             } catch (e) {
-                              devError('Error removing audio element:', e);
+                              console.error('Error removing audio element:', e);
                             }
                             audioRef.current = null;
                           }

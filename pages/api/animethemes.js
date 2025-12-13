@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     // Query animethemes.moe REST API for each anime
     for (const malId of malIds) {
       try {
+        console.log(`Fetching themes for MAL ID: ${malId}`);
 
         // Use REST API endpoint with correct filters for MAL ID
         const url = new URL('https://api.animethemes.moe/anime');
@@ -33,28 +34,41 @@ export default async function handler(req, res) {
 
         if (!response.ok) {
           const errorText = await response.text();
-        // Error fetching themes - continue to next
+          console.error(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
+          console.error(`Error response: ${errorText.substring(0, 500)}`);
+          console.error(`Request URL: ${url.toString()}`);
           continue;
         }
 
         const data = await response.json();
+        
+        // Debug: log the full response structure
+        console.log(`Response for MAL ID ${malId}:`, JSON.stringify(data, null, 2).substring(0, 1000));
         
         // Check if it's JSON:API format with included resources
         let animeArray = [];
         if (data.data && Array.isArray(data.data)) {
           // JSON:API format - data is in data array, relationships in included
           animeArray = data.data;
+          console.log(`Using JSON:API format, found ${animeArray.length} anime in data array`);
         } else if (data.anime && Array.isArray(data.anime)) {
+          // Standard format
           animeArray = data.anime;
+          console.log(`Using standard format, found ${animeArray.length} anime`);
         } else if (Array.isArray(data)) {
+          // Direct array
           animeArray = data;
+          console.log(`Using direct array format, found ${animeArray.length} anime`);
         }
         
         if (animeArray.length === 0) {
+          console.log(`No anime found for MAL ID ${malId}. Response keys:`, Object.keys(data));
           continue;
         }
         
         const anime = animeArray[0];
+        console.log(`Found anime: ${anime.name || anime.attributes?.name || 'Unknown'}, themes count: ${(anime.animethemes || anime.relationships?.animethemes?.data || []).length}`);
+        console.log(`Anime keys:`, Object.keys(anime));
         
         // Handle JSON:API format - resolve relationships from included array
         let animethemes = [];
@@ -64,19 +78,27 @@ export default async function handler(req, res) {
           animethemes = themeIds.map(id => {
             return data.included.find(item => item.type === 'animetheme' && item.id === id);
           }).filter(Boolean);
+          console.log(`Resolved ${animethemes.length} themes from included array`);
         } else if (anime.animethemes) {
           animethemes = Array.isArray(anime.animethemes) ? anime.animethemes : [anime.animethemes];
         }
+        
+        if (animethemes.length > 0) {
+          console.log(`First theme structure:`, JSON.stringify(animethemes[0], null, 2).substring(0, 500));
+        }
 
         // Get OP (Opening) themes
+        // Handle both direct format and JSON:API format
         const opThemes = animethemes.filter(t => {
           const type = t.type || t.attributes?.type;
           return type === 'OP';
         });
+        console.log(`OP themes found: ${opThemes.length}`);
         
         if (opThemes.length === 0) {
-          continue;
-        }
+          console.log(`No OP themes found for ${anime.name}`);
+            continue;
+          }
           
         // Prefer OP1 (first opening), then OP2, etc.
         // Try to find a video with filename containing -OP1 first
@@ -89,6 +111,9 @@ export default async function handler(req, res) {
           return slug === 'OP1';
         }) || opThemes[0];
         
+        const selectedThemeSlug = op1Theme?.slug || op1Theme?.attributes?.slug || 'unknown';
+        console.log(`Selected theme: ${selectedThemeSlug}`);
+        
         // Get entries - handle both direct format and JSON:API
         let entries = [];
         if (op1Theme?.animethemeentries) {
@@ -100,6 +125,8 @@ export default async function handler(req, res) {
             return data.included.find(item => item.type === 'animethemeentry' && item.id === id);
           }).filter(Boolean);
         }
+        
+        console.log(`Theme entries: ${entries.length}`);
         
         if (entries.length > 0) {
           for (const entry of entries) {
@@ -115,7 +142,13 @@ export default async function handler(req, res) {
               }).filter(Boolean);
             }
             
+            console.log(`Entry has ${videos.length} videos`);
             if (videos.length > 0) {
+              // Log video structure
+              const firstVideo = videos[0];
+              const videoData = firstVideo.attributes || firstVideo;
+              console.log(`First video:`, JSON.stringify(videoData, null, 2).substring(0, 300));
+              
               // Prefer video with filename containing -OP1, otherwise take first
               selectedVideo = videos.find(v => {
                 const filename = v.filename || v.attributes?.filename;
@@ -124,6 +157,8 @@ export default async function handler(req, res) {
               
               if (selectedVideo) {
                 selectedTheme = op1Theme;
+                const filename = selectedVideo.filename || selectedVideo.attributes?.filename;
+                console.log(`Selected video filename: ${filename}`);
                 break;
               }
             }
@@ -132,6 +167,7 @@ export default async function handler(req, res) {
         
         // If no video found, try other OP themes
         if (!selectedVideo) {
+          console.log(`Trying other OP themes...`);
           for (const theme of opThemes) {
             let themeEntries = [];
             if (theme.animethemeentries) {
@@ -157,6 +193,9 @@ export default async function handler(req, res) {
               if (videos.length > 0) {
                 selectedVideo = videos[0];
                 selectedTheme = theme;
+                const filename = selectedVideo.filename || selectedVideo.attributes?.filename;
+                const slug = theme.slug || theme.attributes?.slug;
+                console.log(`Selected video from theme ${slug}, filename: ${filename}`);
                 break;
               }
             }
@@ -176,7 +215,8 @@ export default async function handler(req, res) {
           // Construct audio URL using filename
           const audioUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
           
-          themes.push({
+          console.log(`Adding theme for ${animeName}: ${audioUrl} (from ${videoFilename})`);
+            themes.push({
               malId: parseInt(malId),
             animeName: animeName,
             animeSlug: animeSlug,
@@ -187,15 +227,18 @@ export default async function handler(req, res) {
             filename: videoFilename,
             isAudio: true
           });
+        } else {
+          console.log(`No video with filename found for ${animeName}. Selected video:`, selectedVideo);
         }
       } catch (error) {
-        // Error fetching theme - continue to next
+        console.error(`Error fetching themes for MAL ID ${malId}:`, error);
         continue;
       }
     }
 
     return res.status(200).json({ themes });
   } catch (error) {
+    console.error('Error in animethemes API:', error);
     return res.status(500).json({ error: 'Failed to fetch anime themes' });
   }
 }
