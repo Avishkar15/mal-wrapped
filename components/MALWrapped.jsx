@@ -1805,16 +1805,33 @@ export default function MALWrapped() {
       url.searchParams.append('filter[external_id]', malId.toString());
       url.searchParams.append('include', 'animethemes.animethemeentries.videos');
 
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
+      // Add timeout for mobile devices (15 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        devError(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
+      let response;
+      try {
+        response = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          devError(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
+          return null;
+        }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          devError(`Timeout fetching themes for MAL ID ${malId} (15s timeout)`);
+        } else {
+          devError(`Network error fetching themes for MAL ID ${malId}:`, fetchError);
+        }
         return null;
       }
 
@@ -1937,27 +1954,37 @@ export default function MALWrapped() {
       setPendingMalIds(malIds);
       
       // Fetch all themes together with delays to avoid rate limiting
-      const themes = [];
-      for (let i = 0; i < malIds.length; i++) {
-        if (i > 0) {
-          // Add delay between requests
-          await new Promise(resolve => setTimeout(resolve, 300));
-        }
-        try {
-          const theme = await fetchSingleAnimeTheme(malIds[i]);
-          if (theme) {
-            themes.push(theme);
-            devLog(`Successfully fetched theme ${i + 1}/${malIds.length} for MAL ID ${malIds[i]}`);
-          } else {
-            devWarn(`No theme found for MAL ID ${malIds[i]}`);
-          }
-        } catch (error) {
-          devError(`Error fetching theme for MAL ID ${malIds[i]}:`, error);
-        }
-      }
+      // Add overall timeout (90 seconds for 5 requests with delays)
+      const overallTimeout = setTimeout(() => {
+        devError('Overall timeout: Theme fetching took too long, stopping...');
+        setIsFetchingThemes(false);
+        setPendingMalIds([]);
+      }, 90000);
       
-      setIsFetchingThemes(false);
-      setPendingMalIds([]);
+      const themes = [];
+      try {
+        for (let i = 0; i < malIds.length; i++) {
+          if (i > 0) {
+            // Add delay between requests
+            await new Promise(resolve => setTimeout(resolve, 300));
+          }
+          try {
+            const theme = await fetchSingleAnimeTheme(malIds[i]);
+            if (theme) {
+              themes.push(theme);
+              devLog(`Successfully fetched theme ${i + 1}/${malIds.length} for MAL ID ${malIds[i]}`);
+            } else {
+              devWarn(`No theme found for MAL ID ${malIds[i]}`);
+            }
+          } catch (error) {
+            devError(`Error fetching theme for MAL ID ${malIds[i]}:`, error);
+          }
+        }
+      } finally {
+        clearTimeout(overallTimeout);
+        setIsFetchingThemes(false);
+        setPendingMalIds([]);
+      }
       
       if (themes.length > 0) {
         setPlaylist(themes);
