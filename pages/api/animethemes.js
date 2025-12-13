@@ -1,30 +1,12 @@
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Support both GET (single) and POST (batch) requests
-  let malIds = [];
-  if (req.method === 'GET') {
-    const { malId } = req.query;
-    if (!malId) {
-      return res.status(400).json({ error: 'malId query parameter is required for GET requests' });
-    }
-    malIds = [malId];
-  } else if (req.method === 'POST') {
-    const { malIds: bodyMalIds } = req.body;
-    if (!bodyMalIds || !Array.isArray(bodyMalIds) || bodyMalIds.length === 0) {
-      return res.status(400).json({ error: 'malIds array is required for POST requests' });
-    }
-    malIds = bodyMalIds;
-  } else {
-    return res.status(405).json({ error: 'Method not allowed' });
+  const { malIds } = req.body;
+
+  if (!malIds || !Array.isArray(malIds) || malIds.length === 0) {
+    return res.status(400).json({ error: 'malIds array is required' });
   }
 
   try {
@@ -230,8 +212,8 @@ export default async function handler(req, res) {
         const themeType = selectedTheme?.type || selectedTheme?.attributes?.type;
         
         if (selectedVideo && videoFilename) {
-          // Use proxy URL to bypass CORS restrictions
-          const audioUrl = `/api/audio-proxy?filename=${encodeURIComponent(videoFilename + '.ogg')}`;
+          // Construct audio URL using filename
+          const audioUrl = `https://api.animethemes.moe/audio/${videoFilename}.ogg`;
           
           console.log(`Adding theme for ${animeName}: ${audioUrl} (from ${videoFilename})`);
             themes.push({
@@ -254,13 +236,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // For GET requests (single anime), return the theme object directly
-    // For POST requests (batch), return array of themes
-    if (req.method === 'GET') {
-      return res.status(200).json(themes.length > 0 ? themes[0] : null);
-    } else {
-      return res.status(200).json({ themes });
-    }
+    return res.status(200).json({ themes });
   } catch (error) {
     console.error('Error in animethemes API:', error);
     return res.status(500).json({ error: 'Failed to fetch anime themes' });
