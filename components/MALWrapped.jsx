@@ -281,7 +281,6 @@ export default function MALWrapped() {
   const lastForcedSlideRef = useRef(null);
   const isFetchingThemesRef = useRef(false);
   const currentTrackIndexRef = useRef(0);
-  const trackChangeInitiatedRef = useRef(false); // Track if we've already initiated a track change for current slide
   
   // Memoize hasAnime and hasManga to prevent unnecessary recalculations
   const hasAnime = useMemo(() => 
@@ -2012,7 +2011,7 @@ export default function MALWrapped() {
       } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
         devError(`Network error fetching theme for MAL ID ${malId} (iOS network issue)`);
       } else {
-      devError(`Error fetching theme for MAL ID ${malId}:`, error);
+        devError(`Error fetching theme for MAL ID ${malId}:`, error);
       }
       return null;
     }
@@ -2131,10 +2130,21 @@ export default function MALWrapped() {
       devLog('Playlist is for different year, not playing');
       // Stop any currently playing audio
       if (audioRef.current) {
-        cleanupMediaElement(audioRef.current);
-        audioRef.current = null;
+        try {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+          audioRef.current.load();
+        } catch (e) {
+          devError('Error stopping audio:', e);
+        }
       }
       setIsMusicPlaying(false);
+      return;
+    }
+    
+    // Prevent concurrent calls
+    if (isSwitchingTrackRef.current) {
+      devLog('Already switching tracks, ignoring duplicate call');
       return;
     }
     
@@ -2145,11 +2155,6 @@ export default function MALWrapped() {
       return;
     }
     
-    // Prevent concurrent calls
-    if (isSwitchingTrackRef.current) {
-      devLog('Already switching tracks, ignoring duplicate call');
-      return;
-    }
     isSwitchingTrackRef.current = true;
     
     const track = tracksToUse[index];
@@ -2158,16 +2163,28 @@ export default function MALWrapped() {
       return;
     }
     
-    // Clean up old element BEFORE creating new one to prevent too many WebMediaPlayers
+    // CRITICAL: Store reference to old element and clean up stray elements BEFORE creating new one
     const oldMediaElement = audioRef.current;
-    if (oldMediaElement) {
-      // Stop and clean up old element immediately
-      cleanupMediaElement(oldMediaElement);
-      audioRef.current = null;
-    }
     
-    // Also clean up any stray media elements in the DOM
-    cleanupAllMediaElements();
+    // Clean up any stray media elements in the DOM (but keep the current one for crossfade)
+    const allMediaElements = document.querySelectorAll('audio, video');
+    allMediaElements.forEach(el => {
+      // Keep the current audioRef element for crossfade, clean up everything else
+      if (el !== oldMediaElement) {
+        cleanupMediaElement(el);
+      }
+    });
+    
+    // Check how many media elements exist - Chrome limits this (should be 0-1 now)
+    const remainingElements = document.querySelectorAll('audio, video');
+    if (remainingElements.length > 2) {
+      devWarn(`Too many media elements (${remainingElements.length}), cleaning up all except current`);
+      remainingElements.forEach(el => {
+        if (el !== oldMediaElement) {
+          cleanupMediaElement(el);
+        }
+      });
+    }
     
     // Use Audio element for audio files, Video element for video files
     const isAudio = track.isAudio || track.videoUrl.match(/\.(mp3|m4a|ogg|wav|aac)(\?|$)/i);
@@ -2207,7 +2224,7 @@ export default function MALWrapped() {
         return;
       }
       
-      // Check if this element is still the current one (might have been replaced)
+      // Check if this element is still valid (might have been replaced)
       if (audioRef.current && audioRef.current !== newMediaElement && audioRef.current !== oldMediaElement) {
         devLog('New track started, cleaning up this one');
         cleanupMediaElement(newMediaElement);
@@ -2217,16 +2234,28 @@ export default function MALWrapped() {
       
       canPlayHandled = true;
       
-      // If there's an old track, crossfade. Otherwise, just start playing.
-      if (oldMediaElement && !oldMediaElement.paused && oldMediaElement.currentTime > 0) {
+      // If there's an old track that's still valid and playing, crossfade. Otherwise, just start playing.
+      if (oldMediaElement && oldMediaElement.parentNode && !oldMediaElement.paused && oldMediaElement.currentTime > 0) {
         // Crossfade: fade out old, fade in new
         newMediaElement.play().then(() => {
           const fadeIntervalId = setInterval(() => {
-            // Check if we should stop (new track started)
+            // Check if we should stop (new track started or element removed)
             if (audioRef.current !== newMediaElement && audioRef.current !== oldMediaElement) {
               clearInterval(fadeIntervalId);
               cleanupMediaElement(newMediaElement);
               cleanupMediaElement(oldMediaElement);
+              isSwitchingTrackRef.current = false;
+              return;
+            }
+            
+            // Check if old element still exists
+            if (!oldMediaElement || !oldMediaElement.parentNode) {
+              clearInterval(fadeIntervalId);
+              newMediaElement.volume = targetVolume;
+              audioRef.current = newMediaElement;
+              setCurrentTrackIndex(index);
+              currentTrackIndexRef.current = index;
+              setIsMusicPlaying(true);
               isSwitchingTrackRef.current = false;
               return;
             }
@@ -2332,7 +2361,8 @@ export default function MALWrapped() {
             // Remove any existing listeners first
             newMediaElement.removeEventListener('canplay', handleCanPlay);
             newMediaElement.removeEventListener('loadedmetadata', handleCanPlay);
-    newMediaElement.addEventListener('canplay', handleCanPlay, { once: true });
+            newMediaElement.addEventListener('canplay', handleCanPlay, { once: true });
+            newMediaElement.addEventListener('loadedmetadata', handleCanPlay, { once: true });
             newMediaElement.load(); // Trigger load
           });
         }
@@ -2341,6 +2371,7 @@ export default function MALWrapped() {
         newMediaElement.removeEventListener('canplay', handleCanPlay);
         newMediaElement.removeEventListener('loadedmetadata', handleCanPlay);
         newMediaElement.addEventListener('canplay', handleCanPlay, { once: true });
+        newMediaElement.addEventListener('loadedmetadata', handleCanPlay, { once: true });
       }
     };
     
@@ -2429,7 +2460,7 @@ export default function MALWrapped() {
   useEffect(() => {
     if (currentSlide === 0) {
       cleanupMediaElement(audioRef.current);
-        audioRef.current = null;
+      audioRef.current = null;
       cleanupAllMediaElements();
       setIsMusicPlaying(false);
       setPlaylist([]);
@@ -2585,11 +2616,7 @@ export default function MALWrapped() {
   // On slide 6: force to top 1 (index 0)
   // On slide 16: force to top 2 (index 1)
   useEffect(() => {
-    if (!audioRef.current || !stats || !slides || slides.length === 0 || !playlist || playlist.length === 0 || currentSlide === 0) {
-      // Reset track change flag when conditions aren't met
-      trackChangeInitiatedRef.current = false;
-      return;
-    }
+    if (!audioRef.current || !stats || !slides || slides.length === 0 || !playlist || playlist.length === 0 || currentSlide === 0) return;
     
     const slideNumber = currentSlide + 1;
     let targetTrackIndex = null;
@@ -2601,44 +2628,20 @@ export default function MALWrapped() {
       targetTrackIndex = 0;
       shouldForceChange = true;
       lastForcedSlideRef.current = 6;
-      trackChangeInitiatedRef.current = false; // Reset flag for new slide
     } else if (slideNumber === 16 && lastForcedSlideRef.current !== 16) {
       // Slide 16: force to top 2 (index 1) - only on slide change
       targetTrackIndex = Math.min(1, playlist.length - 1);
       shouldForceChange = true;
       lastForcedSlideRef.current = 16;
-      trackChangeInitiatedRef.current = false; // Reset flag for new slide
     } else if (slideNumber !== 6 && slideNumber !== 16) {
       // Reset the ref when we're not on a forced slide
       lastForcedSlideRef.current = null;
-      trackChangeInitiatedRef.current = false;
     }
     
     // Only change track if we have a forced change and we're not already playing it
     // Use ref to check current track index to avoid re-running effect when track changes
     if (shouldForceChange && targetTrackIndex !== null && targetTrackIndex < playlist.length && 
         currentTrackIndexRef.current !== targetTrackIndex && audioRef.current) {
-      
-      // CRITICAL: Prevent multiple track changes for the same slide
-      // Only initiate track change once per slide
-      if (trackChangeInitiatedRef.current) {
-        devLog(`Track change already initiated for slide ${slideNumber}, skipping duplicate call`);
-        return;
-      }
-      
-      // Prevent concurrent track switches - if already switching, just skip to target
-      if (isSwitchingTrackRef.current) {
-        devLog(`Already switching tracks, skipping to ${targetTrackIndex} for slide ${slideNumber}`);
-        // Just update the index without calling playTrack
-        setCurrentTrackIndex(targetTrackIndex);
-        currentTrackIndexRef.current = targetTrackIndex;
-        trackChangeInitiatedRef.current = true; // Mark as initiated
-        return;
-      }
-      
-      // Mark that we've initiated a track change for this slide
-      trackChangeInitiatedRef.current = true;
-      
       devLog(`Forcing track change from ${currentTrackIndexRef.current} to ${targetTrackIndex} for slide ${slideNumber}`);
       // Check if music is playing using audioRef instead of state
       const isPlaying = audioRef.current && !audioRef.current.paused && audioRef.current.currentTime > 0;
@@ -2654,8 +2657,7 @@ export default function MALWrapped() {
     if (audioRef.current) {
       audioRef.current.volume = 0.3;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSlide, stats, slides, playlist.length]);
+  }, [currentSlide, stats, slides, playlist, playTrack]);
 
 
 
@@ -2663,7 +2665,7 @@ export default function MALWrapped() {
   useEffect(() => {
     return () => {
       cleanupMediaElement(audioRef.current);
-        audioRef.current = null;
+      audioRef.current = null;
     };
   }, []);
 
@@ -3958,7 +3960,7 @@ export default function MALWrapped() {
                             }
                           } else {
                             // If playlist not ready, use the flag (fallback for other platforms)
-                          setShouldStartMusic(true);
+                            setShouldStartMusic(true);
                           }
                           // Move to next slide
                           setCurrentSlide(1);
@@ -4550,18 +4552,18 @@ export default function MALWrapped() {
                                     </div>
                                     {malUrl ? (
                                       <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="block">
-                                    <div className="w-20 h-20 rounded-lg overflow-hidden">
-                                      {item.coverImage && (
-                                        <motion.img 
-                                          src={item.coverImage} 
-                                          alt={item.title} 
-                                          crossOrigin="anonymous" 
-                                          className="w-full h-full object-cover"
-                                          whileHover={{ scale: 1.05 }}
-                                          transition={{ duration: 0.2 }}
-                                        />
-                                      )}
-                                    </div>
+                                        <div className="w-20 h-20 rounded-lg overflow-hidden">
+                                          {item.coverImage && (
+                                            <motion.img 
+                                              src={item.coverImage} 
+                                              alt={item.title} 
+                                              crossOrigin="anonymous" 
+                                              className="w-full h-full object-cover"
+                                              whileHover={{ scale: 1.05 }}
+                                              transition={{ duration: 0.2 }}
+                                            />
+                                          )}
+                                        </div>
                                       </a>
                                     ) : (
                                       <div className="w-20 h-20 rounded-lg overflow-hidden">
@@ -4575,7 +4577,7 @@ export default function MALWrapped() {
                                             transition={{ duration: 0.2 }}
                                           />
                                         )}
-                                  </div>
+                                      </div>
                                     )}
                                   </div>
                                   {/* Title and details - not clickable */}
@@ -4592,7 +4594,7 @@ export default function MALWrapped() {
                               );
                               return (
                                 <motion.div key={item.id} className="w-full">
-                                      {itemContent}
+                                  {itemContent}
                                 </motion.div>
                               );
                             })}
@@ -6242,37 +6244,37 @@ export default function MALWrapped() {
 
           {(isLoading || (isLoadingSongs && isAuthenticated)) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black">
-            <div className="text-center w-full max-w-2xl mx-auto px-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: smoothEase }}
-              >
-                <motion.h1 
-                  className="body-lg font-medium text-white mb-4 tracking-tight"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
+              <div className="text-center w-full max-w-2xl mx-auto px-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: smoothEase }}
                 >
+                  <motion.h1 
+                    className="body-lg font-medium text-white mb-4 tracking-tight"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  >
                     {loadingProgress || ('Loading...')}
-                </motion.h1>
+                  </motion.h1>
 
-                {/* Progress bar */}
-                <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full"
-                    style={{
-                      background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 200, 255, 0.8) 100%)'
-                    }}
-                    initial={{ width: "0%" }}
-                    animate={{ width: `${loadingProgressPercent}%` }}
-                    transition={{
-                      duration: 0.3,
-                      ease: smoothEase
-                    }}
-                  />
-                </div>
-              </motion.div>
+                  {/* Progress bar */}
+                  <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full"
+                      style={{
+                        background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 200, 255, 0.8) 100%)'
+                      }}
+                      initial={{ width: "0%" }}
+                      animate={{ width: `${loadingProgressPercent}%` }}
+                      transition={{
+                        duration: 0.3,
+                        ease: smoothEase
+                      }}
+                    />
+                  </div>
+                </motion.div>
               </div>
             </div>
           )}
