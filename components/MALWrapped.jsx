@@ -2392,6 +2392,15 @@ export default function MALWrapped() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
 
+  // Clear loading states when user is not authenticated (on login page)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoadingSongs(false);
+      setLoadingProgress('');
+      setLoadingProgressPercent(0);
+    }
+  }, [isAuthenticated]);
+
   // Start music when playlist is ready and button was clicked
   useEffect(() => {
     if (shouldStartMusic && playlist.length > 0 && currentSlide >= 1) {
@@ -6127,7 +6136,7 @@ export default function MALWrapped() {
             </div>
           )}
 
-          {(isLoading || isLoadingSongs) && (
+          {(isLoading || (isLoadingSongs && isAuthenticated)) && (
             <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black">
               <div className="text-center w-full max-w-2xl mx-auto px-4">
                 <motion.div
