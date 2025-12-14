@@ -2546,13 +2546,10 @@ export default function MALWrapped() {
     
     // Only change track if we have a forced change and we're not already playing it
     if (shouldForceChange && targetTrackIndex !== null && targetTrackIndex < playlist.length && 
-        currentTrackIndex !== targetTrackIndex && audioRef.current) {
+        currentTrackIndex !== targetTrackIndex) {
       devLog(`Forcing track change from ${currentTrackIndex} to ${targetTrackIndex} for slide ${slideNumber}`);
-      if (isMusicPlaying) {
-        playTrack(targetTrackIndex, playlist);
-      } else {
-        setCurrentTrackIndex(targetTrackIndex);
-      }
+      // Always play the track on slide 6 and 16, regardless of current playback state
+      playTrack(targetTrackIndex, playlist);
     }
     
     // Set volume (no reduction on drumroll)
