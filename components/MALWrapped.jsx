@@ -2125,6 +2125,28 @@ export default function MALWrapped() {
     const tracksToUse = tracks || playlist;
     if (!tracksToUse || tracksToUse.length === 0 || index < 0 || index >= tracksToUse.length) return;
     
+    // Don't play on welcome page (currentSlide === 0)
+    if (currentSlide === 0) {
+      return;
+    }
+    
+    // Don't play if playlist is for a different year (only check when using default playlist)
+    if (tracks === null && playlistYear !== null && playlistYear !== selectedYear) {
+      devLog('Playlist is for different year, not playing');
+      // Stop any currently playing audio
+      if (audioRef.current) {
+        try {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+          audioRef.current.load();
+        } catch (e) {
+          devError('Error stopping audio:', e);
+        }
+      }
+      setIsMusicPlaying(false);
+      return;
+    }
+    
     // Prevent concurrent calls
     if (isSwitchingTrackRef.current) {
       return;
@@ -2270,13 +2292,14 @@ export default function MALWrapped() {
     
     newMediaElement.addEventListener('ended', () => {
       // Play next track in sequence (5th→4th→3rd→2nd→1st, backwards)
-      // Don't loop - just stop if we reach the end
+      // Loop back to 5th song (index 4) when reaching the end (index 0)
       if (index > 0) {
         const nextIndex = index - 1; // Go backwards: 4→3→2→1→0
         playTrack(nextIndex, tracksToUse);
       } else {
-        // Reached the end (index 0), stop playback
-        setIsMusicPlaying(false);
+        // Reached the end (index 0), loop back to 5th song (index 4)
+        const lastIndex = Math.min(4, tracksToUse.length - 1);
+        playTrack(lastIndex, tracksToUse);
       }
     });
     
@@ -2306,15 +2329,17 @@ export default function MALWrapped() {
     
     // Start loading immediately
     newMediaElement.load();
-    
-    // Start loading immediately
-    newMediaElement.load();
-  }, [playlist]);
+  }, [playlist, playlistYear, selectedYear, currentSlide]);
 
   // Toggle music play/pause
   const toggleMusic = useCallback(() => {
+    // Don't play on welcome page
+    if (currentSlide === 0) {
+      return;
+    }
+    
     if (!audioRef.current) {
-      if (playlist.length > 0) {
+      if (playlist.length > 0 && currentSlide !== 0) {
         playTrack(currentTrackIndex, playlist);
       }
       return;
@@ -2328,13 +2353,13 @@ export default function MALWrapped() {
         setIsMusicPlaying(true);
       }).catch(err => {
         devError('Failed to resume video:', err);
-        // Try to restart from current track
-        if (playlist.length > 0) {
+        // Try to restart from current track (only if not on welcome page)
+        if (playlist.length > 0 && currentSlide !== 0) {
           playTrack(currentTrackIndex, playlist);
         }
       });
     }
-  }, [playlist, currentTrackIndex, isMusicPlaying, playTrack]);
+  }, [playlist, currentTrackIndex, isMusicPlaying, playTrack, currentSlide]);
 
   // Stop music and clear playlist when returning to welcome slide or when year changes
   useEffect(() => {
@@ -2388,8 +2413,9 @@ export default function MALWrapped() {
   }, [isAuthenticated]);
 
   // Start music when playlist is ready and button was clicked
+  // Only start if NOT on welcome page (currentSlide >= 1)
   useEffect(() => {
-    if (shouldStartMusic && playlist.length > 0 && currentSlide >= 1) {
+    if (shouldStartMusic && playlist.length > 0 && currentSlide >= 1 && currentSlide !== 0) {
       // Start with 5th anime (index 4) - will play freely 4→3→2→1→0
       const initialTrackIndex = Math.min(4, playlist.length - 1);
       setCurrentTrackIndex(initialTrackIndex);
@@ -6391,6 +6417,16 @@ export default function MALWrapped() {
                       <motion.button
                         type="button"
                         onClick={() => {
+                          // Stop and clear all audio before going to welcome page
+                          if (audioRef.current) {
+                            cleanupMediaElement(audioRef.current);
+                            audioRef.current = null;
+                          }
+                          cleanupAllMediaElements();
+                          setIsMusicPlaying(false);
+                          setCurrentTrackIndex(0);
+                          currentTrackIndexRef.current = 0;
+                          isSwitchingTrackRef.current = false;
                           setCurrentSlide(0);
                           // Playlist will be cleared by the welcome slide useEffect
                           // Themes will be refetched automatically by the fetch themes useEffect
