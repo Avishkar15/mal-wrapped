@@ -2364,16 +2364,6 @@ export default function MALWrapped() {
   // Stop music and clear playlist when returning to welcome slide or when year changes
   useEffect(() => {
     if (currentSlide === 0) {
-      // Immediately stop and clear all audio
-      if (audioRef.current) {
-        try {
-          audioRef.current.pause();
-          audioRef.current.src = '';
-          audioRef.current.load();
-        } catch (e) {
-          devError('Error stopping audio in cleanup:', e);
-        }
-      }
       cleanupMediaElement(audioRef.current);
       audioRef.current = null;
       cleanupAllMediaElements();
@@ -6427,23 +6417,7 @@ export default function MALWrapped() {
                       <motion.button
                         type="button"
                         onClick={() => {
-                          // Stop and clear all audio before going to welcome page
-                          if (audioRef.current) {
-                            cleanupMediaElement(audioRef.current);
-                            audioRef.current = null;
-                          }
-                          cleanupAllMediaElements();
-                          setIsMusicPlaying(false);
-                          setCurrentTrackIndex(0);
-                          currentTrackIndexRef.current = 0;
-                          isSwitchingTrackRef.current = false;
-                          isFetchingThemesRef.current = false;
-                          // Clear playlist and related state immediately
-                          setPlaylist([]);
-                          setPlaylistYear(null);
-                          setPendingMalIds([]);
-                          setCurrentSlide(0);
-                          // Themes will be refetched automatically by the fetch themes useEffect
+                          window.location.reload();
                         }}
                         className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
                         whileHover={{ 
