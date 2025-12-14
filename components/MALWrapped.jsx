@@ -281,6 +281,7 @@ export default function MALWrapped() {
   const lastForcedSlideRef = useRef(null);
   const isFetchingThemesRef = useRef(false);
   const currentTrackIndexRef = useRef(0);
+  const trackChangeInitiatedRef = useRef(false); // Track if we've already initiated a track change for current slide
   
   // Memoize hasAnime and hasManga to prevent unnecessary recalculations
   const hasAnime = useMemo(() => 
@@ -2137,6 +2138,13 @@ export default function MALWrapped() {
       return;
     }
     
+    // Prevent switching to the same track we're already playing
+    if (currentTrackIndexRef.current === index && audioRef.current && 
+        !audioRef.current.paused && audioRef.current.currentTime > 0) {
+      devLog(`Already playing track ${index}, ignoring duplicate call`);
+      return;
+    }
+    
     // Prevent concurrent calls
     if (isSwitchingTrackRef.current) {
       devLog('Already switching tracks, ignoring duplicate call');
@@ -2577,7 +2585,11 @@ export default function MALWrapped() {
   // On slide 6: force to top 1 (index 0)
   // On slide 16: force to top 2 (index 1)
   useEffect(() => {
-    if (!audioRef.current || !stats || !slides || slides.length === 0 || !playlist || playlist.length === 0 || currentSlide === 0) return;
+    if (!audioRef.current || !stats || !slides || slides.length === 0 || !playlist || playlist.length === 0 || currentSlide === 0) {
+      // Reset track change flag when conditions aren't met
+      trackChangeInitiatedRef.current = false;
+      return;
+    }
     
     const slideNumber = currentSlide + 1;
     let targetTrackIndex = null;
@@ -2589,28 +2601,43 @@ export default function MALWrapped() {
       targetTrackIndex = 0;
       shouldForceChange = true;
       lastForcedSlideRef.current = 6;
+      trackChangeInitiatedRef.current = false; // Reset flag for new slide
     } else if (slideNumber === 16 && lastForcedSlideRef.current !== 16) {
       // Slide 16: force to top 2 (index 1) - only on slide change
       targetTrackIndex = Math.min(1, playlist.length - 1);
       shouldForceChange = true;
       lastForcedSlideRef.current = 16;
+      trackChangeInitiatedRef.current = false; // Reset flag for new slide
     } else if (slideNumber !== 6 && slideNumber !== 16) {
       // Reset the ref when we're not on a forced slide
       lastForcedSlideRef.current = null;
+      trackChangeInitiatedRef.current = false;
     }
     
     // Only change track if we have a forced change and we're not already playing it
     // Use ref to check current track index to avoid re-running effect when track changes
     if (shouldForceChange && targetTrackIndex !== null && targetTrackIndex < playlist.length && 
         currentTrackIndexRef.current !== targetTrackIndex && audioRef.current) {
+      
+      // CRITICAL: Prevent multiple track changes for the same slide
+      // Only initiate track change once per slide
+      if (trackChangeInitiatedRef.current) {
+        devLog(`Track change already initiated for slide ${slideNumber}, skipping duplicate call`);
+        return;
+      }
+      
       // Prevent concurrent track switches - if already switching, just skip to target
       if (isSwitchingTrackRef.current) {
         devLog(`Already switching tracks, skipping to ${targetTrackIndex} for slide ${slideNumber}`);
         // Just update the index without calling playTrack
         setCurrentTrackIndex(targetTrackIndex);
         currentTrackIndexRef.current = targetTrackIndex;
+        trackChangeInitiatedRef.current = true; // Mark as initiated
         return;
       }
+      
+      // Mark that we've initiated a track change for this slide
+      trackChangeInitiatedRef.current = true;
       
       devLog(`Forcing track change from ${currentTrackIndexRef.current} to ${targetTrackIndex} for slide ${slideNumber}`);
       // Check if music is playing using audioRef instead of state
