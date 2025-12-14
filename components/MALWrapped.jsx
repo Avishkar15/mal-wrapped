@@ -554,7 +554,7 @@ export default function MALWrapped() {
         offset += limit;
       }
       
-      setLoadingProgress('Loading characters and authors...');
+      setLoadingProgress('Loading characters, authors, and openings...');
       // Ensure progress only increases, never decreases (manga loading might have reached 95%)
       setLoadingProgressPercent(prev => Math.max(prev, 80));
 
@@ -2091,6 +2091,8 @@ export default function MALWrapped() {
         setLoadingProgress('Complete!');
         // Ensure progress only increases, never decreases
         setLoadingProgressPercent(prev => Math.max(prev, 100));
+        // Reset fetch attempt counter on success
+        fetchAttemptRef.current = 0;
       } else if (year !== selectedYear) {
         devLog(`Year changed after fetch from ${year} to ${selectedYear}, discarding results`);
       }
@@ -2101,6 +2103,8 @@ export default function MALWrapped() {
       devError('Error fetching anime themes:', error);
       setPendingMalIds([]);
       setLoadingProgress('');
+      // Don't reset fetchAttemptRef on error - let it count up to prevent infinite retries
+      // The counter will reset when user changes slide or year
     } finally {
       isFetchingThemesRef.current = false;
       // Only clear loading after fetch is completely done
@@ -2405,6 +2409,8 @@ export default function MALWrapped() {
   const prevStatsYearRef = useRef(null);
   const prevSelectedYearRef = useRef(null);
   const prevPlaylistLengthRef = useRef(0);
+  const fetchAttemptRef = useRef(0);
+  const maxFetchAttempts = 3; // Prevent infinite retries on iOS
   
   useEffect(() => {
     // Only fetch when on welcome page (currentSlide === 0)
@@ -2413,6 +2419,8 @@ export default function MALWrapped() {
       if (!isFetchingThemesRef.current) {
         setIsLoadingSongs(false);
       }
+      // Reset fetch attempt counter when leaving welcome page
+      fetchAttemptRef.current = 0;
       return;
     }
     
@@ -2428,6 +2436,7 @@ export default function MALWrapped() {
       // Only clear loading if we have songs and they're for the current year
       setIsLoadingSongs(false);
       prevPlaylistLengthRef.current = playlist.length;
+      fetchAttemptRef.current = 0; // Reset on success
       return; // Already have songs for this year
     }
     
@@ -2439,6 +2448,7 @@ export default function MALWrapped() {
         devLog(`Stats not yet recalculated for year ${selectedYear}, waiting...`);
         prevStatsYearRef.current = stats?.selectedYear;
         prevSelectedYearRef.current = selectedYear;
+        fetchAttemptRef.current = 0; // Reset when year changes
       }
       // Keep loading visible while waiting for stats
       setIsLoadingSongs(true);
@@ -2455,13 +2465,21 @@ export default function MALWrapped() {
       return;
     }
     
+    // Prevent infinite retries on iOS - if we've tried too many times, stop trying
+    if (fetchAttemptRef.current >= maxFetchAttempts) {
+      devLog(`Max fetch attempts (${maxFetchAttempts}) reached, stopping to prevent infinite loop`);
+      setIsLoadingSongs(false);
+      return;
+    }
+    
     const topRatedLength = stats?.topRated?.length || 0;
     if (topRatedLength > 0 && pendingMalIds.length === 0) {
-      devLog(`Fetching themes for welcome page (year: ${selectedYear}, stats year: ${stats.selectedYear})`);
+      devLog(`Fetching themes for welcome page (year: ${selectedYear}, stats year: ${stats.selectedYear}, attempt: ${fetchAttemptRef.current + 1})`);
       // Update refs before fetching
       prevStatsYearRef.current = statsYear;
       prevSelectedYearRef.current = selectedYear;
       prevPlaylistLengthRef.current = playlist.length;
+      fetchAttemptRef.current += 1;
       // Start fetch immediately - loading will be set in fetchAnimeThemes
       fetchAnimeThemes(stats.topRated, selectedYear);
     } else if (topRatedLength === 0) {
@@ -2469,6 +2487,7 @@ export default function MALWrapped() {
       setIsLoadingSongs(false);
       prevStatsYearRef.current = statsYear;
       prevSelectedYearRef.current = selectedYear;
+      fetchAttemptRef.current = 0; // Reset on no songs
     } else {
       // Still have pending IDs, keep loading visible
       setIsLoadingSongs(true);
@@ -4410,26 +4429,43 @@ export default function MALWrapped() {
                                   className="flex items-center gap-2.5 sm:gap-3 w-full"
                                   variants={staggerItem}
                                 >
-                                  {/* Thumbnail */}
+                                  {/* Thumbnail - only this is clickable */}
                                   <div className="relative flex-shrink-0">
                                     {/* Number badge in circle at top left - outside overflow container */}
                                     <div className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}>
                                       {index + 2}
                                     </div>
-                                    <div className="w-20 h-20 rounded-lg overflow-hidden">
-                                      {item.coverImage && (
-                                        <motion.img 
-                                          src={item.coverImage} 
-                                          alt={item.title} 
-                                          crossOrigin="anonymous" 
-                                          className="w-full h-full object-cover"
-                                          whileHover={{ scale: 1.05 }}
-                                          transition={{ duration: 0.2 }}
-                                        />
-                                      )}
-                                    </div>
+                                    {malUrl ? (
+                                      <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="block">
+                                        <div className="w-20 h-20 rounded-lg overflow-hidden">
+                                          {item.coverImage && (
+                                            <motion.img 
+                                              src={item.coverImage} 
+                                              alt={item.title} 
+                                              crossOrigin="anonymous" 
+                                              className="w-full h-full object-cover"
+                                              whileHover={{ scale: 1.05 }}
+                                              transition={{ duration: 0.2 }}
+                                            />
+                                          )}
+                                        </div>
+                                      </a>
+                                    ) : (
+                                      <div className="w-20 h-20 rounded-lg overflow-hidden">
+                                        {item.coverImage && (
+                                          <motion.img 
+                                            src={item.coverImage} 
+                                            alt={item.title} 
+                                            crossOrigin="anonymous" 
+                                            className="w-full h-full object-cover"
+                                            whileHover={{ scale: 1.05 }}
+                                            transition={{ duration: 0.2 }}
+                                          />
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
-                                  {/* Title and details */}
+                                  {/* Title and details - not clickable */}
                                   <div className="flex-1 min-w-0">
                                     <h3 className="title-sm font-semibold text-white truncate">{item.title}</h3>
                                     {item.studio && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.studio}</p>}
@@ -4443,13 +4479,7 @@ export default function MALWrapped() {
                               );
                               return (
                                 <motion.div key={item.id} className="w-full">
-                                  {malUrl ? (
-                                    <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                                      {itemContent}
-                                    </a>
-                                  ) : (
-                                    itemContent
-                                  )}
+                                  {itemContent}
                                 </motion.div>
                               );
                             })}
