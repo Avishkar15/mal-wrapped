@@ -23,6 +23,7 @@ import {
 import { motion, useMotionValue } from 'framer-motion';
 import { useTranslation } from 'next-i18next';
 import LanguageSelector from './LanguageSelector.jsx';
+import LoadingScreen from './LoadingScreen.jsx';
 
 // MyAnimeList Icon Component
 const MyAnimeListIcon = ({ size = 20, className = '' }) => (
@@ -8028,41 +8029,10 @@ export default function MALWrapped() {
           )}
 
           {(isLoading || (isLoadingSongs && isAuthenticated)) && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black">
-              <div className="text-center w-full max-w-2xl mx-auto px-4">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: smoothEase }}
-                >
-                  <motion.h1
-                    className="body-lg font-medium text-white mb-4 tracking-tight"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                  >
-                    {loadingProgress || t('general.loadingText')}
-                  </motion.h1>
-
-                  {/* Progress bar */}
-                  <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full"
-                      style={{
-                        background:
-                          'linear-gradient(90deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 200, 255, 0.8) 100%)',
-                      }}
-                      initial={{ width: '0%' }}
-                      animate={{ width: `${loadingProgressPercent}%` }}
-                      transition={{
-                        duration: 0.3,
-                        ease: smoothEase,
-                      }}
-                    />
-                  </div>
-                </motion.div>
-              </div>
-            </div>
+            <LoadingScreen
+              progress={loadingProgressPercent}
+              message={loadingProgress || t('general.loadingText')}
+            />
           )}
 
           {!isAuthenticated && (
