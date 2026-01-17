@@ -14,10 +14,13 @@
     "dom-to-image": "^2.6.0",
     "dom-to-image-more": "^3.7.2",
     "framer-motion": "^12.23.24",
+    "i18next": "^25.7.4",
     "lucide-react": "^0.294.0",
     "next": "14.0.4",
+    "next-i18next": "^15.4.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-i18next": "^16.5.3"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",
