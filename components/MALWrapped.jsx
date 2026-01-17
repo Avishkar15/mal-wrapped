@@ -1,45 +1,78 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { ChevronLeft, ChevronRight, Download, LogOut, Share2, Github, Youtube, Linkedin, Instagram, ExternalLink, Copy, Volume2, VolumeX } from 'lucide-react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from 'react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  LogOut,
+  Share2,
+  Github,
+  Youtube,
+  Linkedin,
+  Instagram,
+  ExternalLink,
+  Copy,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { motion, useMotionValue } from 'framer-motion';
+import { useTranslation } from 'next-i18next';
+import LanguageSelector from './LanguageSelector.jsx';
+import LoadingScreen from './LoadingScreen.jsx';
 
 // MyAnimeList Icon Component
 const MyAnimeListIcon = ({ size = 20, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path fill="currentColor" d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404l-1.989-2.458l-.02 5.285H.001L0 7.247h2.203l1.865 2.545l2.015-2.546l2.19.001zm8.628 2.069l.025 6.335h-2.365l-.008-2.871h-2.8c.07.499.21 1.266.417 1.779c.155.381.298.751.583 1.128l-1.705 1.125c-.349-.636-.622-1.337-.878-2.082a9.296 9.296 0 0 1-.507-2.179c-.085-.75-.097-1.471.107-2.212a3.908 3.908 0 0 1 1.161-1.866c.313-.293.749-.5 1.1-.687c.351-.187.743-.264 1.107-.359a7.405 7.405 0 0 1 1.191-.183c.398-.034 1.107-.066 2.39-.028l.545 1.749H14.51c-.593.008-.878.001-1.341.209a2.236 2.236 0 0 0-1.278 1.92l2.663.033l.038-1.81h2.309zm3.992-2.099v6.627l3.107.032l-.43 1.775h-4.807V7.187l2.13.03z"/>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+  >
+    <path
+      fill="currentColor"
+      d="M8.273 7.247v8.423l-2.103-.003v-5.216l-2.03 2.404l-1.989-2.458l-.02 5.285H.001L0 7.247h2.203l1.865 2.545l2.015-2.546l2.19.001zm8.628 2.069l.025 6.335h-2.365l-.008-2.871h-2.8c.07.499.21 1.266.417 1.779c.155.381.298.751.583 1.128l-1.705 1.125c-.349-.636-.622-1.337-.878-2.082a9.296 9.296 0 0 1-.507-2.179c-.085-.75-.097-1.471.107-2.212a3.908 3.908 0 0 1 1.161-1.866c.313-.293.749-.5 1.1-.687c.351-.187.743-.264 1.107-.359a7.405 7.405 0 0 1 1.191-.183c.398-.034 1.107-.066 2.39-.028l.545 1.749H14.51c-.593.008-.878.001-1.341.209a2.236 2.236 0 0 0-1.278 1.92l2.663.033l.038-1.81h2.309zm3.992-2.099v6.627l3.107.032l-.43 1.775h-4.807V7.187l2.13.03z"
+    />
   </svg>
 );
 
 const smoothEase = [0.25, 0.1, 0.25, 1];
 
-// Watermark map - moved outside component to avoid recreation
-const WATERMARK_MAP = {
-  'welcome': 'MAL-WRAPPED.VERCEL.APP',
-  'anime_count': 'My Anime Journey',
-  'anime_time': 'My Anime Watchtime',
-  'top_genre': 'My Most Watched Genres',
-  'demographic_anime': 'My Anime Demographics',
-  'demographic_manga': 'My Manga Demographics',
-  'drumroll_anime': 'My Top Anime',
-  'top_5_anime': 'My Top 5 Anime',
-  'top_studio': 'My Favorite Studios',
-  'seasonal_highlights': 'My Seasonal Highlights',
-  'hidden_gems_anime': 'My Hidden Anime Gems',
-  'planned_anime': 'My Planned-to-Watch Anime',
-  'milestones': 'My Milestones',
-  'anime_to_manga_transition': 'MAL-WRAPPED.VERCEL.APP',
-  'manga_count': 'My Manga Journey',
-  'manga_time': 'My Manga Reading Time',
-  'top_manga_genre': 'My Most Read Genres',
-  'drumroll_manga': 'My Top Manga',
-  'top_5_manga': 'My Top 5 Manga',
-  'top_author': 'My Favorite Authors',
-  'hidden_gems_manga': 'My Hidden Manga Gems',
-  'longest_manga': 'My Longest Manga Journey',
-  'planned_manga': 'My Planned-to-Read Manga',
-  'badges': 'My Badges',
-  'character_twin': 'My Character Match',
-  'rating_style': 'My Rating Style',
-  'finale': 'MAL-WRAPPED.VERCEL.APP'
+// Watermark map keys - maps slide IDs to translation keys
+const WATERMARK_KEYS = {
+  welcome: 'watermarks.welcome',
+  anime_count: 'watermarks.animeCount',
+  anime_time: 'watermarks.animeTime',
+  top_genre: 'watermarks.topGenre',
+  demographic_anime: 'watermarks.demographicAnime',
+  demographic_manga: 'watermarks.demographicManga',
+  drumroll_anime: 'watermarks.drumrollAnime',
+  top_5_anime: 'watermarks.top5Anime',
+  top_studio: 'watermarks.topStudio',
+  seasonal_highlights: 'watermarks.seasonalHighlights',
+  hidden_gems_anime: 'watermarks.hiddenGemsAnime',
+  planned_anime: 'watermarks.plannedAnime',
+  milestones: 'watermarks.milestones',
+  anime_to_manga_transition: 'watermarks.animeToMangaTransition',
+  manga_count: 'watermarks.mangaCount',
+  manga_time: 'watermarks.mangaTime',
+  top_manga_genre: 'watermarks.topMangaGenre',
+  drumroll_manga: 'watermarks.drumrollManga',
+  top_5_manga: 'watermarks.top5Manga',
+  top_author: 'watermarks.topAuthor',
+  hidden_gems_manga: 'watermarks.hiddenGemsManga',
+  longest_manga: 'watermarks.longestManga',
+  planned_manga: 'watermarks.plannedManga',
+  badges: 'watermarks.badges',
+  character_twin: 'watermarks.characterTwin',
+  rating_style: 'watermarks.ratingStyle',
+  finale: 'watermarks.finale',
 };
 
 // Helper function to get MAL URL for anime/manga
@@ -54,7 +87,8 @@ const getMALUrl = (item) => {
 };
 
 function generateCodeVerifier(length = 128) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
   let result = '';
   for (let i = 0; i < length; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -73,8 +107,10 @@ const AUTH_URL = 'https://myanimelist.net/v1/oauth2/authorize';
 
 // Dev-only loggers - created once outside component
 const devLog = process.env.NODE_ENV === 'development' ? console.log : () => {};
-const devError = process.env.NODE_ENV === 'development' ? console.error : () => {};
-const devWarn = process.env.NODE_ENV === 'development' ? console.warn : () => {};
+const devError =
+  process.env.NODE_ENV === 'development' ? console.error : () => {};
+const devWarn =
+  process.env.NODE_ENV === 'development' ? console.warn : () => {};
 
 // Helper function to clean up media elements - prevents code duplication
 const cleanupMediaElement = (element) => {
@@ -101,25 +137,25 @@ const cleanupAllMediaElements = () => {
 const fadeSlideUp = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: smoothEase }
+  transition: { duration: 0.6, ease: smoothEase },
 };
 
 const fadeIn = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
-  transition: { duration: 0.6, ease: smoothEase }
+  transition: { duration: 0.6, ease: smoothEase },
 };
 
 const fadeIn100 = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
-  transition: { duration: 0.2, ease: smoothEase }
+  transition: { duration: 0.2, ease: smoothEase },
 };
 
 const fadeIn300 = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
-  transition: { duration: 0.4, ease: smoothEase }
+  transition: { duration: 0.4, ease: smoothEase },
 };
 
 const float = {
@@ -128,9 +164,9 @@ const float = {
     transition: {
       duration: 8,
       repeat: Infinity,
-      ease: smoothEase
-    }
-  }
+      ease: smoothEase,
+    },
+  },
 };
 
 // Stagger container variants
@@ -140,9 +176,9 @@ const staggerContainer = {
     opacity: 1,
     transition: {
       staggerChildren: 0.1,
-      delayChildren: 0.1
-    }
-  }
+      delayChildren: 0.1,
+    },
+  },
 };
 
 const staggerItem = {
@@ -152,18 +188,18 @@ const staggerItem = {
     y: 0,
     transition: {
       duration: 0.5,
-      ease: smoothEase
-    }
-  }
+      ease: smoothEase,
+    },
+  },
 };
-
 
 const hoverImage = {
   scale: 1.1,
-  transition: { duration: 0.3, ease: smoothEase }
+  transition: { duration: 0.3, ease: smoothEase },
 };
 
-const bottomGradientBackground = 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, .5) 25%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, .5) 80%, rgba(0, 0, 0, 1) 100%)';
+const bottomGradientBackground =
+  'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, .5) 25%, rgba(0, 0, 0, 0.25) 60%, rgba(0, 0, 0, .5) 80%, rgba(0, 0, 0, 1) 100%)';
 
 // Animated Number Component using Framer Motion
 function AnimatedNumber({ value, duration = 1.5, className = '' }) {
@@ -173,27 +209,27 @@ function AnimatedNumber({ value, duration = 1.5, className = '' }) {
   useEffect(() => {
     // Reset to 0 when value changes
     setDisplayValue(0);
-    
+
     // Animate to the target value
     const startTime = Date.now();
     const startValue = 0;
     const endValue = numValue;
     let animationFrameId;
     let cancelled = false;
-    
+
     const animate = () => {
       if (cancelled) return;
-      
+
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / (duration * 1000), 1);
-      
+
       // Gentler ease-out function: starts fast, slows down but not too much
       // Using quadratic ease-out instead of cubic for less extreme slowdown
       const eased = 1 - Math.pow(1 - progress, 2);
-      
+
       const currentValue = startValue + (endValue - startValue) * eased;
       setDisplayValue(currentValue);
-      
+
       if (progress < 1) {
         animationFrameId = requestAnimationFrame(animate);
       } else {
@@ -201,9 +237,9 @@ function AnimatedNumber({ value, duration = 1.5, className = '' }) {
         setDisplayValue(endValue);
       }
     };
-    
+
     animationFrameId = requestAnimationFrame(animate);
-    
+
     return () => {
       cancelled = true;
       if (animationFrameId) {
@@ -213,7 +249,7 @@ function AnimatedNumber({ value, duration = 1.5, className = '' }) {
   }, [numValue, duration]);
 
   return (
-    <motion.span 
+    <motion.span
       className={className}
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
@@ -228,15 +264,14 @@ function getComparisonCopy(percentage, nounPlural) {
   if (!percentage || percentage <= 0) return null;
   const isAboveAverage = percentage >= 100;
   if (isAboveAverage) {
-    const aboveBy = percentage - 100;
-  return {
-      prefix: "That's ",
-      suffix: ` more than the average MAL user! You’re leaving the crowd behind!`
+    return {
+      keyPrefix: 'comparison.abovePrefix',
+      keySuffix: 'comparison.aboveSuffix',
     };
   } else {
     return {
-      prefix: "That's only ",
-      suffix: ` of the average MAL user. Don’t worry, every hero has a slow arc!`
+      keyPrefix: 'comparison.belowPrefix',
+      keySuffix: 'comparison.belowSuffix',
     };
   }
 }
@@ -252,6 +287,7 @@ function getCompletionDays(startDate, finishDate) {
 }
 
 export default function MALWrapped() {
+  const { t } = useTranslation('common');
   const [currentSlide, setCurrentSlide] = useState(0);
   const [username, setUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -281,48 +317,63 @@ export default function MALWrapped() {
   const lastForcedSlideRef = useRef(null);
   const isFetchingThemesRef = useRef(false);
   const currentTrackIndexRef = useRef(0);
-  
+
   // Memoize hasAnime and hasManga to prevent unnecessary recalculations
-  const hasAnime = useMemo(() => 
-    stats?.thisYearAnime?.length > 0, 
-    [stats?.thisYearAnime]
+  const hasAnime = useMemo(
+    () => stats?.thisYearAnime?.length > 0,
+    [stats?.thisYearAnime],
   );
-  const hasManga = useMemo(() => 
-    mangaList?.length > 0, 
-    [mangaList]
+  const hasManga = useMemo(() => mangaList?.length > 0, [mangaList]);
+
+  const slides = useMemo(
+    () =>
+      stats
+        ? [
+            { id: 'welcome' },
+            { id: 'anime_count' },
+            ...(hasAnime
+              ? [
+                  { id: 'anime_time' },
+                  { id: 'top_genre' },
+                  ...(stats?.animeDemographicDistribution &&
+                  stats.animeDemographicDistribution.length > 0
+                    ? [{ id: 'demographic_anime' }]
+                    : []),
+                  { id: 'drumroll_anime' },
+                  { id: 'top_5_anime' },
+                  { id: 'seasonal_highlights' },
+                  { id: 'hidden_gems_anime' },
+                  { id: 'planned_anime' },
+                ]
+              : []),
+            { id: 'anime_to_manga_transition' },
+            { id: 'manga_count' },
+            ...(hasManga
+              ? [
+                  { id: 'manga_time' },
+                  { id: 'top_manga_genre' },
+                  ...(stats?.mangaDemographicDistribution &&
+                  stats.mangaDemographicDistribution.length > 0
+                    ? [{ id: 'demographic_manga' }]
+                    : []),
+                  { id: 'drumroll_manga' },
+                  { id: 'top_5_manga' },
+                  { id: 'top_author' },
+                  { id: 'longest_manga' },
+                  { id: 'hidden_gems_manga' },
+                  { id: 'planned_manga' },
+                ]
+              : []),
+            ...(stats.badges && stats.badges.length > 0
+              ? [{ id: 'badges' }]
+              : []),
+            ...(stats.ratingStyle ? [{ id: 'rating_style' }] : []),
+            ...(stats.characterTwin ? [{ id: 'character_twin' }] : []),
+            { id: 'finale' },
+          ]
+        : [],
+    [stats, hasAnime, hasManga],
   );
-  
-  const slides = useMemo(() => stats ? [
-    { id: 'welcome' },
-    { id: 'anime_count' },
-    ...(hasAnime ? [
-      { id: 'anime_time' },
-      { id: 'top_genre' },
-      ...(stats?.animeDemographicDistribution && stats.animeDemographicDistribution.length > 0 ? [{ id: 'demographic_anime' }] : []),
-      { id: 'drumroll_anime' },
-      { id: 'top_5_anime' },
-      { id: 'seasonal_highlights' },
-      { id: 'hidden_gems_anime' },
-      { id: 'planned_anime' },
-    ] : []),
-    { id: 'anime_to_manga_transition' },
-    { id: 'manga_count' },
-    ...(hasManga ? [
-      { id: 'manga_time' },
-      { id: 'top_manga_genre' },
-      ...(stats?.mangaDemographicDistribution && stats.mangaDemographicDistribution.length > 0 ? [{ id: 'demographic_manga' }] : []),
-      { id: 'drumroll_manga' },
-      { id: 'top_5_manga' },
-      { id: 'top_author' },
-      { id: 'longest_manga' },
-      { id: 'hidden_gems_manga' },
-      { id: 'planned_manga' },
-    ] : []),
-    ...(stats.badges && stats.badges.length > 0 ? [{ id: 'badges' }] : []),
-    ...(stats.ratingStyle ? [{ id: 'rating_style' }] : []),
-    ...(stats.characterTwin ? [{ id: 'character_twin' }] : []),
-    { id: 'finale' },
-  ] : [], [stats, hasAnime, hasManga]);
 
   // Get website URL for watermark - memoized once
   const websiteUrl = useMemo(() => {
@@ -330,11 +381,15 @@ export default function MALWrapped() {
     return window.location.origin.replace(/^https?:\/\//, '').toUpperCase();
   }, []); // Empty deps - only compute once on mount
 
-  // Get slide-specific watermark text
-  const getWatermarkText = useCallback((slideId) => {
-    if (!slideId) return websiteUrl;
-    return WATERMARK_MAP[slideId] || websiteUrl;
-  }, [websiteUrl]);
+  // Get slide-specific watermark text (using translations)
+  const getWatermarkText = useCallback(
+    (slideId) => {
+      if (!slideId) return websiteUrl;
+      const key = WATERMARK_KEYS[slideId];
+      return key ? t(key) : websiteUrl;
+    },
+    [websiteUrl, t],
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -405,26 +460,35 @@ export default function MALWrapped() {
   async function exchangeCodeForToken(code, verifier) {
     setIsLoading(true);
     setError('');
-    setLoadingProgress('Connecting to MAL...');
+    setLoadingProgress(t('loading.message1'));
     // Ensure progress only increases, never decreases
-    setLoadingProgressPercent(prev => Math.max(prev, 10));
-    
+    setLoadingProgressPercent((prev) => Math.max(prev, 10));
+
     try {
       const redirectUri = getRedirectUri();
       const response = await fetch('/api/auth/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, code_verifier: verifier, redirect_uri: redirectUri }),
+        body: JSON.stringify({
+          code,
+          code_verifier: verifier,
+          redirect_uri: redirectUri,
+        }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error_description || errorData.error || 'Authentication failed');
+        throw new Error(
+          errorData.error_description ||
+            errorData.error ||
+            'Authentication failed',
+        );
       }
 
       const data = await response.json();
       localStorage.setItem('mal_access_token', data.access_token);
-      if (data.refresh_token) localStorage.setItem('mal_refresh_token', data.refresh_token);
+      if (data.refresh_token)
+        localStorage.setItem('mal_refresh_token', data.refresh_token);
       localStorage.removeItem('pkce_verifier');
       window.history.replaceState({}, document.title, window.location.pathname);
 
@@ -439,24 +503,24 @@ export default function MALWrapped() {
 
   async function fetchUserData(accessToken) {
     setIsLoading(true);
-    setLoadingProgress('Fetching your profile...');
+    setLoadingProgress(t('loading.message4'));
     // Ensure progress only increases, never decreases
-    setLoadingProgressPercent(prev => Math.max(prev, 20));
-    
+    setLoadingProgressPercent((prev) => Math.max(prev, 20));
+
     try {
       const response = await fetch('/api/mal/user', {
-        headers: { 'Authorization': `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       if (!response.ok) throw new Error('Failed to fetch user data');
       const data = await response.json();
-      
+
       setUsername(data.name);
       setUserData(data);
-      
+
       const animeData = await fetchAnimeList(accessToken);
       await fetchMangaList(accessToken, animeData);
-      
+
       setIsAuthenticated(true);
     } catch (err) {
       setError(err.message);
@@ -467,40 +531,50 @@ export default function MALWrapped() {
   }
 
   async function fetchAnimeList(accessToken) {
-    setLoadingProgress('Loading your anime list...');
+    setLoadingProgress(t('loading.message2'));
     // Ensure progress only increases, never decreases
-    setLoadingProgressPercent(prev => Math.max(prev, 25));
+    setLoadingProgressPercent((prev) => Math.max(prev, 25));
     try {
       let allAnime = [];
       let offset = 0;
       const limit = 100;
 
       while (true) {
-        const response = await fetch(`/api/mal/animelist?offset=${offset}&limit=${limit}`, {
-          headers: { 'Authorization': `Bearer ${accessToken}` },
-        });
+        const response = await fetch(
+          `/api/mal/animelist?offset=${offset}&limit=${limit}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        );
 
         if (!response.ok) break;
         const data = await response.json();
-        
+
         if (!data.data || data.data.length === 0) break;
-        
+
         allAnime = [...allAnime, ...data.data];
-        setLoadingProgress(`Loaded ${allAnime.length} anime...`);
-        
+        setLoadingProgress(
+          t('loading.loadedAnime', { count: allAnime.length }),
+        );
+
         // Update progress: 25% to 60% for anime loading
         if (data.paging?.next) {
           // Estimate progress based on items loaded (assume roughly similar batch sizes)
           // Use a logarithmic scale to slow down as we approach the end
-          const estimatedProgress = Math.min(0.95, 1 - Math.pow(0.9, allAnime.length / 100));
-          const animeProgress = 25 + (35 * estimatedProgress);
+          const estimatedProgress = Math.min(
+            0.95,
+            1 - Math.pow(0.9, allAnime.length / 100),
+          );
+          const animeProgress = 25 + 35 * estimatedProgress;
           // Ensure progress only increases, never decreases
-          setLoadingProgressPercent(prev => Math.max(prev, Math.min(animeProgress, 60)));
+          setLoadingProgressPercent((prev) =>
+            Math.max(prev, Math.min(animeProgress, 60)),
+          );
         } else {
           // Ensure progress only increases, never decreases
-          setLoadingProgressPercent(prev => Math.max(prev, 60));
+          setLoadingProgressPercent((prev) => Math.max(prev, 60));
         }
-        
+
         if (!data.paging?.next) break;
         offset += limit;
       }
@@ -517,46 +591,56 @@ export default function MALWrapped() {
   }
 
   async function fetchMangaList(accessToken, animeData = []) {
-    setLoadingProgress('Loading your manga list...');
+    setLoadingProgress(t('loading.message2'));
     // Ensure progress only increases, never decreases
-    setLoadingProgressPercent(prev => Math.max(prev, 65));
+    setLoadingProgressPercent((prev) => Math.max(prev, 65));
     try {
       let allManga = [];
       let offset = 0;
       const limit = 100;
 
       while (true) {
-        const response = await fetch(`/api/mal/mangalist?offset=${offset}&limit=${limit}`, {
-          headers: { 'Authorization': `Bearer ${accessToken}` },
-        });
+        const response = await fetch(
+          `/api/mal/mangalist?offset=${offset}&limit=${limit}`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` },
+          },
+        );
 
         if (!response.ok) break;
         const data = await response.json();
-        
+
         if (!data.data || data.data.length === 0) break;
         allManga = [...allManga, ...data.data];
-        setLoadingProgress(`Loaded ${allManga.length} manga...`);
-        
+        setLoadingProgress(
+          t('loading.loadedManga', { count: allManga.length }),
+        );
+
         // Update progress: 65% to 95% for manga loading
         if (data.paging?.next) {
           // Estimate progress based on items loaded (assume roughly similar batch sizes)
           // Use a logarithmic scale to slow down as we approach the end
-          const estimatedProgress = Math.min(0.95, 1 - Math.pow(0.9, allManga.length / 100));
-          const mangaProgress = 65 + (30 * estimatedProgress);
+          const estimatedProgress = Math.min(
+            0.95,
+            1 - Math.pow(0.9, allManga.length / 100),
+          );
+          const mangaProgress = 65 + 30 * estimatedProgress;
           // Ensure progress only increases, never decreases
-          setLoadingProgressPercent(prev => Math.max(prev, Math.min(mangaProgress, 95)));
+          setLoadingProgressPercent((prev) =>
+            Math.max(prev, Math.min(mangaProgress, 95)),
+          );
         } else {
           // Ensure progress only increases, never decreases
-          setLoadingProgressPercent(prev => Math.max(prev, 95));
+          setLoadingProgressPercent((prev) => Math.max(prev, 95));
         }
-        
+
         if (!data.paging?.next) break;
         offset += limit;
       }
-      
-      setLoadingProgress('Loading characters, authors, and openings...');
+
+      setLoadingProgress(t('loading.message3'));
       // Ensure progress only increases, never decreases (manga loading might have reached 95%)
-      setLoadingProgressPercent(prev => Math.max(prev, 80));
+      setLoadingProgressPercent((prev) => Math.max(prev, 80));
 
       setMangaList(allManga);
       // Recalculate stats with both anime and manga
@@ -564,7 +648,7 @@ export default function MALWrapped() {
       const animeToUse = animeData.length > 0 ? animeData : animeList;
       // Recalculate with current year selection
       calculateStats(animeToUse, allManga);
-      
+
       // Stats calculation is done, but songs will be loaded separately
       // Don't set to 100% yet - wait for songs
     } catch (err) {
@@ -574,11 +658,11 @@ export default function MALWrapped() {
 
   function calculateStats(anime, manga) {
     const currentYear = selectedYear;
-    
+
     // Helper function to deduplicate items by title
     const deduplicateByTitle = (items) => {
       const map = new Map();
-      items.forEach(item => {
+      items.forEach((item) => {
         const title = item.node?.title || '';
         if (title && !map.has(title)) {
           map.set(title, item);
@@ -586,12 +670,15 @@ export default function MALWrapped() {
       });
       return Array.from(map.values());
     };
-    
+
     // Helper to get year from item's date fields
     // Priority: finish_date > start_date > updated_at (only as last resort when neither exists)
     // updated_at changes when score is updated, so we prefer finish/start dates when available
     const getItemYear = (item) => {
-      const dateStr = item.list_status?.finish_date || item.list_status?.start_date || item.list_status?.updated_at;
+      const dateStr =
+        item.list_status?.finish_date ||
+        item.list_status?.start_date ||
+        item.list_status?.updated_at;
       if (!dateStr) return null;
       try {
         return new Date(dateStr).getFullYear();
@@ -599,34 +686,34 @@ export default function MALWrapped() {
         return null;
       }
     };
-    
+
     // Helper to filter items by year
     const filterByYear = (items) => {
       if (currentYear === 'all') return items;
-      return items.filter(item => getItemYear(item) === currentYear);
+      return items.filter((item) => getItemYear(item) === currentYear);
     };
-    
+
     // Filter anime based on selected year, excluding plan_to_watch items
-    const thisYearAnime = filterByYear(anime).filter(item => 
-      item.list_status?.status !== 'plan_to_watch'
+    const thisYearAnime = filterByYear(anime).filter(
+      (item) => item.list_status?.status !== 'plan_to_watch',
     );
 
     // Get anime with ratings (completed or watching) from filtered list
-    const ratedAnime = thisYearAnime.filter(item => {
+    const ratedAnime = thisYearAnime.filter((item) => {
       const { status, score } = item.list_status || {};
       return (status === 'completed' || status === 'watching') && score > 0;
     });
 
     // Get completed anime for specific stats
-    const completedAnime = thisYearAnime.filter(item => {
+    const completedAnime = thisYearAnime.filter((item) => {
       const { status, score } = item.list_status || {};
       return status === 'completed' && score > 0;
     });
-    
+
     // Calculate genres (from filtered anime)
     const genreCounts = {};
-    thisYearAnime.forEach(item => {
-      item.node?.genres?.forEach(genre => {
+    thisYearAnime.forEach((item) => {
+      item.node?.genres?.forEach((genre) => {
         genreCounts[genre.name] = (genreCounts[genre.name] || 0) + 1;
       });
     });
@@ -637,8 +724,8 @@ export default function MALWrapped() {
 
     // Calculate studios (from filtered anime)
     const studioCounts = {};
-    thisYearAnime.forEach(item => {
-      item.node?.studios?.forEach(studio => {
+    thisYearAnime.forEach((item) => {
+      item.node?.studios?.forEach((studio) => {
         studioCounts[studio.name] = (studioCounts[studio.name] || 0) + 1;
       });
     });
@@ -651,15 +738,17 @@ export default function MALWrapped() {
     const topRated = ratedAnime
       .sort((a, b) => b.list_status.score - a.list_status.score)
       .slice(0, 5);
-    
+
     // Planned to watch (status: plan_to_watch) - get from original list before filtering
     const plannedAnime = deduplicateByTitle(
-      filterByYear(anime).filter(item => item.list_status?.status === 'plan_to_watch')
+      filterByYear(anime).filter(
+        (item) => item.list_status?.status === 'plan_to_watch',
+      ),
     );
 
     // Hidden gems (high community score, low popularity) - combine with rarest for merged slide
     const hiddenGemsRaw = completedAnime
-      .filter(item => {
+      .filter((item) => {
         const malScore = item.node?.mean ?? 0;
         const popularity = item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
         return malScore >= 7.0 && popularity < 70000;
@@ -677,14 +766,17 @@ export default function MALWrapped() {
     const hiddenGems = deduplicateByTitle(hiddenGemsRaw).slice(0, 3);
 
     // Watch time calculation (from filtered anime)
-    const totalEpisodes = thisYearAnime.reduce((sum, item) => 
-      sum + (item.list_status?.num_episodes_watched || 0), 0
+    const totalEpisodes = thisYearAnime.reduce(
+      (sum, item) => sum + (item.list_status?.num_episodes_watched || 0),
+      0,
     );
     // Calculate unique seasons
     const uniqueSeasons = new Set();
-    thisYearAnime.forEach(item => {
+    thisYearAnime.forEach((item) => {
       if (item.node?.start_season?.year && item.node?.start_season?.season) {
-        uniqueSeasons.add(`${item.node.start_season.year}-${item.node.start_season.season}`);
+        uniqueSeasons.add(
+          `${item.node.start_season.year}-${item.node.start_season.season}`,
+        );
       }
     });
     const totalSeasons = uniqueSeasons.size;
@@ -697,7 +789,7 @@ export default function MALWrapped() {
       Winter: { anime: [], episodes: 0, hours: 0 },
       Spring: { anime: [], episodes: 0, hours: 0 },
       Summer: { anime: [], episodes: 0, hours: 0 },
-      Fall: { anime: [], episodes: 0, hours: 0 }
+      Fall: { anime: [], episodes: 0, hours: 0 },
     };
 
     // Helper to capitalize season name (MAL returns lowercase)
@@ -706,13 +798,13 @@ export default function MALWrapped() {
       return season.charAt(0).toUpperCase() + season.slice(1).toLowerCase();
     };
 
-    thisYearAnime.forEach(item => {
+    thisYearAnime.forEach((item) => {
       // Only include anime that user has watched or is watching (not planned)
       const status = item.list_status?.status;
       if (status !== 'completed' && status !== 'watching') {
         return;
       }
-      
+
       const startSeason = item.node?.start_season;
       if (startSeason && startSeason.season && startSeason.year) {
         // If a specific year is selected, only include anime that released in that year
@@ -731,22 +823,23 @@ export default function MALWrapped() {
 
     // Get top anime for each season
     const seasonalHighlights = {};
-    ['Winter', 'Spring', 'Summer', 'Fall'].forEach(season => {
+    ['Winter', 'Spring', 'Summer', 'Fall'].forEach((season) => {
       if (seasonalData[season].anime.length > 0) {
-        const topAnime = seasonalData[season].anime
-          .sort((a, b) => (b.list_status?.score || 0) - (a.list_status?.score || 0))[0];
+        const topAnime = seasonalData[season].anime.sort(
+          (a, b) => (b.list_status?.score || 0) - (a.list_status?.score || 0),
+        )[0];
         seasonalHighlights[season] = {
           highlight: topAnime,
           totalAnime: seasonalData[season].anime.length,
           totalEpisodes: seasonalData[season].episodes,
-          totalHours: seasonalData[season].hours
+          totalHours: seasonalData[season].hours,
         };
       }
     });
 
     // Manga stats - filter by year, excluding plan_to_read items
-    const filteredManga = filterByYear(manga).filter(item => 
-      item.list_status?.status !== 'plan_to_read'
+    const filteredManga = filterByYear(manga).filter(
+      (item) => item.list_status?.status !== 'plan_to_read',
     );
 
     // Calculate demographic distribution (Shounen, Seinen, Shoujo, Josei)
@@ -759,65 +852,84 @@ export default function MALWrapped() {
       if (normalized === 'josei') return 'Josei';
       return null;
     };
-    
+
     // Count demographics from anime
-    const animeDemographicCounts = { Shounen: 0, Seinen: 0, Shoujo: 0, Josei: 0 };
-    thisYearAnime.forEach(item => {
-      item.node?.genres?.forEach(genre => {
+    const animeDemographicCounts = {
+      Shounen: 0,
+      Seinen: 0,
+      Shoujo: 0,
+      Josei: 0,
+    };
+    thisYearAnime.forEach((item) => {
+      item.node?.genres?.forEach((genre) => {
         const demo = normalizeDemographic(genre.name);
         if (demo) animeDemographicCounts[demo]++;
       });
     });
-    
-    const totalAnimeDemographicItems = Object.values(animeDemographicCounts).reduce((sum, count) => sum + count, 0);
+
+    const totalAnimeDemographicItems = Object.values(
+      animeDemographicCounts,
+    ).reduce((sum, count) => sum + count, 0);
     const animeDemographicDistribution = Object.entries(animeDemographicCounts)
       .map(([name, count]) => ({
         name,
         count,
-        percentage: totalAnimeDemographicItems > 0 ? Math.round((count / totalAnimeDemographicItems) * 100) : 0
+        percentage:
+          totalAnimeDemographicItems > 0
+            ? Math.round((count / totalAnimeDemographicItems) * 100)
+            : 0,
       }))
-      .filter(demo => demo.count > 0)
+      .filter((demo) => demo.count > 0)
       .sort((a, b) => b.count - a.count);
-    
+
     // Count demographics from manga
-    const mangaDemographicCounts = { Shounen: 0, Seinen: 0, Shoujo: 0, Josei: 0 };
-    filteredManga.forEach(item => {
-      item.node?.genres?.forEach(genre => {
+    const mangaDemographicCounts = {
+      Shounen: 0,
+      Seinen: 0,
+      Shoujo: 0,
+      Josei: 0,
+    };
+    filteredManga.forEach((item) => {
+      item.node?.genres?.forEach((genre) => {
         const demo = normalizeDemographic(genre.name);
         if (demo) mangaDemographicCounts[demo]++;
       });
     });
-    
-    const totalMangaDemographicItems = Object.values(mangaDemographicCounts).reduce((sum, count) => sum + count, 0);
+
+    const totalMangaDemographicItems = Object.values(
+      mangaDemographicCounts,
+    ).reduce((sum, count) => sum + count, 0);
     const mangaDemographicDistribution = Object.entries(mangaDemographicCounts)
       .map(([name, count]) => ({
         name,
         count,
-        percentage: totalMangaDemographicItems > 0 ? Math.round((count / totalMangaDemographicItems) * 100) : 0
+        percentage:
+          totalMangaDemographicItems > 0
+            ? Math.round((count / totalMangaDemographicItems) * 100)
+            : 0,
       }))
-      .filter(demo => demo.count > 0)
+      .filter((demo) => demo.count > 0)
       .sort((a, b) => b.count - a.count);
 
     // Get manga with ratings (completed or reading)
-    const ratedManga = filteredManga.filter(item => {
+    const ratedManga = filteredManga.filter((item) => {
       const { status, score } = item.list_status || {};
       return (status === 'completed' || status === 'reading') && score > 0;
     });
 
-    const completedManga = filteredManga.filter(item => {
+    const completedManga = filteredManga.filter((item) => {
       const { status, score } = item.list_status || {};
       return status === 'completed' && score > 0;
     });
-    
 
     const topManga = ratedManga
       .sort((a, b) => b.list_status.score - a.list_status.score)
       .slice(0, 5);
-    
+
     // Longest Manga Journey - find manga with most chapters read
     let longestMangaJourney = null;
     const mangaChaptersMap = new Map();
-    
+
     // Helper to estimate reading time (average 5 minutes per chapter)
     const estimateReadingTime = (chapters) => {
       const minutes = chapters * 5;
@@ -825,77 +937,90 @@ export default function MALWrapped() {
       const days = Math.floor(hours / 24);
       return { minutes, hours, days };
     };
-    
+
     if (currentYear === 'all') {
       // For all time: find manga with most chapters read from all manga (excluding plan_to_read)
-      const allMangaExcludingPlanned = (manga || []).filter(item => 
-        item.list_status?.status !== 'plan_to_read'
+      const allMangaExcludingPlanned = (manga || []).filter(
+        (item) => item.list_status?.status !== 'plan_to_read',
       );
-      allMangaExcludingPlanned.forEach(item => {
+      allMangaExcludingPlanned.forEach((item) => {
         const chaptersRead = item.list_status?.num_chapters_read || 0;
         const title = item.node?.title || '';
         const mangaId = item.node?.id;
         const startDate = item.list_status?.start_date;
         const finishDate = item.list_status?.finish_date;
         const status = item.list_status?.status;
-        
+
         if (chaptersRead > 0 && title) {
-          if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < chaptersRead) {
+          if (
+            !mangaChaptersMap.has(title) ||
+            mangaChaptersMap.get(title).chapters < chaptersRead
+          ) {
             const readingTime = estimateReadingTime(chaptersRead);
             mangaChaptersMap.set(title, {
               title,
               chapters: chaptersRead,
               mangaId,
-              coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
+              coverImage:
+                item.node?.main_picture?.large ||
+                item.node?.main_picture?.medium ||
+                '',
               startDate,
               finishDate,
               status,
-              readingTime
+              readingTime,
             });
           }
         }
       });
     } else {
       // For specific year: find manga with most chapters read in that year
-      filteredManga.forEach(item => {
+      filteredManga.forEach((item) => {
         const chaptersRead = item.list_status?.num_chapters_read || 0;
         const title = item.node?.title || '';
         const mangaId = item.node?.id;
         const startDate = item.list_status?.start_date;
         const finishDate = item.list_status?.finish_date;
         const status = item.list_status?.status;
-        
+
         if (chaptersRead > 0 && title) {
-          if (!mangaChaptersMap.has(title) || mangaChaptersMap.get(title).chapters < chaptersRead) {
+          if (
+            !mangaChaptersMap.has(title) ||
+            mangaChaptersMap.get(title).chapters < chaptersRead
+          ) {
             const readingTime = estimateReadingTime(chaptersRead);
             mangaChaptersMap.set(title, {
               title,
               chapters: chaptersRead,
               mangaId,
-              coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
+              coverImage:
+                item.node?.main_picture?.large ||
+                item.node?.main_picture?.medium ||
+                '',
               startDate,
               finishDate,
               status,
-              readingTime
+              readingTime,
             });
           }
         }
       });
     }
-    
+
     // Find the manga with most chapters read
     if (mangaChaptersMap.size > 0) {
-      const longestManga = Array.from(mangaChaptersMap.values())
-        .sort((a, b) => b.chapters - a.chapters)[0];
-      
+      const longestManga = Array.from(mangaChaptersMap.values()).sort(
+        (a, b) => b.chapters - a.chapters,
+      )[0];
+
       if (longestManga) {
         longestMangaJourney = longestManga;
       }
     }
-    
+
     // Hidden gems manga (high community score, low popularity) - same as anime implementation
     const hiddenGemsMangaRaw = completedManga
-      .filter(item => {
+      .filter((item) => {
         const malScore = item.node?.mean ?? 0;
         const popularity = item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
         return malScore >= 7.0 && popularity < 50000;
@@ -911,38 +1036,44 @@ export default function MALWrapped() {
         return popularityA - popularityB;
       });
     const hiddenGemsManga = deduplicateByTitle(hiddenGemsMangaRaw).slice(0, 3);
-    
+
     // Planned to read - get from original list before filtering
     const plannedManga = deduplicateByTitle(
-      filterByYear(manga).filter(item => item.list_status?.status === 'plan_to_read')
+      filterByYear(manga).filter(
+        (item) => item.list_status?.status === 'plan_to_read',
+      ),
     );
-    
+
     // Calculate manga chapters/volumes and time
-    const totalChapters = filteredManga.reduce((sum, item) => 
-      sum + (item.list_status?.num_chapters_read || 0), 0
+    const totalChapters = filteredManga.reduce(
+      (sum, item) => sum + (item.list_status?.num_chapters_read || 0),
+      0,
     );
-    const totalVolumes = filteredManga.reduce((sum, item) => 
-      sum + (item.list_status?.num_volumes_read || 0), 0
+    const totalVolumes = filteredManga.reduce(
+      (sum, item) => sum + (item.list_status?.num_volumes_read || 0),
+      0,
     );
     // Estimate: 5 minutes per chapter, 20 minutes per volume
-    const mangaMinutes = (totalChapters * 5) + (totalVolumes * 20);
+    const mangaMinutes = totalChapters * 5 + totalVolumes * 20;
     const mangaHours = Math.floor(mangaMinutes / 60);
     const mangaDays = Math.floor(mangaHours / 24);
 
     // Manga authors (from filtered manga)
     // Normalize author names to avoid duplicates from spacing/case variations
     const normalizeAuthorName = (first, last) => {
-      return `${(first || '').trim()} ${(last || '').trim()}`.trim().replace(/\s+/g, ' ');
+      return `${(first || '').trim()} ${(last || '').trim()}`
+        .trim()
+        .replace(/\s+/g, ' ');
     };
-    
+
     const authorCounts = {};
     const authorIds = {}; // Store author IDs
-    
-    filteredManga.forEach(item => {
-      item.node?.authors?.forEach(author => {
+
+    filteredManga.forEach((item) => {
+      item.node?.authors?.forEach((author) => {
         const name = normalizeAuthorName(
           author.node?.first_name || '',
-          author.node?.last_name || ''
+          author.node?.last_name || '',
         );
         if (name) {
           authorCounts[name] = (authorCounts[name] || 0) + 1;
@@ -960,10 +1091,12 @@ export default function MALWrapped() {
       .map(([name, count]) => [name, count, authorIds[name]]); // Include author ID
 
     // ========== NEW UNIQUE FEATURES ==========
-    
+
     // 1. Milestones & Achievements
     // Calculate total completed anime across all time (for milestone detection)
-    const allCompletedAnime = anime.filter(item => item.list_status?.status === 'completed');
+    const allCompletedAnime = anime.filter(
+      (item) => item.list_status?.status === 'completed',
+    );
     const totalCompletedAnime = allCompletedAnime.length;
     const milestones = [];
     if (totalCompletedAnime >= 100) {
@@ -978,17 +1111,17 @@ export default function MALWrapped() {
     if (totalCompletedAnime >= 1000) {
       milestones.push({ type: '1000_completed', count: 1000 });
     }
-    
+
     // Check if user hit a milestone this year
     // Sort all completed anime by finish date to find which one was the milestone
     const sortedCompletedAnime = allCompletedAnime
-      .filter(item => item.list_status?.finish_date)
+      .filter((item) => item.list_status?.finish_date)
       .sort((a, b) => {
         const dateA = new Date(a.list_status?.finish_date || 0);
         const dateB = new Date(b.list_status?.finish_date || 0);
         return dateA - dateB;
       });
-    
+
     let thisYearMilestone = null;
     if (currentYear === 'all') {
       // For all time, show the highest milestone achieved
@@ -997,34 +1130,38 @@ export default function MALWrapped() {
       }
     } else {
       // For specific year, find milestone achieved in that year
-      thisYearMilestone = milestones.find(m => {
-      // Check if the m.count-th completed anime was finished this year
-      if (sortedCompletedAnime.length < m.count) return false;
-      const milestoneItem = sortedCompletedAnime[m.count - 1];
-      if (!milestoneItem) return false;
-      const finishDate = milestoneItem.list_status?.finish_date;
-      if (!finishDate) return false;
-      try {
-        const year = new Date(finishDate).getFullYear();
-        return year === currentYear;
-      } catch (e) {
-        return false;
-      }
-    });
+      thisYearMilestone = milestones.find((m) => {
+        // Check if the m.count-th completed anime was finished this year
+        if (sortedCompletedAnime.length < m.count) return false;
+        const milestoneItem = sortedCompletedAnime[m.count - 1];
+        if (!milestoneItem) return false;
+        const finishDate = milestoneItem.list_status?.finish_date;
+        if (!finishDate) return false;
+        try {
+          const year = new Date(finishDate).getFullYear();
+          return year === currentYear;
+        } catch (e) {
+          return false;
+        }
+      });
     }
 
     // 2. Rarity Features - Hidden gems: least members (below threshold), sorted by MAL mean score descending
     const HIDDEN_GEM_ANIME_THRESHOLD = 80000;
     const HIDDEN_GEM_MANGA_THRESHOLD = 40000;
     const HIDDEN_GEM_SCORE_THRESHOLD = 7.0;
-    
+
     const allRareAnime = completedAnime
-      .map(item => ({
+      .map((item) => ({
         ...item,
         popularity: item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER,
-        malScore: item.node?.mean ?? 0
+        malScore: item.node?.mean ?? 0,
       }))
-      .filter(item => item.malScore >= HIDDEN_GEM_SCORE_THRESHOLD && item.popularity <= HIDDEN_GEM_ANIME_THRESHOLD) // MAL score >= 7.0 and members below threshold
+      .filter(
+        (item) =>
+          item.malScore >= HIDDEN_GEM_SCORE_THRESHOLD &&
+          item.popularity <= HIDDEN_GEM_ANIME_THRESHOLD,
+      ) // MAL score >= 7.0 and members below threshold
       .sort((a, b) => {
         // Sort by MAL score descending, then by popularity (least members first)
         if (b.malScore !== a.malScore) {
@@ -1032,22 +1169,26 @@ export default function MALWrapped() {
         }
         return a.popularity - b.popularity;
       });
-    
+
     const rareAnimeGems = deduplicateByTitle(allRareAnime).slice(0, 3);
-    
+
     // For hidden gems, use all completed manga (not just rated ones) - same as anime
-    const completedMangaForGems = filteredManga.filter(item => {
+    const completedMangaForGems = filteredManga.filter((item) => {
       const { status } = item.list_status || {};
       return status === 'completed';
     });
-    
+
     const allRareManga = completedMangaForGems
-      .map(item => ({
+      .map((item) => ({
         ...item,
         popularity: item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER,
-        malScore: item.node?.mean ?? 0
+        malScore: item.node?.mean ?? 0,
       }))
-      .filter(item => item.malScore >= HIDDEN_GEM_SCORE_THRESHOLD && item.popularity <= HIDDEN_GEM_MANGA_THRESHOLD) // MAL score >= 7.0 and members below threshold
+      .filter(
+        (item) =>
+          item.malScore >= HIDDEN_GEM_SCORE_THRESHOLD &&
+          item.popularity <= HIDDEN_GEM_MANGA_THRESHOLD,
+      ) // MAL score >= 7.0 and members below threshold
       .sort((a, b) => {
         // Sort by MAL score descending, then by popularity (least members first)
         if (b.malScore !== a.malScore) {
@@ -1055,35 +1196,39 @@ export default function MALWrapped() {
         }
         return a.popularity - b.popularity;
       });
-    
+
     const rareMangaGems = deduplicateByTitle(allRareManga).slice(0, 3);
-    
+
     // Count hidden gems (with score and popularity requirements)
-    const hiddenGemsAnimeCount = completedAnime.filter(item => {
+    const hiddenGemsAnimeCount = completedAnime.filter((item) => {
       const malScore = item.node?.mean ?? 0;
       const popularity = item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
-      return malScore >= HIDDEN_GEM_SCORE_THRESHOLD && popularity < HIDDEN_GEM_ANIME_THRESHOLD;
+      return (
+        malScore >= HIDDEN_GEM_SCORE_THRESHOLD &&
+        popularity < HIDDEN_GEM_ANIME_THRESHOLD
+      );
     }).length;
 
-    const hiddenGemsMangaCount = completedManga.filter(item => {
+    const hiddenGemsMangaCount = completedManga.filter((item) => {
       const malScore = item.node?.mean ?? 0;
       const popularity = item.node?.num_list_users ?? Number.MAX_SAFE_INTEGER;
-      return malScore >= HIDDEN_GEM_SCORE_THRESHOLD && popularity < HIDDEN_GEM_MANGA_THRESHOLD;
+      return (
+        malScore >= HIDDEN_GEM_SCORE_THRESHOLD &&
+        popularity < HIDDEN_GEM_MANGA_THRESHOLD
+      );
     }).length;
 
     const hiddenGemsCount = hiddenGemsAnimeCount + hiddenGemsMangaCount;
 
-
-
     // 3. Streak Calculation (consecutive days watching)
     const watchDates = new Set();
-    thisYearAnime.forEach(item => {
+    thisYearAnime.forEach((item) => {
       const startDate = item.list_status?.start_date;
       const finishDate = item.list_status?.finish_date;
       const updatedAt = item.list_status?.updated_at;
-      
+
       // Get all dates when user was active
-      [startDate, finishDate, updatedAt].forEach(dateStr => {
+      [startDate, finishDate, updatedAt].forEach((dateStr) => {
         if (dateStr) {
           try {
             const date = new Date(dateStr);
@@ -1095,17 +1240,19 @@ export default function MALWrapped() {
         }
       });
     });
-    
+
     // Calculate longest streak
     const sortedDates = Array.from(watchDates).sort();
     let longestStreak = 0;
     let currentStreak = 0;
     let lastDate = null;
-    
-    sortedDates.forEach(dateStr => {
+
+    sortedDates.forEach((dateStr) => {
       const currentDate = new Date(dateStr);
       if (lastDate) {
-        const daysDiff = Math.floor((currentDate - lastDate) / (1000 * 60 * 60 * 24));
+        const daysDiff = Math.floor(
+          (currentDate - lastDate) / (1000 * 60 * 60 * 24),
+        );
         if (daysDiff === 1) {
           currentStreak++;
         } else {
@@ -1121,203 +1268,222 @@ export default function MALWrapped() {
 
     // 4. Badge System - New badge definitions, only top 2
     const badgeCandidates = [];
-    
+
     // The Hunter - Hidden gems (10+ rare anime/manga)
     if (hiddenGemsCount >= 10) {
-      badgeCandidates.push({ 
-        type: 'the_hunter', 
+      badgeCandidates.push({
+        type: 'the_hunter',
         name: 'The Hunter',
         description: `You’ve hunted down ${hiddenGemsCount} underated titles that most fans skip. Instincts like Gon’s always lead to something special.`,
-        score: hiddenGemsCount * 10
+        score: hiddenGemsCount * 10,
       });
     }
-    
+
     // The Explorer - 20+ genres and authors
     const uniqueGenres = new Set();
-    thisYearAnime.forEach(item => {
-      item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
+    thisYearAnime.forEach((item) => {
+      item.node?.genres?.forEach((genre) => uniqueGenres.add(genre.name));
     });
     // Add manga genres to the same set to avoid duplication
-    filteredManga.forEach(item => {
-      item.node?.genres?.forEach(genre => uniqueGenres.add(genre.name));
+    filteredManga.forEach((item) => {
+      item.node?.genres?.forEach((genre) => uniqueGenres.add(genre.name));
     });
     const uniqueAuthors = new Set();
-    filteredManga.forEach(item => {
-      item.node?.authors?.forEach(author => {
-        const name = `${(author.node?.first_name || '').trim()} ${(author.node?.last_name || '').trim()}`.trim();
+    filteredManga.forEach((item) => {
+      item.node?.authors?.forEach((author) => {
+        const name =
+          `${(author.node?.first_name || '').trim()} ${(author.node?.last_name || '').trim()}`.trim();
         if (name) uniqueAuthors.add(name);
       });
     });
     if (uniqueGenres.size >= 20 || uniqueAuthors.size >= 20) {
-      const descText = uniqueGenres.size >= 20 && uniqueAuthors.size >= 20
-        ? `You roamed far, discovering  ${uniqueGenres.size} genres and ${uniqueAuthors.size} authors. That’s a journey even Luffy would respect.`
-        : uniqueGenres.size >= 20
-        ? `You roamed far, discovering ${uniqueGenres.size} genres. That’s a journey even Luffy would respect.`
-        : `You roamed far, discovering ${uniqueAuthors.size} authors. That’s a journey even Luffy would respect.`;
-      
-      badgeCandidates.push({ 
-        type: 'the_explorer', 
+      const descText =
+        uniqueGenres.size >= 20 && uniqueAuthors.size >= 20
+          ? `You roamed far, discovering  ${uniqueGenres.size} genres and ${uniqueAuthors.size} authors. That’s a journey even Luffy would respect.`
+          : uniqueGenres.size >= 20
+            ? `You roamed far, discovering ${uniqueGenres.size} genres. That’s a journey even Luffy would respect.`
+            : `You roamed far, discovering ${uniqueAuthors.size} authors. That’s a journey even Luffy would respect.`;
+
+      badgeCandidates.push({
+        type: 'the_explorer',
         name: 'The Explorer',
         description: `${descText}`,
-        score: uniqueGenres.size + uniqueAuthors.size
+        score: uniqueGenres.size + uniqueAuthors.size,
       });
     }
-    
+
     // The Archivist - 130+ for year, 500+ for all time
     const totalCompleted = completedAnime.length + completedManga.length;
-    const allTimeCompleted = (anime || []).filter(item => item.list_status?.status === 'completed').length + 
-                             (manga || []).filter(item => item.list_status?.status === 'completed').length;
-    
+    const allTimeCompleted =
+      (anime || []).filter((item) => item.list_status?.status === 'completed')
+        .length +
+      (manga || []).filter((item) => item.list_status?.status === 'completed')
+        .length;
+
     const archivistThreshold = currentYear === 'all' ? 500 : 130;
-    const completedCount = currentYear === 'all' ? allTimeCompleted : totalCompleted;
-    
+    const completedCount =
+      currentYear === 'all' ? allTimeCompleted : totalCompleted;
+
     if (completedCount >= archivistThreshold) {
-      badgeCandidates.push({ 
-        type: 'the_archivist', 
+      badgeCandidates.push({
+        type: 'the_archivist',
         name: 'The Archivist',
         description: `Your completed shelf now holds ${completedCount} anime and manga! Myne would happily dive into a collection like that`,
-        score: completedCount
+        score: completedCount,
       });
     }
-    
+
     // The Strategist - 20+ planned to watch/read
     const totalPlanned = plannedAnime.length + plannedManga.length;
     if (totalPlanned >= 20) {
-      badgeCandidates.push({ 
-        type: 'the_strategist', 
+      badgeCandidates.push({
+        type: 'the_strategist',
         name: 'The Strategist',
         description: `With ${totalPlanned} lined up in your planned list, every move is calculated. Light would call this a solid plan.`,
-        score: totalPlanned
+        score: totalPlanned,
       });
     }
-    
+
     // The Sprinter - Completed a title within 1-3 days
     if (totalEpisodes >= 1000 || totalChapters >= 2000) {
       const bingeThresholdDays = 3;
       const bingeAnimeCandidates = thisYearAnime
-        .map(item => {
+        .map((item) => {
           const episodes = item.list_status?.num_episodes_watched || 0;
-          const days = getCompletionDays(item.list_status?.start_date, item.list_status?.finish_date);
+          const days = getCompletionDays(
+            item.list_status?.start_date,
+            item.list_status?.finish_date,
+          );
           return {
             item,
             episodes,
             days,
-            status: item.list_status?.status
+            status: item.list_status?.status,
           };
         })
-        .filter(candidate => 
-          candidate.status === 'completed' &&
-          candidate.days !== null &&
-          candidate.days <= bingeThresholdDays &&
-          candidate.episodes > 0
+        .filter(
+          (candidate) =>
+            candidate.status === 'completed' &&
+            candidate.days !== null &&
+            candidate.days <= bingeThresholdDays &&
+            candidate.episodes > 0,
         )
         .sort((a, b) => b.episodes - a.episodes);
-      
+
       let bingeEntry = bingeAnimeCandidates[0]
         ? {
             title: bingeAnimeCandidates[0].item.node?.title || '',
             amount: bingeAnimeCandidates[0].episodes,
             unit: 'episodes',
-            days: bingeAnimeCandidates[0].days
+            days: bingeAnimeCandidates[0].days,
           }
         : null;
-      
+
       if (!bingeEntry) {
         const bingeMangaCandidates = filteredManga
-          .map(item => {
+          .map((item) => {
             const chapters = item.list_status?.num_chapters_read || 0;
-            const days = getCompletionDays(item.list_status?.start_date, item.list_status?.finish_date);
+            const days = getCompletionDays(
+              item.list_status?.start_date,
+              item.list_status?.finish_date,
+            );
             return {
               item,
               chapters,
               days,
-              status: item.list_status?.status
+              status: item.list_status?.status,
             };
           })
-          .filter(candidate =>
-            candidate.status === 'completed' &&
-            candidate.days !== null &&
-            candidate.days <= bingeThresholdDays &&
-            candidate.chapters > 0
+          .filter(
+            (candidate) =>
+              candidate.status === 'completed' &&
+              candidate.days !== null &&
+              candidate.days <= bingeThresholdDays &&
+              candidate.chapters > 0,
           )
           .sort((a, b) => b.chapters - a.chapters);
-        
+
         if (bingeMangaCandidates[0]) {
           bingeEntry = {
             title: bingeMangaCandidates[0].item.node?.title || '',
             amount: bingeMangaCandidates[0].chapters,
             unit: 'chapters',
-            days: bingeMangaCandidates[0].days
+            days: bingeMangaCandidates[0].days,
           };
         }
       }
-      
+
       if (bingeEntry) {
-        const titlePreview = bingeEntry.title.substring(0, 30) + (bingeEntry.title.length > 30 ? '...' : '');
+        const titlePreview =
+          bingeEntry.title.substring(0, 30) +
+          (bingeEntry.title.length > 30 ? '...' : '');
         const bingeDesc = `You blazed through "${titlePreview}" in just ${bingeEntry.days} day${bingeEntry.days > 1 ? 's' : ''}. That not giving up attitude is peak Naruto energy.`;
-        
-        badgeCandidates.push({ 
-          type: 'the_sprinter', 
+
+        badgeCandidates.push({
+          type: 'the_sprinter',
           name: 'The Sprinter',
           description: bingeDesc,
-          score: bingeEntry.amount + (3 - bingeEntry.days) * 50
+          score: bingeEntry.amount + (3 - bingeEntry.days) * 50,
         });
       }
     }
-    
+
     // The Loyalist - 4-5+ anime/manga from same studio/author
     const topStudioCount = topStudios.length > 0 ? topStudios[0][1] : 0;
     const topAuthorCount = topAuthors.length > 0 ? topAuthors[0][1] : 0;
     if (topStudioCount >= 4 || topAuthorCount >= 4) {
-      const loyalistName = topStudioCount >= topAuthorCount 
-        ? topStudios[0]?.[0] || ''
-        : topAuthors[0]?.[0] || '';
+      const loyalistName =
+        topStudioCount >= topAuthorCount
+          ? topStudios[0]?.[0] || ''
+          : topAuthors[0]?.[0] || '';
       const loyalistCount = Math.max(topStudioCount, topAuthorCount);
-      const loyalistType = topStudioCount >= topAuthorCount ? 'studio' : 'author';
-      
-      badgeCandidates.push({ 
-        type: 'the_loyalist', 
+      const loyalistType =
+        topStudioCount >= topAuthorCount ? 'studio' : 'author';
+
+      badgeCandidates.push({
+        type: 'the_loyalist',
         name: 'The Loyalist',
         description: `You kept returning to ${loyalistName}, finishing ${loyalistCount} of their works. Rem would be proud of your devotion.`,
-        score: loyalistCount
+        score: loyalistCount,
       });
     }
-    
+
     // The Specialist - 40+ anime same genre
     if (topGenres.length > 0 && thisYearAnime.length > 0) {
       const topGenreCount = topGenres[0][1];
       const genrePercentage = (topGenreCount / thisYearAnime.length) * 100;
       if (topGenreCount >= 40 || genrePercentage > 40) {
-        badgeCandidates.push({ 
-          type: 'the_guardian', 
+        badgeCandidates.push({
+          type: 'the_guardian',
           name: 'The Guardian',
           description: `You became the guardian of ${topGenres[0][0]} genre, finishing ${topGenreCount} titles. Like Usagi, you protected what you love.`,
-          score: genrePercentage
+          score: genrePercentage,
         });
       }
     }
-    
+
     // The Rookie - Started using MAL that year (check if earliest entry is this year)
     let isRookie = false;
     if (currentYear !== 'all' && typeof currentYear === 'number') {
       const allYears = [
         ...anime.map(getItemYear),
-        ...(manga || []).map(getItemYear)
-      ].filter(year => year !== null);
-      
-      const earliestYear = allYears.length > 0 ? Math.min(...allYears) : currentYear;
+        ...(manga || []).map(getItemYear),
+      ].filter((year) => year !== null);
+
+      const earliestYear =
+        allYears.length > 0 ? Math.min(...allYears) : currentYear;
       isRookie = earliestYear === currentYear && totalCompleted < 20;
     }
-    
+
     if (isRookie) {
-      badgeCandidates.push({ 
-        type: 'the_rookie', 
+      badgeCandidates.push({
+        type: 'the_rookie',
         name: 'The Rookie',
         description: `Deku’s story might be complete, but yours is just getting started! Welcome to MyAnimeList. Plus Ultra!`,
-        score: 1000 // High score to prioritize if they qualify
+        score: 1000, // High score to prioritize if they qualify
       });
     }
-    
+
     // Sort badges by score (most impressive first) and take only top 4
     const badges = badgeCandidates
       .sort((a, b) => b.score - a.score)
@@ -1328,27 +1494,36 @@ export default function MALWrapped() {
     let yearComparison = null;
     if (currentYear !== 'all' && typeof currentYear === 'number') {
       const previousYear = currentYear - 1;
-      const previousYearAnime = anime.filter(item => getItemYear(item) === previousYear);
-      const previousYearEpisodes = previousYearAnime.reduce((sum, item) => 
-        sum + (item.list_status?.num_episodes_watched || 0), 0
+      const previousYearAnime = anime.filter(
+        (item) => getItemYear(item) === previousYear,
+      );
+      const previousYearEpisodes = previousYearAnime.reduce(
+        (sum, item) => sum + (item.list_status?.num_episodes_watched || 0),
+        0,
       );
       const previousYearAnimeCount = previousYearAnime.length;
-      
+
       // Get previous year manga
-      const previousYearManga = (manga || []).filter(item => getItemYear(item) === previousYear);
+      const previousYearManga = (manga || []).filter(
+        (item) => getItemYear(item) === previousYear,
+      );
       const previousYearMangaCount = previousYearManga.length;
-      
+
       if (previousYearEpisodes > 0 || previousYearAnimeCount > 0) {
-        const growth = previousYearEpisodes > 0 
-          ? ((totalEpisodes - previousYearEpisodes) / previousYearEpisodes) * 100
-          : 0;
-        const animeCountGrowth = previousYearAnimeCount > 0
-          ? thisYearAnime.length - previousYearAnimeCount
-          : 0;
-        const mangaCountGrowth = previousYearMangaCount > 0
-          ? filteredManga.length - previousYearMangaCount
-          : 0;
-        
+        const growth =
+          previousYearEpisodes > 0
+            ? ((totalEpisodes - previousYearEpisodes) / previousYearEpisodes) *
+              100
+            : 0;
+        const animeCountGrowth =
+          previousYearAnimeCount > 0
+            ? thisYearAnime.length - previousYearAnimeCount
+            : 0;
+        const mangaCountGrowth =
+          previousYearMangaCount > 0
+            ? filteredManga.length - previousYearMangaCount
+            : 0;
+
         yearComparison = {
           previousYear,
           previousEpisodes: previousYearEpisodes,
@@ -1362,7 +1537,7 @@ export default function MALWrapped() {
           previousMangaCount: previousYearMangaCount,
           currentMangaCount: filteredManga.length,
           mangaCountGrowth: mangaCountGrowth,
-          isMangaGrowth: mangaCountGrowth > 0
+          isMangaGrowth: mangaCountGrowth > 0,
         };
       }
     }
@@ -1370,211 +1545,541 @@ export default function MALWrapped() {
     // 6. Character Twin Suggestion - Match user's genres with popular characters
     // Male character database with genres and MAL anime IDs
     const maleCharacterDatabase = [
-      { name: 'Spike Spiegel', series: 'Cowboy Bebop', malId: 1, genres: ['Sci-Fi', 'Action', 'Drama'] },
-      { name: 'Lelouch vi Britannia', series: 'Code Geass', malId: 1575, genres: ['Mecha', 'Military', 'Drama'] },
-      { name: 'Light Yagami', series: 'Death Note', malId: 1535, genres: ['Supernatural', 'Thriller', 'Mystery'] },
-      { name: 'Edward Elric', series: 'Fullmetal Alchemist: Brotherhood', malId: 5114, genres: ['Action', 'Adventure', 'Drama'] },
-      { name: 'Guts', series: 'Berserk', malId: 33, genres: ['Action', 'Adventure', 'Horror'] },
-      { name: 'Shinji Ikari', series: 'Neon Genesis Evangelion', malId: 30, genres: ['Drama', 'Mecha', 'Sci-Fi'] },
-      { name: 'Johan Liebert', series: 'Monster', malId: 19, genres: ['Drama', 'Mystery', 'Psychological'] },
-      { name: 'Thorfinn', series: 'Vinland Saga', malId: 37521, genres: ['Action', 'Drama', 'Historical'] },
-      { name: 'Saitama', series: 'One Punch Man', malId: 30276, genres: ['Action', 'Comedy', 'Supernatural'] },
-      { name: 'Monkey D. Luffy', series: 'One Piece', malId: 21, genres: ['Action', 'Adventure', 'Fantasy'] },
-      { name: 'Goku', series: 'Dragon Ball Z', malId: 813, genres: ['Action', 'Adventure', 'Comedy'] },
-      { name: 'Satoru Gojo', series: 'Jujutsu Kaisen', malId: 40748, genres: ['Action', 'Fantasy', 'Supernatural'] },
-      { name: 'Denji', series: 'Chainsaw Man', malId: 44511, genres: ['Action', 'Supernatural', 'Gore'] },
-      { name: 'Loid Forger', series: 'Spy x Family', malId: 50265, genres: ['Action', 'Comedy', 'Slice of Life'] },
-      { name: 'Tanjiro Kamado', series: 'Demon Slayer', malId: 38000, genres: ['Action', 'Fantasy', 'Supernatural'] },
-      { name: 'Senku Ishigami', series: 'Dr. Stone', malId: 38691, genres: ['Adventure', 'Comedy', 'Sci-Fi'] },
-      { name: 'Mob', series: 'Mob Psycho 100', malId: 32182, genres: ['Action', 'Comedy', 'Supernatural'] },
-      { name: 'Naruto Uzumaki', series: 'Naruto', malId: 20, genres: ['Action', 'Adventure', 'Fantasy'] },
-      { name: 'Levi Ackerman', series: 'Attack on Titan', malId: 16498, genres: ['Action', 'Drama', 'Suspense'] },
-      { name: 'L', series: 'Death Note', malId: 1535, genres: ['Mystery', 'Supernatural', 'Thriller'] },
-      { name: 'Okabe Rintarou', series: 'Steins;Gate', malId: 9253, genres: ['Drama', 'Sci-Fi', 'Thriller'] },
-      { name: 'Gon Freecss', series: 'Hunter x Hunter', malId: 11061, genres: ['Action', 'Adventure', 'Fantasy'] },
-      { name: 'Yusuke Urameshi', series: 'Yu Yu Hakusho', malId: 392, genres: ['Action', 'Adventure', 'Supernatural'] },
-      { name: 'Ken Kaneki', series: 'Tokyo Ghoul', malId: 22319, genres: ['Action', 'Drama', 'Horror'] },
-      { name: 'Kamina', series: 'Gurren Lagann', malId: 2001, genres: ['Action', 'Mecha', 'Sci-Fi'] },
-      { name: 'Ichigo Kurosaki', series: 'Bleach', malId: 269, genres: ['Action', 'Adventure', 'Supernatural'] },
-      { name: 'Eren Yeager', series: 'Attack on Titan', malId: 16498, genres: ['Action', 'Drama', 'Mystery'] },
-      { name: 'Kakashi Hatake', series: 'Naruto', malId: 20, genres: ['Action', 'Adventure', 'Fantasy'] },
-      { name: 'Roy Mustang', series: 'Fullmetal Alchemist: Brotherhood', malId: 5114, genres: ['Action', 'Drama', 'Fantasy'] },
-      { name: 'Vegeta', series: 'Dragon Ball Z', malId: 813, genres: ['Action', 'Adventure', 'Fantasy'] }
+      {
+        name: 'Spike Spiegel',
+        series: 'Cowboy Bebop',
+        malId: 1,
+        genres: ['Sci-Fi', 'Action', 'Drama'],
+      },
+      {
+        name: 'Lelouch vi Britannia',
+        series: 'Code Geass',
+        malId: 1575,
+        genres: ['Mecha', 'Military', 'Drama'],
+      },
+      {
+        name: 'Light Yagami',
+        series: 'Death Note',
+        malId: 1535,
+        genres: ['Supernatural', 'Thriller', 'Mystery'],
+      },
+      {
+        name: 'Edward Elric',
+        series: 'Fullmetal Alchemist: Brotherhood',
+        malId: 5114,
+        genres: ['Action', 'Adventure', 'Drama'],
+      },
+      {
+        name: 'Guts',
+        series: 'Berserk',
+        malId: 33,
+        genres: ['Action', 'Adventure', 'Horror'],
+      },
+      {
+        name: 'Shinji Ikari',
+        series: 'Neon Genesis Evangelion',
+        malId: 30,
+        genres: ['Drama', 'Mecha', 'Sci-Fi'],
+      },
+      {
+        name: 'Johan Liebert',
+        series: 'Monster',
+        malId: 19,
+        genres: ['Drama', 'Mystery', 'Psychological'],
+      },
+      {
+        name: 'Thorfinn',
+        series: 'Vinland Saga',
+        malId: 37521,
+        genres: ['Action', 'Drama', 'Historical'],
+      },
+      {
+        name: 'Saitama',
+        series: 'One Punch Man',
+        malId: 30276,
+        genres: ['Action', 'Comedy', 'Supernatural'],
+      },
+      {
+        name: 'Monkey D. Luffy',
+        series: 'One Piece',
+        malId: 21,
+        genres: ['Action', 'Adventure', 'Fantasy'],
+      },
+      {
+        name: 'Goku',
+        series: 'Dragon Ball Z',
+        malId: 813,
+        genres: ['Action', 'Adventure', 'Comedy'],
+      },
+      {
+        name: 'Satoru Gojo',
+        series: 'Jujutsu Kaisen',
+        malId: 40748,
+        genres: ['Action', 'Fantasy', 'Supernatural'],
+      },
+      {
+        name: 'Denji',
+        series: 'Chainsaw Man',
+        malId: 44511,
+        genres: ['Action', 'Supernatural', 'Gore'],
+      },
+      {
+        name: 'Loid Forger',
+        series: 'Spy x Family',
+        malId: 50265,
+        genres: ['Action', 'Comedy', 'Slice of Life'],
+      },
+      {
+        name: 'Tanjiro Kamado',
+        series: 'Demon Slayer',
+        malId: 38000,
+        genres: ['Action', 'Fantasy', 'Supernatural'],
+      },
+      {
+        name: 'Senku Ishigami',
+        series: 'Dr. Stone',
+        malId: 38691,
+        genres: ['Adventure', 'Comedy', 'Sci-Fi'],
+      },
+      {
+        name: 'Mob',
+        series: 'Mob Psycho 100',
+        malId: 32182,
+        genres: ['Action', 'Comedy', 'Supernatural'],
+      },
+      {
+        name: 'Naruto Uzumaki',
+        series: 'Naruto',
+        malId: 20,
+        genres: ['Action', 'Adventure', 'Fantasy'],
+      },
+      {
+        name: 'Levi Ackerman',
+        series: 'Attack on Titan',
+        malId: 16498,
+        genres: ['Action', 'Drama', 'Suspense'],
+      },
+      {
+        name: 'L',
+        series: 'Death Note',
+        malId: 1535,
+        genres: ['Mystery', 'Supernatural', 'Thriller'],
+      },
+      {
+        name: 'Okabe Rintarou',
+        series: 'Steins;Gate',
+        malId: 9253,
+        genres: ['Drama', 'Sci-Fi', 'Thriller'],
+      },
+      {
+        name: 'Gon Freecss',
+        series: 'Hunter x Hunter',
+        malId: 11061,
+        genres: ['Action', 'Adventure', 'Fantasy'],
+      },
+      {
+        name: 'Yusuke Urameshi',
+        series: 'Yu Yu Hakusho',
+        malId: 392,
+        genres: ['Action', 'Adventure', 'Supernatural'],
+      },
+      {
+        name: 'Ken Kaneki',
+        series: 'Tokyo Ghoul',
+        malId: 22319,
+        genres: ['Action', 'Drama', 'Horror'],
+      },
+      {
+        name: 'Kamina',
+        series: 'Gurren Lagann',
+        malId: 2001,
+        genres: ['Action', 'Mecha', 'Sci-Fi'],
+      },
+      {
+        name: 'Ichigo Kurosaki',
+        series: 'Bleach',
+        malId: 269,
+        genres: ['Action', 'Adventure', 'Supernatural'],
+      },
+      {
+        name: 'Eren Yeager',
+        series: 'Attack on Titan',
+        malId: 16498,
+        genres: ['Action', 'Drama', 'Mystery'],
+      },
+      {
+        name: 'Kakashi Hatake',
+        series: 'Naruto',
+        malId: 20,
+        genres: ['Action', 'Adventure', 'Fantasy'],
+      },
+      {
+        name: 'Roy Mustang',
+        series: 'Fullmetal Alchemist: Brotherhood',
+        malId: 5114,
+        genres: ['Action', 'Drama', 'Fantasy'],
+      },
+      {
+        name: 'Vegeta',
+        series: 'Dragon Ball Z',
+        malId: 813,
+        genres: ['Action', 'Adventure', 'Fantasy'],
+      },
     ];
-    
+
     // Female character database with genres and MAL anime IDs
     const femaleCharacterDatabase = [
-      { name: 'Mikasa Ackerman', series: 'Attack on Titan', malId: 16498, genres: ['Action', 'Drama', 'Suspense'] },
-      { name: 'Asuka Langley Soryu', series: 'Neon Genesis Evangelion', malId: 30, genres: ['Drama', 'Mecha', 'Sci-Fi'] },
-      { name: 'Motoko Kusanagi', series: 'Ghost in the Shell: Stand Alone Complex', malId: 467, genres: ['Action', 'Sci-Fi', 'Mystery'] },
-      { name: 'Homura Akemi', series: 'Madoka Magica', malId: 9756, genres: ['Drama', 'Psychological', 'Thriller'] },
-      { name: 'Revy', series: 'Black Lagoon', malId: 889, genres: ['Action', 'Drama', 'Thriller'] },
-      { name: 'Saber', series: 'Fate/Zero', malId: 10087, genres: ['Action', 'Fantasy', 'Supernatural'] },
-      { name: 'Violet Evergarden', series: 'Violet Evergarden', malId: 33352, genres: ['Drama', 'Fantasy', 'Slice of Life'] },
-      { name: 'Faye Valentine', series: 'Cowboy Bebop', malId: 1, genres: ['Action', 'Drama', 'Sci-Fi'] },
-      { name: 'Kagura', series: 'Gintama', malId: 918, genres: ['Action', 'Comedy', 'Sci-Fi'] },
-      { name: 'Erza Scarlet', series: 'Fairy Tail', malId: 6702, genres: ['Action', 'Adventure', 'Fantasy'] },
-      { name: 'Nami', series: 'One Piece', malId: 21, genres: ['Action', 'Adventure', 'Fantasy'] },
-      { name: 'Rukia Kuchiki', series: 'Bleach', malId: 269, genres: ['Action', 'Adventure', 'Supernatural'] },
-      { name: 'Yor Forger', series: 'Spy x Family', malId: 50265, genres: ['Action', 'Comedy', 'Slice of Life'] },
-      { name: 'Marin Kitagawa', series: 'My Dress-Up Darling', malId: 48736, genres: ['Comedy', 'Romance', 'Slice of Life'] },
-      { name: 'Power', series: 'Chainsaw Man', malId: 44511, genres: ['Action', 'Comedy', 'Supernatural'] },
-      { name: 'Nico Robin', series: 'One Piece', malId: 21, genres: ['Action', 'Adventure', 'Mystery'] },
-      { name: 'Shiki Ryougi', series: 'Kara no Kyoukai', malId: 2593, genres: ['Action', 'Mystery', 'Supernatural'] },
-      { name: 'Holo', series: 'Spice and Wolf', malId: 2966, genres: ['Adventure', 'Fantasy', 'Romance'] },
-      { name: 'Nobara Kugisaki', series: 'Jujutsu Kaisen', malId: 40748, genres: ['Action', 'Fantasy', 'Supernatural'] },
-      { name: 'Shouko Nishimiya', series: 'A Silent Voice', malId: 28851, genres: ['Drama', 'Romance', 'Slice of Life'] },
-      { name: 'Tsunade', series: 'Naruto', malId: 20, genres: ['Action', 'Adventure', 'Fantasy'] },
-      { name: 'Riza Hawkeye', series: 'Fullmetal Alchemist: Brotherhood', malId: 5114, genres: ['Action', 'Drama', 'Fantasy'] },
-      { name: 'Winry Rockbell', series: 'Fullmetal Alchemist: Brotherhood', malId: 5114, genres: ['Adventure', 'Drama', 'Romance'] },
-      { name: 'Bulma', series: 'Dragon Ball Z', malId: 813, genres: ['Action', 'Adventure', 'Comedy'] },
-      { name: 'Makise Kurisu', series: 'Steins;Gate', malId: 9253, genres: ['Drama', 'Sci-Fi', 'Thriller'] },
-      { name: 'Nezuko Kamado', series: 'Demon Slayer', malId: 38000, genres: ['Action', 'Fantasy', 'Supernatural'] },
-      { name: 'Hinata Hyuga', series: 'Naruto', malId: 20, genres: ['Action', 'Drama', 'Romance'] },
-      { name: 'Ryuko Matoi', series: 'Kill la Kill', malId: 18679, genres: ['Action', 'Comedy', 'Fantasy'] },
-      { name: 'Ochaco Uraraka', series: 'My Hero Academia', malId: 31964, genres: ['Action', 'Comedy', 'Fantasy'] },
-      { name: 'Yoruichi Shihouin', series: 'Bleach', malId: 269, genres: ['Action', 'Adventure', 'Supernatural'] }
+      {
+        name: 'Mikasa Ackerman',
+        series: 'Attack on Titan',
+        malId: 16498,
+        genres: ['Action', 'Drama', 'Suspense'],
+      },
+      {
+        name: 'Asuka Langley Soryu',
+        series: 'Neon Genesis Evangelion',
+        malId: 30,
+        genres: ['Drama', 'Mecha', 'Sci-Fi'],
+      },
+      {
+        name: 'Motoko Kusanagi',
+        series: 'Ghost in the Shell: Stand Alone Complex',
+        malId: 467,
+        genres: ['Action', 'Sci-Fi', 'Mystery'],
+      },
+      {
+        name: 'Homura Akemi',
+        series: 'Madoka Magica',
+        malId: 9756,
+        genres: ['Drama', 'Psychological', 'Thriller'],
+      },
+      {
+        name: 'Revy',
+        series: 'Black Lagoon',
+        malId: 889,
+        genres: ['Action', 'Drama', 'Thriller'],
+      },
+      {
+        name: 'Saber',
+        series: 'Fate/Zero',
+        malId: 10087,
+        genres: ['Action', 'Fantasy', 'Supernatural'],
+      },
+      {
+        name: 'Violet Evergarden',
+        series: 'Violet Evergarden',
+        malId: 33352,
+        genres: ['Drama', 'Fantasy', 'Slice of Life'],
+      },
+      {
+        name: 'Faye Valentine',
+        series: 'Cowboy Bebop',
+        malId: 1,
+        genres: ['Action', 'Drama', 'Sci-Fi'],
+      },
+      {
+        name: 'Kagura',
+        series: 'Gintama',
+        malId: 918,
+        genres: ['Action', 'Comedy', 'Sci-Fi'],
+      },
+      {
+        name: 'Erza Scarlet',
+        series: 'Fairy Tail',
+        malId: 6702,
+        genres: ['Action', 'Adventure', 'Fantasy'],
+      },
+      {
+        name: 'Nami',
+        series: 'One Piece',
+        malId: 21,
+        genres: ['Action', 'Adventure', 'Fantasy'],
+      },
+      {
+        name: 'Rukia Kuchiki',
+        series: 'Bleach',
+        malId: 269,
+        genres: ['Action', 'Adventure', 'Supernatural'],
+      },
+      {
+        name: 'Yor Forger',
+        series: 'Spy x Family',
+        malId: 50265,
+        genres: ['Action', 'Comedy', 'Slice of Life'],
+      },
+      {
+        name: 'Marin Kitagawa',
+        series: 'My Dress-Up Darling',
+        malId: 48736,
+        genres: ['Comedy', 'Romance', 'Slice of Life'],
+      },
+      {
+        name: 'Power',
+        series: 'Chainsaw Man',
+        malId: 44511,
+        genres: ['Action', 'Comedy', 'Supernatural'],
+      },
+      {
+        name: 'Nico Robin',
+        series: 'One Piece',
+        malId: 21,
+        genres: ['Action', 'Adventure', 'Mystery'],
+      },
+      {
+        name: 'Shiki Ryougi',
+        series: 'Kara no Kyoukai',
+        malId: 2593,
+        genres: ['Action', 'Mystery', 'Supernatural'],
+      },
+      {
+        name: 'Holo',
+        series: 'Spice and Wolf',
+        malId: 2966,
+        genres: ['Adventure', 'Fantasy', 'Romance'],
+      },
+      {
+        name: 'Nobara Kugisaki',
+        series: 'Jujutsu Kaisen',
+        malId: 40748,
+        genres: ['Action', 'Fantasy', 'Supernatural'],
+      },
+      {
+        name: 'Shouko Nishimiya',
+        series: 'A Silent Voice',
+        malId: 28851,
+        genres: ['Drama', 'Romance', 'Slice of Life'],
+      },
+      {
+        name: 'Tsunade',
+        series: 'Naruto',
+        malId: 20,
+        genres: ['Action', 'Adventure', 'Fantasy'],
+      },
+      {
+        name: 'Riza Hawkeye',
+        series: 'Fullmetal Alchemist: Brotherhood',
+        malId: 5114,
+        genres: ['Action', 'Drama', 'Fantasy'],
+      },
+      {
+        name: 'Winry Rockbell',
+        series: 'Fullmetal Alchemist: Brotherhood',
+        malId: 5114,
+        genres: ['Adventure', 'Drama', 'Romance'],
+      },
+      {
+        name: 'Bulma',
+        series: 'Dragon Ball Z',
+        malId: 813,
+        genres: ['Action', 'Adventure', 'Comedy'],
+      },
+      {
+        name: 'Makise Kurisu',
+        series: 'Steins;Gate',
+        malId: 9253,
+        genres: ['Drama', 'Sci-Fi', 'Thriller'],
+      },
+      {
+        name: 'Nezuko Kamado',
+        series: 'Demon Slayer',
+        malId: 38000,
+        genres: ['Action', 'Fantasy', 'Supernatural'],
+      },
+      {
+        name: 'Hinata Hyuga',
+        series: 'Naruto',
+        malId: 20,
+        genres: ['Action', 'Drama', 'Romance'],
+      },
+      {
+        name: 'Ryuko Matoi',
+        series: 'Kill la Kill',
+        malId: 18679,
+        genres: ['Action', 'Comedy', 'Fantasy'],
+      },
+      {
+        name: 'Ochaco Uraraka',
+        series: 'My Hero Academia',
+        malId: 31964,
+        genres: ['Action', 'Comedy', 'Fantasy'],
+      },
+      {
+        name: 'Yoruichi Shihouin',
+        series: 'Bleach',
+        malId: 269,
+        genres: ['Action', 'Adventure', 'Supernatural'],
+      },
     ];
-    
+
     // Select character database based on user gender
     // Check userData.gender or userData.sex (MAL API might use either)
     const userGender = userData?.gender || userData?.sex;
     let characterDatabase;
-    if (userGender === 'Female' || userGender === 'female' || userGender === 'F' || userGender === 'f') {
+    if (
+      userGender === 'Female' ||
+      userGender === 'female' ||
+      userGender === 'F' ||
+      userGender === 'f'
+    ) {
       characterDatabase = femaleCharacterDatabase;
-    } else if (userGender === 'Male' || userGender === 'male' || userGender === 'M' || userGender === 'm') {
+    } else if (
+      userGender === 'Male' ||
+      userGender === 'male' ||
+      userGender === 'M' ||
+      userGender === 'm'
+    ) {
       characterDatabase = maleCharacterDatabase;
     } else {
       // If no gender specified, use either (default to male)
       characterDatabase = maleCharacterDatabase;
     }
-    
+
     // Filter to only characters from anime the user has watched
     const userAnimeIds = new Set(
-      anime.map(item => item.node?.id).filter(id => id !== undefined && id !== null)
+      anime
+        .map((item) => item.node?.id)
+        .filter((id) => id !== undefined && id !== null),
     );
-    
+
     // Filter character database to only include characters from watched anime
-    const watchedCharacterDatabase = characterDatabase.filter(character => 
-      userAnimeIds.has(character.malId)
+    const watchedCharacterDatabase = characterDatabase.filter((character) =>
+      userAnimeIds.has(character.malId),
     );
-    
+
     // Use watched characters if available, otherwise fall back to all characters
-    const availableCharacterDatabase = watchedCharacterDatabase.length > 0 
-      ? watchedCharacterDatabase 
-      : characterDatabase;
-    
+    const availableCharacterDatabase =
+      watchedCharacterDatabase.length > 0
+        ? watchedCharacterDatabase
+        : characterDatabase;
+
     // Normalize genre names for matching (handle MAL genre variations)
     const normalizeGenre = (genre) => {
       if (!genre) return '';
       const genreLower = genre.toLowerCase().trim();
-      
+
       // Map common MAL genre variations to standard names
       const genreMap = {
-        'shounen': 'Shounen',
-        'shonen': 'Shounen',
-        'seinen': 'Seinen',
-        'action': 'Action',
-        'adventure': 'Adventure',
-        'comedy': 'Comedy',
-        'drama': 'Drama',
-        'fantasy': 'Fantasy',
+        shounen: 'Shounen',
+        shonen: 'Shounen',
+        seinen: 'Seinen',
+        action: 'Action',
+        adventure: 'Adventure',
+        comedy: 'Comedy',
+        drama: 'Drama',
+        fantasy: 'Fantasy',
         'sci-fi': 'Sci-Fi',
         'science fiction': 'Sci-Fi',
-        'mecha': 'Mecha',
-        'mystery': 'Mystery',
-        'psychological': 'Psychological',
-        'thriller': 'Thriller',
-        'supernatural': 'Supernatural',
-        'horror': 'Horror',
-        'military': 'Military',
-        'suspense': 'Suspense',
-        'historical': 'Historical',
+        mecha: 'Mecha',
+        mystery: 'Mystery',
+        psychological: 'Psychological',
+        thriller: 'Thriller',
+        supernatural: 'Supernatural',
+        horror: 'Horror',
+        military: 'Military',
+        suspense: 'Suspense',
+        historical: 'Historical',
         'slice of life': 'Slice of Life',
         'martial arts': 'Martial Arts',
-        'parody': 'Parody',
+        parody: 'Parody',
         'dark fantasy': 'Dark Fantasy',
-        'gore': 'Gore',
-        'space': 'Space',
+        gore: 'Gore',
+        space: 'Space',
         'super power': 'Super Power',
-        'school': 'School',
-        'romance': 'Romance',
-        'sports': 'Sports',
-        'music': 'Music',
-        'ecchi': 'Ecchi',
-        'harem': 'Harem',
-        'isekai': 'Isekai'
+        school: 'School',
+        romance: 'Romance',
+        sports: 'Sports',
+        music: 'Music',
+        ecchi: 'Ecchi',
+        harem: 'Harem',
+        isekai: 'Isekai',
       };
-      
+
       return genreMap[genreLower] || genre;
     };
-    
+
     // Get user's top 3 genres (normalized) - always use top 3 for matching
-    const userTopGenres = topGenres.length > 0 
-      ? topGenres.slice(0, 3).map(([genre]) => normalizeGenre(genre))
-      : [];
-    
+    const userTopGenres =
+      topGenres.length > 0
+        ? topGenres.slice(0, 3).map(([genre]) => normalizeGenre(genre))
+        : [];
+
     // Find best matching character based on genre overlap with top 3 genres
     let bestMatch = null;
     let bestScore = 0;
-    
+
     if (userTopGenres.length > 0) {
-      availableCharacterDatabase.forEach(character => {
+      availableCharacterDatabase.forEach((character) => {
         const characterGenres = character.genres.map(normalizeGenre);
-        
+
         // Calculate overlap score - check if any of user's top 3 genres match character genres
-        const matchingGenres = userTopGenres.filter(userGenre => {
+        const matchingGenres = userTopGenres.filter((userGenre) => {
           const userNorm = normalizeGenre(userGenre).toLowerCase();
-          return characterGenres.some(charGenre => {
+          return characterGenres.some((charGenre) => {
             const charNorm = normalizeGenre(charGenre).toLowerCase();
-            return userNorm === charNorm || 
-                   userNorm.includes(charNorm) || 
-                   charNorm.includes(userNorm);
+            return (
+              userNorm === charNorm ||
+              userNorm.includes(charNorm) ||
+              charNorm.includes(userNorm)
+            );
           });
         });
-        
+
         const score = matchingGenres.length;
-        
+
         if (score > bestScore) {
           bestScore = score;
           bestMatch = character;
         }
       });
     }
-    
+
     // If no match found, use top genre to find closest match
     if (!bestMatch && topGenres.length > 0) {
       const topGenre = normalizeGenre(topGenres[0][0]);
-      bestMatch = availableCharacterDatabase.find(char => 
-        char.genres.some(g => {
-          const charNorm = normalizeGenre(g).toLowerCase();
-          const topNorm = topGenre.toLowerCase();
-          return charNorm === topNorm || charNorm.includes(topNorm) || topNorm.includes(charNorm);
-        })
-      ) || (availableCharacterDatabase.length > 0 ? availableCharacterDatabase[0] : null); // Fallback to first character from watched anime
+      bestMatch =
+        availableCharacterDatabase.find((char) =>
+          char.genres.some((g) => {
+            const charNorm = normalizeGenre(g).toLowerCase();
+            const topNorm = topGenre.toLowerCase();
+            return (
+              charNorm === topNorm ||
+              charNorm.includes(topNorm) ||
+              topNorm.includes(charNorm)
+            );
+          }),
+        ) ||
+        (availableCharacterDatabase.length > 0
+          ? availableCharacterDatabase[0]
+          : null); // Fallback to first character from watched anime
     }
-    
+
     // Only create a character twin if we have a match (prefer watched anime, but allow fallback)
     if (!bestMatch && availableCharacterDatabase.length > 0) {
       bestMatch = availableCharacterDatabase[0];
     }
-    
+
     let characterTwin = null;
     if (bestMatch) {
-      const matchedGenres = userTopGenres.length > 0 
-        ? bestMatch.genres.filter(charGenre => 
-            userTopGenres.some(userGenre => {
-              const charNorm = normalizeGenre(charGenre).toLowerCase();
-              const userNorm = normalizeGenre(userGenre).toLowerCase();
-              return charNorm === userNorm || 
-                     userNorm.includes(charNorm) || 
-                     charNorm.includes(userNorm);
-            })
-          )
-        : bestMatch.genres;
-      
-      const genreText = matchedGenres.length > 0 ? matchedGenres[0] : (topGenres[0]?.[0] || bestMatch.genres[0] || 'anime');
-      
+      const matchedGenres =
+        userTopGenres.length > 0
+          ? bestMatch.genres.filter((charGenre) =>
+              userTopGenres.some((userGenre) => {
+                const charNorm = normalizeGenre(charGenre).toLowerCase();
+                const userNorm = normalizeGenre(userGenre).toLowerCase();
+                return (
+                  charNorm === userNorm ||
+                  userNorm.includes(charNorm) ||
+                  charNorm.includes(userNorm)
+                );
+              }),
+            )
+          : bestMatch.genres;
+
+      const genreText =
+        matchedGenres.length > 0
+          ? matchedGenres[0]
+          : topGenres[0]?.[0] || bestMatch.genres[0] || 'anime';
+
       // Use only matching genres for the reason text
       let matchingGenreNames = '';
       if (matchedGenres.length > 0) {
@@ -1591,18 +2096,20 @@ export default function MALWrapped() {
       } else {
         matchingGenreNames = 'anime';
       }
-      
+
       characterTwin = {
         title: bestMatch.name,
         series: bestMatch.series,
         genre: genreText,
-        reason: matchingGenreNames !== 'anime'
-          ? `Based on your love for ${matchingGenreNames}, ${bestMatch.name} from '${bestMatch.series}' matches your vibes`
-          : `${bestMatch.name} from '${bestMatch.series}' matches your journey`,
+        reasonKey:
+          matchingGenreNames !== 'anime'
+            ? 'slides.characterTwin.basedOnLove'
+            : 'slides.characterTwin.matchesJourney',
+        genres: matchingGenreNames,
+        characterName: bestMatch.name,
         coverImage: '/Mascot.webp', // Will be updated with character image
         type: 'character',
         animeId: bestMatch.malId,
-        characterName: bestMatch.name
       };
     }
 
@@ -1610,12 +2117,13 @@ export default function MALWrapped() {
     // Average MAL user watches ~650 episodes per year, 5497 all-time
     const averageEpisodesPerYear = 650;
     const averageEpisodesAllTime = 5497;
-    
+
     // Calculate all-time episodes
-    const allTimeEpisodes = anime.reduce((sum, item) => 
-      sum + (item.list_status?.num_episodes_watched || 0), 0
+    const allTimeEpisodes = anime.reduce(
+      (sum, item) => sum + (item.list_status?.num_episodes_watched || 0),
+      0,
     );
-    
+
     const episodeComparison = {
       userEpisodes: totalEpisodes,
       averageEpisodes: averageEpisodesPerYear,
@@ -1623,17 +2131,20 @@ export default function MALWrapped() {
       isAboveAverage: totalEpisodes > averageEpisodesPerYear,
       allTimeEpisodes: allTimeEpisodes,
       averageAllTime: averageEpisodesAllTime,
-      allTimePercentage: Math.round((allTimeEpisodes / averageEpisodesAllTime) * 100),
-      isAboveAverageAllTime: allTimeEpisodes > averageEpisodesAllTime
+      allTimePercentage: Math.round(
+        (allTimeEpisodes / averageEpisodesAllTime) * 100,
+      ),
+      isAboveAverageAllTime: allTimeEpisodes > averageEpisodesAllTime,
     };
 
     // Manga comparison (estimate average MAL user reads ~950 chapters per year, 9500 all-time)
     const averageChaptersPerYear = 950;
     const averageChaptersAllTime = 9500;
-    const allTimeChapters = (manga || []).reduce((sum, item) => 
-      sum + (item.list_status?.num_chapters_read || 0), 0
+    const allTimeChapters = (manga || []).reduce(
+      (sum, item) => sum + (item.list_status?.num_chapters_read || 0),
+      0,
     );
-    
+
     const mangaComparison = {
       userChapters: totalChapters,
       averageChapters: averageChaptersPerYear,
@@ -1641,8 +2152,10 @@ export default function MALWrapped() {
       isAboveAverage: totalChapters > averageChaptersPerYear,
       allTimeChapters: allTimeChapters,
       averageAllTime: averageChaptersAllTime,
-      allTimePercentage: Math.round((allTimeChapters / averageChaptersAllTime) * 100),
-      isAboveAverageAllTime: allTimeChapters > averageChaptersAllTime
+      allTimePercentage: Math.round(
+        (allTimeChapters / averageChaptersAllTime) * 100,
+      ),
+      isAboveAverageAllTime: allTimeChapters > averageChaptersAllTime,
     };
 
     // Removed obscure studios calculation
@@ -1650,146 +2163,216 @@ export default function MALWrapped() {
     // 7. Rating Style Archetype
     let ratingStyle = null;
     const allRatedItems = [
-      ...ratedAnime.map(item => ({ score: item.list_status.score, malScore: item.node?.mean })),
-      ...ratedManga.map(item => ({ score: item.list_status.score, malScore: item.node?.mean }))
-    ].filter(item => item.score > 0 && item.malScore !== undefined && item.malScore > 0);
+      ...ratedAnime.map((item) => ({
+        score: item.list_status.score,
+        malScore: item.node?.mean,
+      })),
+      ...ratedManga.map((item) => ({
+        score: item.list_status.score,
+        malScore: item.node?.mean,
+      })),
+    ].filter(
+      (item) =>
+        item.score > 0 && item.malScore !== undefined && item.malScore > 0,
+    );
 
     if (allRatedItems.length >= 10) {
-      const scores = allRatedItems.map(item => item.score);
-      const averageRating = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-      
+      const scores = allRatedItems.map((item) => item.score);
+      const averageRating =
+        scores.reduce((sum, s) => sum + s, 0) / scores.length;
+
       // Rating distribution
-      const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 };
-      scores.forEach(s => {
+      const ratingCounts = {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+        9: 0,
+        10: 0,
+      };
+      scores.forEach((s) => {
         const rounded = Math.round(s);
         if (rounded >= 1 && rounded <= 10) ratingCounts[rounded]++;
       });
-      
-      const lowRatings = (ratingCounts[1] + ratingCounts[2] + ratingCounts[3] + ratingCounts[4] + ratingCounts[5]) / scores.length;
-      const midRatings = (ratingCounts[6] + ratingCounts[7] + ratingCounts[8]) / scores.length;
+
+      const lowRatings =
+        (ratingCounts[1] +
+          ratingCounts[2] +
+          ratingCounts[3] +
+          ratingCounts[4] +
+          ratingCounts[5]) /
+        scores.length;
+      const midRatings =
+        (ratingCounts[6] + ratingCounts[7] + ratingCounts[8]) / scores.length;
       const highRatings = (ratingCounts[9] + ratingCounts[10]) / scores.length;
       const veryHighRatings = ratingCounts[10] / scores.length;
-      const veryLowRatings = (ratingCounts[1] + ratingCounts[2] + ratingCounts[3]) / scores.length;
-      
+      const veryLowRatings =
+        (ratingCounts[1] + ratingCounts[2] + ratingCounts[3]) / scores.length;
+
       // Compare with MAL community scores
-      const malDifferences = allRatedItems.map(item => Math.abs(item.score - item.malScore));
-      const avgMalDifference = malDifferences.reduce((sum, d) => sum + d, 0) / malDifferences.length;
-      const largeDifferences = malDifferences.filter(d => d >= 2).length / malDifferences.length;
-      const closeMatches = malDifferences.filter(d => d <= 0.5).length / malDifferences.length;
-      
+      const malDifferences = allRatedItems.map((item) =>
+        Math.abs(item.score - item.malScore),
+      );
+      const avgMalDifference =
+        malDifferences.reduce((sum, d) => sum + d, 0) / malDifferences.length;
+      const largeDifferences =
+        malDifferences.filter((d) => d >= 2).length / malDifferences.length;
+      const closeMatches =
+        malDifferences.filter((d) => d <= 0.5).length / malDifferences.length;
+
       // Completion rate (for Completionist archetype - needs to be very strict)
       const totalItems = thisYearAnime.length + filteredManga.length;
       const completedItems = completedAnime.length + completedManga.length;
       const completionRate = totalItems > 0 ? completedItems / totalItems : 0;
-      
+
       // Calculate all-time completion rate for stricter criteria
-      const allTimeAnime = anime.filter(item => item.list_status?.status !== 'plan_to_watch');
-      const allTimeManga = (manga || []).filter(item => item.list_status?.status !== 'plan_to_read');
+      const allTimeAnime = anime.filter(
+        (item) => item.list_status?.status !== 'plan_to_watch',
+      );
+      const allTimeManga = (manga || []).filter(
+        (item) => item.list_status?.status !== 'plan_to_read',
+      );
       const allTimeTotal = allTimeAnime.length + allTimeManga.length;
-      const allTimeCompleted = allTimeAnime.filter(item => item.list_status?.status === 'completed').length +
-                               allTimeManga.filter(item => item.list_status?.status === 'completed').length;
-      const allTimeCompletionRate = allTimeTotal > 0 ? allTimeCompleted / allTimeTotal : 0;
-      
+      const allTimeCompleted =
+        allTimeAnime.filter((item) => item.list_status?.status === 'completed')
+          .length +
+        allTimeManga.filter((item) => item.list_status?.status === 'completed')
+          .length;
+      const allTimeCompletionRate =
+        allTimeTotal > 0 ? allTimeCompleted / allTimeTotal : 0;
+
       // Determine archetype using a scoring system to ensure all are achievable
       // Score each archetype and pick the highest scoring one
       const archetypeScores = {};
-      
+
       // The Generous Soul: High average, few low ratings
       if (averageRating >= 7.5 && lowRatings < 0.15) {
-        archetypeScores.generous_soul = (averageRating - 7.0) * 10 + (0.15 - lowRatings) * 20;
+        archetypeScores.generous_soul =
+          (averageRating - 7.0) * 10 + (0.15 - lowRatings) * 20;
       }
-      
+
       // The Harsh Critic: Low average, many low ratings
       if (averageRating < 7.0 && lowRatings > 0.25) {
-        archetypeScores.harsh_critic = (7.0 - averageRating) * 10 + (lowRatings - 0.25) * 20;
+        archetypeScores.harsh_critic =
+          (7.0 - averageRating) * 10 + (lowRatings - 0.25) * 20;
       }
-      
+
       // The Perfectionist: Polarized ratings (mostly highs OR mostly lows, or extreme polarization)
-      const polarizationScore = Math.max(veryHighRatings, veryLowRatings) + Math.abs(highRatings - lowRatings);
-      if (polarizationScore > 0.5 || (veryHighRatings > 0.25) || (veryLowRatings > 0.15 && lowRatings > 0.35)) {
+      const polarizationScore =
+        Math.max(veryHighRatings, veryLowRatings) +
+        Math.abs(highRatings - lowRatings);
+      if (
+        polarizationScore > 0.5 ||
+        veryHighRatings > 0.25 ||
+        (veryLowRatings > 0.15 && lowRatings > 0.35)
+      ) {
         archetypeScores.perfectionist = polarizationScore * 30;
       }
-      
+
       // The Completionist: Very high completion rate
-      if (completionRate >= 0.90 && allTimeCompletionRate >= 0.85 && totalItems >= 15) {
-        archetypeScores.completionist = (completionRate - 0.85) * 50 + (allTimeCompletionRate - 0.80) * 30;
+      if (
+        completionRate >= 0.9 &&
+        allTimeCompletionRate >= 0.85 &&
+        totalItems >= 15
+      ) {
+        archetypeScores.completionist =
+          (completionRate - 0.85) * 50 + (allTimeCompletionRate - 0.8) * 30;
       }
-      
+
       // The Hype Rider: Ratings align with community
       if (closeMatches > 0.5) {
         archetypeScores.hype_rider = (closeMatches - 0.5) * 40;
       }
-      
+
       // The Contrarian: Ratings differ from community
       if (largeDifferences > 0.3) {
         archetypeScores.contrarian = (largeDifferences - 0.3) * 40;
       }
-      
+
       // The Balanced Reviewer: Most ratings in middle range, balanced distribution
-      if (midRatings >= 0.55 && Math.abs(averageRating - 7.0) < 0.8 && lowRatings < 0.20 && highRatings < 0.30) {
-        archetypeScores.middle_ground = (midRatings - 0.50) * 30 + (0.8 - Math.abs(averageRating - 7.0)) * 10;
+      if (
+        midRatings >= 0.55 &&
+        Math.abs(averageRating - 7.0) < 0.8 &&
+        lowRatings < 0.2 &&
+        highRatings < 0.3
+      ) {
+        archetypeScores.middle_ground =
+          (midRatings - 0.5) * 30 + (0.8 - Math.abs(averageRating - 7.0)) * 10;
       }
-      
+
       // Find the highest scoring archetype
       const maxScore = Math.max(...Object.values(archetypeScores), 0);
-      const topArchetype = Object.keys(archetypeScores).find(key => archetypeScores[key] === maxScore);
-      
+      const topArchetype = Object.keys(archetypeScores).find(
+        (key) => archetypeScores[key] === maxScore,
+      );
+
       if (topArchetype) {
         switch (topArchetype) {
           case 'generous_soul':
             ratingStyle = {
               type: 'generous_soul',
-              name: 'The Generous Soul',
-              footer: `Average score: ${averageRating.toFixed(1)} — You see the best in everything`,
-              image: '/rating-styles/generous-soul.webp'
+              nameKey: 'slides.ratingStyle.generousSoul',
+              footerKey: 'slides.ratingStyle.generousSoulFooter',
+              score: averageRating.toFixed(1),
+              image: '/rating-styles/generous-soul.webp',
             };
             break;
           case 'harsh_critic':
             ratingStyle = {
               type: 'harsh_critic',
-              name: 'The Harsh Critic',
-              footer: `Average score: ${averageRating.toFixed(1)} — High standards, no compromises`,
-              image: '/rating-styles/harsh-critic.webp'
+              nameKey: 'slides.ratingStyle.harshCritic',
+              footerKey: 'slides.ratingStyle.harshCriticFooter',
+              score: averageRating.toFixed(1),
+              image: '/rating-styles/harsh-critic.webp',
             };
             break;
           case 'perfectionist':
             ratingStyle = {
               type: 'perfectionist',
-              name: 'The Perfectionist',
-              footer: `Average score: ${averageRating.toFixed(1)} — It's either masterpiece or miss. No in-between`,
-              image: '/rating-styles/perfectionist.webp'
+              nameKey: 'slides.ratingStyle.perfectionist',
+              footerKey: 'slides.ratingStyle.perfectionistFooter',
+              score: averageRating.toFixed(1),
+              image: '/rating-styles/perfectionist.webp',
             };
             break;
           case 'completionist':
             ratingStyle = {
               type: 'completionist',
-              name: 'The Completionist',
-              footer: `Average score: ${averageRating.toFixed(1)} — You finish everything, even the rough ones`,
-              image: '/rating-styles/completionist.webp'
+              nameKey: 'slides.ratingStyle.completionist',
+              footerKey: 'slides.ratingStyle.completionistFooter',
+              score: averageRating.toFixed(1),
+              image: '/rating-styles/completionist.webp',
             };
             break;
           case 'hype_rider':
             ratingStyle = {
               type: 'hype_rider',
-              name: 'The Hype Rider',
-              footer: `Average score: ${averageRating.toFixed(1)} — Your taste lines up with the community, and that's perfectly fine`,
-              image: '/rating-styles/hype-rider.webp'
+              nameKey: 'slides.ratingStyle.hypeRider',
+              footerKey: 'slides.ratingStyle.hypeRiderFooter',
+              score: averageRating.toFixed(1),
+              image: '/rating-styles/hype-rider.webp',
             };
             break;
           case 'contrarian':
             ratingStyle = {
               type: 'contrarian',
-              name: 'The Contrarian',
-              footer: `Average score: ${averageRating.toFixed(1)} — You trust your own judgment over popular opinions`,
-              image: '/rating-styles/contrarian.webp'
+              nameKey: 'slides.ratingStyle.contrarian',
+              footerKey: 'slides.ratingStyle.contrarianFooter',
+              score: averageRating.toFixed(1),
+              image: '/rating-styles/contrarian.webp',
             };
             break;
           case 'middle_ground':
             ratingStyle = {
               type: 'middle_ground',
-              name: 'The Balanced Reviewer',
-              footer: `Average score: ${averageRating.toFixed(1)} — Fair and measured in every rating you give`,
-              image: '/rating-styles/balanced-reviewer.webp'
+              nameKey: 'slides.ratingStyle.balancedReviewer',
+              footerKey: 'slides.ratingStyle.balancedReviewerFooter',
+              score: averageRating.toFixed(1),
+              image: '/rating-styles/balanced-reviewer.webp',
             };
             break;
         }
@@ -1797,9 +2380,10 @@ export default function MALWrapped() {
         // Wild Card: Only if no other archetype scores high enough
         ratingStyle = {
           type: 'wild_card',
-          name: 'The Wild Card',
-          footer: `Average score: ${averageRating.toFixed(1)} — Unpredictable and impossible to pin down`,
-          image: '/rating-styles/wild-card.webp'
+          nameKey: 'slides.ratingStyle.wildCard',
+          footerKey: 'slides.ratingStyle.wildCardFooter',
+          score: averageRating.toFixed(1),
+          image: '/rating-styles/wild-card.webp',
         };
       }
     }
@@ -1812,7 +2396,8 @@ export default function MALWrapped() {
       topStudios: topStudios.length > 0 ? topStudios : [],
       topRated: topRated.length > 0 ? topRated : [],
       hiddenGems: hiddenGems.length > 0 ? hiddenGems : [],
-      hiddenGemsManga: hiddenGemsManga && hiddenGemsManga.length > 0 ? hiddenGemsManga : [],
+      hiddenGemsManga:
+        hiddenGemsManga && hiddenGemsManga.length > 0 ? hiddenGemsManga : [],
       watchTime: totalHours,
       watchDays: Math.floor(totalHours / 24),
       completedCount: completedAnime.length,
@@ -1833,8 +2418,10 @@ export default function MALWrapped() {
       // New unique features
       milestones: milestones,
       thisYearMilestone: thisYearMilestone,
-      rareAnimeGems: rareAnimeGems && rareAnimeGems.length > 0 ? rareAnimeGems : [],
-      rareMangaGems: rareMangaGems && rareMangaGems.length > 0 ? rareMangaGems : [],
+      rareAnimeGems:
+        rareAnimeGems && rareAnimeGems.length > 0 ? rareAnimeGems : [],
+      rareMangaGems:
+        rareMangaGems && rareMangaGems.length > 0 ? rareMangaGems : [],
       hiddenGemsCount: hiddenGemsCount,
       hiddenGemsMangaCount: hiddenGemsMangaCount ?? 0,
       hiddenGemsAnimeCount: hiddenGemsAnimeCount ?? 0,
@@ -1846,18 +2433,28 @@ export default function MALWrapped() {
       mangaComparison: mangaComparison,
       totalCompletedAnime: totalCompletedAnime,
       ratingStyle: ratingStyle,
-      animeDemographicDistribution: animeDemographicDistribution.length > 0 ? animeDemographicDistribution : null,
-      mangaDemographicDistribution: mangaDemographicDistribution.length > 0 ? mangaDemographicDistribution : null,
+      animeDemographicDistribution:
+        animeDemographicDistribution.length > 0
+          ? animeDemographicDistribution
+          : null,
+      mangaDemographicDistribution:
+        mangaDemographicDistribution.length > 0
+          ? mangaDemographicDistribution
+          : null,
     };
-    
+
     setStats(statsData);
-    
+
     // Don't fetch themes here - wait until after welcome screen to avoid rate limiting
     // Themes will be fetched when user moves past welcome screen
-    
+
     // Fetch character image if we have an anime ID
     if (characterTwin && characterTwin.animeId && characterTwin.characterName) {
-      fetchCharacterImage(characterTwin.animeId, characterTwin.characterName, statsData);
+      fetchCharacterImage(
+        characterTwin.animeId,
+        characterTwin.characterName,
+        statsData,
+      );
     }
   }
 
@@ -1876,7 +2473,10 @@ export default function MALWrapped() {
       url.searchParams.append('filter[has]', 'resources');
       url.searchParams.append('filter[site]', 'MyAnimeList');
       url.searchParams.append('filter[external_id]', malId.toString());
-      url.searchParams.append('include', 'animethemes.animethemeentries.videos');
+      url.searchParams.append(
+        'include',
+        'animethemes.animethemeentries.videos',
+      );
 
       // Add timeout for iOS (10 seconds)
       const controller = new AbortController();
@@ -1885,7 +2485,7 @@ export default function MALWrapped() {
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         signal: controller.signal,
       });
@@ -1894,14 +2494,20 @@ export default function MALWrapped() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        devError(`Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`);
+        devError(
+          `Failed to fetch themes for MAL ID ${malId}: ${response.status} ${response.statusText}`,
+        );
         return null;
       }
 
       const data = await response.json();
-      
+
       // The API returns { anime: [...] }
-      if (!data.anime || !Array.isArray(data.anime) || data.anime.length === 0) {
+      if (
+        !data.anime ||
+        !Array.isArray(data.anime) ||
+        data.anime.length === 0
+      ) {
         return null;
       }
 
@@ -1911,11 +2517,11 @@ export default function MALWrapped() {
 
       // Get OP (Opening) themes
       const animethemes = anime.animethemes || [];
-      const opThemes = animethemes.filter(t => {
+      const opThemes = animethemes.filter((t) => {
         const type = t.type || t.attributes?.type;
         return type === 'OP';
       });
-      
+
       if (opThemes.length === 0) {
         return null;
       }
@@ -1923,42 +2529,44 @@ export default function MALWrapped() {
       // Prefer OP1 (first opening)
       let selectedVideo = null;
       let selectedTheme = null;
-      
-      const op1Theme = opThemes.find(t => {
-        const slug = t.slug || t.attributes?.slug;
-        return slug === 'OP1';
-      }) || opThemes[0];
-      
+
+      const op1Theme =
+        opThemes.find((t) => {
+          const slug = t.slug || t.attributes?.slug;
+          return slug === 'OP1';
+        }) || opThemes[0];
+
       // Get entries
       const entries = op1Theme.animethemeentries || [];
-      
+
       for (const entry of entries) {
         const videos = entry.videos || [];
         if (videos.length > 0) {
           const sortedVideos = sortVideosByQuality(videos);
-          
+
           // Prefer video with filename containing -OP1, otherwise take first from sorted list
-          selectedVideo = sortedVideos.find(v => {
-            const filename = v.filename || v.attributes?.filename;
-            return filename && filename.toLowerCase().includes('-op1');
-          }) || sortedVideos[0];
-          
+          selectedVideo =
+            sortedVideos.find((v) => {
+              const filename = v.filename || v.attributes?.filename;
+              return filename && filename.toLowerCase().includes('-op1');
+            }) || sortedVideos[0];
+
           if (selectedVideo) {
             selectedTheme = op1Theme;
             break;
           }
         }
       }
-      
+
       // If no video found in OP1, try other OP themes
       if (!selectedVideo) {
         for (const theme of opThemes) {
           const entries = theme.animethemeentries || [];
           for (const entry of entries) {
-              const videos = entry.videos || [];
-              if (videos.length > 0) {
-                const sortedVideos = sortVideosByQuality(videos);
-              
+            const videos = entry.videos || [];
+            if (videos.length > 0) {
+              const sortedVideos = sortVideosByQuality(videos);
+
               selectedVideo = sortedVideos[0];
               selectedTheme = theme;
               break;
@@ -1967,18 +2575,20 @@ export default function MALWrapped() {
           if (selectedVideo) break;
         }
       }
-      
+
       // Extract filename and construct audio URL
-      const videoFilename = selectedVideo?.filename || selectedVideo?.attributes?.filename;
-      const videoBasename = selectedVideo?.basename || selectedVideo?.attributes?.basename;
+      const videoFilename =
+        selectedVideo?.filename || selectedVideo?.attributes?.filename;
+      const videoBasename =
+        selectedVideo?.basename || selectedVideo?.attributes?.basename;
       const themeSlug = selectedTheme?.slug || selectedTheme?.attributes?.slug;
       const themeType = selectedTheme?.type || selectedTheme?.attributes?.type;
-      
+
       if (selectedVideo && videoFilename) {
         // Use our proxy API to bypass CORS restrictions
         // The proxy fetches the audio server-side and streams it to the client
         const audioUrl = `/api/audio-proxy?filename=${encodeURIComponent(videoFilename + '.ogg')}`;
-        
+
         return {
           malId: parseInt(malId),
           animeName: animeName,
@@ -1988,17 +2598,24 @@ export default function MALWrapped() {
           videoUrl: audioUrl,
           basename: videoBasename,
           filename: videoFilename,
-          isAudio: true
+          isAudio: true,
         };
       }
-      
+
       return null;
     } catch (error) {
       // Handle timeout and network errors gracefully (especially for iOS)
       if (error.name === 'AbortError') {
-        devError(`Timeout fetching theme for MAL ID ${malId} (iOS may have network restrictions)`);
-      } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-        devError(`Network error fetching theme for MAL ID ${malId} (iOS network issue)`);
+        devError(
+          `Timeout fetching theme for MAL ID ${malId} (iOS may have network restrictions)`,
+        );
+      } else if (
+        error.name === 'TypeError' &&
+        error.message.includes('Failed to fetch')
+      ) {
+        devError(
+          `Network error fetching theme for MAL ID ${malId} (iOS network issue)`,
+        );
       } else {
         devError(`Error fetching theme for MAL ID ${malId}:`, error);
       }
@@ -2012,22 +2629,24 @@ export default function MALWrapped() {
       devLog('Already fetching themes, skipping duplicate call');
       return;
     }
-    
+
     // Validate year matches current selected year before starting
     if (year !== selectedYear) {
-      devLog(`Year mismatch: requested ${year}, current ${selectedYear}, aborting fetch`);
+      devLog(
+        `Year mismatch: requested ${year}, current ${selectedYear}, aborting fetch`,
+      );
       return;
     }
-    
+
     isFetchingThemesRef.current = true;
     setIsLoadingSongs(true);
-    
+
     try {
       const malIds = topRatedAnime
         .slice(0, 5)
-        .map(item => item.node?.id)
-        .filter(id => id != null);
-      
+        .map((item) => item.node?.id)
+        .filter((id) => id != null);
+
       if (malIds.length === 0) {
         isFetchingThemesRef.current = false;
         setIsLoadingSongs(false);
@@ -2035,40 +2654,42 @@ export default function MALWrapped() {
         setLoadingProgressPercent(100);
         return;
       }
-      
+
       // Store MAL IDs (but don't update during fetch to avoid re-renders)
       setPendingMalIds(malIds);
-      
+
       // Update loading progress to show we're fetching songs
-      setLoadingProgress('Generating your Wrapped...');
+      setLoadingProgress(t('loading.message3'));
       // Ensure progress only increases, never decreases
-      setLoadingProgressPercent(prev => Math.max(prev, 85));
-      
+      setLoadingProgressPercent((prev) => Math.max(prev, 85));
+
       // Fetch all themes with delays to avoid rate limiting (500ms between requests)
       const themes = [];
       for (let i = 0; i < malIds.length; i++) {
         // Check if year changed during fetch
         if (year !== selectedYear) {
-          devLog(`Year changed during fetch from ${year} to ${selectedYear}, aborting`);
+          devLog(
+            `Year changed during fetch from ${year} to ${selectedYear}, aborting`,
+          );
           setPendingMalIds([]);
           isFetchingThemesRef.current = false;
           setIsLoadingSongs(false);
           setLoadingProgress('');
           return;
         }
-        
+
         if (i > 0) {
           // Add delay between requests to prevent rate limiting
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
         }
-        
+
         const theme = await fetchSingleAnimeTheme(malIds[i]);
         if (theme) {
           themes.push(theme);
         }
         // Don't update state during loop to prevent re-renders
       }
-      
+
       // Final validation: only set playlist if year still matches
       if (year === selectedYear && themes.length > 0) {
         setPlaylist(themes);
@@ -2077,15 +2698,17 @@ export default function MALWrapped() {
         const initialIndex = Math.min(4, themes.length - 1);
         setCurrentTrackIndex(initialIndex);
         currentTrackIndexRef.current = initialIndex;
-        setLoadingProgress('Complete!');
+        setLoadingProgress(t('loading.complete'));
         // Ensure progress only increases, never decreases
-        setLoadingProgressPercent(prev => Math.max(prev, 100));
+        setLoadingProgressPercent((prev) => Math.max(prev, 100));
         // Reset fetch attempt counter on success
         fetchAttemptRef.current = 0;
       } else if (year !== selectedYear) {
-        devLog(`Year changed after fetch from ${year} to ${selectedYear}, discarding results`);
+        devLog(
+          `Year changed after fetch from ${year} to ${selectedYear}, discarding results`,
+        );
       }
-      
+
       // Clear pending IDs after successful fetch
       setPendingMalIds([]);
     } catch (error) {
@@ -2110,94 +2733,149 @@ export default function MALWrapped() {
   }
 
   // Play a track from the playlist with crossfade
-  const playTrack = useCallback((index, tracks = null) => {
-    const tracksToUse = tracks || playlist;
-    if (!tracksToUse || tracksToUse.length === 0 || index < 0 || index >= tracksToUse.length) return;
-    
-    // Don't play on welcome page (currentSlide === 0)
-    if (currentSlide === 0) {
-      return;
-    }
-    
-    // Don't play if playlist is for a different year (only check when using default playlist)
-    if (tracks === null && playlistYear !== null && playlistYear !== selectedYear) {
-      devLog('Playlist is for different year, not playing');
-      // Stop any currently playing audio
-      if (audioRef.current) {
-        try {
-          audioRef.current.pause();
-          audioRef.current.src = '';
-          audioRef.current.load();
-        } catch (e) {
-          devError('Error stopping audio:', e);
-        }
+  const playTrack = useCallback(
+    (index, tracks = null) => {
+      const tracksToUse = tracks || playlist;
+      if (
+        !tracksToUse ||
+        tracksToUse.length === 0 ||
+        index < 0 ||
+        index >= tracksToUse.length
+      )
+        return;
+
+      // Don't play on welcome page (currentSlide === 0)
+      if (currentSlide === 0) {
+        return;
       }
-      setIsMusicPlaying(false);
-      return;
-    }
-    
-    // Prevent concurrent calls
-    if (isSwitchingTrackRef.current) {
-      return;
-    }
-    isSwitchingTrackRef.current = true;
-    
-    const track = tracksToUse[index];
-    if (!track || !track.videoUrl) {
-      isSwitchingTrackRef.current = false;
-      return;
-    }
-    
-    // Use Audio element for audio files, Video element for video files
-    const isAudio = track.isAudio || track.videoUrl.match(/\.(mp3|m4a|ogg|wav|aac)(\?|$)/i);
-    const newMediaElement = isAudio 
-      ? document.createElement('audio')
-      : document.createElement('video');
-    
-    // Ensure URL is properly set
-    const audioUrl = track.videoUrl;
-    if (!audioUrl || audioUrl.trim() === '') {
-      isSwitchingTrackRef.current = false;
-      return;
-    }
-    newMediaElement.src = audioUrl;
-    newMediaElement.volume = 0; // Start at 0 for crossfade
-    newMediaElement.crossOrigin = 'anonymous';
-    newMediaElement.preload = 'auto';
-    newMediaElement.playsInline = true; // Required for iOS
-    newMediaElement.setAttribute('playsinline', 'true'); // iOS compatibility
-    newMediaElement.setAttribute('webkit-playsinline', 'true'); // Older iOS
-    newMediaElement.style.display = 'none';
-    document.body.appendChild(newMediaElement);
-    
-    const oldMediaElement = audioRef.current;
-    const targetVolume = 0.3;
-    const fadeDuration = 1000; // 1 second crossfade
-    const fadeSteps = 20;
-    const fadeInterval = fadeDuration / fadeSteps;
-    let currentStep = 0;
-    
-    const handleCanPlay = () => {
-      // If there's an old track, crossfade. Otherwise, just start playing.
-      if (oldMediaElement && !oldMediaElement.paused && oldMediaElement.currentTime > 0) {
-        // Crossfade: fade out old, fade in new
-        newMediaElement.play().then(() => {
-          const fadeIntervalId = setInterval(() => {
-            currentStep++;
-            const progress = currentStep / fadeSteps;
-            
-            // Clamp volume values between 0 and 1
-            if (oldMediaElement) {
-              const oldVolume = Math.max(0, Math.min(1, targetVolume * (1 - progress)));
-              oldMediaElement.volume = oldVolume;
-            }
-            const newVolume = Math.max(0, Math.min(1, targetVolume * progress));
-            newMediaElement.volume = newVolume;
-            
-            if (currentStep >= fadeSteps) {
-              clearInterval(fadeIntervalId);
-              
-              // Clean up old element
+
+      // Don't play if playlist is for a different year (only check when using default playlist)
+      if (
+        tracks === null &&
+        playlistYear !== null &&
+        playlistYear !== selectedYear
+      ) {
+        devLog('Playlist is for different year, not playing');
+        // Stop any currently playing audio
+        if (audioRef.current) {
+          try {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+            audioRef.current.load();
+          } catch (e) {
+            devError('Error stopping audio:', e);
+          }
+        }
+        setIsMusicPlaying(false);
+        return;
+      }
+
+      // Prevent concurrent calls
+      if (isSwitchingTrackRef.current) {
+        return;
+      }
+      isSwitchingTrackRef.current = true;
+
+      const track = tracksToUse[index];
+      if (!track || !track.videoUrl) {
+        isSwitchingTrackRef.current = false;
+        return;
+      }
+
+      // Use Audio element for audio files, Video element for video files
+      const isAudio =
+        track.isAudio || track.videoUrl.match(/\.(mp3|m4a|ogg|wav|aac)(\?|$)/i);
+      const newMediaElement = isAudio
+        ? document.createElement('audio')
+        : document.createElement('video');
+
+      // Ensure URL is properly set
+      const audioUrl = track.videoUrl;
+      if (!audioUrl || audioUrl.trim() === '') {
+        isSwitchingTrackRef.current = false;
+        return;
+      }
+      newMediaElement.src = audioUrl;
+      newMediaElement.volume = 0; // Start at 0 for crossfade
+      newMediaElement.crossOrigin = 'anonymous';
+      newMediaElement.preload = 'auto';
+      newMediaElement.playsInline = true; // Required for iOS
+      newMediaElement.setAttribute('playsinline', 'true'); // iOS compatibility
+      newMediaElement.setAttribute('webkit-playsinline', 'true'); // Older iOS
+      newMediaElement.style.display = 'none';
+      document.body.appendChild(newMediaElement);
+
+      const oldMediaElement = audioRef.current;
+      const targetVolume = 0.3;
+      const fadeDuration = 1000; // 1 second crossfade
+      const fadeSteps = 20;
+      const fadeInterval = fadeDuration / fadeSteps;
+      let currentStep = 0;
+
+      const handleCanPlay = () => {
+        // If there's an old track, crossfade. Otherwise, just start playing.
+        if (
+          oldMediaElement &&
+          !oldMediaElement.paused &&
+          oldMediaElement.currentTime > 0
+        ) {
+          // Crossfade: fade out old, fade in new
+          newMediaElement
+            .play()
+            .then(() => {
+              const fadeIntervalId = setInterval(() => {
+                currentStep++;
+                const progress = currentStep / fadeSteps;
+
+                // Clamp volume values between 0 and 1
+                if (oldMediaElement) {
+                  const oldVolume = Math.max(
+                    0,
+                    Math.min(1, targetVolume * (1 - progress)),
+                  );
+                  oldMediaElement.volume = oldVolume;
+                }
+                const newVolume = Math.max(
+                  0,
+                  Math.min(1, targetVolume * progress),
+                );
+                newMediaElement.volume = newVolume;
+
+                if (currentStep >= fadeSteps) {
+                  clearInterval(fadeIntervalId);
+
+                  // Clean up old element
+                  if (oldMediaElement) {
+                    try {
+                      oldMediaElement.pause();
+                      if (oldMediaElement.parentNode) {
+                        oldMediaElement.parentNode.removeChild(oldMediaElement);
+                      }
+                    } catch (e) {
+                      devError('Error cleaning up old media element:', e);
+                    }
+                  }
+
+                  newMediaElement.volume = targetVolume;
+                  audioRef.current = newMediaElement;
+                  setCurrentTrackIndex(index);
+                  currentTrackIndexRef.current = index;
+                  setIsMusicPlaying(true);
+                  isSwitchingTrackRef.current = false;
+                }
+              }, fadeInterval);
+            })
+            .catch((err) => {
+              devError('Failed to start crossfade:', err);
+              isSwitchingTrackRef.current = false;
+            });
+        } else {
+          // No old track, just start playing
+          newMediaElement.volume = targetVolume;
+          newMediaElement
+            .play()
+            .then(() => {
+              // Clean up old element if it exists
               if (oldMediaElement) {
                 try {
                   oldMediaElement.pause();
@@ -2208,117 +2886,99 @@ export default function MALWrapped() {
                   devError('Error cleaning up old media element:', e);
                 }
               }
-              
-              newMediaElement.volume = targetVolume;
+
               audioRef.current = newMediaElement;
               setCurrentTrackIndex(index);
               currentTrackIndexRef.current = index;
               setIsMusicPlaying(true);
               isSwitchingTrackRef.current = false;
-            }
-          }, fadeInterval);
-        }).catch(err => {
-          devError('Failed to start crossfade:', err);
-          isSwitchingTrackRef.current = false;
-        });
-      } else {
-        // No old track, just start playing
-        newMediaElement.volume = targetVolume;
-        newMediaElement.play().then(() => {
-          // Clean up old element if it exists
-          if (oldMediaElement) {
-            try {
-              oldMediaElement.pause();
-              if (oldMediaElement.parentNode) {
-                oldMediaElement.parentNode.removeChild(oldMediaElement);
+            })
+            .catch((err) => {
+              if (err.name === 'NotAllowedError') {
+                devLog('Autoplay prevented - waiting for user interaction');
+                setIsMusicPlaying(false);
+                isSwitchingTrackRef.current = false;
+              } else {
+                devError('Failed to play media:', err, track);
+                setIsMusicPlaying(false);
+                isSwitchingTrackRef.current = false;
               }
-            } catch (e) {
-              devError('Error cleaning up old media element:', e);
-            }
-          }
-          
-          audioRef.current = newMediaElement;
-          setCurrentTrackIndex(index);
-          currentTrackIndexRef.current = index;
-          setIsMusicPlaying(true);
-          isSwitchingTrackRef.current = false;
-        }).catch(err => {
-          if (err.name === 'NotAllowedError') {
-            devLog('Autoplay prevented - waiting for user interaction');
-            setIsMusicPlaying(false);
-            isSwitchingTrackRef.current = false;
-          } else {
-            devError('Failed to play media:', err, track);
-            setIsMusicPlaying(false);
-            isSwitchingTrackRef.current = false;
-          }
-        });
-      }
-    };
-    
-    // Use multiple events for better mobile compatibility
-    let hasStarted = false;
-    let timeoutId = null;
-    
-    const handleReady = () => {
-      if (hasStarted) return;
-      hasStarted = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      handleCanPlay();
-    };
-    
-    newMediaElement.addEventListener('canplay', handleReady, { once: true });
-    newMediaElement.addEventListener('canplaythrough', handleReady, { once: true });
-    newMediaElement.addEventListener('loadeddata', handleReady, { once: true });
-    newMediaElement.addEventListener('loadedmetadata', handleReady, { once: true });
-    
-    // Fallback timeout for mobile devices that may not fire events properly
-    timeoutId = setTimeout(() => {
-      if (!hasStarted && newMediaElement.readyState >= 2) { // HAVE_CURRENT_DATA or higher
-        handleReady();
-      }
-    }, 3000);
-    
-    newMediaElement.addEventListener('ended', () => {
-      // Play next track in sequence (5th→4th→3rd→2nd→1st, backwards)
-      // Loop back to 5th song (index 4) when reaching the end (index 0)
-      if (index > 0) {
-        const nextIndex = index - 1; // Go backwards: 4→3→2→1→0
-        playTrack(nextIndex, tracksToUse);
-      } else {
-        // Reached the end (index 0), loop back to 5th song (index 4)
-        const lastIndex = Math.min(4, tracksToUse.length - 1);
-        playTrack(lastIndex, tracksToUse);
-      }
-    });
-    
-    newMediaElement.addEventListener('error', (e) => {
-      devError('Media playback error:', e, track);
-      isSwitchingTrackRef.current = false;
-      
-      // Clean up
-      try {
-        if (newMediaElement.parentNode) {
-          newMediaElement.parentNode.removeChild(newMediaElement);
+            });
         }
-      } catch (cleanupErr) {
-        devError('Error cleaning up error media element:', cleanupErr);
-      }
-      
-      // Skip to next track on error
-      const nextIndex = (index + 1) % tracksToUse.length;
-      if (nextIndex !== index) {
-        setTimeout(() => {
+      };
+
+      // Use multiple events for better mobile compatibility
+      let hasStarted = false;
+      let timeoutId = null;
+
+      const handleReady = () => {
+        if (hasStarted) return;
+        hasStarted = true;
+        if (timeoutId) clearTimeout(timeoutId);
+        handleCanPlay();
+      };
+
+      newMediaElement.addEventListener('canplay', handleReady, { once: true });
+      newMediaElement.addEventListener('canplaythrough', handleReady, {
+        once: true,
+      });
+      newMediaElement.addEventListener('loadeddata', handleReady, {
+        once: true,
+      });
+      newMediaElement.addEventListener('loadedmetadata', handleReady, {
+        once: true,
+      });
+
+      // Fallback timeout for mobile devices that may not fire events properly
+      timeoutId = setTimeout(() => {
+        if (!hasStarted && newMediaElement.readyState >= 2) {
+          // HAVE_CURRENT_DATA or higher
+          handleReady();
+        }
+      }, 3000);
+
+      newMediaElement.addEventListener('ended', () => {
+        // Play next track in sequence (5th→4th→3rd→2nd→1st, backwards)
+        // Loop back to 5th song (index 4) when reaching the end (index 0)
+        if (index > 0) {
+          const nextIndex = index - 1; // Go backwards: 4→3→2→1→0
           playTrack(nextIndex, tracksToUse);
-        }, 100);
-      } else {
-        setIsMusicPlaying(false);
-      }
-    });
-    
-    // Start loading immediately
-    newMediaElement.load();
-  }, [playlist, playlistYear, selectedYear, currentSlide]);
+        } else {
+          // Reached the end (index 0), loop back to 5th song (index 4)
+          const lastIndex = Math.min(4, tracksToUse.length - 1);
+          playTrack(lastIndex, tracksToUse);
+        }
+      });
+
+      newMediaElement.addEventListener('error', (e) => {
+        devError('Media playback error:', e, track);
+        isSwitchingTrackRef.current = false;
+
+        // Clean up
+        try {
+          if (newMediaElement.parentNode) {
+            newMediaElement.parentNode.removeChild(newMediaElement);
+          }
+        } catch (cleanupErr) {
+          devError('Error cleaning up error media element:', cleanupErr);
+        }
+
+        // Skip to next track on error
+        const nextIndex = (index + 1) % tracksToUse.length;
+        if (nextIndex !== index) {
+          setTimeout(() => {
+            playTrack(nextIndex, tracksToUse);
+          }, 100);
+        } else {
+          setIsMusicPlaying(false);
+        }
+      });
+
+      // Start loading immediately
+      newMediaElement.load();
+    },
+    [playlist, playlistYear, selectedYear, currentSlide],
+  );
 
   // Toggle music play/pause
   const toggleMusic = useCallback(() => {
@@ -2326,27 +2986,30 @@ export default function MALWrapped() {
     if (currentSlide === 0) {
       return;
     }
-    
+
     if (!audioRef.current) {
       if (playlist.length > 0 && currentSlide !== 0) {
         playTrack(currentTrackIndex, playlist);
       }
       return;
     }
-    
+
     if (isMusicPlaying) {
       audioRef.current.pause();
       setIsMusicPlaying(false);
     } else {
-      audioRef.current.play().then(() => {
-        setIsMusicPlaying(true);
-      }).catch(err => {
-        devError('Failed to resume video:', err);
-        // Try to restart from current track (only if not on welcome page)
-        if (playlist.length > 0 && currentSlide !== 0) {
-          playTrack(currentTrackIndex, playlist);
-        }
-      });
+      audioRef.current
+        .play()
+        .then(() => {
+          setIsMusicPlaying(true);
+        })
+        .catch((err) => {
+          devError('Failed to resume video:', err);
+          // Try to restart from current track (only if not on welcome page)
+          if (playlist.length > 0 && currentSlide !== 0) {
+            playTrack(currentTrackIndex, playlist);
+          }
+        });
     }
   }, [playlist, currentTrackIndex, isMusicPlaying, playTrack, currentSlide]);
 
@@ -2371,7 +3034,7 @@ export default function MALWrapped() {
   useEffect(() => {
     // Only clear on initial mount, not on every render
     let isMounted = true;
-    
+
     if (isMounted) {
       // Clear playlist on initial load
       setPlaylist([]);
@@ -2385,7 +3048,7 @@ export default function MALWrapped() {
       cleanupMediaElement(audioRef.current);
       audioRef.current = null;
     }
-    
+
     return () => {
       isMounted = false;
     };
@@ -2404,7 +3067,12 @@ export default function MALWrapped() {
   // Start music when playlist is ready and button was clicked
   // Only start if NOT on welcome page (currentSlide >= 1)
   useEffect(() => {
-    if (shouldStartMusic && playlist.length > 0 && currentSlide >= 1 && currentSlide !== 0) {
+    if (
+      shouldStartMusic &&
+      playlist.length > 0 &&
+      currentSlide >= 1 &&
+      currentSlide !== 0
+    ) {
       // Start with 5th anime (index 4) - will play freely 4→3→2→1→0
       const initialTrackIndex = Math.min(4, playlist.length - 1);
       setCurrentTrackIndex(initialTrackIndex);
@@ -2421,7 +3089,7 @@ export default function MALWrapped() {
   const prevPlaylistLengthRef = useRef(0);
   const fetchAttemptRef = useRef(0);
   const maxFetchAttempts = 3; // Prevent infinite retries on iOS
-  
+
   useEffect(() => {
     // Only fetch when on welcome page (currentSlide === 0)
     if (currentSlide !== 0) {
@@ -2433,14 +3101,14 @@ export default function MALWrapped() {
       fetchAttemptRef.current = 0;
       return;
     }
-    
+
     // Don't fetch if we're already fetching
     if (isFetchingThemesRef.current) {
       // Keep loading visible while fetching
       setIsLoadingSongs(true);
       return;
     }
-    
+
     // Only fetch if playlist is empty or if it's for a different year
     if (playlist.length > 0 && playlistYear === selectedYear) {
       // Only clear loading if we have songs and they're for the current year
@@ -2449,13 +3117,18 @@ export default function MALWrapped() {
       fetchAttemptRef.current = 0; // Reset on success
       return; // Already have songs for this year
     }
-    
+
     // Make sure stats are for the current selected year
     // Check if stats.selectedYear matches selectedYear to ensure stats are recalculated
     if (stats?.selectedYear !== selectedYear) {
       // Only log if values actually changed (prevents spam on iOS)
-      if (prevStatsYearRef.current !== stats?.selectedYear || prevSelectedYearRef.current !== selectedYear) {
-        devLog(`Stats not yet recalculated for year ${selectedYear}, waiting...`);
+      if (
+        prevStatsYearRef.current !== stats?.selectedYear ||
+        prevSelectedYearRef.current !== selectedYear
+      ) {
+        devLog(
+          `Stats not yet recalculated for year ${selectedYear}, waiting...`,
+        );
         prevStatsYearRef.current = stats?.selectedYear;
         prevSelectedYearRef.current = selectedYear;
         fetchAttemptRef.current = 0; // Reset when year changes
@@ -2464,27 +3137,34 @@ export default function MALWrapped() {
       setIsLoadingSongs(true);
       return; // Wait for stats to be recalculated
     }
-    
+
     // Check if we've already processed this combination (prevents infinite loops)
     const statsYear = stats?.selectedYear;
-    const hasStatsChanged = prevStatsYearRef.current !== statsYear || prevSelectedYearRef.current !== selectedYear;
-    const hasPlaylistChanged = prevPlaylistLengthRef.current !== playlist.length;
-    
+    const hasStatsChanged =
+      prevStatsYearRef.current !== statsYear ||
+      prevSelectedYearRef.current !== selectedYear;
+    const hasPlaylistChanged =
+      prevPlaylistLengthRef.current !== playlist.length;
+
     // Only proceed if something actually changed
     if (!hasStatsChanged && !hasPlaylistChanged && playlist.length > 0) {
       return;
     }
-    
+
     // Prevent infinite retries on iOS - if we've tried too many times, stop trying
     if (fetchAttemptRef.current >= maxFetchAttempts) {
-      devLog(`Max fetch attempts (${maxFetchAttempts}) reached, stopping to prevent infinite loop`);
+      devLog(
+        `Max fetch attempts (${maxFetchAttempts}) reached, stopping to prevent infinite loop`,
+      );
       setIsLoadingSongs(false);
       return;
     }
-    
+
     const topRatedLength = stats?.topRated?.length || 0;
     if (topRatedLength > 0 && pendingMalIds.length === 0) {
-      devLog(`Fetching themes for welcome page (year: ${selectedYear}, stats year: ${stats.selectedYear}, attempt: ${fetchAttemptRef.current + 1})`);
+      devLog(
+        `Fetching themes for welcome page (year: ${selectedYear}, stats year: ${stats.selectedYear}, attempt: ${fetchAttemptRef.current + 1})`,
+      );
       // Update refs before fetching
       prevStatsYearRef.current = statsYear;
       prevSelectedYearRef.current = selectedYear;
@@ -2503,20 +3183,36 @@ export default function MALWrapped() {
       setIsLoadingSongs(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSlide, stats?.topRated?.length, stats?.selectedYear, selectedYear, playlist.length, playlistYear, pendingMalIds.length]);
-
+  }, [
+    currentSlide,
+    stats?.topRated?.length,
+    stats?.selectedYear,
+    selectedYear,
+    playlist.length,
+    playlistYear,
+    pendingMalIds.length,
+  ]);
 
   // Change tracks based on slide numbers
   // On slides 1-5: let music play freely (5th→4th→3rd→2nd→1st)
   // On slide 6: force to top 1 (index 0)
   // On slide 16: force to top 2 (index 1)
   useEffect(() => {
-    if (!audioRef.current || !stats || !slides || slides.length === 0 || !playlist || playlist.length === 0 || currentSlide === 0) return;
-    
+    if (
+      !audioRef.current ||
+      !stats ||
+      !slides ||
+      slides.length === 0 ||
+      !playlist ||
+      playlist.length === 0 ||
+      currentSlide === 0
+    )
+      return;
+
     const slideNumber = currentSlide + 1;
     let targetTrackIndex = null;
     let shouldForceChange = false;
-    
+
     // Only force track changes on specific slides when slide actually changes
     if (slideNumber === 6 && lastForcedSlideRef.current !== 6) {
       // Slide 6: force to top 1 (index 0) - only on slide change
@@ -2532,22 +3228,34 @@ export default function MALWrapped() {
       // Reset the ref when we're not on a forced slide
       lastForcedSlideRef.current = null;
     }
-    
+
     // Only change track if we have a forced change and we're not already playing it
-    if (shouldForceChange && targetTrackIndex !== null && targetTrackIndex < playlist.length && 
-        currentTrackIndex !== targetTrackIndex) {
-      devLog(`Forcing track change from ${currentTrackIndex} to ${targetTrackIndex} for slide ${slideNumber}`);
+    if (
+      shouldForceChange &&
+      targetTrackIndex !== null &&
+      targetTrackIndex < playlist.length &&
+      currentTrackIndex !== targetTrackIndex
+    ) {
+      devLog(
+        `Forcing track change from ${currentTrackIndex} to ${targetTrackIndex} for slide ${slideNumber}`,
+      );
       // Always play the track on slide 6 and 16, regardless of current playback state
       playTrack(targetTrackIndex, playlist);
     }
-    
+
     // Set volume (no reduction on drumroll)
     if (audioRef.current) {
       audioRef.current.volume = 0.3;
     }
-  }, [currentSlide, stats, slides, playlist, currentTrackIndex, isMusicPlaying, playTrack]);
-
-
+  }, [
+    currentSlide,
+    stats,
+    slides,
+    playlist,
+    currentTrackIndex,
+    isMusicPlaying,
+    playTrack,
+  ]);
 
   // Cleanup audio/video on unmount
   useEffect(() => {
@@ -2561,110 +3269,125 @@ export default function MALWrapped() {
     try {
       const accessToken = localStorage.getItem('mal_access_token');
       if (!accessToken) return;
-      
+
       const response = await fetch(`/api/mal/characters?animeId=${animeId}`, {
-        headers: { 'Authorization': `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
-      
+
       if (!response.ok) {
         // Failed to fetch characters
         return;
       }
-      
+
       const data = await response.json();
       const characters = data.data || [];
-      
+
       // Find the matching character by name (case-insensitive, improved matching)
       const characterNameLower = characterName.toLowerCase().trim();
-      const characterNameParts = characterNameLower.split(/\s+/).filter(part => part.length > 0);
-      
+      const characterNameParts = characterNameLower
+        .split(/\s+/)
+        .filter((part) => part.length > 0);
+
       let foundCharacter = null;
-      
+
       // First, try exact match with full name
-      foundCharacter = characters.find(c => {
+      foundCharacter = characters.find((c) => {
         const firstName = (c.node?.first_name || '').toLowerCase().trim();
         const lastName = (c.node?.last_name || '').toLowerCase().trim();
         const altName = (c.node?.alternative_name || '').toLowerCase().trim();
         const fullName = `${firstName} ${lastName}`.trim();
-        
+
         // Exact match (most reliable)
         if (fullName === characterNameLower || altName === characterNameLower) {
           return true;
         }
-        
+
         // Check if all parts of the character name match the API name parts
         // e.g., "Eren Yeager" should match first_name="Eren" + last_name="Yeager"
         if (characterNameParts.length >= 2) {
           const firstPart = characterNameParts[0];
           const lastPart = characterNameParts[characterNameParts.length - 1];
-          if ((firstName === firstPart && lastName === lastPart) ||
-              (firstName === lastPart && lastName === firstPart)) {
+          if (
+            (firstName === firstPart && lastName === lastPart) ||
+            (firstName === lastPart && lastName === firstPart)
+          ) {
             return true;
           }
         }
-        
+
         // Check if character name contains all parts of the database name
         // e.g., "Eren Yeager" should match if fullName contains both "eren" and "yeager"
-        const allPartsMatch = characterNameParts.every(part => 
-          fullName.includes(part) || firstName.includes(part) || lastName.includes(part)
+        const allPartsMatch = characterNameParts.every(
+          (part) =>
+            fullName.includes(part) ||
+            firstName.includes(part) ||
+            lastName.includes(part),
         );
         if (allPartsMatch && characterNameParts.length > 0) {
           return true;
         }
-        
+
         // Check alternative name
-        if (altName && (altName === characterNameLower || 
-            characterNameLower.includes(altName) || 
-            altName.includes(characterNameLower))) {
+        if (
+          altName &&
+          (altName === characterNameLower ||
+            characterNameLower.includes(altName) ||
+            altName.includes(characterNameLower))
+        ) {
           return true;
         }
-        
+
         return false;
       });
-      
+
       // Only fall back to main character if we truly couldn't find a match by name
       // This ensures we use the correct character photo, not just the first main character
       if (!foundCharacter) {
         // Try one more time with a more lenient match (in case of slight name variations)
-        foundCharacter = characters.find(c => {
+        foundCharacter = characters.find((c) => {
           const firstName = (c.node?.first_name || '').toLowerCase().trim();
           const lastName = (c.node?.last_name || '').toLowerCase().trim();
           const fullName = `${firstName} ${lastName}`.trim();
-          
+
           // Check if at least one significant word matches
-          return characterNameParts.some(part => 
-            part.length > 2 && (fullName.includes(part) || firstName === part || lastName === part)
+          return characterNameParts.some(
+            (part) =>
+              part.length > 2 &&
+              (fullName.includes(part) ||
+                firstName === part ||
+                lastName === part),
           );
         });
       }
-      
+
       // Last resort: only use main character if we still can't find a match
       // This should rarely happen if the character database names are accurate
       if (!foundCharacter) {
-        foundCharacter = characters.find(c => c.role === 'Main') || characters[0];
+        foundCharacter =
+          characters.find((c) => c.role === 'Main') || characters[0];
       }
-      
+
       if (foundCharacter && foundCharacter.node && currentStats.characterTwin) {
         const characterNode = foundCharacter.node;
-        const characterImage = characterNode?.main_picture?.medium || 
-                              characterNode?.main_picture?.large || 
-                              '/Mascot.webp';
-        
+        const characterImage =
+          characterNode?.main_picture?.medium ||
+          characterNode?.main_picture?.large ||
+          '/Mascot.webp';
+
         // Update stats with character image
-        setStats(prevStats => ({
+        setStats((prevStats) => ({
           ...prevStats,
           characterTwin: {
             ...prevStats.characterTwin,
             coverImage: characterImage,
-            characterImage: characterImage
-          }
+            characterImage: characterImage,
+          },
         }));
       }
     } catch (err) {
       // Error fetching character image
     }
   }
-
 
   function getRedirectUri() {
     if (typeof window === 'undefined') return '';
@@ -2691,22 +3414,22 @@ export default function MALWrapped() {
   // Helper function to wait for fonts to load
   async function waitForFonts() {
     if (typeof document === 'undefined') return;
-    
+
     try {
       // Wait for fonts to be ready
       await document.fonts.ready;
-      
+
       // Additional check for specific fonts used in the app
       const fontsToCheck = ['Sora', 'DM Sans', 'Space Mono'];
-      const fontPromises = fontsToCheck.map(font => {
+      const fontPromises = fontsToCheck.map((font) => {
         return document.fonts.check(`12px "${font}"`);
       });
-      
+
       // Give fonts a moment to fully load
       await Promise.all(fontPromises);
-      
+
       // Small delay to ensure fonts are fully rendered
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     } catch (err) {
       // Font loading check failed, proceeding anyway
     }
@@ -2714,36 +3437,40 @@ export default function MALWrapped() {
 
   async function generatePNG() {
     if (!slideRef.current || typeof window === 'undefined') return null;
-    
+
     try {
       const cardElement = slideRef.current;
-      
+
       // Wait for fonts to load before capturing (improves performance and font accuracy)
       await waitForFonts();
-      
+
       // Detect mobile device for optimization
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        ) || window.innerWidth < 768;
       const scale = isMobile ? 1 : 2; // Lower scale on mobile for better performance
-      
+
       // Dynamically import snapdom
       const { snapdom } = await import('@zumer/snapdom');
-      
+
       // Simplified plugin - only stop animations on the main element
       const capturePlugin = {
         name: 'mal-wrapped-capture',
         async afterClone(context) {
           const clonedDoc = context.clonedDocument;
           if (!clonedDoc) return;
-          
-          const clonedElement = clonedDoc.querySelector('.slide-card') || clonedDoc.body;
+
+          const clonedElement =
+            clonedDoc.querySelector('.slide-card') || clonedDoc.body;
           if (clonedElement) {
             clonedElement.style.animation = 'none';
             clonedElement.style.transition = 'none';
             clonedElement.style.animationPlayState = 'paused';
           }
-        }
+        },
       };
-      
+
       // Capture with snapdom - exclude only navigation containers using data attribute
       // embedFonts: true ensures fonts are properly embedded in the screenshot
       const out = await snapdom(cardElement, {
@@ -2751,12 +3478,12 @@ export default function MALWrapped() {
         scale: scale,
         exclude: ['[data-exclude-from-screenshot]'],
         embedFonts: true, // Changed to true to ensure fonts are captured correctly
-        plugins: [capturePlugin]
+        plugins: [capturePlugin],
       });
-      
+
       // Export as PNG
       const png = await out.toPng();
-      
+
       // Add watermark directly using data URL without reloading image
       return new Promise((resolve, reject) => {
         try {
@@ -2764,13 +3491,13 @@ export default function MALWrapped() {
           img.onload = () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
+
             canvas.width = img.width;
             canvas.height = img.height;
-            
+
             // Draw the original image
             ctx.drawImage(img, 0, 0);
-            
+
             // Add watermark at the bottom - adjust font size based on scale
             const currentSlideId = slides[currentSlide]?.id;
             const watermarkText = getWatermarkText(currentSlideId);
@@ -2778,34 +3505,42 @@ export default function MALWrapped() {
             ctx.font = `bold ${fontSize}px "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            
+
             const x = canvas.width / 2;
-            const y = canvas.height - (canvas.height * 0.015);
-            
+            const y = canvas.height - canvas.height * 0.015;
+
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.fillText(watermarkText, x, y);
-            
+
             // Convert canvas to blob
             canvas.toBlob((blob) => {
               if (!blob) {
                 reject(new Error('Failed to create blob'));
                 return;
               }
-              
-              const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
+
+              const file = new File(
+                [blob],
+                `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`,
+                { type: 'image/png' },
+              );
               const dataUrl = canvas.toDataURL('image/png');
-              
+
               resolve({ file, dataUrl });
             }, 'image/png');
           };
-          
+
           img.onerror = () => {
             // Fallback: return PNG without watermark if image load fails
             if (png.src && png.src.startsWith('data:')) {
               fetch(png.src)
-                .then(res => res.blob())
-                .then(blob => {
-                  const file = new File([blob], `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`, { type: 'image/png' });
+                .then((res) => res.blob())
+                .then((blob) => {
+                  const file = new File(
+                    [blob],
+                    `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`,
+                    { type: 'image/png' },
+                  );
                   resolve({ file, dataUrl: png.src });
                 })
                 .catch(() => reject(new Error('Failed to process image')));
@@ -2813,7 +3548,7 @@ export default function MALWrapped() {
               reject(new Error('Failed to load image'));
             }
           };
-          
+
           // Use the PNG src directly (snapdom returns a data URL)
           img.src = png.src || (png.blob ? URL.createObjectURL(png.blob) : '');
         } catch (error) {
@@ -2834,7 +3569,7 @@ export default function MALWrapped() {
     try {
       const result = await generatePNG();
       if (!result) return;
-      
+
       // Create download link
       const link = document.createElement('a');
       link.download = `mal-wrapped-${username || 'user'}-slide-${currentSlide + 1}.png`;
@@ -2853,17 +3588,19 @@ export default function MALWrapped() {
     try {
       const result = await generatePNG();
       if (!result) return;
-      
+
       const response = await fetch(result.dataUrl);
       const blob = await response.blob();
       await navigator.clipboard.write([
-        new ClipboardItem({ 'image/png': blob })
+        new ClipboardItem({ 'image/png': blob }),
       ]);
       alert('Image copied to clipboard!');
       setShowShareMenu(false);
     } catch (err) {
       // Failed to copy image
-      alert('Failed to copy image to clipboard. Please try downloading instead.');
+      alert(
+        'Failed to copy image to clipboard. Please try downloading instead.',
+      );
     }
   }
 
@@ -2892,7 +3629,10 @@ export default function MALWrapped() {
         return;
       }
 
-      const yearText = stats?.selectedYear && stats.selectedYear !== 'all' ? `${stats.selectedYear} ` : '';
+      const yearText =
+        stats?.selectedYear && stats.selectedYear !== 'all'
+          ? `${stats.selectedYear} `
+          : '';
       const shareData = {
         title: `My ${yearText}MAL Wrapped`,
         text: `Check out your ${yearText}MyAnimeList Wrapped!`,
@@ -2900,7 +3640,11 @@ export default function MALWrapped() {
         files: [result.file],
       };
 
-      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare(shareData)
+      ) {
         await navigator.share(shareData);
       } else {
         // Fallback: trigger download so user can share manually
@@ -2911,11 +3655,13 @@ export default function MALWrapped() {
         link.click();
         document.body.removeChild(link);
 
-        alert('Sharing is not supported on this device. The image has been downloaded so you can share it manually.');
+        alert(
+          'Sharing is not supported on this device. The image has been downloaded so you can share it manually.',
+        );
       }
     } catch (error) {
       if (error?.name !== 'AbortError') {
-            // Error sharing image
+        // Error sharing image
         alert('Failed to share image. Please try again.');
       }
     } finally {
@@ -2930,8 +3676,11 @@ export default function MALWrapped() {
     }
 
     // Detect if we're on a mobile device
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                     (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      ) ||
+      (window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
 
     // On desktop, always show the menu. On mobile, try native share first
     if (isMobile && navigator.share) {
@@ -2951,14 +3700,17 @@ export default function MALWrapped() {
   }
 
   function shareToSocial(platform) {
-    const yearText = stats?.selectedYear && stats.selectedYear !== 'all' ? `${stats.selectedYear} ` : '';
+    const yearText =
+      stats?.selectedYear && stats.selectedYear !== 'all'
+        ? `${stats.selectedYear} `
+        : '';
     const shareText = `Check out your ${yearText}MyAnimeList Wrapped!`;
     const shareUrl = window.location.href;
     const encodedText = encodeURIComponent(shareText);
     const encodedUrl = encodeURIComponent(shareUrl);
-    
+
     let shareLink = '';
-    
+
     switch (platform) {
       case 'twitter':
         shareLink = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
@@ -2981,7 +3733,7 @@ export default function MALWrapped() {
       default:
         return;
     }
-    
+
     window.open(shareLink, '_blank', 'width=600,height=400');
     setShowShareMenu(false);
   }
@@ -2989,7 +3741,10 @@ export default function MALWrapped() {
   // Close share menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
-      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target)) {
+      if (
+        shareMenuRef.current &&
+        !shareMenuRef.current.contains(event.target)
+      ) {
         setShowShareMenu(false);
       }
     }
@@ -3013,23 +3768,27 @@ export default function MALWrapped() {
   // Fetch author photos from MAL API
   useEffect(() => {
     if (!stats?.topAuthors || !isAuthenticated) return;
-    
+
     const fetchAuthorPhotos = async () => {
       const photos = {};
       const storedToken = localStorage.getItem('mal_access_token');
       if (!storedToken) return;
-      
+
       for (const authorEntry of stats.topAuthors) {
         const [authorName, count, authorId] = authorEntry;
         if (authorId) {
           try {
-            const response = await fetch(`/api/mal/person?personId=${authorId}`, {
-              headers: { 'Authorization': `Bearer ${storedToken}` },
-            });
+            const response = await fetch(
+              `/api/mal/person?personId=${authorId}`,
+              {
+                headers: { Authorization: `Bearer ${storedToken}` },
+              },
+            );
             if (response.ok) {
               const data = await response.json();
               if (data.main_picture?.large || data.main_picture?.medium) {
-                photos[authorName] = data.main_picture.large || data.main_picture.medium;
+                photos[authorName] =
+                  data.main_picture.large || data.main_picture.medium;
               }
             }
           } catch (error) {
@@ -3037,10 +3796,10 @@ export default function MALWrapped() {
           }
         }
       }
-      
+
       setAuthorPhotos(photos);
     };
-    
+
     fetchAuthorPhotos();
   }, [stats?.topAuthors, isAuthenticated]);
 
@@ -3049,26 +3808,29 @@ export default function MALWrapped() {
     // Don't handle tap if user clicked on an interactive element
     const target = e.target;
     if (
-      target.tagName === 'A' || 
-      target.tagName === 'BUTTON' || 
-      target.closest('a') || 
+      target.tagName === 'A' ||
+      target.tagName === 'BUTTON' ||
+      target.closest('a') ||
       target.closest('button') ||
       target.closest('[data-exclude-from-screenshot]')
     ) {
       return;
     }
-    
+
     if (!slides || slides.length === 0) return;
-    
+
     const screenWidth = window.innerWidth;
-    const tapX = e.clientX || (e.touches && e.touches[0]?.clientX) || (e.changedTouches && e.changedTouches[0]?.clientX);
-    
+    const tapX =
+      e.clientX ||
+      (e.touches && e.touches[0]?.clientX) ||
+      (e.changedTouches && e.changedTouches[0]?.clientX);
+
     if (!tapX) return;
-    
+
     // Divide screen into thirds - left third goes back, right third goes forward
     const leftThird = screenWidth / 3;
     const rightThird = (screenWidth / 3) * 2;
-    
+
     if (tapX < leftThird && currentSlide > 0) {
       // Tap left side - go to previous slide
       e.preventDefault();
@@ -3089,7 +3851,9 @@ export default function MALWrapped() {
     }
 
     if (!CLIENT_ID || CLIENT_ID === '<your_client_id_here>') {
-      setError('CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID in Vercel.');
+      setError(
+        'CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID in Vercel.',
+      );
       return;
     }
 
@@ -3120,11 +3884,11 @@ export default function MALWrapped() {
 
   function SlideContent({ slide, mangaListData, websiteUrl }) {
     if (!slide || !stats) return null;
-    
+
     // Helper function to deduplicate items by title
     const deduplicateByTitle = (items) => {
       const map = new Map();
-      items.forEach(item => {
+      items.forEach((item) => {
         const title = item.node?.title || '';
         if (title && !map.has(title)) {
           map.set(title, item);
@@ -3132,33 +3896,33 @@ export default function MALWrapped() {
       });
       return Array.from(map.values());
     };
-    
+
     // Define userImage for use across all slides
     const userImage = userData?.picture || '/Mascot.webp';
 
     // Helper function to get bgColor for current slide
     const getSlideBgColor = (slideId) => {
       const colorMap = {
-        'welcome': 'pink',
-        'anime_count': 'blue',
-        'anime_time': 'green',
-        'top_genre': 'yellow',
-        'top_studio': 'red',
-        'seasonal_anime': 'pink',
-        'hidden_gems_anime': 'blue',
-        'planned_anime': 'green',
-        'anime_to_manga_transition': 'black',
-        'manga_count': 'yellow',
-        'manga_time': 'blue',
-        'top_manga_genre': 'yellow',
-        'top_author': 'pink',
-        'hidden_gems_manga': 'blue',
-        'longest_manga': 'blue',
-        'planned_manga': 'green',
-        'milestone': 'yellow',
-        'badges': 'purple',
-        'character_twin': 'pink',
-        'rating_style': 'green'
+        welcome: 'pink',
+        anime_count: 'blue',
+        anime_time: 'green',
+        top_genre: 'yellow',
+        top_studio: 'red',
+        seasonal_anime: 'pink',
+        hidden_gems_anime: 'blue',
+        planned_anime: 'green',
+        anime_to_manga_transition: 'black',
+        manga_count: 'yellow',
+        manga_time: 'blue',
+        top_manga_genre: 'yellow',
+        top_author: 'pink',
+        hidden_gems_manga: 'blue',
+        longest_manga: 'blue',
+        planned_manga: 'green',
+        milestone: 'yellow',
+        badges: 'purple',
+        character_twin: 'pink',
+        rating_style: 'green',
       };
       return colorMap[slideId] || 'black';
     };
@@ -3166,13 +3930,13 @@ export default function MALWrapped() {
     // Helper function to map bgColor to Tailwind color class
     const getNumberCircleColor = (bgColor) => {
       const colorClasses = {
-        'black': 'bg-purple-500',
-        'pink': 'bg-pink-500',
-        'yellow': 'bg-yellow-500',
-        'blue': 'bg-blue-500',
-        'green': 'bg-green-500',
-        'red': 'bg-red-500',
-        'purple': 'bg-purple-500'
+        black: 'bg-purple-500',
+        pink: 'bg-pink-500',
+        yellow: 'bg-yellow-500',
+        blue: 'bg-blue-500',
+        green: 'bg-green-500',
+        red: 'bg-red-500',
+        purple: 'bg-purple-500',
       };
       return colorClasses[bgColor] || 'bg-pink-500';
     };
@@ -3188,11 +3952,12 @@ export default function MALWrapped() {
         blue: 'bg-gradient-to-br from-cyan-700 via-blue-800 to-indigo-950',
         green: 'bg-gradient-to-br from-emerald-700 via-teal-800 to-blue-950',
         red: 'bg-gradient-to-br from-red-700 via-rose-800 to-purple-950',
-        purple: 'bg-gradient-to-br from-purple-700 via-violet-800 to-indigo-950'
+        purple:
+          'bg-gradient-to-br from-purple-700 via-violet-800 to-indigo-950',
       };
-      
+
       return (
-        <motion.div 
+        <motion.div
           className={`w-full h-full relative px-2 sm:px-3 md:px-4 lg:px-6 py-2 sm:py-3 md:py-4 lg:py-6 flex flex-col items-center justify-center slide-card overflow-hidden abstract-shapes ${bgColorClasses[bgColor] || 'bg-black'}`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -3200,94 +3965,116 @@ export default function MALWrapped() {
           style={{ position: 'relative' }}
         >
           {/* Colorful abstract shapes background on all cards - animated */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+          <div
+            className="absolute inset-0 pointer-events-none overflow-hidden"
+            style={{ zIndex: 0 }}
+          >
             {/* Large layered organic shape (left side) */}
-            <motion.div 
+            <motion.div
               className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60"
               style={{
-                background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
-                clipPath: 'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
+                background:
+                  'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
+                clipPath:
+                  'polygon(0% 20%, 40% 0%, 100% 30%, 80% 70%, 40% 100%, 0% 80%)',
                 filter: 'blur(140px)',
-                willChange: 'transform, opacity'
+                willChange: 'transform, opacity',
               }}
               animate={{
-                transform: ['rotate(-15deg) translateY(-50%)', 'rotate(-10deg) translateY(-50%)', 'rotate(-20deg) translateY(-50%)', 'rotate(-15deg) translateY(-50%)'],
-                opacity: [0.6, 0.7, 0.5, 0.6]
+                transform: [
+                  'rotate(-15deg) translateY(-50%)',
+                  'rotate(-10deg) translateY(-50%)',
+                  'rotate(-20deg) translateY(-50%)',
+                  'rotate(-15deg) translateY(-50%)',
+                ],
+                opacity: [0.6, 0.7, 0.5, 0.6],
               }}
               transition={{
                 duration: 8,
                 repeat: Infinity,
-                ease: smoothEase
+                ease: smoothEase,
               }}
               data-framer-motion
               data-shape-blur
             ></motion.div>
-            
+
             {/* Rainbow gradient rectangle (top right) */}
-            <motion.div 
+            <motion.div
               className="absolute top-0 right-0 w-96 h-64 opacity-50"
               style={{
-                background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
+                background:
+                  'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
                 clipPath: 'polygon(20% 0%, 100% 0%, 100% 80%, 0% 100%)',
                 filter: 'blur(120px)',
-                willChange: 'transform, opacity'
+                willChange: 'transform, opacity',
               }}
               animate={{
-                transform: ['translateY(0%)', 'translateY(-5%)', 'translateY(0%)'],
-                opacity: [0.5, 0.6, 0.5]
+                transform: [
+                  'translateY(0%)',
+                  'translateY(-5%)',
+                  'translateY(0%)',
+                ],
+                opacity: [0.5, 0.6, 0.5],
               }}
               transition={{
                 duration: 7,
                 repeat: Infinity,
-                ease: smoothEase
+                ease: smoothEase,
               }}
               data-framer-motion
               data-shape-blur
             ></motion.div>
-            
+
             {/* Purple glow (center) */}
-            <motion.div 
+            <motion.div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40"
               style={{
-                background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
+                background:
+                  'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
                 filter: 'blur(140px)',
-                willChange: 'transform, opacity'
+                willChange: 'transform, opacity',
               }}
               animate={{
                 scale: [1, 1.1, 1],
-                opacity: [0.4, 0.5, 0.4]
+                opacity: [0.4, 0.5, 0.4],
               }}
               transition={{
                 duration: 10,
                 repeat: Infinity,
-                ease: smoothEase
+                ease: smoothEase,
               }}
               data-framer-motion
               data-shape-blur
             ></motion.div>
-            
+
             {/* Rainbow accent (bottom right) */}
-            <motion.div 
+            <motion.div
               className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50"
               style={{
-                background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
+                background:
+                  'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
                 filter: 'blur(120px)',
-                willChange: 'transform, opacity'
+                willChange: 'transform, opacity',
               }}
               animate={{
-                transform: ['rotate(0deg)', 'rotate(10deg)', 'rotate(-10deg)', 'rotate(0deg)'],
-                opacity: [0.5, 0.6, 0.5]
+                transform: [
+                  'rotate(0deg)',
+                  'rotate(10deg)',
+                  'rotate(-10deg)',
+                  'rotate(0deg)',
+                ],
+                opacity: [0.5, 0.6, 0.5],
               }}
               transition={{
                 duration: 12,
                 repeat: Infinity,
-                ease: smoothEase
+                ease: smoothEase,
               }}
               data-framer-motion
               data-shape-blur
             ></motion.div>
-        </div>
-          <motion.div 
+          </div>
+          <motion.div
             className="w-full relative z-20"
             variants={staggerContainer}
             initial="initial"
@@ -3295,13 +4082,13 @@ export default function MALWrapped() {
           >
             {children}
           </motion.div>
-          
+
           {/* Bottom gradient fade - above rainbow shapes, below content */}
-          <div 
+          <div
             className="absolute bottom-0 left-0 right-0 pointer-events-none h-full"
             style={{
               zIndex: 5,
-              background: bottomGradientBackground
+              background: bottomGradientBackground,
             }}
           />
         </motion.div>
@@ -3309,7 +4096,12 @@ export default function MALWrapped() {
     };
 
     // Image Carousel Component - Different implementations for mobile and desktop
-    const ImageCarousel = ({ items, maxItems = 10, showHover = true, showNames = false }) => {
+    const ImageCarousel = ({
+      items,
+      maxItems = 10,
+      showHover = true,
+      showNames = false,
+    }) => {
       const [isMobile, setIsMobile] = useState(false);
       const [isHovered, setIsHovered] = useState(false);
       const [hoveredItem, setHoveredItem] = useState(null);
@@ -3319,10 +4111,10 @@ export default function MALWrapped() {
       const startTimeRef = useRef(Date.now());
       const pausedPositionRef = useRef(0);
       const containerRef = useRef(null);
-      
+
       // Deduplicate items by title AND ID to prevent repeats
       const uniqueItemsMap = new Map();
-      items.forEach(item => {
+      items.forEach((item) => {
         const title = item.title || '';
         const id = item.malId || item.mangaId || '';
         const uniqueKey = `${title}-${id}`;
@@ -3332,7 +4124,7 @@ export default function MALWrapped() {
       });
       const uniqueItems = Array.from(uniqueItemsMap.values());
       const visibleItems = uniqueItems.slice(0, maxItems);
-      
+
       // Update gap size, items per view, and mobile detection based on screen width
       useEffect(() => {
         const updateResponsive = () => {
@@ -3349,24 +4141,24 @@ export default function MALWrapped() {
         };
         // Set initial value immediately
         if (typeof window !== 'undefined') {
-        updateResponsive();
-        window.addEventListener('resize', updateResponsive);
-        return () => window.removeEventListener('resize', updateResponsive);
+          updateResponsive();
+          window.addEventListener('resize', updateResponsive);
+          return () => window.removeEventListener('resize', updateResponsive);
         }
       }, []);
-      
+
       const itemWidth = 100 / itemsPerView;
-      
+
       // Only duplicate items if we have more items than can fit in viewport (for infinite scroll)
       // Otherwise, just show the unique items
       const shouldScroll = visibleItems.length > itemsPerView;
-      const duplicatedItems = shouldScroll 
+      const duplicatedItems = shouldScroll
         ? [...visibleItems, ...visibleItems, ...visibleItems]
         : visibleItems;
-      
+
       // Center items when there are fewer than itemsPerView
       const shouldCenter = !shouldScroll && visibleItems.length < itemsPerView;
-      
+
       // Calculate animation duration based on number of items for smooth infinite scroll
       const animationDuration = visibleItems.length * 2; // 2 seconds per item
       const maxScroll = visibleItems.length * itemWidth; // Maximum scroll in percentage
@@ -3378,11 +4170,15 @@ export default function MALWrapped() {
         let animationFrameId;
 
         const animate = () => {
-          if (!isHovered && containerRef.current && containerRef.current.offsetWidth > 0) {
+          if (
+            !isHovered &&
+            containerRef.current &&
+            containerRef.current.offsetWidth > 0
+          ) {
             // Calculate progress (0 to 1) based on elapsed time
             const elapsed = (Date.now() - startTimeRef.current) / 1000;
             const progress = (elapsed % animationDuration) / animationDuration;
-            
+
             // Get container width to calculate pixel offset
             const containerWidth = containerRef.current.offsetWidth;
             // Calculate x position in pixels based on percentage
@@ -3405,11 +4201,14 @@ export default function MALWrapped() {
       // Handle hover state changes to preserve position (desktop only)
       useEffect(() => {
         if (isMobile) return;
-        
+
         if (isHovered) {
           // Pause: save current position
           pausedPositionRef.current = x.get();
-        } else if (containerRef.current && containerRef.current.offsetWidth > 0) {
+        } else if (
+          containerRef.current &&
+          containerRef.current.offsetWidth > 0
+        ) {
           // Resume: adjust start time to continue from paused position
           const currentX = pausedPositionRef.current;
           const containerWidth = containerRef.current.offsetWidth;
@@ -3417,7 +4216,7 @@ export default function MALWrapped() {
           if (maxScrollPixels > 0) {
             const progress = Math.abs(currentX) / maxScrollPixels;
             const adjustedElapsed = progress * animationDuration;
-            startTimeRef.current = Date.now() - (adjustedElapsed * 1000);
+            startTimeRef.current = Date.now() - adjustedElapsed * 1000;
           }
         }
       }, [isHovered, maxScroll, animationDuration, x, isMobile]);
@@ -3426,31 +4225,32 @@ export default function MALWrapped() {
 
       // Simple mobile carousel - CSS-based, no complex animations
       if (isMobile) {
-
         if (shouldScroll) {
           const scrollDuration = visibleItems.length * 0.8; // Faster: 0.8 seconds per item for mobile
           // On mobile, make items larger - use 2 items per view instead of 3
           const mobileItemsPerView = 2;
           const mobileItemWidth = 100 / mobileItemsPerView;
-      return (
-            <motion.div 
+          return (
+            <motion.div
               className="mt-2 sm:mt-3 overflow-hidden relative flex justify-center"
-              style={{ 
-                maskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
-                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)'
+              style={{
+                maskImage:
+                  'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
+                WebkitMaskImage:
+                  'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: smoothEase }}
             >
-              <div 
+              <div
                 className="flex flex-row"
-                style={{ 
+                style={{
                   gap: gapSize,
                   justifyContent: 'flex-start',
                   width: '100%',
                   flexWrap: 'nowrap',
-                  animation: `scrollMobile ${scrollDuration}s linear infinite`
+                  animation: `scrollMobile ${scrollDuration}s linear infinite`,
                 }}
               >
                 {[...visibleItems, ...visibleItems].map((item, idx) => {
@@ -3459,16 +4259,27 @@ export default function MALWrapped() {
                   const itemStyle = {
                     width: `${mobileItemWidth}%`,
                     flexShrink: 0,
-                    minWidth: '150px'
+                    minWidth: '150px',
                   };
                   const content = (
-                    <div className="flex flex-col items-center" style={itemStyle}>
-                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+                    <div
+                      className="flex flex-col items-center"
+                      style={itemStyle}
+                    >
+                      <div
+                        className="aspect-[2/3] w-full bg-transparent rounded-lg relative"
+                        style={{
+                          maxHeight: '275px',
+                          maxWidth: '100%',
+                          boxSizing: 'border-box',
+                          overflow: 'hidden',
+                        }}
+                      >
                         {item.coverImage && (
-                          <img 
-                            src={item.coverImage} 
-                            alt={item.title || ''} 
-                            crossOrigin="anonymous" 
+                          <img
+                            src={item.coverImage}
+                            alt={item.title || ''}
+                            crossOrigin="anonymous"
                             className="w-full h-full object-cover rounded-lg"
                           />
                         )}
@@ -3477,14 +4288,22 @@ export default function MALWrapped() {
                         <div className="mt-2 text-center">
                           <p className="title-sm truncate">{item.title}</p>
                           {item.userRating && (
-                            <p className="mono font-semibold text-yellow-300 mt-1">★ {Math.round(item.userRating)}</p>
+                            <p className="mono font-semibold text-yellow-300 mt-1">
+                              ★ {Math.round(item.userRating)}
+                            </p>
                           )}
                         </div>
                       )}
                     </div>
                   );
                   return malUrl ? (
-                    <a key={uniqueKey} href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                    <a
+                      key={uniqueKey}
+                      href={malUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {content}
                     </a>
                   ) : (
@@ -3509,42 +4328,56 @@ export default function MALWrapped() {
           const mobileItemsPerView = 2;
           const mobileItemWidth = 100 / mobileItemsPerView;
           return (
-            <motion.div 
-          className="mt-2 sm:mt-3 overflow-hidden relative flex justify-center"
-          style={{ 
+            <motion.div
+              className="mt-2 sm:mt-3 overflow-hidden relative flex justify-center"
+              style={{
                 maskImage: 'linear-gradient(to right, black 0%, black 100%)',
-                WebkitMaskImage: 'linear-gradient(to right, black 0%, black 100%)'
+                WebkitMaskImage:
+                  'linear-gradient(to right, black 0%, black 100%)',
               }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: smoothEase }}
             >
-              <div 
+              <div
                 className="flex flex-row"
-                style={{ 
+                style={{
                   gap: gapSize,
                   justifyContent: shouldCenter ? 'center' : 'flex-start',
                   width: shouldCenter ? 'auto' : '100%',
-                  flexWrap: 'nowrap'
+                  flexWrap: 'nowrap',
                 }}
               >
                 {visibleItems.map((item, idx) => {
                   const malUrl = getMALUrl(item);
                   const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}`;
                   const itemStyle = {
-                    width: shouldCenter ? `${100 / mobileItemsPerView}%` : `${mobileItemWidth}%`,
+                    width: shouldCenter
+                      ? `${100 / mobileItemsPerView}%`
+                      : `${mobileItemWidth}%`,
                     flexShrink: 0,
                     minWidth: shouldCenter ? '150px' : '150px',
-                    maxWidth: shouldCenter ? '200px' : 'none'
+                    maxWidth: shouldCenter ? '200px' : 'none',
                   };
                   const content = (
-                    <div className="flex flex-col items-center" style={itemStyle}>
-                      <div className="aspect-[2/3] w-full bg-transparent rounded-lg relative" style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+                    <div
+                      className="flex flex-col items-center"
+                      style={itemStyle}
+                    >
+                      <div
+                        className="aspect-[2/3] w-full bg-transparent rounded-lg relative"
+                        style={{
+                          maxHeight: '275px',
+                          maxWidth: '100%',
+                          boxSizing: 'border-box',
+                          overflow: 'hidden',
+                        }}
+                      >
                         {item.coverImage && (
-                          <img 
-                            src={item.coverImage} 
-                            alt={item.title || ''} 
-                            crossOrigin="anonymous" 
+                          <img
+                            src={item.coverImage}
+                            alt={item.title || ''}
+                            crossOrigin="anonymous"
                             className="w-full h-full object-cover rounded-lg"
                           />
                         )}
@@ -3553,14 +4386,22 @@ export default function MALWrapped() {
                         <div className="mt-2 text-center">
                           <p className="title-sm truncate">{item.title}</p>
                           {item.userRating && (
-                            <p className="mono font-semibold text-yellow-300 mt-1">★ {Math.round(item.userRating)}</p>
+                            <p className="mono font-semibold text-yellow-300 mt-1">
+                              ★ {Math.round(item.userRating)}
+                            </p>
                           )}
                         </div>
                       )}
                     </div>
                   );
                   return malUrl ? (
-                    <a key={uniqueKey} href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                    <a
+                      key={uniqueKey}
+                      href={malUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {content}
                     </a>
                   ) : (
@@ -3575,16 +4416,16 @@ export default function MALWrapped() {
 
       // Desktop Framer Motion ticker - simplified
       return (
-        <div 
+        <div
           ref={containerRef}
           className="mt-2 sm:mt-3 overflow-hidden relative flex justify-center"
-          style={{ 
-            maskImage: shouldScroll 
+          style={{
+            maskImage: shouldScroll
               ? 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)'
               : 'linear-gradient(to right, black 0%, black 100%)',
-            WebkitMaskImage: shouldScroll 
+            WebkitMaskImage: shouldScroll
               ? 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)'
-              : 'linear-gradient(to right, black 0%, black 100%)'
+              : 'linear-gradient(to right, black 0%, black 100%)',
           }}
           onMouseEnter={() => showHover && setIsHovered(true)}
           onMouseLeave={() => {
@@ -3592,14 +4433,14 @@ export default function MALWrapped() {
             setHoveredItem(null);
           }}
         >
-          <motion.div 
+          <motion.div
             className="flex"
-            style={{ 
+            style={{
               gap: gapSize,
               justifyContent: shouldCenter ? 'center' : 'flex-start',
               width: shouldCenter ? 'auto' : '100%',
               overflow: 'visible',
-              x: shouldScroll ? x : 0
+              x: shouldScroll ? x : 0,
             }}
           >
             {duplicatedItems.map((item, idx) => {
@@ -3608,15 +4449,20 @@ export default function MALWrapped() {
               const uniqueKey = `${item.title || ''}-${item.malId || item.mangaId || idx}-${actualIndex}`;
               const content = (
                 <div className="flex flex-col flex-shrink-0 items-center w-full">
-                  <div 
-                className="aspect-[2/3] w-full bg-transparent rounded-lg relative" 
-                    style={{ maxHeight: '275px', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}
+                  <div
+                    className="aspect-[2/3] w-full bg-transparent rounded-lg relative"
+                    style={{
+                      maxHeight: '275px',
+                      maxWidth: '100%',
+                      boxSizing: 'border-box',
+                      overflow: 'hidden',
+                    }}
                   >
                     {item.coverImage && (
-                      <img 
-                        src={item.coverImage} 
-                        alt={item.title || ''} 
-                        crossOrigin="anonymous" 
+                      <img
+                        src={item.coverImage}
+                        alt={item.title || ''}
+                        crossOrigin="anonymous"
                         className="w-full h-full object-cover rounded-lg"
                       />
                     )}
@@ -3635,27 +4481,37 @@ export default function MALWrapped() {
                     <div className="mt-2 text-center">
                       <p className="title-sm truncate">{item.title}</p>
                       {item.userRating && (
-                        <p className="mono font-semibold text-yellow-300 mt-1">★ {Math.round(item.userRating)}</p>
+                        <p className="mono font-semibold text-yellow-300 mt-1">
+                          ★ {Math.round(item.userRating)}
+                        </p>
                       )}
                     </div>
                   )}
                 </div>
               );
-              
+
               return (
-                <div 
-                  key={uniqueKey} 
-                  className="relative group flex-shrink-0 flex justify-center" 
-                  style={{ 
-                    width: shouldCenter ? `${100 / itemsPerView}%` : `${itemWidth}%`,
+                <div
+                  key={uniqueKey}
+                  className="relative group flex-shrink-0 flex justify-center"
+                  style={{
+                    width: shouldCenter
+                      ? `${100 / itemsPerView}%`
+                      : `${itemWidth}%`,
                     minWidth: shouldCenter ? '120px' : 'auto',
-                    maxWidth: shouldCenter ? '183px' : 'none'
+                    maxWidth: shouldCenter ? '183px' : 'none',
                   }}
                   onMouseEnter={() => showHover && setHoveredItem(actualIndex)}
                   onMouseLeave={() => showHover && setHoveredItem(null)}
                 >
                   {malUrl ? (
-                    <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="w-full">
+                    <a
+                      href={malUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full"
+                    >
                       {content}
                     </a>
                   ) : (
@@ -3673,7 +4529,7 @@ export default function MALWrapped() {
     const GridImages = ({ items, maxItems = 5 }) => {
       const visibleItems = items.slice(0, maxItems);
       const itemCount = visibleItems.length;
-      
+
       // Dynamically set columns based on number of items
       // On mobile: max 3 columns, on larger screens: use item count (max 5)
       const getGridCols = () => {
@@ -3686,65 +4542,75 @@ export default function MALWrapped() {
         return 'grid-cols-3 sm:grid-cols-5';
       };
 
-
       if (visibleItems.length === 0) return null;
 
       return (
         <div className="mt-4 flex justify-center w-full px-2">
-          <motion.div 
+          <motion.div
             className={`grid ${getGridCols()} gap-4 place-items-center w-full max-w-4xl mx-auto`}
             variants={staggerContainer}
             initial="initial"
             animate="animate"
           >
-          {visibleItems.map((item, idx) => {
-            const malUrl = getMALUrl(item);
-            const itemContent = (
-                <motion.div 
+            {visibleItems.map((item, idx) => {
+              const malUrl = getMALUrl(item);
+              const itemContent = (
+                <motion.div
                   className="flex flex-col items-center w-full"
                   variants={staggerItem}
                 >
-                  <motion.div 
-                className="aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative w-full" 
-                    style={{ maxHeight: '275px', maxWidth: '183px', width: '100%', boxSizing: 'border-box' }}
+                  <motion.div
+                    className="aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative w-full"
+                    style={{
+                      maxHeight: '275px',
+                      maxWidth: '183px',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                    }}
                     whileHover={{ borderColor: '#ffffff' }}
-                    transition={{ duration: 0.3, ease: smoothEase}}
+                    transition={{ duration: 0.3, ease: smoothEase }}
                   >
-                  
-                  {item.coverImage && (
-                    <motion.img 
-                      src={item.coverImage} 
-                      alt={item.title || ''} 
-                      crossOrigin="anonymous" 
-                      className="w-full h-full object-cover rounded-lg"
-                      whileHover={hoverImage}
-                    />
-                  )}
-                  
-                </motion.div>
-                {item.title && (
+                    {item.coverImage && (
+                      <motion.img
+                        src={item.coverImage}
+                        alt={item.title || ''}
+                        crossOrigin="anonymous"
+                        className="w-full h-full object-cover rounded-lg"
+                        whileHover={hoverImage}
+                      />
+                    )}
+                  </motion.div>
+                  {item.title && (
                     <div className="mt-2 text-center w-full px-1">
                       <p className="title-sm truncate">{item.title}</p>
-                    {item.userRating && (
-                      <p className="mono font-semibold text-yellow-300 mt-1">★ {item.userRating.toFixed(1)}</p>
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            );
-            
-            return (
+                      {item.userRating && (
+                        <p className="mono font-semibold text-yellow-300 mt-1">
+                          ★ {item.userRating.toFixed(1)}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              );
+
+              return (
                 <motion.div key={idx} className="w-full flex justify-center">
-                {malUrl ? (
-                    <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="w-full flex justify-center">
-                    {itemContent}
-                  </a>
-                ) : (
-                  itemContent
-                )}
-              </motion.div>
-            );
-          })}
+                  {malUrl ? (
+                    <a
+                      href={malUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full flex justify-center"
+                    >
+                      {itemContent}
+                    </a>
+                  ) : (
+                    itemContent
+                  )}
+                </motion.div>
+              );
+            })}
           </motion.div>
         </div>
       );
@@ -3756,49 +4622,74 @@ export default function MALWrapped() {
           <SlideLayout bgColor="pink">
             <div className="text-center relative w-full h-full flex flex-col items-center justify-center">
               {/* Colorful abstract shapes background */}
-              
+
               <div className="relative z-20 w-full flex flex-col items-center justify-center">
-              <motion.div {...fadeIn} data-framer-motion className="mt-16 w-full flex flex-col items-center">
+                <motion.div
+                  {...fadeIn}
+                  data-framer-motion
+                  className="mt-16 w-full flex flex-col items-center"
+                >
                   {/* User Picture - moved above MyAnimeList */}
-              <motion.div 
+                  <motion.div
                     className="mb-8 w-full flex items-center justify-center relative z-20"
-                variants={staggerItem}
+                    variants={staggerItem}
                     {...fadeIn}
                     data-framer-motion
-              >
-                    <div className="relative w-32 h-32 flex items-center justify-center flex-shrink-0 z-20">
-                  <motion.a
-                    href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
-                    {...fadeSlideUp}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
                   >
-                    <img 
-                      src={userImage} 
-                      alt={username || 'User'} 
-                      className="w-full h-full object-cover"
-                      crossOrigin="anonymous"
-                    />
-                  </motion.a>
-                </div>
-              </motion.div>
-                  
+                    <div className="relative w-32 h-32 flex items-center justify-center flex-shrink-0 z-20">
+                      <motion.a
+                        href={
+                          username
+                            ? `https://myanimelist.net/profile/${encodeURIComponent(username)}`
+                            : '#'
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
+                        {...fadeSlideUp}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <img
+                          src={userImage}
+                          alt={username || 'User'}
+                          className="w-full h-full object-cover"
+                          crossOrigin="anonymous"
+                        />
+                      </motion.a>
+                    </div>
+                  </motion.div>
+
                   <div className="relative inline-block text-center">
                     <h1 className="wrapped-brand text-white/70 relative z-10 text-center">
-                      {stats.selectedYear === 'all' ? 'MyAnimeList' : 'MyAnimeList ' + stats.selectedYear}
+                      {stats.selectedYear === 'all'
+                        ? 'MyAnimeList'
+                        : 'MyAnimeList ' + stats.selectedYear}
                     </h1>
                     <h2 className="wrapped-title text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white relative z-10 text-center">
                       Wrapped
                     </h2>
                   </div>
-                  <p className="body-md font-regular text-white mt-8 text-center text-container max-w-2xl mx-auto">A look back at your {stats.selectedYear === 'all' ? 'journey' : stats.selectedYear}, <span className="text-white font-medium">{username || 'a'}</span>.</p>
-                  
+                  <p className="body-md font-regular text-white mt-8 text-center text-container max-w-2xl mx-auto">
+                    {stats.selectedYear === 'all'
+                      ? t('welcome.lookBackJourney')
+                      : t('welcome.lookBack', {
+                          year: stats.selectedYear,
+                        })}{' '}
+                    <span className="text-white font-medium">
+                      {username || 'a'}
+                    </span>
+                  </p>
+
                   {/* Year Picker - moved from top nav */}
-                  <motion.div {...fadeIn} data-framer-motion className="mt-8 flex flex-col items-center gap-4">
-                    <p className="body-sm font-regular text-white/70 text-center mb-1">Select a year to view your stats</p>
+                  <motion.div
+                    {...fadeIn}
+                    data-framer-motion
+                    className="mt-8 flex flex-col items-center gap-4"
+                  >
+                    <p className="body-sm font-regular text-white/70 text-center mb-1">
+                      {t('welcome.selectYear')}
+                    </p>
                     <div className="relative min-w-[120px] sm:min-w-[140px]">
                       <select
                         id="year-selector"
@@ -3806,13 +4697,16 @@ export default function MALWrapped() {
                         value={selectedYear}
                         onChange={async (e) => {
                           e.preventDefault();
-                          const newYear = e.target.value === 'all' ? 'all' : parseInt(e.target.value);
-                          
+                          const newYear =
+                            e.target.value === 'all'
+                              ? 'all'
+                              : parseInt(e.target.value);
+
                           // Stop and remove all audio elements immediately
                           cleanupMediaElement(audioRef.current);
                           audioRef.current = null;
                           cleanupAllMediaElements();
-                          
+
                           // Clear all state and playlist
                           setPlaylist([]);
                           setPlaylistYear(null); // Clear playlist year
@@ -3824,75 +4718,161 @@ export default function MALWrapped() {
                           setIsLoadingSongs(true);
                           isSwitchingTrackRef.current = false;
                           isFetchingThemesRef.current = false; // Reset fetching flag
-                          
+
                           // Update year - this will trigger stats recalculation and new fetch
                           setSelectedYear(newYear);
                           // Stats will be recalculated by the useEffect that watches selectedYear
                           // The fetch will happen automatically when stats.topRated updates
                         }}
-                        className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-white rounded-full border-box-cyan transition-all rounded-lg text-xs sm:text-sm font-medium tracking-wider focus:outline-none appearance-none pr-8 sm:pr-10"
-                        style={{ 
+                        className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-white rounded-full border-box-cyan transition-all text-xs sm:text-sm font-medium tracking-wider focus:outline-none appearance-none pr-8 sm:pr-10"
+                        style={{
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                           color: '#ffffff',
-                          background: 'rgba(255, 255, 255, 0.1)'
+                          background: 'rgba(255, 255, 255, 0.1)',
                         }}
                       >
-                        <option value="2020" style={{ background: 'rgba(0, 0, 0, 0.85)', color: '#ffffff' }}>2020</option>
-                        <option value="2021" style={{ background: 'rgba(0, 0, 0, 0.85)', color: '#ffffff' }}>2021</option>
-                        <option value="2022" style={{ background: 'rgba(0, 0, 0, 0.85)', color: '#ffffff' }}>2022</option>
-                        <option value="2023" style={{ background: 'rgba(0, 0, 0, 0.85)', color: '#ffffff' }}>2023</option>
-                        <option value="2024" style={{ background: 'rgba(0, 0, 0, 0.85)', color: '#ffffff' }}>2024</option>
-                        <option value="2025" style={{ background: 'rgba(0, 0, 0, 0.85)', color: '#ffffff' }}>2025</option>
-                        <option value="all" style={{ background: 'rgba(0, 0, 0, 0.85)', color: '#ffffff' }}>All Time</option>
+                        <option
+                          value="2020"
+                          style={{
+                            background: 'rgba(0, 0, 0, 0.85)',
+                            color: '#ffffff',
+                          }}
+                        >
+                          2020
+                        </option>
+                        <option
+                          value="2021"
+                          style={{
+                            background: 'rgba(0, 0, 0, 0.85)',
+                            color: '#ffffff',
+                          }}
+                        >
+                          2021
+                        </option>
+                        <option
+                          value="2022"
+                          style={{
+                            background: 'rgba(0, 0, 0, 0.85)',
+                            color: '#ffffff',
+                          }}
+                        >
+                          2022
+                        </option>
+                        <option
+                          value="2023"
+                          style={{
+                            background: 'rgba(0, 0, 0, 0.85)',
+                            color: '#ffffff',
+                          }}
+                        >
+                          2023
+                        </option>
+                        <option
+                          value="2024"
+                          style={{
+                            background: 'rgba(0, 0, 0, 0.85)',
+                            color: '#ffffff',
+                          }}
+                        >
+                          2024
+                        </option>
+                        <option
+                          value="2025"
+                          style={{
+                            background: 'rgba(0, 0, 0, 0.85)',
+                            color: '#ffffff',
+                          }}
+                        >
+                          2025
+                        </option>
+                        <option
+                          value="all"
+                          style={{
+                            background: 'rgba(0, 0, 0, 0.85)',
+                            color: '#ffffff',
+                          }}
+                        >
+                          {t('filters.allTime')}
+                        </option>
                       </select>
                       <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        <svg
+                          className="w-4 h-4 sm:w-5 sm:h-5 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
                         </svg>
                       </div>
                     </div>
-                    
+
                     {/* Connect to MAL button */}
                     <motion.button
                       onClick={(e) => {
                         // Move to next slide and start music (themes should already be fetched by useEffect)
-                        if (stats && stats.topRated && stats.topRated.length > 0) {
+                        if (
+                          stats &&
+                          stats.topRated &&
+                          stats.topRated.length > 0
+                        ) {
                           // For iOS compatibility, start audio directly from user interaction
                           // iOS requires play() to be called synchronously within user gesture
                           if (playlist.length > 0) {
                             // Start playing immediately from user gesture (required for iOS)
-                            const initialTrackIndex = Math.min(4, playlist.length - 1);
+                            const initialTrackIndex = Math.min(
+                              4,
+                              playlist.length - 1,
+                            );
                             const track = playlist[initialTrackIndex];
-                            
+
                             if (track && track.videoUrl) {
                               // Create and play audio element synchronously within user gesture (iOS requirement)
-                              const isAudio = track.isAudio || track.videoUrl.match(/\.(mp3|m4a|ogg|wav|aac)(\?|$)/i);
-                              const mediaElement = isAudio 
+                              const isAudio =
+                                track.isAudio ||
+                                track.videoUrl.match(
+                                  /\.(mp3|m4a|ogg|wav|aac)(\?|$)/i,
+                                );
+                              const mediaElement = isAudio
                                 ? document.createElement('audio')
                                 : document.createElement('video');
-                              
+
                               mediaElement.src = track.videoUrl;
                               mediaElement.volume = 0.3;
                               mediaElement.crossOrigin = 'anonymous';
                               mediaElement.playsInline = true;
                               mediaElement.setAttribute('playsinline', 'true');
-                              mediaElement.setAttribute('webkit-playsinline', 'true');
+                              mediaElement.setAttribute(
+                                'webkit-playsinline',
+                                'true',
+                              );
                               mediaElement.style.display = 'none';
                               document.body.appendChild(mediaElement);
-                              
+
                               // Call play() immediately within user gesture (required for iOS)
                               const playPromise = mediaElement.play();
                               if (playPromise !== undefined) {
-                                playPromise.then(() => {
-                                  audioRef.current = mediaElement;
-                                  setCurrentTrackIndex(initialTrackIndex);
-                                  currentTrackIndexRef.current = initialTrackIndex;
-                                  setIsMusicPlaying(true);
-                                }).catch(err => {
-                                  devError('Failed to play on button click:', err);
-                                  // Fall back to normal playTrack
-                                  playTrack(initialTrackIndex, playlist);
-                                });
+                                playPromise
+                                  .then(() => {
+                                    audioRef.current = mediaElement;
+                                    setCurrentTrackIndex(initialTrackIndex);
+                                    currentTrackIndexRef.current =
+                                      initialTrackIndex;
+                                    setIsMusicPlaying(true);
+                                  })
+                                  .catch((err) => {
+                                    devError(
+                                      'Failed to play on button click:',
+                                      err,
+                                    );
+                                    // Fall back to normal playTrack
+                                    playTrack(initialTrackIndex, playlist);
+                                  });
                               }
                             } else {
                               // Fall back to normal playTrack
@@ -3907,15 +4887,17 @@ export default function MALWrapped() {
                         }
                       }}
                       className="bg-white text-black font-medium text-lg px-8 py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={!stats || !stats.topRated || stats.topRated.length === 0}
+                      disabled={
+                        !stats || !stats.topRated || stats.topRated.length === 0
+                      }
                       whileHover={{ scale: 1.05, backgroundColor: '#f5f5f5' }}
                       whileTap={{ scale: 0.95 }}
                       transition={{ duration: 0.2, ease: smoothEase }}
                     >
-                      Let's Go
+                      {t('buttons.letsGo')}
                     </motion.button>
                   </motion.div>
-              </motion.div>
+                </motion.div>
               </div>
             </div>
           </SlideLayout>
@@ -3925,12 +4907,19 @@ export default function MALWrapped() {
         if (stats.thisYearAnime.length === 0) {
           return (
             <SlideLayout bgColor="blue">
-              <motion.div className="text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.div
+                className="text-center relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
                 <h2 className="heading-md text-white mb-4 text-container">
-                  You didn't watch any anime {stats.selectedYear === 'all' ? '' : 'in ' + stats.selectedYear}.
+                  {t('slides.animeCount.noData')}{' '}
+                  {stats.selectedYear === 'all'
+                    ? ''
+                    : 'in ' + stats.selectedYear}
                 </h2>
                 <p className="body-md text-white/70 mb-6 text-container">
-                  Log your watched anime on MyAnimeList to see your personalized wrapped!
+                  {t('slides.animeCount.noMALData')}
                 </p>
                 <motion.a
                   href="https://myanimelist.net/"
@@ -3940,41 +4929,75 @@ export default function MALWrapped() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Log Anime on MAL
+                  {t('social.logAnimeOnMal')}
                 </motion.a>
               </motion.div>
             </SlideLayout>
           );
         }
-        const animeCarouselItems = stats.thisYearAnime.map(item => ({
+        const animeCarouselItems = stats.thisYearAnime.map((item) => ({
           title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
-          malId: item.node?.id
+          coverImage:
+            item.node?.main_picture?.large ||
+            item.node?.main_picture?.medium ||
+            '',
+          malId: item.node?.id,
         }));
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-medium  text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {stats.selectedYear === 'all' ? 'Overall' : 'In ' + stats.selectedYear}, you watched
+            <motion.h2
+              className="body-md font-medium  text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {stats.selectedYear === 'all'
+                ? t('slides.animeCount.overall')
+                : t('slides.animeCount.title', { year: stats.selectedYear })}
             </motion.h2>
-            <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-4 text-center relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               <p className="number-xl text-white ">
-                <AnimatedNumber value={stats.thisYearAnime.length} /> anime
+                <AnimatedNumber value={stats.thisYearAnime.length} />{' '}
+                {t('slides.animeCount.count')}
               </p>
-              
             </motion.div>
-            {animeCarouselItems.length > 0 && <div className="relative z-10"><ImageCarousel items={animeCarouselItems} maxItems={10} showHover={true} showNames={false} /></div>}
-            {stats.yearComparison && stats.yearComparison.previousAnimeCount > 0 && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                {stats.yearComparison.isAnimeGrowth ? (
-                  <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> more than last year. You’re leveling up!</>
-                ) : (
-                  <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.animeCountGrowth)}</span> less than last year. Don’t stop now!</>
-                )}
-              </motion.h3>
+            {animeCarouselItems.length > 0 && (
+              <div className="relative z-10">
+                <ImageCarousel
+                  items={animeCarouselItems}
+                  maxItems={10}
+                  showHover={true}
+                  showNames={false}
+                />
+              </div>
             )}
-            {(!stats.yearComparison || !stats.yearComparison.previousAnimeCount) && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                Now that's dedication
+            {stats.yearComparison &&
+              stats.yearComparison.previousAnimeCount > 0 && (
+                <motion.h3
+                  className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {stats.yearComparison.isAnimeGrowth
+                    ? t('slides.animeCount.more', {
+                        count: Math.abs(stats.yearComparison.animeCountGrowth),
+                      })
+                    : t('slides.animeCount.less', {
+                        count: Math.abs(stats.yearComparison.animeCountGrowth),
+                      })}
+                </motion.h3>
+              )}
+            {(!stats.yearComparison ||
+              !stats.yearComparison.previousAnimeCount) && (
+              <motion.h3
+                className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.animeCount.dedication')}
               </motion.h3>
             )}
           </SlideLayout>
@@ -3983,23 +5006,40 @@ export default function MALWrapped() {
       case 'anime_time':
         // Get percentage for comparison
         const animeComparison = stats.episodeComparison;
-        const animeDisplayPercentage = animeComparison 
-          ? (stats.selectedYear === 'all' ? animeComparison.allTimePercentage : animeComparison.percentage)
+        const animeDisplayPercentage = animeComparison
+          ? stats.selectedYear === 'all'
+            ? animeComparison.allTimePercentage
+            : animeComparison.percentage
           : 0;
-        const animeComparisonCopy = getComparisonCopy(animeDisplayPercentage, 'episodes');
-        
+        const animeComparisonCopy = getComparisonCopy(
+          animeDisplayPercentage,
+          'episodes',
+        );
+
         return (
           <SlideLayout bgColor="green">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            That adds up to
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.animeTime.title')}
             </motion.h2>
-            <motion.div className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               <div className="text-center">
                 <p className="number-lg text-white ">
                   <AnimatedNumber value={stats.totalEpisodes || 0} />
                 </p>
-                <p className="body-md text-white font-medium">episodes</p>
-                <p className="body-sm text-white/70 mt-2 font-regular">or</p>
+                <p className="body-md text-white font-medium">
+                  {t('slides.animeTime.episodes')}
+                </p>
+                <p className="body-sm text-white/70 mt-2 font-regular">
+                  {t('general.or')}
+                </p>
               </div>
               <div className="text-center">
                 {stats.watchDays > 0 ? (
@@ -4007,89 +5047,141 @@ export default function MALWrapped() {
                     <p className="number-lg text-white ">
                       <AnimatedNumber value={stats.watchDays} />
                     </p>
-                    <p className="body-md text-white font-medium">days</p>
-                    <p className="body-sm text-white/70 mt-2 font-regular">of nonstop binge</p>
+                    <p className="body-md text-white font-medium">
+                      {t('slides.animeTime.days')}
+                    </p>
+                    <p className="body-sm text-white/70 mt-2 font-regular">
+                      {t('slides.animeTime.binge')}
+                    </p>
                   </>
                 ) : (
                   <>
                     <p className="number-lg text-white ">
                       <AnimatedNumber value={stats.watchTime} />
                     </p>
-                    <p className="heading-md text-white font-medium">hours</p>
-                    <p className="body-sm text-white/70 mt-2 font-regular">of nonstop binge</p>
+                    <p className="heading-md text-white font-medium">
+                      {t('slides.animeTime.hours')}
+                    </p>
+                    <p className="body-sm text-white/70 mt-2 font-regular">
+                      {t('slides.animeTime.binge')}
+                    </p>
                   </>
                 )}
               </div>
-              {animeComparison && animeDisplayPercentage > 0 && animeComparisonCopy && (
-                <div className="text-center mt-4 w-full">
-                  <p className="body-sm text-white/70 font-regular text-container">
-                    {animeComparisonCopy.prefix}
-                    <span className="text-white font-semibold">
-                      {animeDisplayPercentage >= 100 
-                        ? `${Math.round(animeDisplayPercentage - 100)}%` 
-                        : `${Math.round(animeDisplayPercentage)}%`}
-                    </span>
-                    {animeComparisonCopy.suffix}
-                  </p>
-                </div>
-              )}
+              {animeComparison &&
+                animeDisplayPercentage > 0 &&
+                animeComparisonCopy && (
+                  <div className="text-center mt-4 w-full">
+                    <p className="body-sm text-white/70 font-regular text-container">
+                      {t(animeComparisonCopy.keyPrefix)}
+                      <span className="text-white font-semibold">
+                        {animeDisplayPercentage >= 100
+                          ? `${Math.round(animeDisplayPercentage - 100)}%`
+                          : `${Math.round(animeDisplayPercentage)}%`}
+                      </span>
+                      {t(animeComparisonCopy.keySuffix)}
+                    </p>
+                  </div>
+                )}
             </motion.div>
           </SlideLayout>
         );
 
       case 'top_genre':
-        const topGenre = stats.topGenres && stats.topGenres.length > 0 ? stats.topGenres[0][0] : null;
-        const topGenreAnime = topGenre ? deduplicateByTitle(
-          stats.thisYearAnime.filter(item => 
-            item.node?.genres?.some(g => g.name === topGenre)
-          )
-        ) : [];
-        const genreAnime = topGenreAnime.map(item => ({
+        const topGenre =
+          stats.topGenres && stats.topGenres.length > 0
+            ? stats.topGenres[0][0]
+            : null;
+        const topGenreAnime = topGenre
+          ? deduplicateByTitle(
+              stats.thisYearAnime.filter((item) =>
+                item.node?.genres?.some((g) => g.name === topGenre),
+              ),
+            )
+          : [];
+        const genreAnime = topGenreAnime.map((item) => ({
           title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
-          malId: item.node?.id
+          coverImage:
+            item.node?.main_picture?.large ||
+            item.node?.main_picture?.medium ||
+            '',
+          malId: item.node?.id,
         }));
         const otherGenres = stats.topGenres?.slice(1, 5) || [];
         return (
           <SlideLayout>
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            You couldn't get enough of
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.topGenre.title')}
             </motion.h2>
             {topGenre ? (
               <>
-                <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-                  <p className="heading-lg font-semibold text-white "><span className="body-lg font-bold text-white/70">1.</span> {topGenre}</p>
-                  <p className="text-sm md:text-base text-white/70 font-medium">{stats.topGenres[0][1]} entries</p>
+                <motion.div
+                  className="mt-4 text-center relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  <p className="heading-lg font-semibold text-white ">
+                    <span className="body-lg font-bold text-white/70">1.</span>{' '}
+                    {topGenre}
+                  </p>
+                  <p className="text-sm md:text-base text-white/70 font-medium">
+                    {stats.topGenres[0][1]} {t('slides.topGenre.entries')}
+                  </p>
                 </motion.div>
-                {genreAnime.length > 0 && <div className="relative z-10"><ImageCarousel items={genreAnime} maxItems={10} showHover={true} showNames={false} /></div>}
+                {genreAnime.length > 0 && (
+                  <div className="relative z-10">
+                    <ImageCarousel
+                      items={genreAnime}
+                      maxItems={10}
+                      showHover={true}
+                      showNames={false}
+                    />
+                  </div>
+                )}
                 {otherGenres.length > 0 && (
                   <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
                     {otherGenres.map(([genreName, count], idx) => (
-                      <motion.div 
-                        key={idx} 
-                        className="text-center py-2" 
+                      <motion.div
+                        key={idx}
+                        className="text-center py-2"
                         variants={staggerItem}
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.2, ease: smoothEase }}
                       >
                         <p className="heading-sm font-semibold text-white truncate mb-1">
-                          <span className="body-sm font-bold text-white/50 mr-1.5">{idx + 2}.</span> 
+                          <span className="body-sm font-bold text-white/50 mr-1.5">
+                            {idx + 2}.
+                          </span>
                           {genreName}
                         </p>
-                        <p className="text-sm md:text-base text-white/70 font-medium tracking-wide">{count} entries</p>
+                        <p className="text-sm md:text-base text-white/70 font-medium tracking-wide">
+                          {count} {t('slides.topGenre.entries')}
+                        </p>
                       </motion.div>
                     ))}
                   </div>
                 )}
-                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You know what you love
-            </motion.h3>
+                <motion.h3
+                  className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.topGenre.subtitle')}
+                </motion.h3>
               </>
-              
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>No genres topped your list
-            </motion.h3>
+              <motion.h3
+                className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.topGenre.noGenres')}
+              </motion.h3>
             )}
-            
           </SlideLayout>
         );
 
@@ -4099,7 +5191,7 @@ export default function MALWrapped() {
           const [showPercentages, setShowPercentages] = useState(false);
           const [isMobile, setIsMobile] = useState(false);
           const isAnime = slide.id === 'demographic_anime';
-          
+
           useEffect(() => {
             // Check if mobile on mount and resize
             const checkMobile = () => {
@@ -4109,7 +5201,7 @@ export default function MALWrapped() {
             window.addEventListener('resize', checkMobile);
             return () => window.removeEventListener('resize', checkMobile);
           }, []);
-          
+
           useEffect(() => {
             // Show percentages after reveal completes (1.5s delay + 1.2s transition = ~2.7s)
             const percentageTimer = setTimeout(() => {
@@ -4119,84 +5211,112 @@ export default function MALWrapped() {
               clearTimeout(percentageTimer);
             };
           }, []);
-          
-          const demographicData = isAnime ? stats.animeDemographicDistribution : stats.mangaDemographicDistribution;
+
+          const demographicData = isAnime
+            ? stats.animeDemographicDistribution
+            : stats.mangaDemographicDistribution;
           if (!demographicData || demographicData.length === 0) return null;
-          
+
           const demographics = demographicData;
           const topDemographic = demographics[0];
           const allDemographics = demographics;
           const demographicCharacters = {
-            'Shounen': '/demographics/shounen.webp',
-            'Seinen': '/demographics/seinen.webp',
-            'Shoujo': '/demographics/shoujo.webp',
-            'Josei': '/demographics/josei.webp'
+            Shounen: '/demographics/shounen.webp',
+            Seinen: '/demographics/seinen.webp',
+            Shoujo: '/demographics/shoujo.webp',
+            Josei: '/demographics/josei.webp',
           };
-          
+
           // Helper to get percentage by name
           const getPercentage = (name) => {
-            const demo = demographics.find(d => d.name === name);
+            const demo = demographics.find((d) => d.name === name);
             return demo ? demo.percentage : 0;
           };
-          
+
           // Calculate footer text based on percentages
           const getFooterText = () => {
             const seinen = getPercentage('Seinen');
             const shounen = getPercentage('Shounen');
             const shoujo = getPercentage('Shoujo');
             const josei = getPercentage('Josei');
-            
+
+            const footerKey = isAnime
+              ? 'demographicAnimeFooter'
+              : 'demographicMangaFooter';
+
             // Check in priority order
             if (seinen >= 70 || shounen >= 70 || shoujo >= 70 || josei >= 70) {
-              return "You found your lane and stayed in it";
+              const dominant =
+                seinen >= 70
+                  ? 'seinen'
+                  : shounen >= 70
+                    ? 'shounen'
+                    : shoujo >= 70
+                      ? 'shoujo'
+                      : 'josei';
+              return t(`${footerKey}.${dominant}.foundLane`);
             }
             if (seinen >= 50) {
-              return "Complex narratives are your jam";
+              return t(`${footerKey}.seinen.complexNarratives`);
             }
             if (shounen >= 50) {
-              return "Classic battle arcs never gets old";
+              return t(`${footerKey}.shounen.classicBattle`);
             }
             if (shoujo >= 50) {
-              return "Heart and feelings over action";
+              return t(`${footerKey}.shoujo.foundLane`);
             }
             if (josei >= 50) {
-              return "Life's complexity resonates with you";
+              return t(`${footerKey}.josei.foundLane`);
             }
             if (shounen >= 30 && seinen >= 30) {
-              return "From hype to depth, you want it all";
+              return t(`${footerKey}.josei.complexNarratives`);
             }
             if (shoujo >= 30 && josei >= 30) {
-              return "Romance at every stage of life";
+              return t(`${footerKey}.shounen.foundLane`);
             }
             if (seinen < 40 && shounen < 40 && shoujo < 40 && josei < 40) {
-              return "You read across all demographics";
+              return isAnime
+                ? t('slides.demographicAnime.allDemographics')
+                : t('slides.demographicManga.allDemographics');
             }
-            return "Your taste spans multiple worlds";
+            return t(`${footerKey}.seinen.foundLane`);
           };
-          
+
           // 4 quadrants - evenly spaced, no overlap (reduced on mobile)
           const quadrantSpacing = isMobile ? 80 : 120;
           const quadrantVertical = isMobile ? 60 : 80;
           const quadrantPositions = [
-            { x: -quadrantSpacing, y: -quadrantVertical },  // Top left quadrant
-            { x: quadrantSpacing, y: -quadrantVertical },   // Top right quadrant
-            { x: -quadrantSpacing, y: quadrantVertical },   // Bottom left quadrant
-            { x: quadrantSpacing, y: quadrantVertical }     // Bottom right quadrant
+            { x: -quadrantSpacing, y: -quadrantVertical }, // Top left quadrant
+            { x: quadrantSpacing, y: -quadrantVertical }, // Top right quadrant
+            { x: -quadrantSpacing, y: quadrantVertical }, // Bottom left quadrant
+            { x: quadrantSpacing, y: quadrantVertical }, // Bottom right quadrant
           ];
-          
+
           // Final positions (top centered, others in row below)
-          const topIdx = allDemographics.findIndex(d => d.name === topDemographic.name);
+          const topIdx = allDemographics.findIndex(
+            (d) => d.name === topDemographic.name,
+          );
           const otherIndices = allDemographics
             .map((d, i) => ({ d, i }))
             .filter(({ d }) => d.name !== topDemographic.name)
             .map(({ i }) => i);
-          
+
           return (
             <SlideLayout bgColor="pink">
-              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                Though your {isAnime ? 'watching' : 'reading'} taste leans towards...
+              <motion.h2
+                className="body-md font-medium text-white text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {isAnime
+                  ? t('slides.demographicAnime.title')
+                  : t('slides.demographicManga.title')}
               </motion.h2>
-              <motion.div className="mt-4 md:mt-4 flex flex-col items-center relative z-10 min-h-[50vh] justify-center" {...fadeSlideUp} data-framer-motion>
+              <motion.div
+                className="mt-4 md:mt-4 flex flex-col items-center relative z-10 min-h-[50vh] justify-center"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
                 <motion.div
                   className="relative w-full h-64 md:h-80 flex items-center justify-center"
                   initial={{ opacity: 0 }}
@@ -4209,26 +5329,28 @@ export default function MALWrapped() {
                     // Reduce spacing on mobile
                     const horizontalSpacing = isMobile ? 80 : 120;
                     const verticalSpacing = isMobile ? 80 : 100;
-                    const finalX = isTop 
-                      ? 0 
-                      : (otherIndices.indexOf(idx) - (otherIndices.length - 1) / 2) * horizontalSpacing;
+                    const finalX = isTop
+                      ? 0
+                      : (otherIndices.indexOf(idx) -
+                          (otherIndices.length - 1) / 2) *
+                        horizontalSpacing;
                     const finalY = isTop ? -verticalSpacing : verticalSpacing;
-                    
+
                     return (
                       <motion.div
                         key={demo.name}
                         className="absolute flex flex-col items-center"
-                        initial={{ 
-                          scale: 0, 
+                        initial={{
+                          scale: 0,
                           opacity: 0,
                           x: initialPos.x,
-                          y: initialPos.y
+                          y: initialPos.y,
                         }}
                         animate={{
                           scale: [0, 1, 0.6, 1, isTop ? 1.25 : 0.8],
                           opacity: [0, 1, 1],
                           x: [initialPos.x, initialPos.x, finalX],
-                          y: [initialPos.y, initialPos.y, finalY]
+                          y: [initialPos.y, initialPos.y, finalY],
                         }}
                         transition={{
                           scale: {
@@ -4239,25 +5361,25 @@ export default function MALWrapped() {
                           },
                           opacity: {
                             duration: 0.5,
-                            delay: idx * 0.1
+                            delay: idx * 0.1,
                           },
                           x: {
                             duration: 1.2,
                             delay: 1.5,
-                            ease: smoothEase
+                            ease: smoothEase,
                           },
                           y: {
                             duration: 1.2,
                             delay: 1.5,
-                            ease: smoothEase
-                          }
+                            ease: smoothEase,
+                          },
                         }}
                       >
-                        <div
-                          className="relative rounded-full overflow-hidden mb-1 md:mb-2 w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28"
-                        >
+                        <div className="relative rounded-full overflow-hidden mb-1 md:mb-2 w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28">
                           <img
-                            src={demographicCharacters[demo.name] || '/Mascot.webp'}
+                            src={
+                              demographicCharacters[demo.name] || '/Mascot.webp'
+                            }
                             alt={demo.name}
                             className="w-full h-full object-cover"
                             crossOrigin="anonymous"
@@ -4266,13 +5388,15 @@ export default function MALWrapped() {
                             }}
                           />
                         </div>
-                        <motion.p className={`${isTop ? 'title-sm text-white' : 'body-md text-white/80'} font-semibold text-center`}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: showPercentages ? 1 : 0 }}
-                        transition={{ duration: 0.5 }}>
+                        <motion.p
+                          className={`${isTop ? 'title-sm text-white' : 'body-md text-white/80'} font-semibold text-center`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: showPercentages ? 1 : 0 }}
+                          transition={{ duration: 0.5 }}
+                        >
                           {demo.name}
                         </motion.p>
-                        <motion.p 
+                        <motion.p
                           className={`body-sm text-white/70 font-medium text-center`}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: showPercentages ? 1 : 0 }}
@@ -4284,7 +5408,7 @@ export default function MALWrapped() {
                     );
                   })}
                 </motion.div>
-                <motion.p 
+                <motion.p
                   className="body-sm text-white/70 text-center mt-4 md:mt-8 max-w-md"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -4296,7 +5420,7 @@ export default function MALWrapped() {
             </SlideLayout>
           );
         };
-        
+
         return <DemographicContent />;
       }
 
@@ -4304,7 +5428,7 @@ export default function MALWrapped() {
         const DrumrollContent = () => {
           const [phase, setPhase] = useState(0);
           const topItem = stats.topRated.length > 0 ? stats.topRated[0] : null;
-          
+
           useEffect(() => {
             const timer1 = setTimeout(() => setPhase(1), 2500);
             return () => {
@@ -4314,61 +5438,86 @@ export default function MALWrapped() {
 
           return (
             <SlideLayout bgColor="yellow">
-            {phase === 0 ? (
-              <motion.div className="text-center relative overflow-hidden z-10" {...fadeSlideUp} data-framer-motion>
-                <motion.div 
-                  className="relative z-10 mb-6 flex items-center justify-center"
+              {phase === 0 ? (
+                <motion.div
+                  className="text-center relative overflow-hidden z-10"
+                  {...fadeSlideUp}
                   data-framer-motion
                 >
-                  <img 
-                    src="/anime.gif" 
-                    alt="Anime character"
-                    className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
-                  />
+                  <motion.div
+                    className="relative z-10 mb-6 flex items-center justify-center"
+                    data-framer-motion
+                  >
+                    <img
+                      src="/anime.gif"
+                      alt="Anime character"
+                      className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
+                    />
+                  </motion.div>
+                  <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">
+                    {t('slides.drumroll.animeQuestion', {
+                      year:
+                        stats.selectedYear === 'all'
+                          ? t('general.allTime')
+                          : stats.selectedYear,
+                    })}
+                  </h2>
                 </motion.div>
-                <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">And your top anime of {stats.selectedYear === 'all' ? 'all time' : stats.selectedYear}?</h2>
-              </motion.div>
-            ) : phase === 1 && topItem ? (
-              <motion.div className="text-center relative overflow-hidden z-10">
-                <div className="flex flex-col items-center justify-center gap-4">
-                  <motion.div 
-                    className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative z-10" 
-                    style={{ boxSizing: 'border-box' }}
-                    {...fadeSlideUp}
-                    transition={{ ...fadeSlideUp.transition, delay: 0 }}
-                    whileHover={{ borderColor: '#ffffff' }}
-                  >
-                    {topItem.node?.main_picture?.large && (
-                      <motion.img 
-                        src={topItem.node.main_picture.large} 
-                        alt={topItem.node.title} 
-                        crossOrigin="anonymous" 
-                        className="w-full h-full object-cover rounded-lg"
-                        whileHover={hoverImage}
-                      />
-                    )}
-                  </motion.div>
-                  <motion.div 
-                    className="text-center relative z-10"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.2, ease: smoothEase }}
-                  >
-                    <h3 className="title-lg text-white font-semibold">{topItem.node?.title}</h3>
-                    {topItem.node?.studios?.[0]?.name && (
-                      <p className="body-sm text-white/70  font-regular">{topItem.node.studios[0].name}</p>
-                    )}
-                    <div className="flex items-center justify-center body-md text-yellow-300 font-bold mt-1">
-                      <span className="mr-2">★</span>
-                      <span>{topItem.list_status?.score ? Math.round(topItem.list_status.score) : 'N/A'}</span>
-                    </div>
-                  </motion.div>
+              ) : phase === 1 && topItem ? (
+                <motion.div className="text-center relative overflow-hidden z-10">
+                  <div className="flex flex-col items-center justify-center gap-4">
+                    <motion.div
+                      className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative z-10"
+                      style={{ boxSizing: 'border-box' }}
+                      {...fadeSlideUp}
+                      transition={{ ...fadeSlideUp.transition, delay: 0 }}
+                      whileHover={{ borderColor: '#ffffff' }}
+                    >
+                      {topItem.node?.main_picture?.large && (
+                        <motion.img
+                          src={topItem.node.main_picture.large}
+                          alt={topItem.node.title}
+                          crossOrigin="anonymous"
+                          className="w-full h-full object-cover rounded-lg"
+                          whileHover={hoverImage}
+                        />
+                      )}
+                    </motion.div>
+                    <motion.div
+                      className="text-center relative z-10"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.4,
+                        delay: 0.2,
+                        ease: smoothEase,
+                      }}
+                    >
+                      <h3 className="title-lg text-white font-semibold">
+                        {topItem.node?.title}
+                      </h3>
+                      {topItem.node?.studios?.[0]?.name && (
+                        <p className="body-sm text-white/70  font-regular">
+                          {topItem.node.studios[0].name}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-center body-md text-yellow-300 font-bold mt-1">
+                        <span className="mr-2">★</span>
+                        <span>
+                          {topItem.list_status?.score
+                            ? Math.round(topItem.list_status.score)
+                            : 'N/A'}
+                        </span>
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
+              ) : (
+                <div className="body-md font-regular text-white/70 relative z-10">
+                  {t('slides.drumroll.noAnime')}
                 </div>
-              </motion.div>
-            ) : (
-              <div className="body-md font-regular text-white/70 relative z-10">No favorite anime found</div>
-            )}
-          </SlideLayout>
+              )}
+            </SlideLayout>
           );
         };
         return <DrumrollContent />;
@@ -4378,32 +5527,48 @@ export default function MALWrapped() {
         const Top5Content = () => {
           const type = 'anime';
           const top5Items = stats.topRated.slice(0, 5);
-          
-          const top5Formatted = top5Items.map(item => ({
+
+          const top5Formatted = top5Items.map((item) => ({
             id: item.node.id,
             title: item.node.title,
-            coverImage: item.node.main_picture?.large || item.node.main_picture?.medium || '',
+            coverImage:
+              item.node.main_picture?.large ||
+              item.node.main_picture?.medium ||
+              '',
             userRating: item.list_status.score,
-            studio: type === 'anime' ? (item.node.studios?.[0]?.name || '') : '',
-            author: type === 'manga' ? (`${item.node.authors?.[0]?.node?.first_name || ''} ${item.node.authors?.[0]?.node?.last_name || ''}`.trim()) : '',
-            genres: item.node.genres?.map(g => g.name) || [],
+            studio: type === 'anime' ? item.node.studios?.[0]?.name || '' : '',
+            author:
+              type === 'manga'
+                ? `${item.node.authors?.[0]?.node?.first_name || ''} ${item.node.authors?.[0]?.node?.last_name || ''}`.trim()
+                : '',
+            genres: item.node.genres?.map((g) => g.name) || [],
             malId: type === 'anime' ? item.node.id : null,
-            mangaId: type === 'manga' ? item.node.id : null
+            mangaId: type === 'manga' ? item.node.id : null,
           }));
 
           if (top5Formatted.length === 0) {
             return (
               <SlideLayout>
-                <div className="text-white/70 relative z-10">No favorite {type} found</div>
+                <div className="text-white/70 relative z-10">
+                  {t('slides.top5Anime.noFavorite')}
+                </div>
               </SlideLayout>
             );
           }
 
           return (
             <SlideLayout>
-              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                Your personal hall of fame
+              <motion.div
+                className="relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                <motion.h2
+                  className="body-md font-medium text-white text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.top5Anime.title')}
                 </motion.h2>
                 <div className="mt-4 sm:mt-6 flex flex-col gap-4 sm:gap-6 w-full max-w-3xl mx-auto relative z-10">
                   {(() => {
@@ -4411,33 +5576,46 @@ export default function MALWrapped() {
                     return (
                       <>
                         {/* Featured #1 Item */}
-                        <motion.div 
+                        <motion.div
                           className="relative w-full max-w-3xl z-10"
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
+                          transition={{
+                            duration: 0.3,
+                            delay: 0.1,
+                            ease: smoothEase,
+                          }}
                         >
                           <div className="flex items-center gap-2.5 sm:gap-3 md:flex-col md:items-center">
                             {/* Image - square on mobile, larger 2/3 aspect on desktop */}
                             <div className="flex-shrink-0">
                               {(() => {
-                                const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
+                                const featuredUrl = featured.malId
+                                  ? `https://myanimelist.net/anime/${featured.malId}`
+                                  : featured.mangaId
+                                    ? `https://myanimelist.net/manga/${featured.mangaId}`
+                                    : null;
                                 const featuredImage = (
                                   <div className="relative">
                                     {/* Number badge in circle at top left */}
-                                    <div className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}>
+                                    <div
+                                      className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}
+                                    >
                                       1
                                     </div>
-                                    <motion.div 
-                                      className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-20 h-20 md:w-32 md:h-48" 
+                                    <motion.div
+                                      className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-20 h-20 md:w-32 md:h-48"
                                       whileHover={{ scale: 1.02 }}
-                                      transition={{ duration: 0.3, ease: smoothEase}}
+                                      transition={{
+                                        duration: 0.3,
+                                        ease: smoothEase,
+                                      }}
                                     >
                                       {featured.coverImage && (
-                                        <motion.img 
-                                          src={featured.coverImage} 
-                                          crossOrigin="anonymous" 
-                                          alt={featured.title} 
+                                        <motion.img
+                                          src={featured.coverImage}
+                                          crossOrigin="anonymous"
+                                          alt={featured.title}
                                           className="w-full h-full object-cover rounded-lg"
                                         />
                                       )}
@@ -4445,22 +5623,40 @@ export default function MALWrapped() {
                                   </div>
                                 );
                                 return featuredUrl ? (
-                                  <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
+                                  <a
+                                    href={featuredUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="relative z-10"
+                                  >
                                     {featuredImage}
                                   </a>
-                                ) : featuredImage;
+                                ) : (
+                                  featuredImage
+                                );
                               })()}
                             </div>
                             {/* Title and details - beside on mobile, below on desktop */}
-                            <motion.div 
+                            <motion.div
                               className="flex-1 min-w-0 md:text-center md:flex-1"
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                              <h3 className="title-sm md:title-md font-semibold text-white mb-1">{featured.title}</h3>
-                              {featured.studio && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.studio}</p>}
-                              {featured.author && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.author}</p>}
+                              <h3 className="title-sm md:title-md font-semibold text-white mb-1">
+                                {featured.title}
+                              </h3>
+                              {featured.studio && (
+                                <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">
+                                  {featured.studio}
+                                </p>
+                              )}
+                              {featured.author && (
+                                <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">
+                                  {featured.author}
+                                </p>
+                              )}
                               <div className="flex items-center mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base md:justify-center">
                                 <span className="mr-1">★</span>
                                 <span>{Math.round(featured.userRating)}</span>
@@ -4468,36 +5664,48 @@ export default function MALWrapped() {
                             </motion.div>
                           </div>
                         </motion.div>
-                        
+
                         {/* Items #2-5 - vertical list on mobile, 2x2 grid on desktop */}
                         {others.length > 0 && (
-                          <motion.div 
+                          <motion.div
                             className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-3xl"
                             variants={staggerContainer}
                             initial="initial"
                             animate="animate"
                           >
                             {others.map((item, index) => {
-                              const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
+                              const malUrl = item.malId
+                                ? `https://myanimelist.net/anime/${item.malId}`
+                                : item.mangaId
+                                  ? `https://myanimelist.net/manga/${item.mangaId}`
+                                  : null;
                               const itemContent = (
-                                <motion.div 
+                                <motion.div
                                   className="flex items-center gap-2.5 sm:gap-3 w-full"
                                   variants={staggerItem}
                                 >
                                   {/* Thumbnail - only this is clickable */}
                                   <div className="relative flex-shrink-0">
                                     {/* Number badge in circle at top left - outside overflow container */}
-                                    <div className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}>
+                                    <div
+                                      className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}
+                                    >
                                       {index + 2}
                                     </div>
                                     {malUrl ? (
-                                      <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="block">
+                                      <a
+                                        href={malUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="block"
+                                      >
                                         <div className="w-20 h-20 rounded-lg overflow-hidden">
                                           {item.coverImage && (
-                                            <motion.img 
-                                              src={item.coverImage} 
-                                              alt={item.title} 
-                                              crossOrigin="anonymous" 
+                                            <motion.img
+                                              src={item.coverImage}
+                                              alt={item.title}
+                                              crossOrigin="anonymous"
                                               className="w-full h-full object-cover"
                                               whileHover={{ scale: 1.05 }}
                                               transition={{ duration: 0.2 }}
@@ -4508,10 +5716,10 @@ export default function MALWrapped() {
                                     ) : (
                                       <div className="w-20 h-20 rounded-lg overflow-hidden">
                                         {item.coverImage && (
-                                          <motion.img 
-                                            src={item.coverImage} 
-                                            alt={item.title} 
-                                            crossOrigin="anonymous" 
+                                          <motion.img
+                                            src={item.coverImage}
+                                            alt={item.title}
+                                            crossOrigin="anonymous"
                                             className="w-full h-full object-cover"
                                             whileHover={{ scale: 1.05 }}
                                             transition={{ duration: 0.2 }}
@@ -4522,9 +5730,19 @@ export default function MALWrapped() {
                                   </div>
                                   {/* Title and details - not clickable */}
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="title-sm font-semibold text-white truncate">{item.title}</h3>
-                                    {item.studio && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.studio}</p>}
-                                    {item.author && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.author}</p>}
+                                    <h3 className="title-sm font-semibold text-white truncate">
+                                      {item.title}
+                                    </h3>
+                                    {item.studio && (
+                                      <p className="text-sm md:text-base text-white/70 truncate mt-0.5">
+                                        {item.studio}
+                                      </p>
+                                    )}
+                                    {item.author && (
+                                      <p className="text-sm md:text-base text-white/70 truncate mt-0.5">
+                                        {item.author}
+                                      </p>
+                                    )}
                                     <div className="flex items-center mono text-yellow-300 mt-0.5 font-semibold text-sm sm:text-base">
                                       <span className="mr-0.5">★</span>
                                       <span>{Math.round(item.userRating)}</span>
@@ -4544,7 +5762,13 @@ export default function MALWrapped() {
                     );
                   })()}
                 </div>
-                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>A lineup worth bragging about</motion.h3>
+                <motion.h3
+                  className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.top5Anime.subtitle')}
+                </motion.h3>
               </motion.div>
             </SlideLayout>
           );
@@ -4553,147 +5777,228 @@ export default function MALWrapped() {
       }
 
       case 'top_studio':
-        const topStudio = stats.topStudios && stats.topStudios.length > 0 ? stats.topStudios[0][0] : null;
-        const topStudioAnime = topStudio ? deduplicateByTitle(
-          stats.thisYearAnime.filter(item => 
-            item.node?.studios?.some(s => s.name === topStudio)
-          )
-        ) : [];
-        
-        const studioAnime = topStudioAnime.map(item => ({
+        const topStudio =
+          stats.topStudios && stats.topStudios.length > 0
+            ? stats.topStudios[0][0]
+            : null;
+        const topStudioAnime = topStudio
+          ? deduplicateByTitle(
+              stats.thisYearAnime.filter((item) =>
+                item.node?.studios?.some((s) => s.name === topStudio),
+              ),
+            )
+          : [];
+
+        const studioAnime = topStudioAnime.map((item) => ({
           title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
-          malId: item.node?.id
+          coverImage:
+            item.node?.main_picture?.large ||
+            item.node?.main_picture?.medium ||
+            '',
+          malId: item.node?.id,
         }));
         const otherStudios = stats.topStudios?.slice(1, 5) || [];
         return (
           <SlideLayout bgColor="red">
             <div className="text-center relative">
-            <motion.h2 className="body-md font-bold text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            These studios defined your watchlist
-            </motion.h2>
+              <motion.h2
+                className="body-md font-bold text-white text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.topStudio.title')}
+              </motion.h2>
             </div>
             {topStudio ? (
               <>
-                <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-                  <p className="heading-lg font-semibold text-white "><span className="body-lg font-bold text-white/70">1.</span> {topStudio}</p>
-                  <p className="body-sm text-white/70 font-regular">{stats.topStudios[0][1]} series</p>
+                <motion.div
+                  className="mt-4 text-center relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  <p className="heading-lg font-semibold text-white ">
+                    <span className="body-lg font-bold text-white/70">1.</span>{' '}
+                    {topStudio}
+                  </p>
+                  <p className="body-sm text-white/70 font-regular">
+                    {stats.topStudios[0][1]} {t('slides.topStudio.series')}
+                  </p>
                 </motion.div>
                 {studioAnime.length > 0 && (
-                  <div className="relative z-10"><ImageCarousel items={studioAnime} maxItems={10} showHover={true} showNames={false} /></div>
+                  <div className="relative z-10">
+                    <ImageCarousel
+                      items={studioAnime}
+                      maxItems={10}
+                      showHover={true}
+                      showNames={false}
+                    />
+                  </div>
                 )}
                 {otherStudios.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 relative z-10">
                     {otherStudios.map(([studioName, count], idx) => (
-                      <motion.div key={idx} className="text-center" variants={staggerItem}>
-                        <motion.div 
+                      <motion.div
+                        key={idx}
+                        className="text-center"
+                        variants={staggerItem}
+                      >
+                        <motion.div
                           className="h-full"
                           whileHover={{ scale: 1.02 }}
                           transition={{ duration: 0.3, ease: smoothEase }}
                         >
-                          <p className="heading-sm font-semibold text-white truncate"><span className="body-sm font-bold text-white/70">{idx + 2}.</span> {studioName}</p>
-                          <p className="text-sm text-white/70 font-regular">{count} series</p>
-                      </motion.div>
+                          <p className="heading-sm font-semibold text-white truncate">
+                            <span className="body-sm font-bold text-white/70">
+                              {idx + 2}.
+                            </span>{' '}
+                            {studioName}
+                          </p>
+                          <p className="text-sm text-white/70 font-regular">
+                            {count} {t('slides.topStudio.series')}
+                          </p>
+                        </motion.div>
                       </motion.div>
                     ))}
                   </div>
-                  
                 )}
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container mt-4 relative z-10" {...fadeSlideUp} data-framer-motion>
-                You know who gets the job done
-            </motion.h3>
+                <motion.h3
+                  className="body-sm font-regular text-white/70 text-center text-container mt-4 relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.topStudio.subtitle')}
+                </motion.h3>
               </>
             ) : (
-              <motion.h3 className="body-md font-regular text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            No studios showed up enough to be counted
-            </motion.h3>
+              <motion.h3
+                className="body-md font-regular text-white/70 text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.topStudio.noStudios')}
+              </motion.h3>
             )}
           </SlideLayout>
         );
 
       case 'seasonal_highlights':
         const seasons = ['Winter', 'Spring', 'Summer', 'Fall'];
-        const hasAnySeasonalData = seasons.some(season => stats.seasonalHighlights?.[season]);
-        
+        const hasAnySeasonalData = seasons.some(
+          (season) => stats.seasonalHighlights?.[season],
+        );
+
         if (!hasAnySeasonalData) {
           return (
             <SlideLayout bgColor="pink">
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                You didn't follow any seasonal anime this time
+              <motion.h3
+                className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.seasonalHighlights.noData')}
               </motion.h3>
             </SlideLayout>
           );
         }
-        
+
         return (
           <SlideLayout bgColor="pink">
             <div className="text-center relative">
-              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Your year, season by season
-            </motion.h2>
+              <motion.h2
+                className="body-md font-medium text-white text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.seasonalHighlights.title')}
+              </motion.h2>
             </div>
-            <motion.div 
+            <motion.div
               className="mt-2 sm:mt-4 grid grid-cols-2 gap-2 sm:gap-3 relative z-10 max-w-2xl mx-auto"
               variants={staggerContainer}
               initial="initial"
               animate="animate"
             >
-              {seasons.map(season => {
+              {seasons.map((season) => {
                 const seasonData = stats.seasonalHighlights?.[season];
                 if (!seasonData) return null;
                 const highlight = seasonData.highlight;
                 const seasonIndex = seasons.indexOf(season);
                 // Get year from highlight for "all time" view
-                const seasonYear = stats.selectedYear === 'all' && highlight?.node?.start_season?.year 
-                  ? ` ${highlight.node.start_season.year}` 
-                  : '';
+                const seasonYear =
+                  stats.selectedYear === 'all' &&
+                  highlight?.node?.start_season?.year
+                    ? ` ${highlight.node.start_season.year}`
+                    : '';
                 return (
-                  <motion.div 
-                    key={season} 
+                  <motion.div
+                    key={season}
                     className="rounded-xl overflow-hidden"
                     style={{ padding: '2px' }}
                     variants={staggerItem}
                   >
-                    <motion.div 
+                    <motion.div
                       className="bg-black/60 rounded-xl p-2 md:p-4 h-full flex flex-col items-center"
-                      whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)' }}
+                      whileHover={{
+                        scale: 1.02,
+                        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+                      }}
                       transition={{ duration: 0.3, ease: smoothEase }}
                     >
-                      <h3 className="body-sm font-medium text-white mb-1 sm:mb-2 text-center">{season}{seasonYear}</h3>
-                    {highlight && (
-                      <>
+                      <h3 className="body-sm font-medium text-white mb-1 sm:mb-2 text-center">
+                        {season}
+                        {seasonYear}
+                      </h3>
+                      {highlight && (
+                        <>
                           <div className="flex flex-col items-center gap-1.5 sm:gap-2 w-full">
-                            <motion.div 
-                              className="bg-transparent aspect-[2/3] rounded-lg overflow-hidden relative w-16 md:w-20" 
+                            <motion.div
+                              className="bg-transparent aspect-[2/3] rounded-lg overflow-hidden relative w-16 md:w-20"
                               style={{ boxSizing: 'border-box' }}
                               transition={{ duration: 0.3, ease: smoothEase }}
                             >
                               <div className="bg-transparent rounded-xl w-full h-full overflow-hidden">
-                            {highlight.node?.main_picture?.large && (
-                                  <motion.img 
-                                    src={highlight.node.main_picture.large} 
-                                    alt={highlight.node.title} 
-                                    crossOrigin="anonymous" 
+                                {highlight.node?.main_picture?.large && (
+                                  <motion.img
+                                    src={highlight.node.main_picture.large}
+                                    alt={highlight.node.title}
+                                    crossOrigin="anonymous"
                                     className="w-full h-full object-cover rounded-xl"
                                     whileHover={hoverImage}
                                   />
-                            )}
-                              </div>  
+                                )}
+                              </div>
                             </motion.div>
-                          <div className="w-full text-center">
-                              <p className="title-sm truncate font-semibold text-white">{highlight.node?.title}</p>
-                              <p className="mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base">★ {highlight.list_status?.score ? Math.round(highlight.list_status.score) : 'Not Rated Yet'}</p>
-                               <p className="text-sm md:text-base text-white/70 truncate mt-1 font-regular">{seasonData.totalAnime} anime this season</p>
+                            <div className="w-full text-center">
+                              <p className="title-sm truncate font-semibold text-white">
+                                {highlight.node?.title}
+                              </p>
+                              <p className="mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base">
+                                ★{' '}
+                                {highlight.list_status?.score
+                                  ? Math.round(highlight.list_status.score)
+                                  : t('slides.seasonalHighlights.notRated')}
+                              </p>
+                              <p className="text-sm md:text-base text-white/70 truncate mt-1 font-regular">
+                                {t(
+                                  'slides.seasonalHighlights.animeThisSeason',
+                                  { count: seasonData.totalAnime },
+                                )}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </>
-                    )}
+                        </>
+                      )}
                     </motion.div>
                   </motion.div>
                 );
               })}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>Consistently great picks
+            <motion.h3
+              className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.seasonalHighlights.subtitle')}
             </motion.h3>
           </SlideLayout>
         );
@@ -4702,25 +6007,40 @@ export default function MALWrapped() {
         if (!stats.rareAnimeGems || stats.rareAnimeGems.length === 0) {
           return (
             <SlideLayout bgColor="blue">
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              No overlooked anime in your list this time
+              <motion.h3
+                className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.hiddenGemsAnime.noData')}
               </motion.h3>
             </SlideLayout>
           );
         }
-        const rareAnimeItems = stats.rareAnimeGems.map(item => ({
+        const rareAnimeItems = stats.rareAnimeGems.map((item) => ({
           title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
+          coverImage:
+            item.node?.main_picture?.large ||
+            item.node?.main_picture?.medium ||
+            '',
           popularity: item.popularity,
           malScore: item.malScore,
-          malId: item.node?.id
+          malId: item.node?.id,
         }));
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            You saw shows that others missed
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.hiddenGemsAnime.title')}
             </motion.h2>
-            <motion.div className="mt-4 relative z-10 max-w-2xl mx-auto" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-4 relative z-10 max-w-2xl mx-auto"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               {rareAnimeItems.map((item, idx) => (
                 <motion.div
                   key={idx}
@@ -4730,12 +6050,14 @@ export default function MALWrapped() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
-                  <motion.div
-                    className="flex items-center gap-4"
-                  >
+                  <motion.div className="flex items-center gap-4">
                     {item.coverImage && (
-                      <a 
-                        href={item.malId ? `https://myanimelist.net/anime/${item.malId}` : '#'}
+                      <a
+                        href={
+                          item.malId
+                            ? `https://myanimelist.net/anime/${item.malId}`
+                            : '#'
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
@@ -4751,53 +6073,96 @@ export default function MALWrapped() {
                       </a>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="title-sm font-semibold text-white line-clamp-2">{item.title}</h3>
-                      
+                      <h3 className="title-sm font-semibold text-white line-clamp-2">
+                        {item.title}
+                      </h3>
+
                       {item.malScore && (
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="mono text-yellow-300 font-semibold">★ {Math.round(item.malScore * 10) / 10}</span>
+                          <span className="mono text-yellow-300 font-semibold">
+                            ★ {Math.round(item.malScore * 10) / 10}
+                          </span>
                         </div>
                       )}
-                       <p className="text-sm md:text-base text-white/70 mt-1 font-regular">
-                        Only {item.popularity.toLocaleString()} people watched this!
+                      <p className="text-sm md:text-base text-white/70 mt-1 font-regular">
+                        {t('slides.hiddenGemsAnime.popularity', {
+                          count: item.popularity.toLocaleString(),
+                        })}
                       </p>
                     </div>
                   </motion.div>
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            You found <span className="text-white font-semibold">{stats.hiddenGemsAnimeCount ?? 0}</span> such anime. You've got an eye for quality
+            <motion.h3
+              className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.hiddenGemsAnime.found', {
+                count: stats.hiddenGemsAnimeCount ?? 0,
+              })}
             </motion.h3>
           </SlideLayout>
         );
 
-
       case 'planned_anime':
-        const plannedAnimeItems = stats.plannedAnime.map(item => ({
+        const plannedAnimeItems = stats.plannedAnime.map((item) => ({
           title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
-          malId: item.node?.id
+          coverImage:
+            item.node?.main_picture?.large ||
+            item.node?.main_picture?.medium ||
+            '',
+          malId: item.node?.id,
         }));
         return (
-          <SlideLayout  bgColor="green">
+          <SlideLayout bgColor="green">
             {plannedAnimeItems.length > 0 && (
-              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Your watchlist kept growing
+              <motion.h2
+                className="body-md font-medium text-white text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.plannedAnime.title')}
               </motion.h2>
             )}
             {plannedAnimeItems.length > 0 ? (
-              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <ImageCarousel items={plannedAnimeItems} maxItems={10} showHover={true} showNames={false} />
-                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  One day you'll get to them… probably
+              <motion.div
+                className="relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                <ImageCarousel
+                  items={plannedAnimeItems}
+                  maxItems={10}
+                  showHover={true}
+                  showNames={false}
+                />
+                <motion.h3
+                  className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.plannedAnime.subtitle')}
                 </motion.h3>
-                <motion.p className="body-sm font-regular text-white/70 mt-2 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  {plannedAnimeItems.length} anime planned
+                <motion.p
+                  className="body-sm font-regular text-white/70 mt-2 text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.plannedAnime.count', {
+                    count: plannedAnimeItems.length,
+                  })}
                 </motion.p>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>You didn't add anything to your plan-to-watch list</motion.h3>
+              <motion.h3
+                className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.plannedAnime.noData')}
+              </motion.h3>
             )}
           </SlideLayout>
         );
@@ -4805,55 +6170,75 @@ export default function MALWrapped() {
       case 'anime_to_manga_transition':
         return (
           <SlideLayout bgColor="black">
-            <motion.div className="text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-              <motion.div 
+            <motion.div
+              className="text-center relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              <motion.div
                 className="relative z-10 mb-6 flex items-center justify-center"
                 data-framer-motion
               >
-                <img 
-                  src="/read.gif" 
+                <img
+                  src="/read.gif"
                   alt="Manga character"
                   className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                 />
               </motion.div>
-              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                Now let's see what you've been reading
+              <motion.h2
+                className="body-md font-medium text-white text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.animeToMangaTransition.text')}
               </motion.h2>
-             
             </motion.div>
           </SlideLayout>
         );
 
       case 'manga_count':
         // Get manga from stats - we need to access filtered manga
-        const allMangaItems = (mangaListData || []).filter(item => {
-          if (stats.selectedYear === 'all') return true;
-          const finishDate = item.list_status?.finish_date;
-          const startDate = item.list_status?.start_date;
-          const updatedAt = item.list_status?.updated_at;
-          let dateToCheck = finishDate || startDate || updatedAt;
-          if (!dateToCheck) return false;
-          try {
-            const year = new Date(dateToCheck).getFullYear();
-            return year === stats.selectedYear;
-          } catch (e) {
-            return false;
-          }
-        }).map(item => ({
-          title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
-          mangaId: item.node?.id
-        }));
-        
+        const allMangaItems = (mangaListData || [])
+          .filter((item) => {
+            if (stats.selectedYear === 'all') return true;
+            const finishDate = item.list_status?.finish_date;
+            const startDate = item.list_status?.start_date;
+            const updatedAt = item.list_status?.updated_at;
+            let dateToCheck = finishDate || startDate || updatedAt;
+            if (!dateToCheck) return false;
+            try {
+              const year = new Date(dateToCheck).getFullYear();
+              return year === stats.selectedYear;
+            } catch (e) {
+              return false;
+            }
+          })
+          .map((item) => ({
+            title: item.node?.title || '',
+            coverImage:
+              item.node?.main_picture?.large ||
+              item.node?.main_picture?.medium ||
+              '',
+            mangaId: item.node?.id,
+          }));
+
         if (allMangaItems.length === 0) {
           return (
             <SlideLayout bgColor="yellow">
-              <motion.div className="text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+              <motion.div
+                className="text-center relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
                 <h2 className="heading-md text-white mb-4 text-container">
-                  You didn't read any manga {stats.selectedYear === 'all' ? '' : 'in ' + stats.selectedYear}.
+                  {stats.selectedYear === 'all'
+                    ? t('slides.mangaCount.noData')
+                    : t('slides.mangaCount.noDataYear', {
+                        year: stats.selectedYear,
+                      })}
                 </h2>
                 <p className="body-md text-white/70 mb-6 text-container">
-                  Log your read manga on MyAnimeList to see your personalized wrapped!
+                  {t('slides.mangaCount.noMALData')}
                 </p>
                 <motion.a
                   href="https://myanimelist.net/"
@@ -4863,36 +6248,72 @@ export default function MALWrapped() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  Log Manga on MAL
+                  {t('slides.mangaCount.logManga')}
                 </motion.a>
               </motion.div>
             </SlideLayout>
           );
         }
-        
+
         return (
           <SlideLayout bgColor="yellow">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {stats.selectedYear === 'all' ? 'Till now' : 'In ' + stats.selectedYear}, you read
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {stats.selectedYear === 'all'
+                ? t('slides.mangaCount.overall')
+                : t('slides.mangaCount.title', { year: stats.selectedYear })}
             </motion.h2>
-            <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-4 text-center relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               <p className="number-xl text-white ">
-                <AnimatedNumber value={stats.totalManga} /> manga
+                <AnimatedNumber value={stats.totalManga} />{' '}
+                {t('slides.mangaCount.manga')}
               </p>
             </motion.div>
-            {allMangaItems.length > 0 && <ImageCarousel items={allMangaItems} maxItems={10} showHover={true} showNames={false} />}
-            {stats.yearComparison && stats.yearComparison.previousMangaCount > 0 && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                {stats.yearComparison.isMangaGrowth ? (
-                  <>That's <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> more than last year. Your library is growing!</>
-                ) : (
-                  <>You read <span className="text-white font-semibold">{Math.abs(stats.yearComparison.mangaCountGrowth)}</span> less than last year. There’s always another chapter!!</>
-                )}
-              </motion.h3>
+            {allMangaItems.length > 0 && (
+              <ImageCarousel
+                items={allMangaItems}
+                maxItems={10}
+                showHover={true}
+                showNames={false}
+              />
             )}
-            {(!stats.yearComparison || !stats.yearComparison.previousMangaCount) && (
-              <motion.h3 className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                That's some serious reading energy
+            {stats.yearComparison &&
+              stats.yearComparison.previousMangaCount > 0 && (
+                <motion.h3
+                  className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {stats.yearComparison.isMangaGrowth ? (
+                    <>
+                      {t('slides.mangaCount.more', {
+                        count: Math.abs(stats.yearComparison.mangaCountGrowth),
+                      })}
+                    </>
+                  ) : (
+                    <>
+                      {t('slides.mangaCount.less', {
+                        count: Math.abs(stats.yearComparison.mangaCountGrowth),
+                      })}
+                    </>
+                  )}
+                </motion.h3>
+              )}
+            {(!stats.yearComparison ||
+              !stats.yearComparison.previousMangaCount) && (
+              <motion.h3
+                className="body-sm font-regular mt-4 text-white/70 text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.mangaCount.dedication')}
               </motion.h3>
             )}
           </SlideLayout>
@@ -4901,61 +6322,88 @@ export default function MALWrapped() {
       case 'manga_time':
         // Get percentage for comparison
         const mangaComparison = stats.mangaComparison;
-        const mangaDisplayPercentage = mangaComparison 
-          ? (stats.selectedYear === 'all' ? mangaComparison.allTimePercentage : mangaComparison.percentage)
+        const mangaDisplayPercentage = mangaComparison
+          ? stats.selectedYear === 'all'
+            ? mangaComparison.allTimePercentage
+            : mangaComparison.percentage
           : 0;
-        const mangaComparisonCopy = getComparisonCopy(mangaDisplayPercentage, 'chapters');
-        
+        const mangaComparisonCopy = getComparisonCopy(
+          mangaDisplayPercentage,
+          'chapters',
+        );
+
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            That's a total of
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.mangaTime.title')}
             </motion.h2>
-            <motion.div className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-4 space-y-6 relative z-10 flex flex-col items-center justify-center"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               <div className="text-center">
                 <p className="number-lg text-white ">
                   <AnimatedNumber value={stats.totalChapters || 0} />
                 </p>
-                <p className="body-md text-white font-medium">chapters</p>
-                <p className="body-sm text-white/70 mt-2 font-regular">or</p>
+                <p className="body-md text-white font-medium">
+                  {t('slides.mangaTime.chapters')}
+                </p>
+                <p className="body-sm text-white/70 mt-2 font-regular">
+                  {t('general.or')}
+                </p>
               </div>
               {stats.mangaDays > 0 ? (
                 <div className="text-center">
                   <p className="number-lg text-white ">
                     <AnimatedNumber value={stats.mangaDays} />
                   </p>
-                  <p className="body-md text-white font-medium">days</p>
-                  <p className="body-sm text-white/70 mt-2 font-regular">spent flipping pages</p>
+                  <p className="body-md text-white font-medium">
+                    {t('slides.mangaTime.days')}
+                  </p>
+                  <p className="body-sm text-white/70 mt-2 font-regular">
+                    {t('slides.mangaTime.flippingPages')}
+                  </p>
                 </div>
               ) : (
                 <div className="text-center">
                   <p className="number-lg text-white ">
                     <AnimatedNumber value={stats.mangaHours || 0} />
                   </p>
-                  <p className="heading-md text-white font-medium">hours</p>
-                  <p className="body-sm text-white/70 mt-2 font-regular">spent flipping pages</p>
-                </div>
-              )}
-              {mangaComparison && mangaDisplayPercentage > 0 && mangaComparisonCopy && (
-                <div className="text-center mt-4 w-full">
-                  <p className="body-sm text-white/70 font-regular text-container">
-                    {mangaComparisonCopy.prefix}
-                    <span className="text-white font-semibold">
-                      {mangaDisplayPercentage >= 100 
-                        ? `${Math.round(mangaDisplayPercentage - 100)}%` 
-                        : `${Math.round(mangaDisplayPercentage)}%`}
-                    </span>
-                    {mangaComparisonCopy.suffix}
+                  <p className="heading-md text-white font-medium">
+                    {t('slides.mangaTime.hours')}
+                  </p>
+                  <p className="body-sm text-white/70 mt-2 font-regular">
+                    {t('slides.mangaTime.flippingPages')}
                   </p>
                 </div>
               )}
+              {mangaComparison &&
+                mangaDisplayPercentage > 0 &&
+                mangaComparisonCopy && (
+                  <div className="text-center mt-4 w-full">
+                    <p className="body-sm text-white/70 font-regular text-container">
+                      {t(mangaComparisonCopy.keyPrefix)}
+                      <span className="text-white font-semibold">
+                        {mangaDisplayPercentage >= 100
+                          ? `${Math.round(mangaDisplayPercentage - 100)}%`
+                          : `${Math.round(mangaDisplayPercentage)}%`}
+                      </span>
+                      {t(mangaComparisonCopy.keySuffix)}
+                    </p>
+                  </div>
+                )}
             </motion.div>
           </SlideLayout>
         );
 
       case 'top_manga_genre':
         const mangaGenres = {};
-        (mangaListData || []).forEach(item => {
+        (mangaListData || []).forEach((item) => {
           if (stats.selectedYear !== 'all') {
             const finishDate = item.list_status?.finish_date;
             const startDate = item.list_status?.start_date;
@@ -4969,83 +6417,130 @@ export default function MALWrapped() {
               return;
             }
           }
-          item.node?.genres?.forEach(genre => {
+          item.node?.genres?.forEach((genre) => {
             mangaGenres[genre.name] = (mangaGenres[genre.name] || 0) + 1;
           });
         });
-        const topMangaGenre = Object.entries(mangaGenres).sort((a, b) => b[1] - a[1])[0];
-        const topMangaGenreList = Object.entries(mangaGenres).sort((a, b) => b[1] - a[1]);
-        const topMangaGenreAnimeRaw = topMangaGenre ? (mangaListData || []).filter(item => {
-          if (stats.selectedYear !== 'all') {
-            const finishDate = item.list_status?.finish_date;
-            const startDate = item.list_status?.start_date;
-            const updatedAt = item.list_status?.updated_at;
-            let dateToCheck = finishDate || startDate || updatedAt;
-            if (!dateToCheck) return false;
-            try {
-              const year = new Date(dateToCheck).getFullYear();
-              if (year !== stats.selectedYear) return false;
-            } catch (e) {
-              return false;
-            }
-          }
-          return item.node?.genres?.some(g => g.name === topMangaGenre[0]);
-        }) : [];
+        const topMangaGenre = Object.entries(mangaGenres).sort(
+          (a, b) => b[1] - a[1],
+        )[0];
+        const topMangaGenreList = Object.entries(mangaGenres).sort(
+          (a, b) => b[1] - a[1],
+        );
+        const topMangaGenreAnimeRaw = topMangaGenre
+          ? (mangaListData || []).filter((item) => {
+              if (stats.selectedYear !== 'all') {
+                const finishDate = item.list_status?.finish_date;
+                const startDate = item.list_status?.start_date;
+                const updatedAt = item.list_status?.updated_at;
+                let dateToCheck = finishDate || startDate || updatedAt;
+                if (!dateToCheck) return false;
+                try {
+                  const year = new Date(dateToCheck).getFullYear();
+                  if (year !== stats.selectedYear) return false;
+                } catch (e) {
+                  return false;
+                }
+              }
+              return item.node?.genres?.some(
+                (g) => g.name === topMangaGenre[0],
+              );
+            })
+          : [];
         // Deduplicate by title
         const topMangaGenreAnimeMap = new Map();
-        topMangaGenreAnimeRaw.forEach(item => {
+        topMangaGenreAnimeRaw.forEach((item) => {
           const title = item.node?.title || '';
           if (title && !topMangaGenreAnimeMap.has(title)) {
             topMangaGenreAnimeMap.set(title, item);
           }
         });
         const topMangaGenreAnime = Array.from(topMangaGenreAnimeMap.values());
-        const mangaGenreItems = topMangaGenreAnime.map(item => ({
+        const mangaGenreItems = topMangaGenreAnime.map((item) => ({
           title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
-          mangaId: item.node?.id
+          coverImage:
+            item.node?.main_picture?.large ||
+            item.node?.main_picture?.medium ||
+            '',
+          mangaId: item.node?.id,
         }));
         const otherMangaGenres = topMangaGenreList.slice(1, 5);
         return (
-          <SlideLayout  bgColor="yellow">
-          <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-          You kept returning to
+          <SlideLayout bgColor="yellow">
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.topMangaGenre.title')}
             </motion.h2>
             {topMangaGenre ? (
               <>
-                <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
-                  <p className="heading-lg font-semibold text-white "><span className="body-lg font-body text-white/70">1.</span> {topMangaGenre[0]}</p>
-                  <p className="text-sm md:text-base text-white/70 font-regular">{topMangaGenre[1]} entries</p>
+                <motion.div
+                  className="mt-4 text-center relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  <p className="heading-lg font-semibold text-white ">
+                    <span className="body-lg font-body text-white/70">1.</span>{' '}
+                    {topMangaGenre[0]}
+                  </p>
+                  <p className="text-sm md:text-base text-white/70 font-regular">
+                    {t('slides.topMangaGenre.entries', {
+                      count: topMangaGenre[1],
+                    })}
+                  </p>
                 </motion.div>
-                {mangaGenreItems.length > 0 && <div className="relative z-10"><ImageCarousel items={mangaGenreItems} maxItems={10} showHover={true} showNames={false} /></div>}
+                {mangaGenreItems.length > 0 && (
+                  <div className="relative z-10">
+                    <ImageCarousel
+                      items={mangaGenreItems}
+                      maxItems={10}
+                      showHover={true}
+                      showNames={false}
+                    />
+                  </div>
+                )}
                 {otherMangaGenres.length > 0 && (
                   <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
                     {otherMangaGenres.map(([genreName, count], idx) => (
-                      <motion.div 
-                        key={idx} 
-                        className="text-center py-2" 
+                      <motion.div
+                        key={idx}
+                        className="text-center py-2"
                         variants={staggerItem}
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.2, ease: smoothEase }}
                       >
                         <p className="heading-sm font-semibold text-white truncate mb-1">
-                          <span className="body-sm font-bold text-white/50 mr-1.5">{idx + 2}.</span> 
+                          <span className="body-sm font-bold text-white/50 mr-1.5">
+                            {idx + 2}.
+                          </span>
                           {genreName}
                         </p>
-                        <p className="text-sm md:text-base text-white/70 font-regular tracking-wide">{count} entries</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular tracking-wide">
+                          {t('slides.topMangaGenre.entries', { count })}
+                        </p>
                       </motion.div>
                     ))}
                   </div>
                 )}
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                A tested formula
-            </motion.h3>
+                <motion.h3
+                  className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.topMangaGenre.subtitle')}
+                </motion.h3>
               </>
-              
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                No genres rose to the top
-            </motion.h3>)}
+              <motion.h3
+                className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.topMangaGenre.noGenres')}
+              </motion.h3>
+            )}
           </SlideLayout>
         );
 
@@ -5053,7 +6548,7 @@ export default function MALWrapped() {
         const DrumrollContent = () => {
           const [phase, setPhase] = useState(0);
           const topItem = stats.topManga.length > 0 ? stats.topManga[0] : null;
-          
+
           useEffect(() => {
             const timer1 = setTimeout(() => setPhase(1), 2500);
             return () => {
@@ -5064,46 +6559,62 @@ export default function MALWrapped() {
           return (
             <SlideLayout>
               {phase === 0 ? (
-                <motion.div className="text-center relative overflow-hidden z-10" {...fadeSlideUp} data-framer-motion>
-                  <motion.div 
+                <motion.div
+                  className="text-center relative overflow-hidden z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  <motion.div
                     className="relative z-10 mb-6 flex items-center justify-center"
                     data-framer-motion
                   >
-                    <img 
-                      src="/manga.gif " 
+                    <img
+                      src="/manga.gif "
                       alt="Manga character"
                       className="h-48 sm:h-56 md:h-64 object-contain rounded-xl"
                     />
                   </motion.div>
-                  <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">And your top manga of {stats.selectedYear === 'all' ? 'all time' : stats.selectedYear}?</h2>
+                  <h2 className="body-md font-medium text-white mt-4 text-container z-10 relative">
+                    {stats.selectedYear === 'all'
+                      ? t('slides.drumroll.mangaAllTime')
+                      : t('slides.drumroll.mangaQuestion', {
+                          year: stats.selectedYear,
+                        })}
+                  </h2>
                 </motion.div>
               ) : phase === 1 && topItem ? (
                 <motion.div className="text-center relative overflow-hidden z-10">
                   <div className="flex flex-col items-center justify-center gap-4">
-                    <motion.div 
-                      className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative z-10" 
+                    <motion.div
+                      className="w-32 md:w-48 aspect-[2/3] bg-transparent rounded-lg overflow-hidden relative z-10"
                       style={{ boxSizing: 'border-box' }}
                       {...fadeSlideUp}
                       transition={{ ...fadeSlideUp.transition, delay: 0 }}
                       whileHover={{ borderColor: '#ffffff' }}
                     >
                       {topItem.node?.main_picture?.large && (
-                        <motion.img 
-                          src={topItem.node.main_picture.large} 
-                          alt={topItem.node.title} 
-                          crossOrigin="anonymous" 
+                        <motion.img
+                          src={topItem.node.main_picture.large}
+                          alt={topItem.node.title}
+                          crossOrigin="anonymous"
                           className="w-full h-full object-cover rounded-lg"
                           whileHover={hoverImage}
                         />
                       )}
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                       className="text-center relative z-10"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.2, ease: smoothEase }}
+                      transition={{
+                        duration: 0.4,
+                        delay: 0.2,
+                        ease: smoothEase,
+                      }}
                     >
-                      <h3 className="title-lg text-white font-semibold">{topItem.node?.title}</h3>
+                      <h3 className="title-lg text-white font-semibold">
+                        {topItem.node?.title}
+                      </h3>
                       {topItem.node?.authors?.[0] && (
                         <p className="body-sm text-white/70  font-regular">
                           {`${topItem.node.authors[0].node?.first_name || ''} ${topItem.node.authors[0].node?.last_name || ''}`.trim()}
@@ -5111,13 +6622,19 @@ export default function MALWrapped() {
                       )}
                       <div className="flex items-center justify-center body-md text-yellow-300 font-bold mt-1">
                         <span className="mr-2">★</span>
-                        <span>{topItem.list_status?.score ? Math.round(topItem.list_status.score) : 'N/A'}</span>
+                        <span>
+                          {topItem.list_status?.score
+                            ? Math.round(topItem.list_status.score)
+                            : 'N/A'}
+                        </span>
                       </div>
                     </motion.div>
                   </div>
                 </motion.div>
               ) : (
-                <div className="body-md font-regular text-white/70 relative z-10">No favorite manga found</div>
+                <div className="body-md font-regular text-white/70 relative z-10">
+                  {t('slides.top5Manga.noFavorite')}
+                </div>
               )}
             </SlideLayout>
           );
@@ -5129,32 +6646,48 @@ export default function MALWrapped() {
         const Top5Content = () => {
           const type = 'manga';
           const top5Items = stats.topManga.slice(0, 5);
-          
-          const top5Formatted = top5Items.map(item => ({
+
+          const top5Formatted = top5Items.map((item) => ({
             id: item.node.id,
             title: item.node.title,
-            coverImage: item.node.main_picture?.large || item.node.main_picture?.medium || '',
+            coverImage:
+              item.node.main_picture?.large ||
+              item.node.main_picture?.medium ||
+              '',
             userRating: item.list_status.score,
-            studio: type === 'anime' ? (item.node.studios?.[0]?.name || '') : '',
-            author: type === 'manga' ? (`${item.node.authors?.[0]?.node?.first_name || ''} ${item.node.authors?.[0]?.node?.last_name || ''}`.trim()) : '',
-            genres: item.node.genres?.map(g => g.name) || [],
+            studio: type === 'anime' ? item.node.studios?.[0]?.name || '' : '',
+            author:
+              type === 'manga'
+                ? `${item.node.authors?.[0]?.node?.first_name || ''} ${item.node.authors?.[0]?.node?.last_name || ''}`.trim()
+                : '',
+            genres: item.node.genres?.map((g) => g.name) || [],
             malId: type === 'anime' ? item.node.id : null,
-            mangaId: type === 'manga' ? item.node.id : null
+            mangaId: type === 'manga' ? item.node.id : null,
           }));
 
           if (top5Formatted.length === 0) {
             return (
               <SlideLayout>
-                <div className="text-white/70 relative z-10">No favorite {type} found</div>
+                <div className="text-white/70 relative z-10">
+                  {t('slides.top5Manga.noFavorite')}
+                </div>
               </SlideLayout>
             );
           }
 
           return (
             <SlideLayout>
-              <motion.div className="relative z-10" {...fadeSlideUp} data-framer-motion>
-                <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                Your most unforgettable reads
+              <motion.div
+                className="relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                <motion.h2
+                  className="body-md font-medium text-white text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.top5Manga.title')}
                 </motion.h2>
                 <div className="mt-4 sm:mt-6 flex flex-col gap-2.5 sm:gap-3 w-full max-w-3xl mx-auto relative z-10">
                   {(() => {
@@ -5162,33 +6695,46 @@ export default function MALWrapped() {
                     return (
                       <>
                         {/* Featured #1 Item */}
-                        <motion.div 
+                        <motion.div
                           className="relative w-full max-w-3xl z-10"
                           initial={{ opacity: 0, y: 30 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
+                          transition={{
+                            duration: 0.3,
+                            delay: 0.1,
+                            ease: smoothEase,
+                          }}
                         >
                           <div className="flex items-center gap-2.5 sm:gap-3 md:flex-col md:items-center">
                             {/* Image - square on mobile, larger 2/3 aspect on desktop */}
                             <div className="flex-shrink-0">
                               {(() => {
-                                const featuredUrl = featured.malId ? `https://myanimelist.net/anime/${featured.malId}` : (featured.mangaId ? `https://myanimelist.net/manga/${featured.mangaId}` : null);
+                                const featuredUrl = featured.malId
+                                  ? `https://myanimelist.net/anime/${featured.malId}`
+                                  : featured.mangaId
+                                    ? `https://myanimelist.net/manga/${featured.mangaId}`
+                                    : null;
                                 const featuredImage = (
                                   <div className="relative">
                                     {/* Number badge in circle at top left */}
-                                    <div className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}>
+                                    <div
+                                      className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}
+                                    >
                                       1
                                     </div>
-                                    <motion.div 
-                                      className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-20 h-20 md:w-32 md:h-48" 
+                                    <motion.div
+                                      className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-20 h-20 md:w-32 md:h-48"
                                       whileHover={{ scale: 1.02 }}
-                                      transition={{ duration: 0.3, ease: smoothEase}}
+                                      transition={{
+                                        duration: 0.3,
+                                        ease: smoothEase,
+                                      }}
                                     >
                                       {featured.coverImage && (
-                                        <motion.img 
-                                          src={featured.coverImage} 
-                                          crossOrigin="anonymous" 
-                                          alt={featured.title} 
+                                        <motion.img
+                                          src={featured.coverImage}
+                                          crossOrigin="anonymous"
+                                          alt={featured.title}
                                           className="w-full h-full object-cover rounded-lg"
                                         />
                                       )}
@@ -5196,22 +6742,40 @@ export default function MALWrapped() {
                                   </div>
                                 );
                                 return featuredUrl ? (
-                                  <a href={featuredUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
+                                  <a
+                                    href={featuredUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="relative z-10"
+                                  >
                                     {featuredImage}
                                   </a>
-                                ) : featuredImage;
+                                ) : (
+                                  featuredImage
+                                );
                               })()}
                             </div>
                             {/* Title and details - beside on mobile, below on desktop */}
-                            <motion.div 
+                            <motion.div
                               className="flex-1 min-w-0 md:text-center md:flex-1"
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                              <h3 className="title-sm md:title-md font-semibold text-white mb-1">{featured.title}</h3>
-                              {featured.studio && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.studio}</p>}
-                              {featured.author && <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">{featured.author}</p>}
+                              <h3 className="title-sm md:title-md font-semibold text-white mb-1">
+                                {featured.title}
+                              </h3>
+                              {featured.studio && (
+                                <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">
+                                  {featured.studio}
+                                </p>
+                              )}
+                              {featured.author && (
+                                <p className="text-sm sm:text-base text-white/70 font-medium mb-0.5">
+                                  {featured.author}
+                                </p>
+                              )}
                               <div className="flex items-center mono text-yellow-300 mt-1 font-semibold text-sm sm:text-base md:justify-center">
                                 <span className="mr-1">★</span>
                                 <span>{Math.round(featured.userRating)}</span>
@@ -5219,34 +6783,40 @@ export default function MALWrapped() {
                             </motion.div>
                           </div>
                         </motion.div>
-                        
+
                         {/* Items #2-5 - vertical list on mobile, 2x2 grid on desktop */}
                         {others.length > 0 && (
-                          <motion.div 
+                          <motion.div
                             className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative z-10 max-w-3xl"
                             variants={staggerContainer}
                             initial="initial"
                             animate="animate"
                           >
                             {others.map((item, index) => {
-                              const malUrl = item.malId ? `https://myanimelist.net/anime/${item.malId}` : (item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : null);
+                              const malUrl = item.malId
+                                ? `https://myanimelist.net/anime/${item.malId}`
+                                : item.mangaId
+                                  ? `https://myanimelist.net/manga/${item.mangaId}`
+                                  : null;
                               const itemContent = (
-                                <motion.div 
+                                <motion.div
                                   className="flex items-center gap-2.5 sm:gap-3 w-full"
                                   variants={staggerItem}
                                 >
                                   {/* Thumbnail */}
                                   <div className="relative flex-shrink-0">
                                     {/* Number badge in circle at top left - outside overflow container */}
-                                    <div className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}>
+                                    <div
+                                      className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}
+                                    >
                                       {index + 2}
                                     </div>
                                     <div className="w-20 h-20 rounded-lg overflow-hidden">
                                       {item.coverImage && (
-                                        <motion.img 
-                                          src={item.coverImage} 
-                                          alt={item.title} 
-                                          crossOrigin="anonymous" 
+                                        <motion.img
+                                          src={item.coverImage}
+                                          alt={item.title}
+                                          crossOrigin="anonymous"
                                           className="w-full h-full object-cover"
                                           whileHover={{ scale: 1.05 }}
                                           transition={{ duration: 0.2 }}
@@ -5256,9 +6826,19 @@ export default function MALWrapped() {
                                   </div>
                                   {/* Title and details */}
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="title-sm font-semibold text-white truncate">{item.title}</h3>
-                                    {item.studio && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.studio}</p>}
-                                    {item.author && <p className="text-sm md:text-base text-white/70 truncate mt-0.5">{item.author}</p>}
+                                    <h3 className="title-sm font-semibold text-white truncate">
+                                      {item.title}
+                                    </h3>
+                                    {item.studio && (
+                                      <p className="text-sm md:text-base text-white/70 truncate mt-0.5">
+                                        {item.studio}
+                                      </p>
+                                    )}
+                                    {item.author && (
+                                      <p className="text-sm md:text-base text-white/70 truncate mt-0.5">
+                                        {item.author}
+                                      </p>
+                                    )}
                                     <div className="flex items-center mono text-yellow-300 mt-0.5 font-semibold text-sm">
                                       <span className="mr-0.5">★</span>
                                       <span>{Math.round(item.userRating)}</span>
@@ -5269,7 +6849,12 @@ export default function MALWrapped() {
                               return (
                                 <motion.div key={item.id} className="w-full">
                                   {malUrl ? (
-                                    <a href={malUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                    <a
+                                      href={malUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
                                       {itemContent}
                                     </a>
                                   ) : (
@@ -5284,7 +6869,13 @@ export default function MALWrapped() {
                     );
                   })()}
                 </div>
-                <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>These are the stories you'll carry with you</motion.h3>
+                <motion.h3
+                  className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.top5Manga.subtitle')}
+                </motion.h3>
               </motion.div>
             </SlideLayout>
           );
@@ -5292,15 +6883,16 @@ export default function MALWrapped() {
         return <Top5Content />;
       }
 
-
       case 'top_author':
         // Get manga for each top author
         const normalizeAuthorName = (first, last) => {
-          return `${(first || '').trim()} ${(last || '').trim()}`.trim().replace(/\s+/g, ' ');
+          return `${(first || '').trim()} ${(last || '').trim()}`
+            .trim()
+            .replace(/\s+/g, ' ');
         };
-        
+
         const getAuthorManga = (authorName) => {
-          const authorMangaRaw = (mangaListData || []).filter(item => {
+          const authorMangaRaw = (mangaListData || []).filter((item) => {
             if (stats.selectedYear !== 'all') {
               const finishDate = item.list_status?.finish_date;
               const startDate = item.list_status?.start_date;
@@ -5314,32 +6906,38 @@ export default function MALWrapped() {
                 return false;
               }
             }
-            return item.node?.authors?.some(a => {
+            return item.node?.authors?.some((a) => {
               const name = normalizeAuthorName(
                 a.node?.first_name || '',
-                a.node?.last_name || ''
+                a.node?.last_name || '',
               );
               return name === authorName;
             });
           });
-          
+
           // Deduplicate manga by title
           const authorMangaMap = new Map();
-          authorMangaRaw.forEach(item => {
+          authorMangaRaw.forEach((item) => {
             const title = item.node?.title || '';
             if (title && !authorMangaMap.has(title)) {
               authorMangaMap.set(title, item);
             }
           });
-          return Array.from(authorMangaMap.values()).map(item => item.node?.title || '').filter(Boolean);
+          return Array.from(authorMangaMap.values())
+            .map((item) => item.node?.title || '')
+            .filter(Boolean);
         };
-        
+
         const topAuthors = stats.topAuthors || [];
-        
+
         return (
           <SlideLayout bgColor="pink">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            The authors you can't get enough of
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.topAuthor.title')}
             </motion.h2>
             {topAuthors.length > 0 ? (
               <div className="mt-4 sm:mt-6 flex flex-col gap-4 sm:gap-6 w-full max-w-3xl mx-auto relative z-10">
@@ -5347,16 +6945,20 @@ export default function MALWrapped() {
                   const [featured, ...others] = topAuthors;
                   const featuredAuthorName = featured[0];
                   const featuredAuthorId = featured[2];
-                  const featuredAuthorManga = getAuthorManga(featuredAuthorName);
-                  const featuredAuthorPhoto = authorPhotos[featuredAuthorName] || '/Mascot.webp';
-                  const featuredAuthorUrl = featuredAuthorId ? `https://myanimelist.net/people/${featuredAuthorId}/` : null;
-                  
+                  const featuredAuthorManga =
+                    getAuthorManga(featuredAuthorName);
+                  const featuredAuthorPhoto =
+                    authorPhotos[featuredAuthorName] || '/Mascot.webp';
+                  const featuredAuthorUrl = featuredAuthorId
+                    ? `https://myanimelist.net/people/${featuredAuthorId}/`
+                    : null;
+
                   // Format works text for featured author
                   let featuredWorksText = '';
                   const firstWork = featuredAuthorManga[0] || '';
                   const secondWork = featuredAuthorManga[1] || '';
                   const isFirstWorkLong = firstWork.length > 24;
-                  
+
                   if (featuredAuthorManga.length === 0) {
                     featuredWorksText = '';
                   } else if (featuredAuthorManga.length === 1) {
@@ -5375,15 +6977,19 @@ export default function MALWrapped() {
                       featuredWorksText = `${firstWork}, ${secondWork}, and ${remaining} more`;
                     }
                   }
-                  
+
                   return (
                     <>
                       {/* Featured #1 Author */}
-                      <motion.div 
+                      <motion.div
                         className="relative w-full max-w-3xl z-10"
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.1, ease: smoothEase }}
+                        transition={{
+                          duration: 0.3,
+                          delay: 0.1,
+                          ease: smoothEase,
+                        }}
                       >
                         <div className="flex items-center gap-2.5 sm:gap-3 md:flex-col md:items-center">
                           {/* Image - square on mobile, larger 2/3 aspect on desktop */}
@@ -5392,16 +6998,21 @@ export default function MALWrapped() {
                               const featuredImage = (
                                 <div className="relative">
                                   {/* Number badge in circle at top left */}
-                                  <div className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}>
+                                  <div
+                                    className={`absolute -top-2 -left-2 sm:-top-2.5 sm:-left-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-sm sm:text-base`}
+                                  >
                                     1
                                   </div>
-                                  <motion.div 
-                                    className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-20 h-20 md:w-32 md:h-48" 
+                                  <motion.div
+                                    className="rounded-lg overflow-hidden relative aspect-square md:aspect-[2/3] w-20 h-20 md:w-32 md:h-48"
                                     whileHover={{ scale: 1.02 }}
-                                    transition={{ duration: 0.3, ease: smoothEase}}
+                                    transition={{
+                                      duration: 0.3,
+                                      ease: smoothEase,
+                                    }}
                                   >
-                                    <img 
-                                      src={featuredAuthorPhoto} 
+                                    <img
+                                      src={featuredAuthorPhoto}
                                       alt={featuredAuthorName}
                                       className="w-full h-full object-cover rounded-lg"
                                       onError={(e) => {
@@ -5412,30 +7023,42 @@ export default function MALWrapped() {
                                 </div>
                               );
                               return featuredAuthorUrl ? (
-                                <a href={featuredAuthorUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="relative z-10">
+                                <a
+                                  href={featuredAuthorUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="relative z-10"
+                                >
                                   {featuredImage}
                                 </a>
-                              ) : featuredImage;
+                              ) : (
+                                featuredImage
+                              );
                             })()}
                           </div>
                           {/* Title and details - beside on mobile, below on desktop */}
-                          <motion.div 
+                          <motion.div
                             className="flex-1 min-w-0 md:text-center md:flex-1"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.5, delay: 0.2 }}
                           >
-                            <h3 className="title-sm md:title-md font-semibold text-white mb-1">{featuredAuthorName}</h3>
+                            <h3 className="title-sm md:title-md font-semibold text-white mb-1">
+                              {featuredAuthorName}
+                            </h3>
                             {featuredWorksText && (
-                              <p className="text-sm md:text-base text-white/70 font-medium mt-1">{featuredWorksText}</p>
+                              <p className="text-sm md:text-base text-white/70 font-medium mt-1">
+                                {featuredWorksText}
+                              </p>
                             )}
                           </motion.div>
                         </div>
                       </motion.div>
-                      
+
                       {/* Other Authors #2-5 */}
                       {others.length > 0 && (
-                        <motion.div 
+                        <motion.div
                           className="space-y-2.5 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 relative max-w-3xl z-10"
                           variants={staggerContainer}
                           initial="initial"
@@ -5444,15 +7067,18 @@ export default function MALWrapped() {
                           {others.map((authorEntry, idx) => {
                             const [authorName, count, authorId] = authorEntry;
                             const authorManga = getAuthorManga(authorName);
-                            const authorPhoto = authorPhotos[authorName] || '/Mascot.webp';
-                            const authorUrl = authorId ? `https://myanimelist.net/people/${authorId}/` : null;
-                            
+                            const authorPhoto =
+                              authorPhotos[authorName] || '/Mascot.webp';
+                            const authorUrl = authorId
+                              ? `https://myanimelist.net/people/${authorId}/`
+                              : null;
+
                             // Format works text
                             let worksText = '';
                             const firstWork = authorManga[0] || '';
                             const secondWork = authorManga[1] || '';
                             const isFirstWorkLong = firstWork.length > 24;
-                            
+
                             if (authorManga.length === 0) {
                               worksText = '';
                             } else if (authorManga.length === 1) {
@@ -5471,21 +7097,23 @@ export default function MALWrapped() {
                                 worksText = `${firstWork}, ${secondWork}, and ${remaining} more`;
                               }
                             }
-                            
+
                             const authorContent = (
-                              <motion.div 
+                              <motion.div
                                 className="flex items-center gap-2.5 sm:gap-3 w-full"
                                 variants={staggerItem}
                               >
                                 {/* Thumbnail */}
                                 <div className="relative flex-shrink-0">
                                   {/* Number badge in circle at top left - outside overflow container */}
-                                  <div className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}>
+                                  <div
+                                    className={`absolute -top-1.5 -left-1.5 sm:-top-2 sm:-left-2 z-10 w-5 h-5 sm:w-6 sm:h-6 rounded-full ${currentSlideColor} flex items-center justify-center text-white font-bold text-xs sm:text-sm`}
+                                  >
                                     {idx + 2}
                                   </div>
                                   <div className="w-20 h-20 rounded-lg overflow-hidden">
-                                    <img 
-                                      src={authorPhoto} 
+                                    <img
+                                      src={authorPhoto}
                                       alt={authorName}
                                       className="w-full h-full object-cover"
                                       onError={(e) => {
@@ -5500,16 +7128,23 @@ export default function MALWrapped() {
                                     {authorName}
                                   </p>
                                   {worksText && (
-                                    <p className="text-sm md:text-base text-white/70 mt-0.5">{worksText}</p>
+                                    <p className="text-sm md:text-base text-white/70 mt-0.5">
+                                      {worksText}
+                                    </p>
                                   )}
                                 </div>
                               </motion.div>
                             );
-                            
+
                             return (
                               <motion.div key={idx} className="w-full">
                                 {authorUrl ? (
-                                  <a href={authorUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                  <a
+                                    href={authorUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
                                     {authorContent}
                                   </a>
                                 ) : (
@@ -5525,12 +7160,20 @@ export default function MALWrapped() {
                 })()}
               </div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                No author took the spotlight
+              <motion.h3
+                className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.topAuthor.noAuthors')}
               </motion.h3>
             )}
-            <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-            You'd read anything they write
+            <motion.h3
+              className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.topAuthor.subtitle')}
             </motion.h3>
           </SlideLayout>
         );
@@ -5539,25 +7182,40 @@ export default function MALWrapped() {
         if (!stats.rareMangaGems || stats.rareMangaGems.length === 0) {
           return (
             <SlideLayout bgColor="blue">
-              <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                No hidden gems found yet
+              <motion.h3
+                className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.hiddenGemsManga.noData')}
               </motion.h3>
             </SlideLayout>
           );
         }
-        const rareMangaItems = stats.rareMangaGems.map(item => ({
+        const rareMangaItems = stats.rareMangaGems.map((item) => ({
           title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
+          coverImage:
+            item.node?.main_picture?.large ||
+            item.node?.main_picture?.medium ||
+            '',
           popularity: item.popularity,
           malScore: item.malScore,
-          mangaId: item.node?.id
+          mangaId: item.node?.id,
         }));
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            You went digging
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.hiddenGemsManga.title')}
             </motion.h2>
-            <motion.div className="mt-4 relative z-10 max-w-2xl mx-auto" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-4 relative z-10 max-w-2xl mx-auto"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               {rareMangaItems.map((item, idx) => (
                 <motion.div
                   key={idx}
@@ -5573,8 +7231,12 @@ export default function MALWrapped() {
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     {item.coverImage && (
-                      <a 
-                        href={item.mangaId ? `https://myanimelist.net/manga/${item.mangaId}` : '#'}
+                      <a
+                        href={
+                          item.mangaId
+                            ? `https://myanimelist.net/manga/${item.mangaId}`
+                            : '#'
+                        }
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
@@ -5590,63 +7252,89 @@ export default function MALWrapped() {
                       </a>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="title-md font-semibold text-white line-clamp-2">{item.title}</h3>
-                      
+                      <h3 className="title-md font-semibold text-white line-clamp-2">
+                        {item.title}
+                      </h3>
+
                       {item.malScore && (
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="mono text-yellow-300 font-semibold">★ {Math.round(item.malScore * 10) / 10}</span>
+                          <span className="mono text-yellow-300 font-semibold">
+                            ★ {Math.round(item.malScore * 10) / 10}
+                          </span>
                         </div>
                       )}
                       <p className="text-sm md:text-base text-white/70 mt-1 font-regular">
-                        Only {item.popularity.toLocaleString()} people read this!
+                        {t('slides.hiddenGemsManga.popularity', {
+                          count: item.popularity.toLocaleString(),
+                        })}
                       </p>
                     </div>
                   </motion.div>
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            And struck gold. You found <span className="text-white font-semibold">{stats.hiddenGemsMangaCount ?? 0}</span> such titles.
+            <motion.h3
+              className="body-sm font-regular text-white/70 mt-4 text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.hiddenGemsManga.found', {
+                count: stats.hiddenGemsMangaCount ?? 0,
+              })}
             </motion.h3>
           </SlideLayout>
         );
 
       case 'longest_manga':
         if (!stats.longestMangaJourney) return null;
-        
+
         const journey = stats.longestMangaJourney;
         const chaptersText = `${journey.chapters.toLocaleString()} chapters`;
-        
+
         // Format dates
         const formatDate = (dateString) => {
           if (!dateString) return null;
           try {
             const date = new Date(dateString);
-            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            return date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            });
           } catch (e) {
             return null;
           }
         };
-        
+
         const startDateFormatted = formatDate(journey.startDate);
         const finishDateFormatted = formatDate(journey.finishDate);
         const isCompleted = journey.status === 'completed';
-        
+
         // Format reading time
-        const readingTimeText = journey.readingTime ? (
-          journey.readingTime.days > 0 
+        const readingTimeText = journey.readingTime
+          ? journey.readingTime.days > 0
             ? `${journey.readingTime.days} ${journey.readingTime.days === 1 ? 'day' : 'days'}`
             : journey.readingTime.hours > 0
-            ? `${journey.readingTime.hours} ${journey.readingTime.hours === 1 ? 'hour' : 'hours'}`
-            : `${journey.readingTime.minutes} ${journey.readingTime.minutes === 1 ? 'minute' : 'minutes'}`
-        ) : null;
-        
+              ? `${journey.readingTime.hours} ${journey.readingTime.hours === 1 ? 'hour' : 'hours'}`
+              : `${journey.readingTime.minutes} ${journey.readingTime.minutes === 1 ? 'minute' : 'minutes'}`
+          : null;
+
         return (
           <SlideLayout bgColor="blue">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              {stats.selectedYear === 'all' ? 'Your longest manga' : 'Your most read manga'}
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {stats.selectedYear === 'all'
+                ? t('slides.longestManga.titleAllTime')
+                : t('slides.longestManga.title')}
             </motion.h2>
-            <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-6 flex flex-col items-center relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               {journey.coverImage && (
                 <motion.img
                   src={journey.coverImage}
@@ -5675,92 +7363,145 @@ export default function MALWrapped() {
                 </p>
               )}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              That's dedication at its finest
+            <motion.h3
+              className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.longestManga.subtitle')}
             </motion.h3>
           </SlideLayout>
         );
 
       case 'planned_manga':
-        const plannedMangaItems = stats.plannedManga.map(item => ({
+        const plannedMangaItems = stats.plannedManga.map((item) => ({
           title: item.node?.title || '',
-          coverImage: item.node?.main_picture?.large || item.node?.main_picture?.medium || '',
-          mangaId: item.node?.id
+          coverImage:
+            item.node?.main_picture?.large ||
+            item.node?.main_picture?.medium ||
+            '',
+          mangaId: item.node?.id,
         }));
         return (
-          <SlideLayout  bgColor="green">
+          <SlideLayout bgColor="green">
             {plannedMangaItems.length > 0 && (
-              <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              You bookmarked these for later
+              <motion.h2
+                className="body-md font-medium text-white text-center text-container relative z-10"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.plannedManga.title')}
               </motion.h2>
             )}
             {plannedMangaItems.length > 0 ? (
               <motion.div {...fadeSlideUp} data-framer-motion>
-                <ImageCarousel items={plannedMangaItems} maxItems={10} showHover={true} showNames={false} />
-                <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                  Later just never quite arrived...
-            </motion.h3>
-                <motion.p className="body-sm font-regular text-white/70 mt-2 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-                  {plannedMangaItems.length} manga planned
+                <ImageCarousel
+                  items={plannedMangaItems}
+                  maxItems={10}
+                  showHover={true}
+                  showNames={false}
+                />
+                <motion.h3
+                  className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.plannedManga.subtitle')}
+                </motion.h3>
+                <motion.p
+                  className="body-sm font-regular text-white/70 mt-2 text-center text-container relative z-10"
+                  {...fadeSlideUp}
+                  data-framer-motion
+                >
+                  {t('slides.plannedManga.count', {
+                    count: plannedMangaItems.length,
+                  })}
                 </motion.p>
               </motion.div>
             ) : (
-              <motion.h3 className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4" {...fadeSlideUp} data-framer-motion>
-                No manga added to your plan-to-read list
-            </motion.h3>
+              <motion.h3
+                className="body-sm font-regular text-white/70 text-center text-container relative z-10 mt-4"
+                {...fadeSlideUp}
+                data-framer-motion
+              >
+                {t('slides.plannedManga.noData')}
+              </motion.h3>
             )}
           </SlideLayout>
         );
 
       // ========== NEW UNIQUE FEATURES ==========
-      
+
       case 'milestones':
         if (!stats.thisYearMilestone) return null;
         const milestoneCount = stats.thisYearMilestone.count;
-        const milestonePercent = Math.min(100, Math.max(1, Math.round((milestoneCount / 1000000) * 100))); // Rough estimate
+        const milestonePercent = Math.min(
+          100,
+          Math.max(1, Math.round((milestoneCount / 1000000) * 100)),
+        ); // Rough estimate
         return (
           <SlideLayout bgColor="yellow">
-            <motion.h2 className="body-md font-regular text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              You hit a major milestone!
+            <motion.h2
+              className="body-md font-regular text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.milestones.title')}
             </motion.h2>
-            <motion.div className="mt-4 text-center relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-4 text-center relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               <p className="number-xl text-white">
                 <AnimatedNumber value={milestoneCount} />
               </p>
               <p className="heading-md text-white font-semibold mt-2">
-                completed anime
+                {t('slides.milestones.completedAnime')}
               </p>
               <p className="body-sm text-white/70 mt-4 text-container">
-                That's a milestone shared by only the top {milestonePercent}% of MAL users!
+                {t('slides.milestones.shared', { percent: milestonePercent })}
               </p>
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              Keep the momentum going!
+            <motion.h3
+              className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.milestones.subtitle')}
             </motion.h3>
           </SlideLayout>
         );
 
       case 'badges':
         if (!stats.badges || stats.badges.length === 0) return null;
-        
+
         // Character image mapping for different badge types
         const badgeImages = {
-          'the_hunter': '/badges/the-hunter.webp', // Light Yagami
-          'the_explorer': '/badges/the-explorer.webp', // Monkey D. Luffy
-          'the_archivist': '/badges/the-archivist.webp', // Girl reading book
-          'the_strategist': '/badges/the-strategist.webp', // Boy with green hair and lightning
-          'the_sprinter': '/badges/the_sprinter.webp', // Naruto eating ramen
-          'the_loyalist': '/badges/the-loyalist.webp', // Sailor Moon
-          'the_guardian': '/badges/the-genre-master.webp', // Gon Freecss
-          'the_rookie': '/badges/the-rookie.webp' // Rem
+          the_hunter: '/badges/the-hunter.webp', // Light Yagami
+          the_explorer: '/badges/the-explorer.webp', // Monkey D. Luffy
+          the_archivist: '/badges/the-archivist.webp', // Girl reading book
+          the_strategist: '/badges/the-strategist.webp', // Boy with green hair and lightning
+          the_sprinter: '/badges/the_sprinter.webp', // Naruto eating ramen
+          the_loyalist: '/badges/the-loyalist.webp', // Sailor Moon
+          the_guardian: '/badges/the-genre-master.webp', // Gon Freecss
+          the_rookie: '/badges/the-rookie.webp', // Rem
         };
-        
+
         return (
           <SlideLayout bgColor="purple">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            The badges you earned along the way
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.badges.title')}
             </motion.h2>
-            <motion.div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-2 max-w-3xl mx-auto relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-1.5 md:gap-2 max-w-3xl mx-auto relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               {stats.badges.map((badge, idx) => (
                 <motion.div
                   key={badge.type}
@@ -5771,7 +7512,10 @@ export default function MALWrapped() {
                 >
                   <motion.div
                     className="bg-black/60 rounded-xl p-2 md:p-4 h-full"
-                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(0, 0, 0, 0.45)'}}
+                    whileHover={{
+                      scale: 1.02,
+                      backgroundColor: 'rgba(0, 0, 0, 0.45)',
+                    }}
                     transition={{ duration: 0.3, ease: smoothEase }}
                   >
                     <div className="flex items-center gap-3">
@@ -5779,10 +7523,18 @@ export default function MALWrapped() {
                         className="w-16 md:w-20 h-16 md:h-20 flex-shrink-0 rounded-full overflow-hidden"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        transition={{ duration: 0.4, delay: idx * 0.1 + 0.2, type: "spring", stiffness: 200 }}
+                        transition={{
+                          duration: 0.4,
+                          delay: idx * 0.1 + 0.2,
+                          type: 'spring',
+                          stiffness: 200,
+                        }}
                       >
                         <img
-                          src={badgeImages[badge.type] || '/badges/default-badge.webp'}
+                          src={
+                            badgeImages[badge.type] ||
+                            '/badges/default-badge.webp'
+                          }
                           alt={badge.name}
                           className="w-full h-full object-cover rounded-full"
                           crossOrigin="anonymous"
@@ -5792,16 +7544,24 @@ export default function MALWrapped() {
                         />
                       </motion.div>
                       <div className="flex-1 min-w-0">
-                        <p className="heading-sm font-semibold text-white mb-1">{badge.name}</p>
-                        <p className="text-sm md:text-base text-white/70 font-regular leading-relaxed">{badge.description}</p>
+                        <p className="heading-sm font-semibold text-white mb-1">
+                          {badge.name}
+                        </p>
+                        <p className="text-sm md:text-base text-white/70 font-regular leading-relaxed">
+                          {badge.description}
+                        </p>
                       </div>
                     </div>
                   </motion.div>
                 </motion.div>
               ))}
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            Each one tells a story
+            <motion.h3
+              className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.badges.subtitle')}
             </motion.h3>
           </SlideLayout>
         );
@@ -5809,13 +7569,24 @@ export default function MALWrapped() {
       case 'character_twin':
         if (!stats.characterTwin) return null;
         // Use character image from API if available, otherwise fallback to default
-        const characterImage = stats.characterTwin.characterImage || stats.characterTwin.coverImage || '/Mascot.webp';
+        const characterImage =
+          stats.characterTwin.characterImage ||
+          stats.characterTwin.coverImage ||
+          '/Mascot.webp';
         return (
           <SlideLayout bgColor="pink">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            If you were an anime character, you'd be...
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.characterTwin.title')}
             </motion.h2>
-            <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-6 flex flex-col items-center relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               <div className="relative w-36 h-36 flex items-center justify-center flex-shrink-0 mb-4">
                 <motion.div
                   className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
@@ -5834,72 +7605,43 @@ export default function MALWrapped() {
                   />
                 </motion.div>
               </div>
-              <p className="heading-lg text-white font-semibold text-center">{stats.characterTwin.title}</p>
+              <p className="heading-lg text-white font-semibold text-center">
+                {stats.characterTwin.title}
+              </p>
               {stats.characterTwin.series && (
-                <p className="body-md text-white/70 text-center">{stats.characterTwin.series}</p>
+                <p className="body-md text-white/70 text-center">
+                  {stats.characterTwin.series}
+                </p>
               )}
-             
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-            {(() => {
-              const reason = stats.characterTwin.reason;
-              const characterName = stats.characterTwin.title;
-              const seriesName = stats.characterTwin.series;
-              
-              if (!characterName || !seriesName) {
-                return reason;
-              }
-              
-              if (reason.includes('Based on your love for')) {
-                // Format: "Based on your love for X, CharacterName from 'SeriesName' matches your vibes"
-                const loveForText = 'Based on your love for';
-                const loveForIndex = reason.indexOf(loveForText);
-                const nameIndex = reason.indexOf(characterName);
-                const seriesIndex = reason.indexOf(seriesName);
-                
-                if (loveForIndex !== -1 && nameIndex !== -1 && seriesIndex !== -1) {
-                  const beforeLoveFor = reason.substring(0, loveForIndex);
-                  const afterLoveFor = reason.substring(loveForIndex + loveForText.length, nameIndex);
-                  const afterName = reason.substring(nameIndex + characterName.length, seriesIndex);
-                  const afterSeries = reason.substring(seriesIndex + seriesName.length);
-                  
-                  return (
-                    <>
-                      {beforeLoveFor}
-                      <span className="font-regular">{loveForText}</span>
-                      {afterLoveFor}
-                      <span className="font-bold">{characterName}</span>
-                      {afterName}
-                      <span className="font-bold">{seriesName}</span>
-                      {afterSeries}
-                    </>
-                  );
-                }
-              } else {
-                // Format: "CharacterName from "SeriesName" matches your anime journey"
-                const nameIndex = reason.indexOf(characterName);
-                const seriesIndex = reason.indexOf(seriesName);
-                
-                if (nameIndex !== -1 && seriesIndex !== -1) {
-                  const beforeName = reason.substring(0, nameIndex);
-                  const afterName = reason.substring(nameIndex + characterName.length, seriesIndex);
-                  const afterSeries = reason.substring(seriesIndex + seriesName.length);
-                  
-                  return (
-                    <>
-                      {beforeName}
-                      <span className="font-bold">{characterName}</span>
-                      {afterName}
-                      <span className="font-bold">{seriesName}</span>
-                      {afterSeries}
-                    </>
-                  );
-                }
-              }
-              
-              // Fallback to plain text if parsing fails
-              return reason;
-            })()}
+            <motion.h3
+              className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {stats.characterTwin.reasonKey ===
+              'slides.characterTwin.basedOnLove' ? (
+                <>
+                  {t('slides.characterTwin.basedOnLove', {
+                    genres: stats.characterTwin.genres,
+                  })}{' '}
+                  <span className="font-bold">{stats.characterTwin.title}</span>{' '}
+                  {t('slides.characterTwin.from')} '
+                  <span className="font-bold">
+                    {stats.characterTwin.series}
+                  </span>
+                  ' {t('slides.characterTwin.matchesVibes')}
+                </>
+              ) : (
+                <>
+                  <span className="font-bold">{stats.characterTwin.title}</span>{' '}
+                  {t('slides.characterTwin.from')} '
+                  <span className="font-bold">
+                    {stats.characterTwin.series}
+                  </span>
+                  ' {t('slides.characterTwin.matchesJourney')}
+                </>
+              )}
             </motion.h3>
           </SlideLayout>
         );
@@ -5908,10 +7650,18 @@ export default function MALWrapped() {
         if (!stats.ratingStyle) return null;
         return (
           <SlideLayout bgColor="green">
-            <motion.h2 className="body-md font-medium text-white text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              You rate like...
+            <motion.h2
+              className="body-md font-medium text-white text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t('slides.ratingStyle.title')}
             </motion.h2>
-            <motion.div className="mt-6 flex flex-col items-center relative z-10" {...fadeSlideUp} data-framer-motion>
+            <motion.div
+              className="mt-6 flex flex-col items-center relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
               <div className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center flex-shrink-0 mb-6">
                 <motion.div
                   className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
@@ -5921,7 +7671,7 @@ export default function MALWrapped() {
                 >
                   <img
                     src={stats.ratingStyle.image}
-                    alt={stats.ratingStyle.name}
+                    alt={t(stats.ratingStyle.nameKey)}
                     className="w-full h-full object-cover"
                     crossOrigin="anonymous"
                     onError={(e) => {
@@ -5930,10 +7680,18 @@ export default function MALWrapped() {
                   />
                 </motion.div>
               </div>
-              <p className="heading-lg text-white font-semibold text-center">{stats.ratingStyle.name}</p>
+              <p className="heading-lg text-white font-semibold text-center">
+                {t(stats.ratingStyle.nameKey)}
+              </p>
             </motion.div>
-            <motion.h3 className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10" {...fadeSlideUp} data-framer-motion>
-              {stats.ratingStyle.footer}
+            <motion.h3
+              className="body-sm font-regular text-white/70 mt-6 text-center text-container relative z-10"
+              {...fadeSlideUp}
+              data-framer-motion
+            >
+              {t(stats.ratingStyle.footerKey, {
+                score: stats.ratingStyle.score,
+              })}
             </motion.h3>
           </SlideLayout>
         );
@@ -5941,10 +7699,10 @@ export default function MALWrapped() {
       case 'finale': {
         const totalTimeSpent = stats.totalTimeSpent || 0;
         const totalDays = Math.floor(totalTimeSpent / 24);
-        
+
         // Calculate top manga genres for finale
         const finaleMangaGenres = {};
-        (mangaListData || []).forEach(item => {
+        (mangaListData || []).forEach((item) => {
           if (stats.selectedYear !== 'all') {
             const finishDate = item.list_status?.finish_date;
             const startDate = item.list_status?.start_date;
@@ -5958,36 +7716,45 @@ export default function MALWrapped() {
               return;
             }
           }
-          item.node?.genres?.forEach(genre => {
-            finaleMangaGenres[genre.name] = (finaleMangaGenres[genre.name] || 0) + 1;
+          item.node?.genres?.forEach((genre) => {
+            finaleMangaGenres[genre.name] =
+              (finaleMangaGenres[genre.name] || 0) + 1;
           });
         });
         const finaleCombinedGenres = {};
         (stats.topGenres || []).forEach(([genre, count]) => {
-          finaleCombinedGenres[genre] = (finaleCombinedGenres[genre] || 0) + count;
+          finaleCombinedGenres[genre] =
+            (finaleCombinedGenres[genre] || 0) + count;
         });
         Object.entries(finaleMangaGenres).forEach(([genre, count]) => {
-          finaleCombinedGenres[genre] = (finaleCombinedGenres[genre] || 0) + count;
+          finaleCombinedGenres[genre] =
+            (finaleCombinedGenres[genre] || 0) + count;
         });
-        const finaleTopGenre = Object.entries(finaleCombinedGenres).sort((a, b) => b[1] - a[1])[0];
+        const finaleTopGenre = Object.entries(finaleCombinedGenres).sort(
+          (a, b) => b[1] - a[1],
+        )[0];
         const favoriteAuthor = stats.topAuthors?.[0]?.[0] || null;
-        
+
         return (
-          <SlideLayout  bgColor="blue">
-                <motion.div 
+          <SlideLayout bgColor="blue">
+            <motion.div
               className="w-full h-full flex flex-col items-center justify-center relative z-20 px-4 sm:px-6 md:px-8"
               variants={staggerContainer}
               initial="initial"
               animate="animate"
             >
               {/* Image with Heading */}
-              <motion.div 
+              <motion.div
                 className="w-full max-w-3xl flex items-center justify-center gap-4 sm:gap-6 mb-6 sm:mb-8 relative z-20"
                 variants={staggerItem}
               >
                 <div className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 flex items-center justify-center flex-shrink-0 z-20">
                   <motion.a
-                    href={username ? `https://myanimelist.net/profile/${encodeURIComponent(username)}` : '#'}
+                    href={
+                      username
+                        ? `https://myanimelist.net/profile/${encodeURIComponent(username)}`
+                        : '#'
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="relative z-20 w-full h-full rounded-xl overflow-hidden block"
@@ -5995,53 +7762,76 @@ export default function MALWrapped() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <img 
-                      src={userImage} 
-                      alt={username || 'User'} 
+                    <img
+                      src={userImage}
+                      alt={username || 'User'}
                       className="w-full h-full object-cover"
                       crossOrigin="anonymous"
                     />
                   </motion.a>
                 </div>
                 <div className="flex-1 relative z-20">
-                  <motion.h2 
+                  <motion.h2
                     className="heading-md md:heading-lg text-white font-medium relative z-20"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
                   >
-                    {username ? `${username}'s` : 'My'} {stats.selectedYear !== 'all' ? `${stats.selectedYear} ` : 'All Time'} MyAnimeList Wrapped
+                    {username
+                      ? stats.selectedYear !== 'all'
+                        ? t('slides.finale.titleWithYear', {
+                            username,
+                            year: stats.selectedYear,
+                          })
+                        : t('slides.finale.titleAllTime', { username })
+                      : stats.selectedYear !== 'all'
+                        ? t('slides.finale.myTitleWithYear', {
+                            year: stats.selectedYear,
+                          })
+                        : t('slides.finale.myTitleAllTime')}
                   </motion.h2>
-              </div>
+                </div>
               </motion.div>
 
               {/* Text Content Below - All sections in one flex container with consistent gap */}
               <div className="w-full max-w-3xl flex flex-col gap-6 md:gap-8 text-white relative z-20">
                 {/* Top Anime / Top Manga recap - only show if lists have items */}
                 {(stats.topRated?.length > 0 || stats.topManga?.length > 0) && (
-                  <motion.div 
+                  <motion.div
                     className="grid grid-cols-2 gap-4 md:gap-6 relative z-20"
                     variants={staggerItem}
                   >
                     {stats.topRated?.length > 0 && (
                       <div>
-                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">Top Anime</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">
+                          {t('slides.finale.topAnime')}
+                        </p>
                         {stats.topRated.slice(0, 5).map((a, i) => (
                           <p key={a.node.id} className="text-white truncate">
-                            <span className="title-sm text-white font-medium truncate mr-2">{String(i + 1)}</span>
-                            <span className="title-sm text-white font-medium truncate">{a.node.title}</span>
+                            <span className="title-sm text-white font-medium truncate mr-2">
+                              {String(i + 1)}
+                            </span>
+                            <span className="title-sm text-white font-medium truncate">
+                              {a.node.title}
+                            </span>
                           </p>
                         ))}
                       </div>
                     )}
-                    
+
                     {stats.topManga?.length > 0 && (
                       <div>
-                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">Top Manga</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">
+                          {t('slides.finale.topManga')}
+                        </p>
                         {stats.topManga.slice(0, 5).map((m, i) => (
                           <p key={m.node.id} className="text-white truncate">
-                            <span className="title-sm text-white font-medium truncate mr-2">{String(i + 1)}</span>
-                            <span className="title-sm text-white font-medium truncate">{m.node.title}</span>
+                            <span className="title-sm text-white font-medium truncate mr-2">
+                              {String(i + 1)}
+                            </span>
+                            <span className="title-sm text-white font-medium truncate">
+                              {m.node.title}
+                            </span>
                           </p>
                         ))}
                       </div>
@@ -6049,67 +7839,86 @@ export default function MALWrapped() {
                   </motion.div>
                 )}
 
-                <motion.div 
+                <motion.div
                   className="grid grid-cols-2 gap-4 md:gap-6 relative z-20"
                   variants={staggerItem}
                 >
                   <div>
                     {finaleTopGenre && (
                       <>
-                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">Favorite Genre</p>
-                        <p className="title-md text-white font-medium">{finaleTopGenre[0]}</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">
+                          {t('slides.finale.favoriteGenre')}
+                        </p>
+                        <p className="title-md text-white font-medium">
+                          {finaleTopGenre[0]}
+                        </p>
                       </>
                     )}
                   </div>
-                  
+
                   <div>
                     {favoriteAuthor && (
                       <>
-                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">Favorite Author</p>
-                        <p className="title-md text-white font-medium">{favoriteAuthor}</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">
+                          {t('slides.finale.favoriteAuthor')}
+                        </p>
+                        <p className="title-md text-white font-medium">
+                          {favoriteAuthor}
+                        </p>
                       </>
                     )}
                   </div>
                 </motion.div>
 
                 {/* Watched / Read / Time recap - hide headings when values are 0 */}
-                {(stats.totalAnime > 0 || stats.totalManga > 0 || totalTimeSpent > 0) && (
-                  <motion.div 
+                {(stats.totalAnime > 0 ||
+                  stats.totalManga > 0 ||
+                  totalTimeSpent > 0) && (
+                  <motion.div
                     className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6 relative z-20"
                     variants={staggerItem}
                   >
                     {stats.totalAnime > 0 && (
                       <div>
-                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">Watched</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">
+                          {t('slides.finale.watched')}
+                        </p>
                         <p className="title-lg text-white font-bold">
-                          {stats.totalAnime} Anime
+                          {t('slides.finale.animeCount', {
+                            count: stats.totalAnime,
+                          })}
                         </p>
                       </div>
                     )}
                     {stats.totalManga > 0 && (
                       <div>
-                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">Read</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">
+                          {t('slides.finale.read')}
+                        </p>
                         <p className="title-lg text-white font-bold">
-                          {stats.totalManga} Manga
+                          {t('slides.finale.mangaCount', {
+                            count: stats.totalManga,
+                          })}
                         </p>
                       </div>
                     )}
                     {totalTimeSpent > 0 && (
                       <div>
-                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">Time Spent</p>
+                        <p className="text-sm md:text-base text-white/70 font-regular mb-1">
+                          {t('slides.finale.timeSpent')}
+                        </p>
                         <p className="title-lg text-white font-bold">
-                          {totalDays > 0 ? (
-                            <>{totalDays} Days</>
-                          ) : (
-                            <>{totalTimeSpent} Hours</>
-                          )}
+                          {totalDays > 0
+                            ? t('slides.finale.days', { count: totalDays })
+                            : t('slides.finale.hours', {
+                                count: totalTimeSpent,
+                              })}
                         </p>
                       </div>
                     )}
                   </motion.div>
                 )}
-                </div>
-                
+              </div>
             </motion.div>
           </SlideLayout>
         );
@@ -6121,42 +7930,60 @@ export default function MALWrapped() {
   }
 
   return (
-    <motion.main 
-      className="bg-black text-white w-full flex flex-col items-center justify-center p-2 selection:bg-white selection:text-black relative overflow-hidden min-h-screen" 
-      style={{ 
+    <motion.main
+      className="bg-black text-white w-full flex flex-col items-center justify-center p-2 selection:bg-white selection:text-black relative overflow-hidden min-h-screen"
+      style={{
         minHeight: '100dvh',
         backgroundColor: '#000000',
         backgroundImage: `
           linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
           linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px)
         `,
-        backgroundSize: '40px 40px'
+        backgroundSize: '40px 40px',
       }}
       animate={{
-        backgroundPosition: ['0 0', '40px 40px']
+        backgroundPosition: ['0 0', '40px 40px'],
       }}
       transition={{
         duration: 8,
         repeat: Infinity,
-        ease: 'linear'
+        ease: 'linear',
       }}
       data-framer-motion
     >
+      <LanguageSelector />
       {/* Background floating anime elements - outside the card on grid bg */}
       {stats && isAuthenticated && slides.length > 0 && (
-        <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden" style={{ zIndex: 0 }}>
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden"
+          style={{ zIndex: 0 }}
+        >
           {(() => {
             const slideId = slides[currentSlide]?.id;
             let bgItems = [];
-            if (slideId?.includes('anime') || slideId === 'top_genre' || slideId === 'top_studio' || slideId === 'seasonal_highlights') {
+            if (
+              slideId?.includes('anime') ||
+              slideId === 'top_genre' ||
+              slideId === 'top_studio' ||
+              slideId === 'seasonal_highlights'
+            ) {
               bgItems = stats.thisYearAnime?.slice(0, 6) || [];
-            } else if (slideId?.includes('manga') || slideId === 'top_manga_genre' || slideId === 'top_author') {
+            } else if (
+              slideId?.includes('manga') ||
+              slideId === 'top_manga_genre' ||
+              slideId === 'top_author'
+            ) {
               bgItems = (mangaList || []).slice(0, 6);
             } else {
-              bgItems = [...(stats.thisYearAnime?.slice(0, 3) || []), ...(mangaList?.slice(0, 3) || [])];
+              bgItems = [
+                ...(stats.thisYearAnime?.slice(0, 3) || []),
+                ...(mangaList?.slice(0, 3) || []),
+              ];
             }
             return bgItems.map((item, idx) => {
-              const image = item.node?.main_picture?.large || item.node?.main_picture?.medium;
+              const image =
+                item.node?.main_picture?.large ||
+                item.node?.main_picture?.medium;
               if (!image) return null;
               const positions = [
                 { top: '10%', left: '5%', rotate: -12 },
@@ -6164,7 +7991,7 @@ export default function MALWrapped() {
                 { bottom: '10%', left: '20%', rotate: -8 },
                 { bottom: '15%', right: '15%', rotate: 10 },
                 { top: '30%', left: '15%', rotate: 20 },
-                { bottom: '30%', right: '10%', rotate: -15 }
+                { bottom: '30%', right: '10%', rotate: -15 },
               ];
               const pos = positions[idx % positions.length];
               return (
@@ -6185,7 +8012,15 @@ export default function MALWrapped() {
           })()}
         </div>
       )}
-      <div ref={slideRef} className="w-full max-w-5xl bg-black rounded-2xl flex flex-col justify-center relative overflow-hidden slide-card mb-8" style={{ zIndex: 10, height: '95dvh', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+      <div
+        ref={slideRef}
+        className="w-full max-w-5xl bg-black rounded-2xl flex flex-col justify-center relative overflow-hidden slide-card mb-8"
+        style={{
+          zIndex: 10,
+          height: '95dvh',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+        }}
+      >
         <div className="z-10 w-full h-full flex flex-col items-center justify-center">
           {error && (
             <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-lg z-50">
@@ -6194,95 +8029,86 @@ export default function MALWrapped() {
           )}
 
           {(isLoading || (isLoadingSongs && isAuthenticated)) && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-50 bg-black">
-              <div className="text-center w-full max-w-2xl mx-auto px-4">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: smoothEase }}
-                >
-                  <motion.h1 
-                    className="body-lg font-medium text-white mb-4 tracking-tight"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                  >
-                    {loadingProgress || ('Loading...')}
-                  </motion.h1>
-
-                  {/* Progress bar */}
-                  <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full"
-                      style={{
-                        background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.8) 0%, rgba(0, 200, 255, 0.8) 100%)'
-                      }}
-                      initial={{ width: "0%" }}
-                      animate={{ width: `${loadingProgressPercent}%` }}
-                      transition={{
-                        duration: 0.3,
-                        ease: smoothEase
-                      }}
-                    />
-                  </div>
-                </motion.div>
-              </div>
-            </div>
+            <LoadingScreen
+              progress={loadingProgressPercent}
+              message={loadingProgress || t('general.loadingText')}
+            />
           )}
 
           {!isAuthenticated && (
             <div className="text-center p-4 relative w-full h-full flex flex-col items-center justify-center">
               {/* Colorful abstract shapes background */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+              <div
+                className="absolute inset-0 pointer-events-none overflow-hidden"
+                style={{ zIndex: 0 }}
+              >
                 {/* Large layered organic shape (left side) */}
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60 rounded-full" style={{
-                  background: 'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
-                  transform: 'rotate(-15deg)',
-                  filter: 'blur(120px)'
-                }}></div>
-                
+                <div
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-96 h-96 opacity-60 rounded-full"
+                  style={{
+                    background:
+                      'radial-gradient(ellipse at center, rgba(255, 0, 100, 0.4) 0%, rgba(200, 0, 150, 0.3) 30%, rgba(100, 0, 200, 0.2) 60%, transparent 100%)',
+                    transform: 'rotate(-15deg)',
+                    filter: 'blur(120px)',
+                  }}
+                ></div>
+
                 {/* Rainbow gradient rectangle (top right) */}
-                <div className="absolute top-0 right-0 w-96 h-64 opacity-50 rounded-3xl" style={{
-                  background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
-                  filter: 'blur(120px)'
-                }}></div>
-                
+                <div
+                  className="absolute top-0 right-0 w-96 h-64 opacity-50 rounded-3xl"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(138, 43, 226, 0.5) 0%, rgba(75, 0, 130, 0.4) 20%, rgba(0, 0, 255, 0.3) 40%, rgba(0, 255, 255, 0.3) 60%, rgba(0, 255, 0, 0.3) 80%, rgba(255, 255, 0, 0.4) 100%)',
+                    filter: 'blur(120px)',
+                  }}
+                ></div>
+
                 {/* Purple glow (center) */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40 rounded-full" style={{
-                  background: 'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
-                  filter: 'blur(140px)'
-                }}></div>
-                
+                <div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] opacity-40 rounded-full"
+                  style={{
+                    background:
+                      'radial-gradient(circle, rgba(138, 43, 226, 0.3) 0%, rgba(75, 0, 130, 0.2) 50%, transparent 100%)',
+                    filter: 'blur(140px)',
+                  }}
+                ></div>
+
                 {/* Rainbow accent (bottom right) */}
-                <div className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50 rounded-full" style={{
-                  background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
-                  filter: 'blur(120px)'
-                }}></div>
+                <div
+                  className="absolute bottom-1/4 right-1/4 w-80 h-80 opacity-50 rounded-full"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(255, 0, 0, 0.3) 0%, rgba(255, 165, 0, 0.3) 25%, rgba(255, 255, 0, 0.3) 50%, rgba(0, 255, 0, 0.3) 75%, rgba(0, 0, 255, 0.3) 100%)',
+                    filter: 'blur(120px)',
+                  }}
+                ></div>
               </div>
-              
-              
 
               {/* Bottom gradient fade - static, no animation */}
-              <div 
+              <div
                 className="absolute bottom-0 left-0 right-0 pointer-events-none h-full"
                 style={{
                   zIndex: 9,
-                  background: bottomGradientBackground
+                  background: bottomGradientBackground,
                 }}
               />
-              
+
               <div className="relative z-20 w-full flex flex-col items-center justify-center">
-                <motion.div {...fadeIn100} data-framer-motion className="w-full flex flex-col items-center">
+                <motion.div
+                  {...fadeIn100}
+                  data-framer-motion
+                  className="w-full flex flex-col items-center"
+                >
                   {/* Logo */}
-                  <motion.div 
+                  <motion.div
                     className="mb-8 relative z-10"
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, ease: smoothEase }}
                   >
-                    <img 
-                      src="/logo.webp" 
-                      alt="MAL Wrapped Logo" 
+                    <img
+                      src="/logo.webp"
+                      alt="MAL Wrapped Logo"
                       className="h-28 sm:h-32 md:h-36 w-auto mx-auto rounded-xl"
                     />
                   </motion.div>
@@ -6295,21 +8121,36 @@ export default function MALWrapped() {
                     </h2>
                   </div>
                 </motion.div>
-                <motion.p className="mt-8 body-md text-white/70 text-center text-container max-w-2xl mx-auto" {...fadeIn300} data-framer-motion>Connect with your MyAnimeList account to see your year in review.</motion.p>
-              <motion.div className="mt-4 flex flex-col sm:flex-row gap-4 justify-center w-full" {...fadeIn} data-framer-motion>
+                <motion.p
+                  className="mt-8 body-md text-white/70 text-center text-container max-w-2xl mx-auto"
+                  {...fadeIn300}
+                  data-framer-motion
+                >
+                  {t('general.connectMALDescription')}
+                </motion.p>
+                <motion.div
+                  className="mt-4 flex flex-col sm:flex-row gap-4 justify-center w-full"
+                  {...fadeIn}
+                  data-framer-motion
+                >
                   <motion.button
-                  onClick={handleBegin}
+                    onClick={handleBegin}
                     className="bg-white text-black font-medium text-lg px-8 py-3 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={!CLIENT_ID || CLIENT_ID === '<your_client_id_here>'}
+                    disabled={
+                      !CLIENT_ID || CLIENT_ID === '<your_client_id_here>'
+                    }
                     whileHover={{ scale: 1.05, backgroundColor: '#f5f5f5' }}
                     whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.2, ease: smoothEase }}
-                >
-              Connect with MAL
+                  >
+                    {t('buttons.connectMAL')}
                   </motion.button>
                 </motion.div>
-                <motion.div className="mt-16 flex flex-col items-center w-full" {...fadeIn} data-framer-motion>
-                  
+                <motion.div
+                  className="mt-16 flex flex-col items-center w-full"
+                  {...fadeIn}
+                  data-framer-motion
+                >
                   <motion.img
                     src="/avatar.webp"
                     alt="XAvishkar"
@@ -6320,18 +8161,18 @@ export default function MALWrapped() {
                   />
                 </motion.div>
                 <p className="text-sm text-white/70 text-center">
-                    Made by{' '}
-                    <motion.a
-                      href="https://myanimelist.net/profile/XAvishkar"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-white/70 hover:text-white transition-colors underline"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      XAvishkar
-                    </motion.a>
-                  </p>
+                  Made by{' '}
+                  <motion.a
+                    href="https://myanimelist.net/profile/XAvishkar"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white/70 hover:text-white transition-colors underline"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    XAvishkar
+                  </motion.a>
+                </p>
               </div>
             </div>
           )}
@@ -6339,21 +8180,24 @@ export default function MALWrapped() {
           {isAuthenticated && stats && slides.length > 0 && (
             <div className="w-full h-full flex flex-col overflow-hidden relative">
               {/* Top Bar - Download, Share, Logout (Year picker moved to welcome screen) */}
-              <div className="flex-shrink-0 px-3 sm:px-4 md:px-6 pt-3 pb-2 flex items-center justify-between gap-2 sm:gap-3" data-exclude-from-screenshot>
+              <div
+                className="flex-shrink-0 px-3 sm:px-4 md:px-6 pt-3 pb-2 flex items-center justify-between gap-2 sm:gap-3"
+                data-exclude-from-screenshot
+              >
                 <div className="flex items-center gap-2 sm:gap-3">
                   {playlist.length > 0 && (
-                    <motion.button 
-                      onClick={toggleMusic} 
-                      className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2" 
-                      title={isMusicPlaying ? "Pause Music" : "Play Music"}  
-                      style={{ 
+                    <motion.button
+                      onClick={toggleMusic}
+                      className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2"
+                      title={isMusicPlaying ? 'Pause Music' : 'Play Music'}
+                      style={{
                         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
                       }}
-                      whileHover={{ 
-                        scale: 1.1, 
+                      whileHover={{
+                        scale: 1.1,
                         backgroundColor: 'rgba(139, 92, 246, 0.8)',
-                        borderColor: 'rgba(139, 92, 246, 0.8)'
+                        borderColor: 'rgba(139, 92, 246, 0.8)',
                       }}
                       whileTap={{ scale: 0.9 }}
                       transition={{ duration: 0.2 }}
@@ -6365,99 +8209,120 @@ export default function MALWrapped() {
                       )}
                     </motion.button>
                   )}
-                  <motion.button 
+                  <motion.button
                     type="button"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                       handleDownloadPNG(e);
                     }}
-                    className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2" 
-                    title="Download Slide" 
-                    style={{ 
+                    className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2"
+                    title={t('buttons.download')}
+                    style={{
                       backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
                     }}
-                    whileHover={{ 
-                      scale: 1.1, 
+                    whileHover={{
+                      scale: 1.1,
                       backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                      borderColor: 'rgba(16, 185, 129, 0.8)'
+                      borderColor: 'rgba(16, 185, 129, 0.8)',
                     }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                   >
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span className="text-xs sm:text-sm font-medium">Download</span>
+                    <span className="text-xs sm:text-sm font-medium">
+                      {t('buttons.download')}
+                    </span>
                   </motion.button>
                 </div>
-                <motion.button 
-                  onClick={handleLogout} 
-                  className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2" 
-                  title="Logout"  
-                  style={{ 
+                <motion.button
+                  onClick={handleLogout}
+                  className="p-1.5 sm:p-2 text-white rounded-full flex items-center gap-1.5 sm:gap-2"
+                  title={t('buttons.logout')}
+                  style={{
                     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                   }}
-                  whileHover={{ 
-                    scale: 1.1, 
+                  whileHover={{
+                    scale: 1.1,
                     backgroundColor: 'rgba(211, 68, 68, 0.8)',
-                    borderColor: 'rgba(211, 68, 68, 0.8)'
+                    borderColor: 'rgba(211, 68, 68, 0.8)',
                   }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ duration: 0.2 }}
                 >
                   <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <span className="text-xs sm:text-sm font-medium">Log Out</span>
+                  <span className="text-xs sm:text-sm font-medium">
+                    {t('buttons.logout')}
+                  </span>
                 </motion.button>
               </div>
-              
+
               {/* Progress Bar */}
-              <div className="flex-shrink-0 mt-2 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2 relative z-10" data-exclude-from-screenshot>
+              <div
+                className="flex-shrink-0 mt-2 px-3 sm:px-4 md:px-6 pb-3 flex items-center gap-1 sm:gap-2 relative z-10"
+                data-exclude-from-screenshot
+              >
                 {slides.map((_, i) => {
                   const isCompleted = i < currentSlide;
                   const isActive = i === currentSlide;
                   return (
-                    <div key={i} className="flex-1 h-1 sm:h-1.5 rounded-full bg-white/10 overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-500 ease-out ${isActive ? 'bg-white' : 'bg-white/30'}`} 
-                        style={{ width: (isCompleted || isActive) ? '100%' : '0%' }} 
+                    <div
+                      key={i}
+                      className="flex-1 h-1 sm:h-1.5 rounded-full bg-white/10 overflow-hidden"
+                    >
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ease-out ${isActive ? 'bg-white' : 'bg-white/30'}`}
+                        style={{
+                          width: isCompleted || isActive ? '100%' : '0%',
+                        }}
                       />
                     </div>
                   );
                 })}
               </div>
-              
+
               {/* Slide Content */}
-              <div 
-                key={currentSlide} 
-                className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative" 
+              <div
+                key={currentSlide}
+                className="w-full flex-grow flex items-center justify-center overflow-y-auto py-2 sm:py-4 relative"
                 style={{ zIndex: 0 }}
                 onClick={handleSlideTap}
                 onTouchEnd={handleSlideTap}
               >
                 {/* Top gradient fade - above rainbow shapes, below content */}
-               
-                
-                <div className="w-full h-full relative overflow-y-auto" style={{ zIndex: 10 }}>
-                  <SlideContent slide={slides[currentSlide]} mangaListData={mangaList} websiteUrl={websiteUrl} />
+
+                <div
+                  className="w-full h-full relative overflow-y-auto"
+                  style={{ zIndex: 10 }}
+                >
+                  <SlideContent
+                    slide={slides[currentSlide]}
+                    mangaListData={mangaList}
+                    websiteUrl={websiteUrl}
+                  />
                 </div>
               </div>
-              
+
               {/* Bottom Controls */}
-              <div className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-10" data-exclude-from-screenshot>
+              <div
+                className="flex-shrink-0 w-full px-3 sm:px-4 md:px-6 pb-3 sm:pb-4 flex items-center justify-between gap-2 relative z-10"
+                data-exclude-from-screenshot
+              >
                 <motion.button
-                onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
-                disabled={currentSlide === 0}
+                  onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
+                  disabled={currentSlide === 0}
                   className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30 transition-all"
                   whileHover={{ scale: currentSlide === 0 ? 1 : 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ duration: 0.2 }}
-              >
+                >
                   <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </motion.button>
-                
+
                 <p className="text-white/70 text-xs sm:text-sm md:text-base font-mono py-1.5 sm:py-2 px-2 sm:px-4 rounded-full border-box-cyan ">
-                    {`${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`}
+                  {`${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`}
                 </p>
 
                 <div className="flex items-center gap-2">
@@ -6469,322 +8334,373 @@ export default function MALWrapped() {
                           window.location.reload();
                         }}
                         className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
-                        whileHover={{ 
-                          scale: 1.1, 
+                        whileHover={{
+                          scale: 1.1,
                           backgroundColor: 'rgba(64, 101, 204, 0.8)',
-                          borderColor: 'rgba(64, 101, 204, 0.8)'
+                          borderColor: 'rgba(64, 101, 204, 0.8)',
                         }}
                         whileTap={{ scale: 0.9 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <span className="text-xs sm:text-sm font-medium">Restart</span>
+                        <span className="text-xs sm:text-sm font-medium">
+                          {t('general.restart')}
+                        </span>
                       </motion.button>
-                    <div className="relative" ref={shareMenuRef}>
-                      <motion.button
-                        type="button"
-                        onClick={handleShareButtonClick}
-                        className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
-                        whileHover={{ 
-                          scale: 1.1, 
-                          backgroundColor: 'rgba(64, 101, 204, 0.8)',
-                          borderColor: 'rgba(64, 101, 204, 0.8)'
-                        }}
-                        whileTap={{ scale: 0.9 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
-                        <span className="text-xs sm:text-sm font-medium">Share</span>
-                      </motion.button>
-
-                      {showShareMenu && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      <div className="relative" ref={shareMenuRef}>
+                        <motion.button
+                          type="button"
+                          onClick={handleShareButtonClick}
+                          className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan flex items-center gap-1.5 sm:gap-2"
+                          whileHover={{
+                            scale: 1.1,
+                            backgroundColor: 'rgba(64, 101, 204, 0.8)',
+                            borderColor: 'rgba(64, 101, 204, 0.8)',
+                          }}
+                          whileTap={{ scale: 0.9 }}
                           transition={{ duration: 0.2 }}
-                        className="absolute bottom-full right-0 mb-2 bg-black/95 backdrop-blur-sm rounded-xl p-3 z-50 min-w-[200px]"
                         >
-                          <div className="flex flex-col gap-2">
-                            <button
-                              type="button"
-                              onClick={handleShareImageClick}
-                              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
-                            >
-                              <span className="text-white font-medium">Share Image</span>
-                            </button>
-                            {[
-                              { id: 'twitter', label: 'Twitter/X' },
-                              { id: 'facebook', label: 'Facebook' },
-                              { id: 'reddit', label: 'Reddit' },
-                              { id: 'linkedin', label: 'LinkedIn' },
-                              { id: 'whatsapp', label: 'WhatsApp' },
-                              { id: 'telegram', label: 'Telegram' },
-                            ].map(({ id, label }) => (
+                          <Share2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                          <span className="text-xs sm:text-sm font-medium">
+                            {t('buttons.share')}
+                          </span>
+                        </motion.button>
+
+                        {showShareMenu && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute bottom-full right-0 mb-2 bg-black/95 backdrop-blur-sm rounded-xl p-3 z-50 min-w-[200px]"
+                          >
+                            <div className="flex flex-col gap-2">
                               <button
-                                key={id}
+                                type="button"
+                                onClick={handleShareImageClick}
+                                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                              >
+                                <span className="text-white font-medium">
+                                  {t('general.shareImage')}
+                                </span>
+                              </button>
+                              {[
+                                { id: 'twitter', label: 'Twitter/X' },
+                                { id: 'facebook', label: 'Facebook' },
+                                { id: 'reddit', label: 'Reddit' },
+                                { id: 'linkedin', label: 'LinkedIn' },
+                                { id: 'whatsapp', label: 'WhatsApp' },
+                                { id: 'telegram', label: 'Telegram' },
+                              ].map(({ id, label }) => (
+                                <button
+                                  key={id}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    shareToSocial(id);
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
+                                >
+                                  <span className="text-white font-medium">
+                                    {label}
+                                  </span>
+                                </button>
+                              ))}
+                              <div className="border-t border-white/10 my-1"></div>
+                              <button
                                 type="button"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  shareToSocial(id);
+                                  copyImageToClipboard();
                                 }}
                                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
                               >
-                                <span className="text-white font-medium">{label}</span>
+                                <span className="text-white font-medium">
+                                  {t('general.copyImage')}
+                                </span>
                               </button>
-                            ))}
-                            <div className="border-t border-white/10 my-1"></div>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                copyImageToClipboard();
-                              }}
-                              className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-left"
-                            >
-                              <span className="text-white font-medium">Copy Image</span>
-                            </button>
-                          </div>
-                        </motion.div>
-                      )}
-                    </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </div>
                     </>
                   )}
 
                   <motion.button
-                  onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
-                  disabled={currentSlide === slides.length - 1}
-                  className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30"
-                  whileHover={{ scale: currentSlide === slides.length - 1 ? 1 : 1.1 }}
+                    onClick={() =>
+                      setCurrentSlide(
+                        Math.min(slides.length - 1, currentSlide + 1),
+                      )
+                    }
+                    disabled={currentSlide === slides.length - 1}
+                    className="p-1.5 sm:p-2 text-white rounded-full border-box-cyan disabled:opacity-30"
+                    whileHover={{
+                      scale: currentSlide === slides.length - 1 ? 1 : 1.1,
+                    }}
                     whileTap={{ scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                   >
-                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                   </motion.button>
                 </div>
               </div>
             </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
-    
-    {/* Footer */}
-    <footer className="w-full bg-black border-t border-white/10 mt-auto py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row gap-8 md:gap-12 md:items-start">
-          {/* Left Column - Thanks For Stopping By */}
-          <div className="space-y-4 md:flex-1">
-            <h3 className="text-xl sm:text-2xl font-bold text-white">Thanks For Stopping By!</h3>
-            <p className="text-white/70 text-sm sm:text-base">Want to see more? Send me an email, or have a snoop of more work below.</p>
-            <div className="flex items-center gap-3">
-              <span className="text-white text-sm sm:text-base">avishkarshinde1501@gmail.com</span>
-              <motion.button
-                onClick={copyEmail}
-                className="px-3 py-1.5 border-box-cyan rounded-lg text-white text-sm flex items-center gap-2 transition-all"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Copy size={16} />
-                <span>{emailCopied ? 'Copied' : 'Copy Mail'}</span>
-              </motion.button>
-            </div>
-            <div className="flex items-center gap-4 pt-2">
-              <motion.a
-                href="https://www.linkedin.com/in/xavishkar/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
-                style={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
-                whileHover={{ 
-                  scale: 1.1, 
-                  backgroundColor: 'rgba(0, 119, 181, 0.8)',
-                  borderColor: 'rgba(0, 119, 181, 0.8)'
-                }}
-                whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-                title="LinkedIn"
-              >
-                <Linkedin size={20} className="text-white" />
-              </motion.a>
-              <motion.a
-                href="https://www.youtube.com/@x.avishkar"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
-                style={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
-                whileHover={{ 
-                  scale: 1.1, 
-                  backgroundColor: 'rgba(255, 0, 0, 0.8)',
-                  borderColor: 'rgba(255, 0, 0, 0.8)'
-                }}
-                whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-                title="YouTube"
-              >
-                <Youtube size={20} className="text-white" />
-              </motion.a>
-              <motion.a
-                href="https://www.instagram.com/x.avishkar"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
-                style={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
-                whileHover={{ 
-                  scale: 1.1, 
-                  backgroundColor: 'rgba(228, 64, 95, 0.8)',
-                  borderColor: 'rgba(228, 64, 95, 0.8)'
-                }}
-                whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-                title="Instagram"
-              >
-                <Instagram size={20} className="text-white" />
-              </motion.a>
-              <motion.a
-                href="https://github.com/Avishkar15"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
-                style={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
-                whileHover={{ 
-                  scale: 1.1, 
-                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                  borderColor: 'rgba(255, 255, 255, 0.8)'
-                }}
-                whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-                title="GitHub"
-              >
-                <Github size={20} className="text-white" />
-              </motion.a>
-                    <motion.a
-                      href="https://myanimelist.net/profile/XAvishkar"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
-                      style={{ 
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
-                      }}
-                      whileHover={{ 
-                        scale: 1.1, 
-                        backgroundColor: 'rgba(46, 81, 162, 0.8)',
-                        borderColor: 'rgba(46, 81, 162, 0.8)'
-                      }}
-                      whileTap={{ scale: 0.9 }}
-                      transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
-                      title="MyAnimeList"
-                    >
-                      <MyAnimeListIcon size={20} className="text-white" />
-                    </motion.a>
-            </div>
-          </div>
 
-          {/* Middle and Right Columns Container */}
-          <div className="flex flex-col sm:flex-row gap-6 md:gap-8 flex-shrink-0">
-            {/* Middle Column - PAGES */}
-            <div className="space-y-2 md:space-y-4">
-              <h4 className="text-white/70 text-xs md:text-sm font-medium uppercase tracking-wider">PAGES</h4>
-              <div className="space-y-1.5 md:space-y-2">
+      {/* Footer */}
+      <footer className="w-full bg-black border-t border-white/10 mt-auto py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-12 md:items-start">
+            {/* Left Column - Thanks For Stopping By */}
+            <div className="space-y-4 md:flex-1">
+              <h3 className="text-xl sm:text-2xl font-bold text-white">
+                {t('footer.thankYou')}
+              </h3>
+              <p className="text-white/70 text-sm sm:text-base">
+                {t('footer.wantMore')}
+              </p>
+              <div className="flex items-center gap-3">
+                <span className="text-white text-sm sm:text-base">
+                  avishkarshinde1501@gmail.com
+                </span>
+                <motion.button
+                  onClick={copyEmail}
+                  className="px-3 py-1.5 border-box-cyan rounded-lg text-white text-sm flex items-center gap-2 transition-all"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Copy size={16} />
+                  <span>
+                    {emailCopied ? t('general.copied') : t('general.copyMail')}
+                  </span>
+                </motion.button>
+              </div>
+              <div className="flex items-center gap-4 pt-2">
                 <motion.a
-                  href="https://www.avishkarshinde.com/"
+                  href="https://www.linkedin.com/in/xavishkar/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                  whileHover={{ x: 4 }}
-                            >
-                  <span>Portfolio</span>
-                  <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                  whileHover={{
+                    scale: 1.1,
+                    backgroundColor: 'rgba(0, 119, 181, 0.8)',
+                    borderColor: 'rgba(0, 119, 181, 0.8)',
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+                  title="LinkedIn"
+                >
+                  <Linkedin size={20} className="text-white" />
                 </motion.a>
                 <motion.a
-                  href="https://www.avishkarshinde.com/aboutme"
+                  href="https://www.youtube.com/@x.avishkar"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                  whileHover={{ x: 4 }}
-                            >
-                  <span>About Me</span>
-                  <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                  whileHover={{
+                    scale: 1.1,
+                    backgroundColor: 'rgba(255, 0, 0, 0.8)',
+                    borderColor: 'rgba(255, 0, 0, 0.8)',
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+                  title="YouTube"
+                >
+                  <Youtube size={20} className="text-white" />
                 </motion.a>
                 <motion.a
-                  href="https://drive.google.com/file/d/1ta3SF0s3Iy7ryy6ON1FKWl1p9iu32iH2/view?usp=sharing"
+                  href="https://www.instagram.com/x.avishkar"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                  whileHover={{ x: 4 }}
-                            >
-                  <span>Resume</span>
-                  <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                  whileHover={{
+                    scale: 1.1,
+                    backgroundColor: 'rgba(228, 64, 95, 0.8)',
+                    borderColor: 'rgba(228, 64, 95, 0.8)',
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+                  title="Instagram"
+                >
+                  <Instagram size={20} className="text-white" />
+                </motion.a>
+                <motion.a
+                  href="https://github.com/Avishkar15"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                  whileHover={{
+                    scale: 1.1,
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+                  title="GitHub"
+                >
+                  <Github size={20} className="text-white" />
+                </motion.a>
+                <motion.a
+                  href="https://myanimelist.net/profile/XAvishkar"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white group"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                  }}
+                  whileHover={{
+                    scale: 1.1,
+                    backgroundColor: 'rgba(46, 81, 162, 0.8)',
+                    borderColor: 'rgba(46, 81, 162, 0.8)',
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                  transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+                  title="MyAnimeList"
+                >
+                  <MyAnimeListIcon size={20} className="text-white" />
                 </motion.a>
               </div>
             </div>
 
-            {/* Right Column - WORK */}
-            <div className="space-y-2 md:space-y-4">
-            <h4 className="text-white/70 text-xs md:text-sm font-medium uppercase tracking-wider">UX WORK</h4>
-            <div className="space-y-1.5 md:space-y-2">
-              <motion.a
-                href="https://www.avishkarshinde.com/spotify"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                whileHover={{ x: 4 }}
-              >
-                <span>Spotify</span>
-                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-              </motion.a>
-              <motion.a
-                href="https://www.avishkarshinde.com/toyota-mobility-foundation"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                whileHover={{ x: 4 }}
-              >
-                <span>Toyota Mobility Foundation</span>
-                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-              </motion.a>
-              <motion.a
-                href="https://www.avishkarshinde.com/solarhive"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                whileHover={{ x: 4 }}
-              >
-                <span>SolarHive</span>
-                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-              </motion.a>
-              <motion.a
-                href="https://www.avishkarshinde.com/motion-design"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
-                whileHover={{ x: 4 }}
-              >
-                <span>Indiana University</span>
-                <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-              </motion.a>
-            </div>
+            {/* Middle and Right Columns Container */}
+            <div className="flex flex-col sm:flex-row gap-6 md:gap-8 flex-shrink-0">
+              {/* Middle Column - PAGES */}
+              <div className="space-y-2 md:space-y-4">
+                <h4 className="text-white/70 text-xs md:text-sm font-medium uppercase tracking-wider">
+                  {t('footer.pages')}
+                </h4>
+                <div className="space-y-1.5 md:space-y-2">
+                  <motion.a
+                    href="https://www.avishkarshinde.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
+                    whileHover={{ x: 4 }}
+                  >
+                    <span>{t('footer.portfolio')}</span>
+                    <ExternalLink
+                      size={14}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </motion.a>
+                  <motion.a
+                    href="https://www.avishkarshinde.com/aboutme"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
+                    whileHover={{ x: 4 }}
+                  >
+                    <span>{t('footer.aboutMe')}</span>
+                    <ExternalLink
+                      size={14}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </motion.a>
+                  <motion.a
+                    href="https://drive.google.com/file/d/1ta3SF0s3Iy7ryy6ON1FKWl1p9iu32iH2/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
+                    whileHover={{ x: 4 }}
+                  >
+                    <span>{t('footer.resume')}</span>
+                    <ExternalLink
+                      size={14}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </motion.a>
+                </div>
+              </div>
+
+              {/* Right Column - WORK */}
+              <div className="space-y-2 md:space-y-4">
+                <h4 className="text-white/70 text-xs md:text-sm font-medium uppercase tracking-wider">
+                  {t('footer.uxWork')}
+                </h4>
+                <div className="space-y-1.5 md:space-y-2">
+                  <motion.a
+                    href="https://www.avishkarshinde.com/spotify"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
+                    whileHover={{ x: 4 }}
+                  >
+                    <span>{t('footer.spotify')}</span>
+                    <ExternalLink
+                      size={14}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </motion.a>
+                  <motion.a
+                    href="https://www.avishkarshinde.com/toyota-mobility-foundation"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
+                    whileHover={{ x: 4 }}
+                  >
+                    <span>{t('footer.toyotaMobility')}</span>
+                    <ExternalLink
+                      size={14}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </motion.a>
+                  <motion.a
+                    href="https://www.avishkarshinde.com/solarhive"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
+                    whileHover={{ x: 4 }}
+                  >
+                    <span>{t('footer.solarHive')}</span>
+                    <ExternalLink
+                      size={14}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </motion.a>
+                  <motion.a
+                    href="https://www.avishkarshinde.com/motion-design"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 md:gap-2 text-white hover:text-white/70 transition-colors group text-sm md:text-base"
+                    whileHover={{ x: 4 }}
+                  >
+                    <span>{t('footer.indianaUniversity')}</span>
+                    <ExternalLink
+                      size={14}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </motion.a>
+                </div>
+              </div>
             </div>
           </div>
+          <div className="mt-8 pt-6 border-t border-white/10">
+            <p className="text-white/70 text-sm text-center">
+              {t('footer.copyright')}
+            </p>
+          </div>
         </div>
-        <div className="mt-8 pt-6 border-t border-white/10">
-          <p className="text-white/70 text-sm text-center">© 2025 Designed by <span className="font-semibold">Avishkar Shinde</span></p>
-        </div>
-      </div>
-    </footer>
+      </footer>
     </motion.main>
   );
 }

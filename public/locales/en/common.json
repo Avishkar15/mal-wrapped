@@ -1,0 +1,361 @@
+{
+  "welcome": {
+    "title": "Welcome to Your Anime Journey",
+    "subtitle": "Let's discover your MAL stats",
+    "lookBack": "A look back at your {{year}}, {{username}}.",
+    "lookBackJourney": "A look back at your journey, {{username}}.",
+    "selectYear": "Select a year to view your stats"
+  },
+  "buttons": {
+    "next": "Next",
+    "previous": "Previous",
+    "begin": "Begin",
+    "login": "Login",
+    "logout": "Log Out",
+    "download": "Download",
+    "share": "Share",
+    "connectMAL": "Connect with MAL",
+    "letsGo": "Let's Go"
+  },
+  "loading": {
+    "message1": "Summoning your statistics",
+    "message2": "Analyzing your otaku power level",
+    "message3": "Loading your story arc",
+    "message4": "Gathering your favorites",
+    "message5": "Deciphering your weeb level",
+    "message6": "Preparing your personal saga",
+    "message7": "Compiling your epic moments",
+    "message8": "Activating protagonist mode",
+    "loadedAnime": "Loaded {{count}} anime",
+    "loadedManga": "Loaded {{count}} manga",
+    "complete": "YOROKOBE! Your wrapped is ready!"
+  },
+  "errors": {
+    "noUsername": "Please enter a username",
+    "notFound": "User not found. Check the spelling!",
+    "fetchError": "Error loading data. Try again later."
+  },
+  "watermarks": {
+    "welcome": "MAL-WRAPPED.VERCEL.APP",
+    "animeCount": "My Anime Journey",
+    "animeTime": "My Anime Watchtime",
+    "topGenre": "My Most Watched Genres",
+    "demographicAnime": "My Anime Demographics",
+    "demographicManga": "My Manga Demographics",
+    "drumrollAnime": "My Top Anime",
+    "top5Anime": "My Top 5 Anime",
+    "topStudio": "My Favorite Studios",
+    "seasonalHighlights": "My Seasonal Highlights",
+    "hiddenGemsAnime": "My Hidden Anime Gems",
+    "plannedAnime": "My Planned-to-Watch Anime",
+    "milestones": "My Milestones",
+    "animeToMangaTransition": "MAL-WRAPPED.VERCEL.APP",
+    "mangaCount": "My Manga Journey",
+    "mangaTime": "My Manga Reading Time",
+    "topMangaGenre": "My Most Read Genres",
+    "drumrollManga": "My Top Manga",
+    "top5Manga": "My Top 5 Manga",
+    "topAuthor": "My Favorite Authors",
+    "hiddenGemsManga": "My Hidden Manga Gems",
+    "longestManga": "My Longest Manga Journey",
+    "plannedManga": "My Plan-to-Read Manga",
+    "badges": "My Badges",
+    "characterTwin": "My Character Match",
+    "ratingStyle": "My Rating Style",
+    "finale": "MAL-WRAPPED.VERCEL.APP"
+  },
+  "slides": {
+    "animeCount": {
+      "title": "In {{year}}, you watched",
+      "overall": "Overall, you watched",
+      "noData": "You didn't watch any anime",
+      "count": "anime",
+      "dedication": "Now that's dedication",
+      "more": "That's {{count}} more than last year. You're leveling up!",
+      "less": "You watched {{count}} less than last year. Don't stop now!",
+      "noMALData": "Log your watched anime on MyAnimeList to see your personalized wrapped!"
+    },
+    "animeTime": {
+      "title": "That adds up to",
+      "episodes": "episodes",
+      "days": "days",
+      "hours": "hours",
+      "binge": "of nonstop binge"
+    },
+    "topGenre": {
+      "title": "You couldn't get enough of",
+      "subtitle": "You know what you love",
+      "noGenres": "No genres topped your list",
+      "entries": "entries"
+    },
+    "demographicAnime": {
+      "title": "Though your watching taste leans towards...",
+      "allDemographics": "You watch across all demographics",
+      "foundLane": "You found your lane and stayed in it",
+      "complexNarratives": "Complex narratives are your jam",
+      "classicBattle": "Classic battle arcs never gets old",
+      "heartFeelings": "Heart and feelings over action",
+      "lifeComplexity": "Life's complexity resonates with you",
+      "hypeToDepth": "From hype to depth, you want it all",
+      "romanceEveryStage": "Romance at every stage of life",
+      "tasteSpans": "Your taste spans multiple worlds"
+    },
+    "demographicManga": {
+      "title": "Though your reading taste leans towards...",
+      "allDemographics": "You read across all demographics",
+      "foundLane": "You found your lane and stayed in it",
+      "complexNarratives": "Complex narratives are your jam",
+      "classicBattle": "Classic battle arcs never gets old",
+      "heartFeelings": "Heart and feelings over action",
+      "lifeComplexity": "Life's complexity resonates with you",
+      "hypeToDepth": "From hype to depth, you want it all",
+      "romanceEveryStage": "Romance at every stage of life",
+      "tasteSpans": "Your taste spans multiple worlds"
+    },
+    "drumroll": {
+      "drumrollText": "Your #1 Pick",
+      "animeQuestion": "And your top anime of {{year}}?",
+      "mangaQuestion": "And your top manga of {{year}}?",
+      "mangaAllTime": "And your top manga of all time?",
+      "noAnime": "No favorite anime found"
+    },
+    "top5Anime": {
+      "title": "Your top anime",
+      "subtitle": "A lineup worth bragging about",
+      "noFavorite": "No favorites found"
+    },
+    "top5Manga": {
+      "title": "Your most unforgettable reads",
+      "subtitle": "These are the stories you'll carry with you",
+      "noFavorite": "No favorite manga found"
+    },
+    "topStudio": {
+      "title": "These studios defined your watchlist",
+      "subtitle": "You know who gets the job done",
+      "series": "series",
+      "noStudios": "No studios showed up enough to be counted"
+    },
+    "topAuthor": {
+      "title": "The authors you can't get enough of",
+      "subtitle": "You'd read anything they write",
+      "noAuthors": "No author took the spotlight"
+    },
+    "seasonalHighlights": {
+      "title": "Your year, season by season",
+      "subtitle": "Consistently great picks",
+      "noData": "You didn't follow any seasonal anime this time",
+      "animeThisSeason": "{{count}} anime this season",
+      "notRated": "Not Rated Yet"
+    },
+    "hiddenGemsAnime": {
+      "title": "You saw shows that others missed",
+      "found": "You found {{count}} such anime. You've got an eye for quality",
+      "popularity": "Only {{count}} people watched this!",
+      "noData": "No overlooked anime in your list this time"
+    },
+    "hiddenGemsManga": {
+      "title": "You went digging",
+      "found": "And struck gold. You found {{count}} such titles.",
+      "popularity": "Only {{count}} people read this!",
+      "noData": "No hidden gems found yet"
+    },
+    "plannedAnime": {
+      "title": "Your watchlist kept growing",
+      "subtitle": "One day you'll get to them… probably",
+      "count": "{{count}} anime planned",
+      "noData": "You didn't add anything to your plan-to-watch list"
+    },
+    "plannedManga": {
+      "title": "You bookmarked these for later",
+      "subtitle": "Later just never quite arrived...",
+      "count": "{{count}} manga planned",
+      "noData": "No manga added to your plan-to-read list"
+    },
+    "animeToMangaTransition": {
+      "text": "Now let's see what you've been reading"
+    },
+    "mangaCount": {
+      "title": "In {{year}}, you read",
+      "overall": "Till now, you read",
+      "noData": "You didn't read any manga.",
+      "noDataYear": "You didn't read any manga in {{year}}.",
+      "manga": "manga",
+      "dedication": "That's some serious reading energy",
+      "more": "That's {{count}} more than last year. Your library is growing!",
+      "less": "You read {{count}} less than last year. There's always another chapter!!",
+      "noMALData": "Log your read manga on MyAnimeList to see your personalized wrapped!",
+      "logManga": "Log Manga on MAL"
+    },
+    "mangaTime": {
+      "title": "That's a total of",
+      "chapters": "chapters",
+      "days": "days",
+      "hours": "hours",
+      "flippingPages": "spent flipping pages"
+    },
+    "topMangaGenre": {
+      "title": "You kept returning to",
+      "subtitle": "A tested formula",
+      "noGenres": "No genres rose to the top",
+      "entries": "{{count}} entries"
+    },
+    "longestManga": {
+      "title": "Your most read manga",
+      "titleAllTime": "Your longest manga",
+      "subtitle": "That's dedication at its finest"
+    },
+    "milestones": {
+      "title": "You hit a major milestone!",
+      "completedAnime": "completed anime",
+      "shared": "That's a milestone shared by only the top {{percent}}% of MAL users!",
+      "subtitle": "Keep the momentum going!"
+    },
+    "badges": {
+      "title": "The badges you earned along the way",
+      "subtitle": "Each one tells a story"
+    },
+    "characterTwin": {
+      "title": "If you were an anime character, you'd be...",
+      "notRated": "Not Rated Yet",
+      "basedOnLove": "Based on your love for {{genres}},",
+      "from": "from",
+      "matchesVibes": "matches your vibes",
+      "matchesJourney": "matches your journey"
+    },
+    "ratingStyle": {
+      "title": "You rate like...",
+      "generousSoul": "The Generous Soul",
+      "generousSoulFooter": "Average score: {{score}} — You see the best in everything",
+      "harshCritic": "The Harsh Critic",
+      "harshCriticFooter": "Average score: {{score}} — High standards, no compromises",
+      "perfectionist": "The Perfectionist",
+      "perfectionistFooter": "Average score: {{score}} — It's either masterpiece or miss. No in-between",
+      "completionist": "The Completionist",
+      "completionistFooter": "Average score: {{score}} — You finish everything, even the rough ones",
+      "hypeRider": "The Hype Rider",
+      "hypeRiderFooter": "Average score: {{score}} — Your taste lines up with the community, and that's perfectly fine",
+      "contrarian": "The Contrarian",
+      "contrarianFooter": "Average score: {{score}} — You trust your own judgment over popular opinions",
+      "balancedReviewer": "The Balanced Reviewer",
+      "balancedReviewerFooter": "Average score: {{score}} — Fair and measured in every rating you give",
+      "wildCard": "The Wild Card",
+      "wildCardFooter": "Average score: {{score}} — Unpredictable and impossible to pin down"
+    },
+    "finale": {
+      "titleWithYear": "{{username}}'s {{year}} MyAnimeList Wrapped",
+      "titleAllTime": "{{username}}'s All Time MyAnimeList Wrapped",
+      "myTitleWithYear": "My {{year}} MyAnimeList Wrapped",
+      "myTitleAllTime": "My All Time MyAnimeList Wrapped",
+      "topAnime": "Top Anime",
+      "topManga": "Top Manga",
+      "favoriteGenre": "Favorite Genre",
+      "favoriteAuthor": "Favorite Author",
+      "watched": "Watched",
+      "read": "Read",
+      "timeSpent": "Time Spent",
+      "animeCount": "{{count}} Anime",
+      "mangaCount": "{{count}} Manga",
+      "days": "{{count}} Days",
+      "hours": "{{count}} Hours"
+    }
+  },
+  "demographicAnimeFooter": {
+    "shounen": {
+      "foundLane": "Classic battle arcs never get old",
+      "complexNarratives": "Complex narratives. You're here for the action and underdog moments",
+      "classicBattle": "But you've got a soft spot for coming-of-age stories too"
+    },
+    "seinen": {
+      "foundLane": "Complex narratives are your jam",
+      "complexNarratives": "Deeper layers, darker tones, realism",
+      "classicBattle": "You love complexity in your storytelling"
+    },
+    "shoujo": {
+      "foundLane": "Heart and feelings over action",
+      "complexNarratives": "Love, emotion, and beauty dominate your list",
+      "classicBattle": "You're here for the romance and drama"
+    },
+    "josei": {
+      "foundLane": "Life's complexity resonates with you",
+      "complexNarratives": "From hype to depth",
+      "classicBattle": "Mature stories for mature tastes"
+    }
+  },
+  "demographicMangaFooter": {
+    "shounen": {
+      "foundLane": "Romance at every stage",
+      "complexNarratives": "Classic adventure, big dreams, legendary boss fights",
+      "classicBattle": "Your reading list is filled with shounen energy"
+    },
+    "seinen": {
+      "foundLane": "Your taste spans multiple worlds",
+      "complexNarratives": "You dig into deeper, darker territories",
+      "classicBattle": "Mature narratives, raw emotions"
+    },
+    "shoujo": {
+      "foundLane": "Sweet and heartfelt",
+      "complexNarratives": "You love stories of love and emotion",
+      "classicBattle": "Your manga collection reflects a romantic soul"
+    },
+    "josei": {
+      "foundLane": "Sophisticated and nuanced",
+      "complexNarratives": "Adult slices of life, realistic romances",
+      "classicBattle": "You appreciate maturity in your reads"
+    }
+  },
+  "demographics": {
+    "shounen": "Shounen",
+    "seinen": "Seinen",
+    "shoujo": "Shoujo",
+    "josei": "Josei"
+  },
+  "filters": {
+    "allTime": "All Time",
+    "thisYear": "This Year"
+  },
+  "social": {
+    "shareTitle": "My MAL Wrapped 🎌",
+    "copyEmail": "Email copied!",
+    "logAnimeOnMal": "Log Anime on MAL",
+    "logMangaOnMal": "Log Manga on MAL"
+  },
+  "credits": {
+    "madeBy": "Made with ❤️ by",
+    "builtWith": "Built with Next.js, React & Tailwind CSS",
+    "poweredBy": "Powered by MyAnimeList & Jikan API"
+  },
+  "footer": {
+    "thankYou": "Thanks For Stopping By!",
+    "wantMore": "Want to see more? Send me an email, or have a snoop of more work below.",
+    "pages": "PAGES",
+    "portfolio": "Portfolio",
+    "aboutMe": "About Me",
+    "resume": "Resume",
+    "uxWork": "UX WORK",
+    "spotify": "Spotify",
+    "toyotaMobility": "Toyota Mobility Foundation",
+    "solarHive": "SolarHive",
+    "indianaUniversity": "Indiana University",
+    "copyright": "© 2025 Designed by Avishkar Shinde"
+  },
+  "general": {
+    "overall": "Overall",
+    "allTime": "all time",
+    "or": "or",
+    "notRatedYet": "Not Rated Yet",
+    "restart": "Restart",
+    "copyMail": "Copy Mail",
+    "copied": "Copied",
+    "shareImage": "Share Image",
+    "copyImage": "Copy Image",
+    "connectMALDescription": "Connect with your MyAnimeList account to see your year in review.",
+    "loadingText": "Loading...",
+    "notRated": "N/A"
+  },
+  "comparison": {
+    "abovePrefix": "That's ",
+    "aboveSuffix": " more than the average MAL user! You're leaving the crowd behind!",
+    "belowPrefix": "That's only ",
+    "belowSuffix": " of the average MAL user. Don't worry, every hero has a slow arc!"
+  }
+}

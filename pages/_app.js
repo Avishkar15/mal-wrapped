@@ -1,7 +1,8 @@
+import { appWithTranslation } from 'next-i18next'
 import Head from 'next/head';
 import '../styles/globals.css'
 
-export default function App({ Component, pageProps }) {
+function App({ Component, pageProps }) {
   return (
     <>
       <Head>
@@ -34,3 +35,4 @@ export default function App({ Component, pageProps }) {
   );
 }
 
+export default appWithTranslation(App)

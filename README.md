@@ -9,27 +9,38 @@ Connect your MyAnimeList account and get a beautiful, animated slideshow of your
 ## Getting Started
 
 ### 1. Install stuff
+
 ```bash
 npm install
 ```
 
 ### 2. Get your MyAnimeList API key
+
 - Head over to [MyAnimeList API settings](https://myanimelist.net/apiconfig)
 - Create a new app
 - Copy your Client ID
 
 ### 3. Add your Client ID
+
 - Set `NEXT_PUBLIC_MAL_CLIENT_ID` in your environment variables (or `.env.local`)
 - Set `MAL_CLIENT_SECRET` in your environment variables (for production)
 
 ### 4. Set up your redirect URI
+
 In your MAL app settings, add your redirect URI:
+
 - **Local:** `http://localhost:3000`
 - **Production:** Your actual domain (e.g., `https://yourdomain.com`)
+
+If you add locale-specific routes (e.g., `/fr`, `/es`), MyAnimeList requires **each redirect URI to be registered explicitly**. Add one line per locale, both for local and production, for example:
+
+- `http://localhost:3000/fr`
+- `https://yourdomain.com/fr`
 
 The redirect URI must match exactly—check what's shown on the login page if you're not sure.
 
 ### 5. Run it
+
 ```bash
 npm run dev
 ```
@@ -54,12 +65,14 @@ Built with Next.js, React, Tailwind CSS, and the MyAnimeList API. Uses OAuth 2.0
 ## Having Issues?
 
 **Login not working?**
+
 - Make sure your Client ID is set correctly
 - Check that your redirect URI matches exactly (including `http://` or `https://`)
 - Try clearing your browser's localStorage and cookies
 - Check the browser console for error messages
 
 **Still stuck?**
+
 - The redirect URI is shown on the login page—copy that exact URL into your MAL app settings
 - Make sure you're using the right environment (local vs production)
 

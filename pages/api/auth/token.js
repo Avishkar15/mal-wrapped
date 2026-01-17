@@ -17,34 +17,32 @@ export default async function handler(req, res) {
   const { code, code_verifier, redirect_uri } = req.body;
 
   if (!code || !code_verifier || !redirect_uri) {
-    return res.status(400).json({ 
+    return res.status(400).json({
       error: 'Missing required parameters',
-      required: ['code', 'code_verifier', 'redirect_uri']
+      required: ['code', 'code_verifier', 'redirect_uri'],
     });
   }
 
-  // Normalize redirect_uri (remove trailing slash if present, except for root)
-  let normalizedRedirectUri = redirect_uri;
-  if (normalizedRedirectUri.endsWith('/') && normalizedRedirectUri !== 'https://' + req.headers.host + '/') {
-    normalizedRedirectUri = normalizedRedirectUri.slice(0, -1);
-  }
+  const normalizedRedirectUri = redirect_uri;
 
   const CLIENT_ID = process.env.NEXT_PUBLIC_MAL_CLIENT_ID;
   const CLIENT_SECRET = process.env.MAL_CLIENT_SECRET;
 
   if (!CLIENT_ID) {
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Server configuration error',
-      error_description: 'CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID in Vercel environment variables.',
-      message: 'CLIENT_ID is not configured'
+      error_description:
+        'CLIENT_ID is not configured. Please set NEXT_PUBLIC_MAL_CLIENT_ID in Vercel environment variables.',
+      message: 'CLIENT_ID is not configured',
     });
   }
 
   if (!CLIENT_SECRET) {
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Server configuration error',
-      error_description: 'CLIENT_SECRET is not configured. Please set MAL_CLIENT_SECRET in Vercel environment variables. Web apps require a client secret.',
-      message: 'CLIENT_SECRET is not configured'
+      error_description:
+        'CLIENT_SECRET is not configured. Please set MAL_CLIENT_SECRET in Vercel environment variables. Web apps require a client secret.',
+      message: 'CLIENT_SECRET is not configured',
     });
   }
 
@@ -55,7 +53,7 @@ export default async function handler(req, res) {
       code: code,
       code_verifier: code_verifier,
       grant_type: 'authorization_code',
-      redirect_uri: normalizedRedirectUri
+      redirect_uri: normalizedRedirectUri,
     });
 
     const response = await fetch('https://myanimelist.net/v1/oauth2/token', {
@@ -72,10 +70,10 @@ export default async function handler(req, res) {
     } catch (e) {
       // If response is not JSON, try to get text
       const text = await response.text();
-      return res.status(response.status).json({ 
+      return res.status(response.status).json({
         error: 'invalid_request',
         error_description: text || 'Unknown error',
-        status: response.status
+        status: response.status,
       });
     }
 
@@ -85,9 +83,9 @@ export default async function handler(req, res) {
 
     return res.status(200).json(data);
   } catch (error) {
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Internal server error',
-      message: error.message 
+      message: error.message,
     });
   }
 }
