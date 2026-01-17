@@ -1,10 +1,341 @@
 {
   "welcome": {
     "title": "Bienvenue dans Votre Aventure Anime",
-    "subtitle": "Découvrez vos statistiques MAL"
+    "subtitle": "Découvrez vos statistiques MAL",
+    "lookBack": "Un regard sur votre {{year}}.",
+    "lookBackJourney": "Un regard sur votre voyage.",
+    "selectYear": "Sélectionnez une année pour voir vos statistiques"
   },
   "buttons": {
     "next": "Suivant",
-    "previous": "Précédent"
+    "previous": "Précédent",
+    "begin": "Commencer",
+    "login": "Se Connecter",
+    "logout": "Déconnexion",
+    "download": "Télécharger",
+    "share": "Partager",
+    "connectMAL": "Se Connecter avec MAL",
+    "letsGo": "C'est parti"
+  },
+  "loading": {
+    "message1": "Activation de vos stats...",
+    "message2": "Analyse de votre goût anime...",
+    "message3": "Génération de votre wrapped...",
+    "message4": "Construction de votre profil...",
+    "loadedAnime": "{{count}} anime chargés...",
+    "loadedManga": "{{count}} manga chargés...",
+    "complete": "Terminé !"
+  },
+  "errors": {
+    "noUsername": "Veuillez entrer un pseudo",
+    "notFound": "Utilisateur non trouvé. Vérifiez l'orthographe !",
+    "fetchError": "Erreur lors du chargement. Réessayez plus tard."
+  },
+  "watermarks": {
+    "welcome": "MAL-WRAPPED.VERCEL.APP",
+    "animeCount": "Mon Voyage Anime",
+    "animeTime": "Mon Temps de Visionnage",
+    "topGenre": "Mes Genres les Plus Regardés",
+    "demographicAnime": "Mes Démographies Anime",
+    "demographicManga": "Mes Démographies Manga",
+    "drumrollAnime": "Mon Top Anime",
+    "top5Anime": "Mon Top 5 Anime",
+    "topStudio": "Mes Studios Préférés",
+    "seasonalHighlights": "Mes Points Forts Saisonniers",
+    "hiddenGemsAnime": "Mes Pépites Anime Cachées",
+    "plannedAnime": "Ma Liste à Regarder",
+    "milestones": "Mes Jalons",
+    "animeToMangaTransition": "MAL-WRAPPED.VERCEL.APP",
+    "mangaCount": "Mon Voyage Manga",
+    "mangaTime": "Mon Temps de Lecture",
+    "topMangaGenre": "Mes Genres les Plus Lus",
+    "drumrollManga": "Mon Top Manga",
+    "top5Manga": "Mon Top 5 Manga",
+    "topAuthor": "Mes Auteurs Préférés",
+    "hiddenGemsManga": "Mes Pépites Manga Cachées",
+    "longestManga": "Mon Plus Long Voyage Manga",
+    "plannedManga": "Ma Liste à Lire",
+    "badges": "Mes Badges",
+    "characterTwin": "Mon Jumeau de Personnage",
+    "ratingStyle": "Mon Style de Note",
+    "finale": "MAL-WRAPPED.VERCEL.APP"
+  },
+  "slides": {
+    "animeCount": {
+      "title": "En {{year}}, vous avez regardé",
+      "overall": "Globalement, vous avez regardé",
+      "noData": "Vous n'avez pas regardé d'anime",
+      "count": "anime",
+      "dedication": "Voilà un engagement",
+      "more": "C'est {{count}} de plus que l'année dernière. Vous progressez !",
+      "less": "Vous avez regardé {{count}} de moins que l'année dernière. Ne vous arrêtez pas !",
+      "noMALData": "Enregistrez vos animes regardés sur MyAnimeList pour voir votre résumé personnalisé !"
+    },
+    "animeTime": {
+      "title": "Cela représente",
+      "episodes": "épisodes",
+      "days": "jours",
+      "hours": "heures",
+      "binge": "de visionnage non-stop"
+    },
+    "topGenre": {
+      "title": "Vous ne pouviez pas vous lasser de",
+      "subtitle": "Vous savez ce que vous aimez",
+      "noGenres": "Aucun genre n'a dominé votre liste",
+      "entries": "entrées"
+    },
+    "demographicAnime": {
+      "title": "Bien que votre goût de visionnage penche vers...",
+      "allDemographics": "Vous regardez toutes les démographies"
+    },
+    "demographicManga": {
+      "title": "Bien que votre goût de lecture penche vers...",
+      "allDemographics": "Vous lisez toutes les démographies"
+    },
+    "drumroll": {
+      "drumrollText": "Votre #1 Choix",
+      "animeQuestion": "Et votre top anime de {{year}} ?",
+      "mangaQuestion": "Et votre top manga de {{year}} ?",
+      "mangaAllTime": "Et votre top manga de tous les temps ?",
+      "noAnime": "Aucun anime préféré trouvé"
+    },
+    "top5Anime": {
+      "title": "Vos meilleurs anime",
+      "subtitle": "Une liste dont vous pouvez vous vanter",
+      "noFavorite": "Aucun favori trouvé"
+    },
+    "top5Manga": {
+      "title": "Vos lectures les plus inoubliables",
+      "subtitle": "Ce sont les histoires que vous porterez avec vous",
+      "noFavorite": "Aucun manga préféré trouvé"
+    },
+    "topStudio": {
+      "title": "Ces studios ont défini votre liste de visionnage",
+      "subtitle": "Vous savez qui fait du bon travail",
+      "series": "séries",
+      "noStudios": "Aucun studio n'a assez compté pour être dénombré"
+    },
+    "topAuthor": {
+      "title": "Les auteurs dont vous ne pouvez pas vous lasser",
+      "subtitle": "Vous liriez n'importe quoi qu'ils écrivent",
+      "noAuthors": "Aucun auteur ne s'est démarqué"
+    },
+    "seasonalHighlights": {
+      "title": "Votre année, saison par saison",
+      "subtitle": "Des choix constamment excellents",
+      "noData": "Vous n'avez pas suivi d'anime saisonnier cette fois",
+      "animeThisSeason": "{{count}} anime cette saison",
+      "notRated": "Pas encore noté"
+    },
+    "hiddenGemsAnime": {
+      "title": "Vous avez vu des séries que d'autres ont manquées",
+      "found": "Vous avez trouvé {{count}} tels animes. Vous avez un œil pour la qualité",
+      "popularity": "Seulement {{count}} personnes ont regardé ça !",
+      "noData": "Pas d'anime méconnu dans votre liste cette fois"
+    },
+    "hiddenGemsManga": {
+      "title": "Vous avez creusé profond",
+      "found": "Et trouvé de l'or. Vous avez découvert {{count}} tels titres.",
+      "popularity": "Seulement {{count}} personnes ont lu ça !",
+      "noData": "Pas de pépite cachée trouvée pour l'instant"
+    },
+    "plannedAnime": {
+      "title": "Votre liste à regarder a continué de grandir",
+      "subtitle": "Un jour, vous y arriverez… probablement",
+      "count": "{{count}} anime prévu",
+      "noData": "Vous n'avez rien ajouté à votre liste à regarder"
+    },
+    "plannedManga": {
+      "title": "Vous avez mis ceux-ci en signet pour plus tard",
+      "subtitle": "Plus tard ne s'est jamais vraiment présenté...",
+      "count": "{{count}} manga prévu",
+      "noData": "Aucun manga ajouté à votre liste à lire"
+    },
+    "animeToMangaTransition": {
+      "text": "Maintenant, voyons ce que vous avez lu"
+    },
+    "mangaCount": {
+      "title": "En {{year}}, vous avez lu",
+      "overall": "Jusqu'à présent, vous avez lu",
+      "noData": "Vous n'avez pas lu de manga.",
+      "noDataYear": "Vous n'avez pas lu de manga en {{year}}.",
+      "manga": "manga",
+      "dedication": "C'est une sérieuse énergie de lecture",
+      "more": "C'est {{count}} de plus que l'année dernière. Votre bibliothèque grandit !",
+      "less": "Vous avez lu {{count}} de moins que l'année dernière. Il y a toujours un autre chapitre !!",
+      "noMALData": "Enregistrez vos mangas lus sur MyAnimeList pour voir votre résumé personnalisé !",
+      "logManga": "Enregistrer le manga sur MAL"
+    },
+    "mangaTime": {
+      "title": "C'est un total de",
+      "chapters": "chapitres",
+      "days": "jours",
+      "hours": "heures",
+      "flippingPages": "passé à tourner les pages"
+    },
+    "topMangaGenre": {
+      "title": "Vous avez continué à revenir à",
+      "subtitle": "Une formule éprouvée",
+      "noGenres": "Aucun genre ne s'est démarqué",
+      "entries": "{{count}} entrées"
+    },
+    "longestManga": {
+      "title": "Votre manga le plus lu",
+      "titleAllTime": "Votre plus long manga",
+      "subtitle": "C'est du dévouement au meilleur niveau"
+    },
+    "milestones": {
+      "title": "Vous avez atteint une étape importante !",
+      "completedAnime": "animes complétés",
+      "shared": "C'est une étape partagée par seulement le top {{percent}}% des utilisateurs MAL !",
+      "subtitle": "Maintenez cet élan !"
+    },
+    "badges": {
+      "title": "Les badges que vous avez gagnés en chemin",
+      "subtitle": "Chacun raconte une histoire"
+    },
+    "characterTwin": {
+      "title": "Si vous étiez un personnage d'anime, vous seriez...",
+      "notRated": "Pas encore noté",
+      "basedOnLove": "Basé sur votre amour pour {{genres}},",
+      "from": "de",
+      "matchesVibes": "correspond à vos vibes",
+      "matchesJourney": "correspond à votre voyage"
+    },
+    "ratingStyle": {
+      "title": "Vous notez comme...",
+      "generousSoul": "L'Âme Généreuse",
+      "generousSoulFooter": "Note moyenne : {{score}} — Si ça existe, ça vaut un 10",
+      "harshCritic": "Le Critique Sévère",
+      "harshCriticFooter": "Note moyenne : {{score}} — Un 7 ? C'est un chef-d'œuvre",
+      "perfectionist": "Le Perfectionniste",
+      "perfectionistFooter": "Note moyenne : {{score}} — C'est soit chef-d'œuvre soit raté. Pas d'entre-deux",
+      "completionist": "Le Completionniste",
+      "completionistFooter": "Note moyenne : {{score}} — Vous finissez tout, même les titres difficiles",
+      "hypeRider": "Le Suiveur de Hype",
+      "hypeRiderFooter": "Note moyenne : {{score}} — Votre goût s'aligne avec la communauté, et c'est très bien",
+      "contrarian": "Le Contrarian",
+      "contrarianFooter": "Note moyenne : {{score}} — Vous faites confiance à votre propre jugement plutôt qu'aux opinions populaires",
+      "balancedReviewer": "Le Revieweur Équilibré",
+      "balancedReviewerFooter": "Note moyenne : {{score}} — Juste et mesuré dans chaque note que vous donnez",
+      "wildCard": "Le Joker",
+      "wildCardFooter": "Note moyenne : {{score}} — Imprévisible et impossible à cerner"
+    },
+    "finale": {
+      "titleWithYear": "MyAnimeList Wrapped {{year}} de {{username}}",
+      "titleAllTime": "MyAnimeList Wrapped de tous les temps de {{username}}",
+      "myTitleWithYear": "Mon MyAnimeList Wrapped {{year}}",
+      "myTitleAllTime": "Mon MyAnimeList Wrapped de tous les temps",
+      "topAnime": "Top Anime",
+      "topManga": "Top Manga",
+      "favoriteGenre": "Genre préféré",
+      "favoriteAuthor": "Auteur préféré",
+      "watched": "Regardé",
+      "read": "Lu",
+      "timeSpent": "Temps passé",
+      "animeCount": "{{count}} Anime",
+      "mangaCount": "{{count}} Manga",
+      "days": "{{count}} Jours",
+      "hours": "{{count}} Heures"
+    }
+  },
+  "demographicAnimeFooter": {
+    "shounen": {
+      "foundLane": "Les arcs de bataille classiques ne vieillissent jamais",
+      "complexNarratives": "Récits complexes. Vous êtes ici pour l'action et les moments de dépassement",
+      "classicBattle": "Mais vous avez aussi un côté doux pour les histoires de passage à l'âge adulte"
+    },
+    "seinen": {
+      "foundLane": "Des récits complexes sont votre truc",
+      "complexNarratives": "Des couches plus profondes, des tons plus sombres, du réalisme",
+      "classicBattle": "Vous aimez la complexité dans vos récits"
+    },
+    "shoujo": {
+      "foundLane": "Sentiments chaleureux au cœur",
+      "complexNarratives": "L'amour, l'émotion et la beauté dominent votre liste",
+      "classicBattle": "Vous êtes là pour la romance et les drames"
+    },
+    "josei": {
+      "foundLane": "La vie est compliquée, et vos animes aussi",
+      "complexNarratives": "De l'engouement à la profondeur",
+      "classicBattle": "Des histoires matures pour des goûts matures"
+    }
+  },
+  "demographicMangaFooter": {
+    "shounen": {
+      "foundLane": "De la romance à chaque étape",
+      "complexNarratives": "Aventure classique, grands rêves, combats de boss légendaires",
+      "classicBattle": "Votre liste de lecture est remplie d'énergie shounen"
+    },
+    "seinen": {
+      "foundLane": "Vos goûts couvrent tous les horizons",
+      "complexNarratives": "Vous creusez dans des territoires plus profonds et plus sombres",
+      "classicBattle": "Récits matures, émotions brutes"
+    },
+    "shoujo": {
+      "foundLane": "Doux et sincère",
+      "complexNarratives": "Vous aimez les histoires d'amour et d'émotion",
+      "classicBattle": "Votre collection de mangas reflète une âme romantique"
+    },
+    "josei": {
+      "foundLane": "Sophistiqué et nuancé",
+      "complexNarratives": "Tranches de vie adulte, romances réalistes",
+      "classicBattle": "Vous appréciez la maturité dans vos lectures"
+    }
+  },
+  "demographics": {
+    "shounen": "Shounen",
+    "seinen": "Seinen",
+    "shoujo": "Shoujo",
+    "josei": "Josei"
+  },
+  "filters": {
+    "allTime": "Tous les Temps",
+    "thisYear": "Cette Année"
+  },
+  "social": {
+    "shareTitle": "Mon MAL Wrapped 🎌",
+    "copyEmail": "E-mail copié !",
+    "logAnimeOnMal": "Enregistrer l'anime sur MAL",
+    "logMangaOnMal": "Enregistrer le manga sur MAL"
+  },
+  "credits": {
+    "madeBy": "Fait avec ❤️ par",
+    "builtWith": "Construit avec Next.js, React & Tailwind CSS",
+    "poweredBy": "Alimenté par MyAnimeList & Jikan API"
+  },
+  "footer": {
+    "thankYou": "Merci de votre visite !",
+    "wantMore": "Vous en voulez plus ? Envoyez-moi un e-mail, ou consultez d'autres travaux ci-dessous.",
+    "pages": "PAGES",
+    "portfolio": "Portfolio",
+    "aboutMe": "À propos de moi",
+    "resume": "CV",
+    "uxWork": "TRAVAIL UX",
+    "spotify": "Spotify",
+    "toyotaMobility": "Toyota Mobility Foundation",
+    "solarHive": "SolarHive",
+    "indianaUniversity": "Université d'Indiana",
+    "copyright": "© 2025 Conçu par Avishkar Shinde"
+  },
+  "general": {
+    "overall": "Globalement",
+    "allTime": "tous les temps",
+    "or": "ou",
+    "notRatedYet": "Pas encore noté",
+    "restart": "Redémarrer",
+    "copyMail": "Copier l'e-mail",
+    "copied": "Copié",
+    "shareImage": "Partager l'image",
+    "copyImage": "Copier l'image",
+    "connectMALDescription": "Connectez-vous avec votre compte MyAnimeList pour voir votre année en revue.",
+    "loadingText": "Chargement...",
+    "notRated": "N/A"
+  },
+  "comparison": {
+    "abovePrefix": "C'est ",
+    "aboveSuffix": " de plus que l'utilisateur MAL moyen ! Vous laissez les autres derrière !",
+    "belowPrefix": "C'est seulement ",
+    "belowSuffix": " de l'utilisateur MAL moyen. Ne vous inquiétez pas, chaque héros a un arc lent !"
   }
 }
