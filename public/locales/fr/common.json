@@ -2,7 +2,7 @@
   "welcome": {
     "title": "Bienvenue dans Votre Aventure Anime",
     "subtitle": "Découvrez vos statistiques MAL",
-    "lookBack": "Un regard sur votre {{year}}.",
+    "lookBack": "Un regard sur votre {{year}}",
     "lookBackJourney": "Un regard sur votre voyage.",
     "selectYear": "Sélectionnez une année pour voir vos statistiques"
   },

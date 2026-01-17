@@ -1147,8 +1147,8 @@ export default function MALWrapped() {
     }
 
     // 2. Rarity Features - Hidden gems: least members (below threshold), sorted by MAL mean score descending
-    const HIDDEN_GEM_ANIME_THRESHOLD = 80000;
-    const HIDDEN_GEM_MANGA_THRESHOLD = 40000;
+    const HIDDEN_GEM_ANIME_THRESHOLD = 100000;
+    const HIDDEN_GEM_MANGA_THRESHOLD = 50000;
     const HIDDEN_GEM_SCORE_THRESHOLD = 7.0;
 
     const allRareAnime = completedAnime
