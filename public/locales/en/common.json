@@ -2,8 +2,8 @@
   "welcome": {
     "title": "Welcome to Your Anime Journey",
     "subtitle": "Let's discover your MAL stats",
-    "lookBack": "A look back at your {{year}}, {{username}}.",
-    "lookBackJourney": "A look back at your journey, {{username}}.",
+    "lookBack": "A look back at your {{year}}",
+    "lookBackJourney": "A look back at your journey",
     "selectYear": "Select a year to view your stats"
   },
   "buttons": {
